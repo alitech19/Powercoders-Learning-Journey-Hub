@@ -1,0 +1,46 @@
+{% if task_rows %}
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Due</th>
+            <th>Board</th>
+            <th>Student</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in task_rows %}
+        <tr>
+            <td>
+                {% if row.can_view_content %}
+                    {{ row.task.title }}
+                {% else %}
+                    Private task - content hidden
+                {% endif %}
+            </td>
+            <td>{{ row.task.get_status_display }}</td>
+            <td>{{ row.task.get_priority_display }}</td>
+            <td>{{ row.task.due_date|default:"—" }}</td>
+            <td>{{ row.task.board }}</td>
+            <td>
+                {% if row.task.board.user %}
+                    {{ row.task.board.user.username }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+            <td>
+                {% if row.can_view_metadata %}
+                    <a href="{% url 'tracker:task_detail' row.task.pk %}">View</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No tasks.</p>
+{% endif %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Add subtask — PowerHUB{% endblock %}
+
+{% block content %}
+<h2>Add subtask</h2>
+<p>Parent: {{ parent.title }}</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+<p><a href="{% url 'tracker:task_detail' parent.pk %}">Cancel</a></p>
+{% endblock %}

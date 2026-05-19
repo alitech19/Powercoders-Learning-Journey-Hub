@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}PowerHUB{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1>PowerHUB</h1>
+        <p>
+            User: <strong>{{ user.username }}</strong>
+            | Role: <strong>{{ user.get_role_display }}</strong>
+            | Cohort: <strong>{% if user.cohort %}{{ user.cohort.name }}{% else %}—{% endif %}</strong>
+            | Group: <strong>{% if user.group %}{{ user.group.name }}{% else %}—{% endif %}</strong>
+        </p>
+        <nav>
+            <a href="{% url 'dashboard:dashboard' %}">Dashboard</a> |
+            <a href="{% url 'tracker:home' %}">Tracker</a> |
+            <a href="{% url 'tracker:task_list' %}">Tasks</a> |
+            <a href="/admin/">Admin</a> |
+            <a href="{% url 'logout' %}">Logout</a>
+        </nav>
+        <hr>
+    </header>
+
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

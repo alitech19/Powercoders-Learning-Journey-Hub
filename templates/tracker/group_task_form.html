@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Create group task — PowerHUB{% endblock %}
+
+{% block content %}
+<h2>Create group task</h2>
+<p>Group: {{ group.name }} ({{ group.cohort.name }})</p>
+<p>Tasks on group boards are public.</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+<p><a href="{% url 'dashboard:dashboard' %}">Cancel</a></p>
+{% endblock %}

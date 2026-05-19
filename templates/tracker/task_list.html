@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Tasks — PowerHUB{% endblock %}
+
+{% block content %}
+<h2>Tasks</h2>
+
+{% if request.user.role == "student" or can_create_personal_task %}
+    <p>
+        <a href="{% url 'tracker:task_create' %}"><strong>Create personal task</strong></a>
+    </p>
+{% endif %}
+
+{% include "tracker/_task_table.html" with task_rows=task_rows %}
+{% endblock %}

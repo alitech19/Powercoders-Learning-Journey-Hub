@@ -1,31 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Dashboard — PowerHUB</title>
-</head>
-<body>
-    <h1>Dashboard</h1>
-    <p>Welcome, {{ user.username }}.</p>
-    <p>MVP overview for the task and progress tracker.</p>
+{% extends "base.html" %}
 
-    <h2>Summary</h2>
-    <ul>
-        <li><strong>Total boards:</strong> {{ total_boards }}</li>
-        <li><strong>Total tasks:</strong> {{ total_tasks }}</li>
-    </ul>
+{% block title %}Dashboard — PowerHUB{% endblock %}
 
-    <h2>Tasks by status</h2>
-    {% if tasks_by_status %}
+{% block content %}
+<h2>Dashboard ({{ role }})</h2>
+
+{% if user.role == "admin" %}
+    <p>Total boards: {{ total_boards }}</p>
+
+    <h3>All public tasks</h3>
+    {% include "tracker/_task_table.html" with task_rows=public_task_rows %}
+
+    <h3>Private tasks (metadata only)</h3>
+    {% include "tracker/_task_table.html" with task_rows=private_metadata_rows %}
+
+{% elif user.role == "teacher" %}
+    <h3>Assigned groups</h3>
+    {% if assigned_groups %}
         <ul>
-            {% for status, count in tasks_by_status.items %}
-                <li><strong>{{ status }}:</strong> {{ count }}</li>
+            {% for group in assigned_groups %}
+                <li>
+                    {{ group.name }} ({{ group.cohort.name }})
+                    — <a href="{% url 'tracker:group_task_create' group.pk %}">Create group task</a>
+                </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>No tasks yet.</p>
+        <p>No groups assigned via GroupTeacher.</p>
     {% endif %}
 
-    <p><a href="{% url 'logout' %}">Log out</a></p>
-</body>
-</html>
+    <h3>Public tasks (assigned groups)</h3>
+    {% include "tracker/_task_table.html" with task_rows=public_task_rows %}
+
+    <h3>Private personal tasks (metadata only)</h3>
+    {% include "tracker/_task_table.html" with task_rows=private_metadata_rows %}
+
+{% else %}
+    <h3>Boards</h3>
+    <ul>
+        <li>Personal: {% if personal_board %}{{ personal_board.title }}{% else %}—{% endif %}</li>
+        <li>Group: {% if group_board %}{{ group_board.title }}{% else %}—{% endif %}</li>
+        <li>Cohort: {% if cohort_board %}{{ cohort_board.title }}{% else %}—{% endif %}</li>
+    </ul>
+
+    <h3>Personal task counts by status</h3>
+    {% if tasks_by_status %}
+        <ul>
+            {% for status, count in tasks_by_status.items %}
+                <li>{{ status }}: {{ count }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No personal tasks yet.</p>
+    {% endif %}
+
+    <p><a href="{% url 'tracker:task_create' %}">Create personal task</a></p>
+
+    <h3>My tasks</h3>
+    {% include "tracker/_task_table.html" with task_rows=own_task_rows %}
+
+    <h3>Group tasks (public)</h3>
+    {% include "tracker/_task_table.html" with task_rows=group_task_rows %}
+
+    <h3>Cohort tasks (public)</h3>
+    {% include "tracker/_task_table.html" with task_rows=cohort_task_rows %}
+{% endif %}
+
+{% endblock %}
