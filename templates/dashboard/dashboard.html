@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Dashboard — PowerHUB</title>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <p>Welcome, {{ user.username }}.</p>
+    <p>MVP overview for the task and progress tracker.</p>
+
+    <h2>Summary</h2>
+    <ul>
+        <li><strong>Total boards:</strong> {{ total_boards }}</li>
+        <li><strong>Total tasks:</strong> {{ total_tasks }}</li>
+    </ul>
+
+    <h2>Tasks by status</h2>
+    {% if tasks_by_status %}
+        <ul>
+            {% for status, count in tasks_by_status.items %}
+                <li><strong>{{ status }}:</strong> {{ count }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No tasks yet.</p>
+    {% endif %}
+
+    <p><a href="{% url 'logout' %}">Log out</a></p>
+</body>
+</html>
