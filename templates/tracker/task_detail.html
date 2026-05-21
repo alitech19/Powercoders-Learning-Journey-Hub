@@ -28,9 +28,6 @@
         {% if can_add_update %}
             <li><a href="{% url 'tracker:update_create' task.pk %}">Add update</a></li>
         {% endif %}
-        {% if can_comment %}
-            <li><a href="{% url 'tracker:comment_create' task.pk %}">Add comment</a></li>
-        {% endif %}
     </ul>
 
     <h3>Subtasks</h3>
@@ -51,18 +48,18 @@
         <p>No updates.</p>
     {% endif %}
 
-    <h3>Comments</h3>
-    {% if comments %}
+    <h3>Discussion</h3>
+    {% if can_comment %}
+        <p><a href="{% url 'tracker:comment_create' task.pk %}">Add comment</a></p>
+    {% endif %}
+    {% if comment_tree %}
         <ul>
-            {% for comment in comments %}
-                <li>
-                    <strong>{{ comment.author.username }}</strong>
-                    ({{ comment.created_at }}): {{ comment.text }}
-                </li>
+            {% for comment in comment_tree %}
+                {% include "tracker/comment_tree.html" with comment=comment can_comment=can_comment %}
             {% endfor %}
         </ul>
     {% else %}
-        <p>No comments.</p>
+        <p>No comments yet.</p>
     {% endif %}
 
 {% else %}
@@ -75,6 +72,9 @@
     <p><strong>Due date:</strong> {{ task.due_date|default:"—" }}</p>
     <p><strong>Created:</strong> {{ task.created_at }}</p>
     <p><strong>Updated:</strong> {{ task.updated_at }}</p>
+
+    <h3>Discussion</h3>
+    <p><em>Discussion hidden because this is a private task.</em></p>
 {% endif %}
 
 <p><a href="{% url 'tracker:task_list' %}">Back to tasks</a></p>

@@ -223,9 +223,15 @@ def wrap_tasks_for_display(user, tasks):
                 'task': task,
                 'can_view_content': can_content,
                 'can_view_metadata': can_meta,
+                'can_edit_status': user_can_edit_task_status(user, task),
                 'display_title': (
                     task.title if can_content else 'Private task - content hidden'
                 ),
             }
         )
     return wrapped
+
+
+def user_can_reply_to_comment(user, comment):
+    """Reply when full task content is visible (any nesting depth)."""
+    return user_can_comment_on_task(user, comment.task)

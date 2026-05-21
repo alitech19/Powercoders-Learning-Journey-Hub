@@ -199,7 +199,6 @@ class TaskUpdate(models.Model):
     class UpdateType(models.TextChoices):
         PROGRESS = 'progress', 'Progress'
         BLOCKER = 'blocker', 'Blocker'
-        QUESTION = 'question', 'Question'
         NOTE = 'note', 'Note'
 
     task = models.ForeignKey(
@@ -232,13 +231,21 @@ class TaskUpdate(models.Model):
 
 class TaskComment(models.Model):
     """
-    Comments on a task. Visibility follows the parent Task.
+    Threaded discussion on a task. Visibility follows the parent Task.
+    parent=null: top-level comment; parent set: reply (any depth).
     """
 
     task = models.ForeignKey(
         Task,
         on_delete=models.CASCADE,
         related_name='comments',
+    )
+    parent = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='replies',
     )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -254,3 +261,30 @@ class TaskComment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.author} on {self.task}'
+
+    def clean(self):
+        errors = {}
+        if self.parent_id is not None:
+            if self.pk and self.parent_id == self.pk:
+                errors['parent'] = 'A comment cannot be its own parent.'
+            else:
+                parent = self.parent
+                if parent is None:
+                    errors['parent'] = 'Parent comment does not exist.'
+                elif parent.task_id != self.task_id:
+                    errors['parent'] = 'Parent comment must belong to the same task.'
+                elif self.pk:
+                    ancestor = parent
+                    while ancestor is not None:
+                        if ancestor.pk == self.pk:
+                            errors['parent'] = (
+                                'A comment cannot be placed under its own reply.'
+                            )
+                            break
+                        ancestor = ancestor.parent
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)

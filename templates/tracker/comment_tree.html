@@ -1,0 +1,14 @@
+<li>
+    <strong>{{ comment.author.username }}</strong>
+    ({{ comment.created_at }}): {{ comment.text|linebreaksbr }}
+    {% if can_comment %}
+        <p><a href="{% url 'tracker:comment_reply_create' comment.pk %}">Reply</a></p>
+    {% endif %}
+    {% if comment.tree_replies %}
+        <ul>
+            {% for reply in comment.tree_replies %}
+                {% include "tracker/comment_tree.html" with comment=reply can_comment=can_comment %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>

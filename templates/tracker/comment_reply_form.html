@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Reply to comment — PowerHUB{% endblock %}
+
+{% block content %}
+<h2>Reply to comment</h2>
+<p>Task: {{ task.title }}</p>
+<p><strong>{{ parent_comment.author.username }}</strong>
+    ({{ parent_comment.created_at }}):</p>
+<p>{{ parent_comment.text|linebreaksbr }}</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Post reply</button>
+</form>
+<p><a href="{% url 'tracker:task_detail' task.pk %}">Back to task</a></p>
+{% endblock %}

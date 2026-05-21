@@ -3,8 +3,12 @@
 {% block title %}Add comment — PowerHUB{% endblock %}
 
 {% block content %}
-<h2>Add comment</h2>
+<h2>{{ heading|default:"Add comment" }}</h2>
 <p>Task: {{ task.title }}</p>
+{% if parent_comment %}
+    <p>Replying to <strong>{{ parent_comment.author.username }}</strong>:
+        {{ parent_comment.text }}</p>
+{% endif %}
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}

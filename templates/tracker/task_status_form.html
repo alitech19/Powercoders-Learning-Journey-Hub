@@ -4,11 +4,16 @@
 
 {% block content %}
 <h2>Update status</h2>
-<p>Task: {{ task.title }}</p>
+{% if task.parent_id %}
+    <p>Subtask: {{ task.title }}</p>
+    {% if parent_task %}<p>Parent: {{ parent_task.title }}</p>{% endif %}
+{% else %}
+    <p>Task: {{ task.title }}</p>
+{% endif %}
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Save</button>
 </form>
-<p><a href="{% url 'tracker:task_detail' task.pk %}">Cancel</a></p>
+<p><a href="{% url 'tracker:task_detail' detail_task_id %}">Cancel</a></p>
 {% endblock %}

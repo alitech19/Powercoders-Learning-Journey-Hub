@@ -8,7 +8,7 @@
             <th>Due</th>
             <th>Board</th>
             <th>Student</th>
-            <th></th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -35,6 +35,9 @@
             <td>
                 {% if row.can_view_metadata %}
                     <a href="{% url 'tracker:task_detail' row.task.pk %}">View</a>
+                {% endif %}
+                {% if row.can_edit_status %}
+                    | <a href="{% url 'tracker:task_edit_status' row.task.pk %}">Change status</a>
                 {% endif %}
             </td>
         </tr>

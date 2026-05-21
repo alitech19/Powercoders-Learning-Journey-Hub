@@ -61,6 +61,8 @@ class TaskUpdateAdmin(admin.ModelAdmin):
 
 @admin.register(TaskComment)
 class TaskCommentAdmin(admin.ModelAdmin):
-    list_display = ('task', 'author', 'created_at')
-    search_fields = ('text', 'task__title', 'author__username')
-    autocomplete_fields = ('task', 'author')
+    list_display = ('task', 'author', 'parent', 'created_at')
+    list_filter = (('parent', admin.EmptyFieldListFilter),)
+    search_fields = ('text', 'task__title', 'author__username', 'parent__text')
+    autocomplete_fields = ('task', 'author', 'parent')
+    fields = ('task', 'parent', 'author', 'text')

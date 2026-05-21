@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
-from django.http import Http404
+from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.models import User
@@ -9,9 +8,9 @@ from cohorts.models import Group
 
 from .forms import (
     GroupTaskCreateForm,
+    StudentTaskCreateForm,
     SubtaskCreateForm,
     TaskCommentForm,
-    TaskCreateForm,
     TaskStatusForm,
     TaskUpdateForm,
 )
@@ -22,17 +21,22 @@ from .permissions import (
     user_can_comment_on_task,
     user_can_create_group_task,
     user_can_edit_task_status,
+    user_can_reply_to_comment,
     user_can_view_task_content,
     user_can_view_task_metadata,
     visible_tasks_queryset,
     wrap_tasks_for_display,
-    get_teacher_group_ids,
 )
 from .services import (
-    get_or_create_cohort_board,
+    build_comment_tree,
     get_or_create_group_board,
     get_or_create_personal_board,
 )
+
+
+def _detail_task_id(task):
+    """Task detail URL target: parent for subtasks, self otherwise."""
+    return task.parent_id if task.parent_id else task.pk
 
 
 def _get_task_for_user(user, task_id):
@@ -80,7 +84,7 @@ def task_create(request):
 
     board = get_or_create_personal_board(request.user)
     if request.method == 'POST':
-        form = TaskCreateForm(request.POST)
+        form = StudentTaskCreateForm(request.POST)
         if form.is_valid():
             task = form.save(commit=False)
             task.board = board
@@ -91,7 +95,7 @@ def task_create(request):
             messages.success(request, 'Personal task created.')
             return redirect('tracker:task_detail', task_id=task.pk)
     else:
-        form = TaskCreateForm()
+        form = StudentTaskCreateForm()
     return render(request, 'tracker/task_form.html', {'form': form, 'title': 'Create personal task'})
 
 
@@ -99,9 +103,9 @@ def task_create(request):
 def task_detail(request, task_id):
     task = _get_task_for_user(request.user, task_id)
     can_content = user_can_view_task_content(request.user, task)
-    subtasks = task.subtasks.select_related('assignee', 'created_by')
+    subtasks = task.subtasks.select_related('assignee', 'created_by', 'board')
     updates = task.updates.select_related('author') if can_content else TaskUpdate.objects.none()
-    comments = task.comments.select_related('author') if can_content else TaskComment.objects.none()
+    comment_tree = build_comment_tree(task) if can_content else []
 
     context = {
         'task': task,
@@ -109,7 +113,7 @@ def task_detail(request, task_id):
         'display_title': task.title if can_content else 'Private task - content hidden',
         'subtask_rows': wrap_tasks_for_display(request.user, subtasks),
         'updates': updates,
-        'comments': comments,
+        'comment_tree': comment_tree,
         'can_edit_status': user_can_edit_task_status(request.user, task),
         'can_add_subtask': user_can_add_subtask(request.user, task),
         'can_add_update': user_can_add_update(request.user, task),
@@ -125,18 +129,28 @@ def task_edit_status(request, task_id):
     if not user_can_edit_task_status(request.user, task):
         raise Http404
 
+    detail_task_id = _detail_task_id(task)
+    parent_task = None
+    if task.parent_id:
+        parent_task = _get_task_for_user(request.user, task.parent_id)
+
     if request.method == 'POST':
         form = TaskStatusForm(request.POST, instance=task)
         if form.is_valid():
             form.save()
             messages.success(request, 'Status updated.')
-            return redirect('tracker:task_detail', task_id=task.pk)
+            return redirect('tracker:task_detail', task_id=detail_task_id)
     else:
         form = TaskStatusForm(instance=task)
     return render(
         request,
         'tracker/task_status_form.html',
-        {'form': form, 'task': task},
+        {
+            'form': form,
+            'task': task,
+            'detail_task_id': detail_task_id,
+            'parent_task': parent_task,
+        },
     )
 
 
@@ -196,7 +210,7 @@ def update_create(request, task_id):
 def comment_create(request, task_id):
     task = _get_task_for_user(request.user, task_id)
     if not user_can_comment_on_task(request.user, task):
-        raise Http404
+        return HttpResponseForbidden('You cannot comment on this task.')
 
     if request.method == 'POST':
         form = TaskCommentForm(request.POST)
@@ -204,7 +218,8 @@ def comment_create(request, task_id):
             comment = form.save(commit=False)
             comment.task = task
             comment.author = request.user
-            comment.save()
+            comment.parent = None
+            comment.save()  # model clean() validates parent/task
             messages.success(request, 'Comment added.')
             return redirect('tracker:task_detail', task_id=task.pk)
     else:
@@ -212,7 +227,47 @@ def comment_create(request, task_id):
     return render(
         request,
         'tracker/comment_form.html',
-        {'form': form, 'task': task},
+        {'form': form, 'task': task, 'heading': 'Add comment'},
+    )
+
+
+@login_required
+def comment_reply_create(request, comment_id):
+    parent_comment = get_object_or_404(
+        TaskComment.objects.select_related(
+            'task',
+            'task__board',
+            'task__board__user',
+            'task__assignee',
+            'task__created_by',
+            'author',
+        ),
+        pk=comment_id,
+    )
+    if not user_can_reply_to_comment(request.user, parent_comment):
+        return HttpResponseForbidden('You cannot reply to this comment.')
+
+    task = parent_comment.task
+    if request.method == 'POST':
+        form = TaskCommentForm(request.POST)
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.task = task
+            reply.author = request.user
+            reply.parent = parent_comment
+            reply.save()
+            messages.success(request, 'Reply added.')
+            return redirect('tracker:task_detail', task_id=task.pk)
+    else:
+        form = TaskCommentForm()
+    return render(
+        request,
+        'tracker/comment_reply_form.html',
+        {
+            'form': form,
+            'task': task,
+            'parent_comment': parent_comment,
+        },
     )
 
 
@@ -230,6 +285,9 @@ def group_task_create(request, group_id):
             task.board = board
             task.created_by = request.user
             task.visibility = Task.Visibility.PUBLIC
+            task.parent = None
+            if not task.assignee_id:
+                task.assignee = request.user
             task.save()
             messages.success(request, 'Group task created.')
             return redirect('tracker:task_detail', task_id=task.pk)

@@ -87,11 +87,11 @@ Follow the prompts (username, email, password).
 
 Open in the browser:
 
-| What | URL |
-|------|-----|
-| Home (requires login) | http://localhost:8000/ |
-| Login | http://localhost:8000/accounts/login/ |
-| Admin | http://localhost:8000/admin/ |
+| What                  | URL                                   |
+|-----------------------|---------------------------------------|
+| Home (requires login) | http://localhost:8000/                |
+| Login                 | http://localhost:8000/accounts/login/ |
+| Admin                 | http://localhost:8000/admin/          |
 
 Use the credentials from Step 6.
 
@@ -161,18 +161,18 @@ docker compose exec web python manage.py createsuperuser
 
 ## Services
 
-| Service | Description |
-|---------|-------------|
-| `web` | Django (Python 3.12), port `8000` |
-| `db` | PostgreSQL 16, volume `postgres_data` |
+| Service | Description                           |
+|---------|---------------------------------------|
+| `web`   | Django (Python 3.12), port `8000`     |
+| `db`    | PostgreSQL 16, volume `postgres_data` |
 
 ---
 
 ## Troubleshooting
 
-| Problem | What to do |
-|---------|------------|
-| Port 8000 in use | In `docker-compose.yml` use `"8080:8000"`, open http://localhost:8080/ |
-| Missing `.env` | Repeat Step 4: `cp .env.example .env` |
-| DB connection fails | `POSTGRES_HOST=db` in `.env`; run `docker compose ps` — wait until `db` is healthy |
-| Code changes not visible | `docker compose up --build` |
+| Problem                  | What to do                                                                         |
+|--------------------------|------------------------------------------------------------------------------------|
+| Port 8000 in use         | In `docker-compose.yml` use `"8080:8000"`, open http://localhost:8080/             |
+| Missing `.env`           | Repeat Step 4: `cp .env.example .env`                                              |
+| DB connection fails      | `POSTGRES_HOST=db` in `.env`; run `docker compose ps` — wait until `db` is healthy |
+| Code changes not visible | `docker compose up --build`                                                        |
