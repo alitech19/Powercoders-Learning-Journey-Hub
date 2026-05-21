@@ -7,11 +7,10 @@ Django project with PostgreSQL in Docker.
 | Language | File |
 |----------|------|
 | English | [SETUP.md](SETUP.md) |
-| Українська | [SETUP.uk.md](SETUP.uk.md) |
 
 ## Setup pipeline (summary)
 
-Full details in [SETUP.md](SETUP.md) / [SETUP.uk.md](SETUP.uk.md).
+Full details in [SETUP.md](SETUP.md) 
 
 | Step | Action |
 |------|--------|

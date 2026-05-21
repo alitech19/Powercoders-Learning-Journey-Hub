@@ -1,6 +1,5 @@
 # Powerhub — local setup (Docker)
 
-**Also available in Ukrainian:** [SETUP.uk.md](SETUP.uk.md)
 
 Run the steps below **in order**. Copy one command block at a time.
 
