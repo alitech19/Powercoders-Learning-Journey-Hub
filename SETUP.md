@@ -79,7 +79,7 @@ Open a **second terminal**, stay in the project folder (`cd` as in Step 3).
 docker compose exec web python manage.py createsuperuser
 ```
 
-Follow the prompts (username, email, password).
+Follow the prompts (email, display name, password).
 
 ---
 
@@ -121,10 +121,10 @@ docker compose exec web python manage.py migrate
 
 ### Change a user password
 
-Replace `USERNAME` with the actual username:
+Replace `EMAIL` with the user's email address:
 
 ```bash
-docker compose exec web python manage.py changepassword USERNAME
+docker compose exec web python manage.py changepassword EMAIL
 ```
 
 ### Shell inside the web container

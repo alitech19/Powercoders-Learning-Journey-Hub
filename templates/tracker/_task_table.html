@@ -27,7 +27,7 @@
             <td>{{ row.task.board }}</td>
             <td>
                 {% if row.task.board.user %}
-                    {{ row.task.board.user.username }}
+                    {{ row.task.board.user.display_name }}
                 {% else %}
                     —
                 {% endif %}

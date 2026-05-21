@@ -28,7 +28,7 @@ class TaskCommentInline(admin.TabularInline):
 class TaskBoardAdmin(admin.ModelAdmin):
     list_display = ('title', 'scope_type', 'user', 'group', 'cohort', 'created_by', 'updated_at')
     list_filter = ('scope_type',)
-    search_fields = ('title', 'user__username', 'group__name', 'cohort__name')
+    search_fields = ('title', 'user__display_name', 'user__email', 'group__name', 'cohort__name')
     autocomplete_fields = ('user', 'group', 'cohort', 'created_by')
 
 
@@ -46,7 +46,7 @@ class TaskAdmin(admin.ModelAdmin):
         'updated_at',
     )
     list_filter = ('status', 'priority', 'visibility', 'board__scope_type')
-    search_fields = ('title', 'description', 'assignee__username')
+    search_fields = ('title', 'description', 'assignee__display_name', 'assignee__email')
     autocomplete_fields = ('board', 'parent', 'assignee', 'created_by')
     inlines = [TaskInline, TaskUpdateInline, TaskCommentInline]
 
@@ -55,7 +55,7 @@ class TaskAdmin(admin.ModelAdmin):
 class TaskUpdateAdmin(admin.ModelAdmin):
     list_display = ('task', 'author', 'update_type', 'created_at')
     list_filter = ('update_type',)
-    search_fields = ('text', 'task__title', 'author__username')
+    search_fields = ('text', 'task__title', 'author__display_name', 'author__email')
     autocomplete_fields = ('task', 'author')
 
 
@@ -63,6 +63,6 @@ class TaskUpdateAdmin(admin.ModelAdmin):
 class TaskCommentAdmin(admin.ModelAdmin):
     list_display = ('task', 'author', 'parent', 'created_at')
     list_filter = (('parent', admin.EmptyFieldListFilter),)
-    search_fields = ('text', 'task__title', 'author__username', 'parent__text')
+    search_fields = ('text', 'task__title', 'author__display_name', 'author__email', 'parent__text')
     autocomplete_fields = ('task', 'author', 'parent')
     fields = ('task', 'parent', 'author', 'text')

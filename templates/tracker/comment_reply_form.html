@@ -5,7 +5,7 @@
 {% block content %}
 <h2>Reply to comment</h2>
 <p>Task: {{ task.title }}</p>
-<p><strong>{{ parent_comment.author.username }}</strong>
+<p><strong>{{ parent_comment.author.display_name }}</strong>
     ({{ parent_comment.created_at }}):</p>
 <p>{{ parent_comment.text|linebreaksbr }}</p>
 <form method="post">

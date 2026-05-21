@@ -35,5 +35,5 @@ class GroupAdmin(admin.ModelAdmin):
 class GroupTeacherAdmin(admin.ModelAdmin):
     list_display = ('group', 'teacher', 'role', 'created_at')
     list_filter = ('role', 'group__cohort')
-    search_fields = ('group__name', 'teacher__username', 'teacher__email')
+    search_fields = ('group__name', 'teacher__display_name', 'teacher__email')
     autocomplete_fields = ('group', 'teacher')

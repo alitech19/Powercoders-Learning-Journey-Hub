@@ -14,7 +14,7 @@ def get_or_create_personal_board(user):
         scope_type=TaskBoard.ScopeType.USER,
         user=user,
         defaults={
-            'title': f'{user.username} personal board',
+            'title': f'{user.display_name} personal board',
             'created_by': user,
         },
     )

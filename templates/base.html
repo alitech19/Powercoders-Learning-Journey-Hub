@@ -8,7 +8,10 @@
     <header>
         <h1>PowerHUB</h1>
         <p>
-            User: <strong>{{ user.username }}</strong>
+            {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" alt="" width="28" height="28">
+            {% endif %}
+            User: <strong>{{ user.display_name }}</strong>
             | Role: <strong>{{ user.get_role_display }}</strong>
             | Cohort: <strong>{% if user.cohort %}{{ user.cohort.name }}{% else %}—{% endif %}</strong>
             | Group: <strong>{% if user.group %}{{ user.group.name }}{% else %}—{% endif %}</strong>

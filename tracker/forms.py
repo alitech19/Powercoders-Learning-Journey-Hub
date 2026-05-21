@@ -39,7 +39,7 @@ class SubtaskCreateForm(forms.ModelForm):
         self.fields['assignee'].required = False
         self.fields['due_date'].required = False
         self.fields['assignee'].queryset = User.objects.filter(is_active=True).order_by(
-            'username'
+            'display_name'
         )
 
 
@@ -71,5 +71,5 @@ class GroupTaskCreateForm(forms.ModelForm):
         self.fields['assignee'].required = False
         self.fields['due_date'].required = False
         self.fields['assignee'].queryset = User.objects.filter(is_active=True).order_by(
-            'username'
+            'display_name'
         )

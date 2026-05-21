@@ -2,7 +2,7 @@
 Create or update a development superuser from environment variables.
 
 DEV ONLY — do not use weak credentials in production.
-Set DJANGO_SUPERUSER_USERNAME, DJANGO_SUPERUSER_EMAIL, and
+Set DJANGO_SUPERUSER_EMAIL, DJANGO_SUPERUSER_DISPLAY_NAME, and
 DJANGO_SUPERUSER_PASSWORD in .env for local Docker development.
 """
 
@@ -16,14 +16,14 @@ class Command(BaseCommand):
     help = 'Create or update a development superuser from DJANGO_SUPERUSER_* env vars.'
 
     def handle(self, *args, **options):
-        username = os.environ.get('DJANGO_SUPERUSER_USERNAME', '').strip()
         email = os.environ.get('DJANGO_SUPERUSER_EMAIL', '').strip()
+        display_name = os.environ.get('DJANGO_SUPERUSER_DISPLAY_NAME', 'Admin').strip()
         password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', '')
 
-        if not username or not password:
+        if not email or not password:
             self.stdout.write(
                 self.style.WARNING(
-                    'Skipping dev superuser: set DJANGO_SUPERUSER_USERNAME and '
+                    'Skipping dev superuser: set DJANGO_SUPERUSER_EMAIL and '
                     'DJANGO_SUPERUSER_PASSWORD in .env to enable auto-creation.'
                 )
             )
@@ -31,9 +31,9 @@ class Command(BaseCommand):
 
         User = get_user_model()
         user, created = User.objects.get_or_create(
-            username=username,
+            email=email,
             defaults={
-                'email': email,
+                'display_name': display_name,
                 'is_staff': True,
                 'is_superuser': True,
                 'is_active': True,
@@ -43,7 +43,7 @@ class Command(BaseCommand):
         if hasattr(user, 'role'):
             user.role = User.Role.ADMIN
 
-        user.email = email
+        user.display_name = display_name
         user.is_staff = True
         user.is_superuser = True
         user.is_active = True
@@ -52,9 +52,9 @@ class Command(BaseCommand):
 
         if created:
             self.stdout.write(
-                self.style.SUCCESS(f'Created development superuser "{username}".')
+                self.style.SUCCESS(f'Created development superuser "{display_name}" ({email}).')
             )
         else:
             self.stdout.write(
-                self.style.SUCCESS(f'Updated development superuser "{username}".')
+                self.style.SUCCESS(f'Updated development superuser "{display_name}" ({email}).')
             )
