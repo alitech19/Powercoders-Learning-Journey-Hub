@@ -22,10 +22,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # DEV ONLY: create_dev_superuser reads weak credentials from .env — never use in production.
+    # DEV ONLY: create_dev_users creates demo users when ENABLE_DEV_LOGIN=True.
     command: >
       sh -c "python manage.py migrate --noinput &&
-             python manage.py create_dev_superuser &&
+             python manage.py create_dev_users &&
              python manage.py runserver 0.0.0.0:8000"
 
 volumes:

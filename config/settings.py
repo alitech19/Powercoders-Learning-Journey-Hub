@@ -24,6 +24,8 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+ENABLE_DEV_LOGIN = DEBUG and os.environ.get('ENABLE_DEV_LOGIN', 'False').lower() in ('true', '1', 'yes')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -59,6 +61,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'accounts.context_processors.dev_login',
             ],
         },
     },
@@ -69,9 +72,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ['POSTGRES_DB'],
-        'USER': os.environ['POSTGRES_USER'],
-        'PASSWORD': os.environ['POSTGRES_PASSWORD'],
+        'NAME': os.environ.get('POSTGRES_DB', 'powerhub'),
+        'USER': os.environ.get('POSTGRES_USER', 'powerhub'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'powerhub'),
         'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
         'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }

@@ -1,6 +1,5 @@
 # Powerhub — local setup (Docker)
 
-
 Run the steps below **in order**. Copy one command block at a time.
 
 ---
@@ -47,7 +46,11 @@ All following commands run from this directory.
 cp .env.example .env
 ```
 
-Optional: edit `.env` (especially `SECRET_KEY` and database password).  
+Edit `.env`:
+
+- Set `DEBUG=True`
+- Set `ENABLE_DEV_LOGIN=True`
+
 `.env` is gitignored and is not committed.
 
 ---
@@ -61,7 +64,8 @@ docker compose up --build
 ```
 
 Wait until you see `Starting development server at http://0.0.0.0:8000/`.  
-Migrations run automatically on startup.
+Migrations run automatically on startup.  
+Development users are created automatically when `ENABLE_DEV_LOGIN=True`.
 
 **Alternative — background mode** (skip if you use foreground):
 
@@ -71,19 +75,7 @@ docker compose up --build -d
 
 ---
 
-### Step 6 — Create your first user
-
-Open a **second terminal**, stay in the project folder (`cd` as in Step 3).
-
-```bash
-docker compose exec web python manage.py createsuperuser
-```
-
-Follow the prompts (email, display name, password).
-
----
-
-### Step 7 — Log in
+### Step 6 — Log in
 
 Open in the browser:
 
@@ -93,7 +85,32 @@ Open in the browser:
 | Login                 | http://localhost:8000/accounts/login/ |
 | Admin                 | http://localhost:8000/admin/          |
 
-Use the credentials from Step 6.
+The login page shows **quick login buttons**:
+
+- **Login as Student** — logs in as student@example.com
+- **Login as Teacher** — logs in as teacher@example.com
+- **Login as Admin** — logs in as admin@example.com
+
+No manual user creation needed.
+
+---
+
+## Development users
+
+Created automatically by `python manage.py create_dev_users` (runs on Docker startup).
+
+| Role    | Email               | Password      |
+|---------|---------------------|---------------|
+| Student | student@example.com | student12345  |
+| Teacher | teacher@example.com | teacher12345  |
+| Admin   | admin@example.com   | admin12345    |
+
+Also creates:
+- Demo Cohort (active)
+- Demo Group (in Demo Cohort)
+- GroupTeacher relation (Teacher → Demo Group)
+
+Credentials come from `DEV_*` variables in `.env`.
 
 ---
 
@@ -119,12 +136,10 @@ docker compose logs -f web
 docker compose exec web python manage.py migrate
 ```
 
-### Change a user password
-
-Replace `EMAIL` with the user's email address:
+### Recreate dev users manually
 
 ```bash
-docker compose exec web python manage.py changepassword EMAIL
+docker compose exec web python manage.py create_dev_users
 ```
 
 ### Shell inside the web container
@@ -153,9 +168,32 @@ docker compose down -v
 docker compose up --build
 ```
 
-```bash
-docker compose exec web python manage.py createsuperuser
-```
+Dev users are recreated automatically on startup.
+
+---
+
+## Environment variables
+
+`.env.example` is split into two sections:
+
+**Required (core):**
+- `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS`
+- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`
+
+**Development (quick login and demo data):**
+- `ENABLE_DEV_LOGIN` — enables quick login buttons (requires `DEBUG=True`)
+- `DEV_STUDENT_*`, `DEV_TEACHER_*`, `DEV_ADMIN_*` — credentials for dev users
+- `DEV_COHORT_NAME`, `DEV_GROUP_NAME` — demo data names
+
+Missing `DEV_*` variables are treated as disabled. The app does not crash if they are absent.
+
+---
+
+## Production deployment
+
+- Set `DEBUG=False`
+- Do **not** set `ENABLE_DEV_LOGIN` or `DEV_*` variables
+- Quick login buttons are hidden; quick login URLs return 403
 
 ---
 
@@ -176,3 +214,4 @@ docker compose exec web python manage.py createsuperuser
 | Missing `.env`           | Repeat Step 4: `cp .env.example .env`                                              |
 | DB connection fails      | `POSTGRES_HOST=db` in `.env`; run `docker compose ps` — wait until `db` is healthy |
 | Code changes not visible | `docker compose up --build`                                                        |
+| Quick login not showing  | Check `DEBUG=True` and `ENABLE_DEV_LOGIN=True` in `.env`                           |

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Login</title>
+    <title>Login — PowerHUB</title>
 </head>
 <body>
     <h1>Login</h1>
@@ -11,10 +11,37 @@
         <p>Invalid email or password.</p>
     {% endif %}
 
-    <form method="post" action="{% url 'login' %}">
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post" action="{% url 'accounts:login' %}">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Log in</button>
     </form>
+
+    {% if ENABLE_DEV_LOGIN %}
+        <hr>
+        <h2>Development quick login</h2>
+        <p>
+            <form method="post" action="{% url 'accounts:dev_login_student' %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit">Login as Student</button>
+            </form>
+            <form method="post" action="{% url 'accounts:dev_login_teacher' %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit">Login as Teacher</button>
+            </form>
+            <form method="post" action="{% url 'accounts:dev_login_admin' %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit">Login as Admin</button>
+            </form>
+        </p>
+    {% endif %}
 </body>
 </html>
