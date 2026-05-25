@@ -14,8 +14,9 @@ from .forms import (
     TaskStatusForm,
     TaskUpdateForm,
 )
-from .models import Task, TaskBoard, TaskComment, TaskUpdate
+from .models import Task, TaskComment, TaskUpdate
 from .permissions import (
+    get_teacher_group_ids,
     user_can_add_subtask,
     user_can_add_update,
     user_can_comment_on_task,
@@ -27,25 +28,19 @@ from .permissions import (
     visible_tasks_queryset,
     wrap_tasks_for_display,
 )
-from .services import (
-    build_comment_tree,
-    get_or_create_group_board,
-    get_or_create_personal_board,
-)
+from .services import build_comment_tree
 
 
 def _detail_task_id(task):
-    """Task detail URL target: parent for subtasks, self otherwise."""
     return task.parent_id if task.parent_id else task.pk
 
 
 def _get_task_for_user(user, task_id):
     task = get_object_or_404(
         Task.objects.select_related(
-            'board',
-            'board__user',
-            'board__group',
-            'board__cohort',
+            'user',
+            'group',
+            'cohort',
             'assignee',
             'created_by',
             'parent',
@@ -58,36 +53,35 @@ def _get_task_for_user(user, task_id):
 
 
 @login_required
-def tracker_home(request):
-    return render(request, 'tracker/tracker_home.html')
-
-
-@login_required
 def task_list(request):
     tasks = visible_tasks_queryset(request.user)
+    can_create_personal = request.user.role == User.Role.STUDENT
+    teacher_group_ids = get_teacher_group_ids(request.user) if request.user.role == User.Role.TEACHER else []
+    teacher_groups = Group.objects.filter(pk__in=teacher_group_ids) if teacher_group_ids else []
     return render(
         request,
         'tracker/task_list.html',
         {
             'task_rows': wrap_tasks_for_display(request.user, tasks),
-            'can_create_personal_task': request.user.role == User.Role.STUDENT,
+            'can_create_personal_task': can_create_personal,
+            'teacher_groups': teacher_groups,
         },
     )
 
 
 @login_required
 def task_create(request):
-    """Create a personal task on the student's user-scoped board (students only)."""
+    """Create a personal task (students only)."""
     if request.user.role != User.Role.STUDENT:
         messages.error(request, 'Only students can create personal tasks here.')
         return redirect('tracker:task_list')
 
-    board = get_or_create_personal_board(request.user)
     if request.method == 'POST':
         form = StudentTaskCreateForm(request.POST)
         if form.is_valid():
             task = form.save(commit=False)
-            task.board = board
+            task.scope_type = Task.ScopeType.USER
+            task.user = request.user
             task.parent = None
             task.created_by = request.user
             task.assignee = request.user
@@ -103,7 +97,7 @@ def task_create(request):
 def task_detail(request, task_id):
     task = _get_task_for_user(request.user, task_id)
     can_content = user_can_view_task_content(request.user, task)
-    subtasks = task.subtasks.select_related('assignee', 'created_by', 'board')
+    subtasks = task.subtasks.select_related('assignee', 'created_by')
     updates = task.updates.select_related('author') if can_content else TaskUpdate.objects.none()
     comment_tree = build_comment_tree(task) if can_content else []
 
@@ -118,7 +112,6 @@ def task_detail(request, task_id):
         'can_add_subtask': user_can_add_subtask(request.user, task),
         'can_add_update': user_can_add_update(request.user, task),
         'can_comment': user_can_comment_on_task(request.user, task),
-        'student_user': task.board.user if task.board.scope_type == TaskBoard.ScopeType.USER else None,
     }
     return render(request, 'tracker/task_detail.html', context)
 
@@ -164,7 +157,10 @@ def subtask_create(request, task_id):
         form = SubtaskCreateForm(request.POST)
         if form.is_valid():
             subtask = form.save(commit=False)
-            subtask.board = parent.board
+            subtask.scope_type = parent.scope_type
+            subtask.user = parent.user
+            subtask.group = parent.group
+            subtask.cohort = parent.cohort
             subtask.parent = parent
             subtask.created_by = request.user
             subtask.visibility = parent.visibility
@@ -219,7 +215,7 @@ def comment_create(request, task_id):
             comment.task = task
             comment.author = request.user
             comment.parent = None
-            comment.save()  # model clean() validates parent/task
+            comment.save()
             messages.success(request, 'Comment added.')
             return redirect('tracker:task_detail', task_id=task.pk)
     else:
@@ -236,8 +232,9 @@ def comment_reply_create(request, comment_id):
     parent_comment = get_object_or_404(
         TaskComment.objects.select_related(
             'task',
-            'task__board',
-            'task__board__user',
+            'task__user',
+            'task__group',
+            'task__cohort',
             'task__assignee',
             'task__created_by',
             'author',
@@ -277,12 +274,12 @@ def group_task_create(request, group_id):
     if not user_can_create_group_task(request.user, group):
         raise Http404
 
-    board = get_or_create_group_board(group, created_by=request.user)
     if request.method == 'POST':
         form = GroupTaskCreateForm(request.POST)
         if form.is_valid():
             task = form.save(commit=False)
-            task.board = board
+            task.scope_type = Task.ScopeType.GROUP
+            task.group = group
             task.created_by = request.user
             task.visibility = Task.Visibility.PUBLIC
             task.parent = None

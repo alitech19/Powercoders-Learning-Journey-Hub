@@ -5,9 +5,17 @@
 {% block content %}
 <h2>Tasks</h2>
 
-{% if request.user.role == "student" or can_create_personal_task %}
+{% if can_create_personal_task %}
     <p>
         <a href="{% url 'tracker:task_create' %}"><strong>Create personal task</strong></a>
+    </p>
+{% endif %}
+
+{% if teacher_groups %}
+    <p>Create group task:
+        {% for group in teacher_groups %}
+            <a href="{% url 'tracker:group_task_create' group.pk %}">{{ group.name }}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
     </p>
 {% endif %}
 

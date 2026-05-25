@@ -6,8 +6,6 @@
 <h2>Dashboard ({{ role }})</h2>
 
 {% if user.role == "admin" %}
-    <p>Total boards: {{ total_boards }}</p>
-
     <h3>All public tasks</h3>
     {% include "tracker/_task_table.html" with task_rows=public_task_rows %}
 
@@ -36,14 +34,7 @@
     {% include "tracker/_task_table.html" with task_rows=private_metadata_rows %}
 
 {% else %}
-    <h3>Boards</h3>
-    <ul>
-        <li>Personal: {% if personal_board %}{{ personal_board.title }}{% else %}—{% endif %}</li>
-        <li>Group: {% if group_board %}{{ group_board.title }}{% else %}—{% endif %}</li>
-        <li>Cohort: {% if cohort_board %}{{ cohort_board.title }}{% else %}—{% endif %}</li>
-    </ul>
-
-    <h3>Personal task counts by status</h3>
+    <h3>Task counts by status</h3>
     {% if tasks_by_status %}
         <ul>
             {% for status, count in tasks_by_status.items %}

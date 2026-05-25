@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Task, TaskBoard, TaskComment, TaskUpdate
+from .models import Task, TaskComment, TaskUpdate
 
 
 class TaskInline(admin.TabularInline):
@@ -24,30 +24,33 @@ class TaskCommentInline(admin.TabularInline):
     autocomplete_fields = ('author',)
 
 
-@admin.register(TaskBoard)
-class TaskBoardAdmin(admin.ModelAdmin):
-    list_display = ('title', 'scope_type', 'user', 'group', 'cohort', 'created_by', 'updated_at')
-    list_filter = ('scope_type',)
-    search_fields = ('title', 'user__display_name', 'user__email', 'group__name', 'cohort__name')
-    autocomplete_fields = ('user', 'group', 'cohort', 'created_by')
-
-
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     list_display = (
         'title',
-        'board',
-        'parent',
+        'scope_type',
+        'user',
+        'group',
+        'cohort',
+        'assignee',
+        'visibility',
         'status',
         'priority',
-        'visibility',
-        'assignee',
         'due_date',
         'updated_at',
     )
-    list_filter = ('status', 'priority', 'visibility', 'board__scope_type')
-    search_fields = ('title', 'description', 'assignee__display_name', 'assignee__email')
-    autocomplete_fields = ('board', 'parent', 'assignee', 'created_by')
+    list_filter = ('scope_type', 'visibility', 'status', 'priority', 'group', 'cohort')
+    search_fields = (
+        'title',
+        'description',
+        'user__display_name',
+        'user__email',
+        'assignee__display_name',
+        'assignee__email',
+        'group__name',
+        'cohort__name',
+    )
+    autocomplete_fields = ('user', 'group', 'cohort', 'parent', 'assignee', 'created_by')
     inlines = [TaskInline, TaskUpdateInline, TaskCommentInline]
 
 

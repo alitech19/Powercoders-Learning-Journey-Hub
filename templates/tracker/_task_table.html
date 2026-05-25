@@ -6,8 +6,8 @@
             <th>Status</th>
             <th>Priority</th>
             <th>Due</th>
-            <th>Board</th>
-            <th>Student</th>
+            <th>Scope</th>
+            <th>Owner</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -24,10 +24,14 @@
             <td>{{ row.task.get_status_display }}</td>
             <td>{{ row.task.get_priority_display }}</td>
             <td>{{ row.task.due_date|default:"—" }}</td>
-            <td>{{ row.task.board }}</td>
+            <td>{{ row.task.get_scope_type_display }}</td>
             <td>
-                {% if row.task.board.user %}
-                    {{ row.task.board.user.display_name }}
+                {% if row.task.user %}
+                    {{ row.task.user.display_name }}
+                {% elif row.task.group %}
+                    {{ row.task.group.name }}
+                {% elif row.task.cohort %}
+                    {{ row.task.cohort.name }}
                 {% else %}
                     —
                 {% endif %}

@@ -4,87 +4,18 @@ from django.db import models
 from django.utils import timezone
 
 
-class TaskBoard(models.Model):
+class Task(models.Model):
     """
-    A board scoped to a user, group, or cohort.
-    scope_type determines which foreign key must be set.
+    A task scoped directly to a user, group, or cohort.
+    Public tasks: full content visible to users with scope access.
+    Private tasks: full content only for owner/assignee; teachers/admins
+    may see metadata only (enforced in views/permissions).
     """
 
     class ScopeType(models.TextChoices):
         USER = 'user', 'User'
         GROUP = 'group', 'Group'
         COHORT = 'cohort', 'Cohort'
-
-    scope_type = models.CharField(max_length=20, choices=ScopeType.choices)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='task_boards',
-    )
-    group = models.ForeignKey(
-        'cohorts.Group',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='task_boards',
-    )
-    cohort = models.ForeignKey(
-        'cohorts.Cohort',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='task_boards',
-    )
-    title = models.CharField(max_length=255)
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='created_task_boards',
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['-updated_at', 'title']
-
-    def __str__(self):
-        return self.title
-
-    def clean(self):
-        errors = {}
-        if self.scope_type == self.ScopeType.USER:
-            if not self.user_id:
-                errors['user'] = 'User is required when scope_type is user.'
-            if self.group_id or self.cohort_id:
-                errors['scope_type'] = 'Only user should be set for user scope.'
-        elif self.scope_type == self.ScopeType.GROUP:
-            if not self.group_id:
-                errors['group'] = 'Group is required when scope_type is group.'
-            if self.user_id or self.cohort_id:
-                errors['scope_type'] = 'Only group should be set for group scope.'
-        elif self.scope_type == self.ScopeType.COHORT:
-            if not self.cohort_id:
-                errors['cohort'] = 'Cohort is required when scope_type is cohort.'
-            if self.user_id or self.group_id:
-                errors['scope_type'] = 'Only cohort should be set for cohort scope.'
-        if errors:
-            raise ValidationError(errors)
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
-
-
-class Task(models.Model):
-    """
-    Public tasks: full content visible to users with board access.
-    Private tasks: full content only for owner/assignee; teachers/admins
-    may see metadata only (enforced in views later, not in DB).
-    """
 
     class Visibility(models.TextChoices):
         PUBLIC = 'public', 'Public'
@@ -101,9 +32,26 @@ class Task(models.Model):
         NORMAL = 'normal', 'Normal'
         HIGH = 'high', 'High'
 
-    board = models.ForeignKey(
-        TaskBoard,
+    scope_type = models.CharField(max_length=20, choices=ScopeType.choices)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='scoped_tasks',
+    )
+    group = models.ForeignKey(
+        'cohorts.Group',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='tasks',
+    )
+    cohort = models.ForeignKey(
+        'cohorts.Cohort',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
         related_name='tasks',
     )
     parent = models.ForeignKey(
@@ -167,20 +115,47 @@ class Task(models.Model):
     def is_public(self):
         return self.visibility == self.Visibility.PUBLIC
 
+    @property
+    def is_personal(self):
+        return self.scope_type == self.ScopeType.USER
+
     def owner_user(self):
-        """User who owns private task content (assignee, else creator)."""
         return self.assignee or self.created_by
 
-    def can_view_full_content(self, user):
-        """MVP helper for future views; not a full permission system."""
-        if not user or not user.is_authenticated:
-            return False
-        if self.is_public:
-            return True
-        if user.is_superuser or getattr(user, 'role', None) == 'admin':
-            return False
-        owner = self.owner_user()
-        return owner is not None and owner.pk == user.pk
+    def clean(self):
+        errors = {}
+        if self.scope_type == self.ScopeType.USER:
+            if not self.user_id:
+                errors['user'] = 'User is required for user-scoped tasks.'
+            if self.group_id or self.cohort_id:
+                errors['scope_type'] = 'Only user should be set for user scope.'
+        elif self.scope_type == self.ScopeType.GROUP:
+            if not self.group_id:
+                errors['group'] = 'Group is required for group-scoped tasks.'
+            if self.user_id or self.cohort_id:
+                errors['scope_type'] = 'Only group should be set for group scope.'
+        elif self.scope_type == self.ScopeType.COHORT:
+            if not self.cohort_id:
+                errors['cohort'] = 'Cohort is required for cohort-scoped tasks.'
+            if self.user_id or self.group_id:
+                errors['scope_type'] = 'Only cohort should be set for cohort scope.'
+
+        if self.visibility == self.Visibility.PRIVATE and self.scope_type != self.ScopeType.USER:
+            errors['visibility'] = 'Private visibility is only allowed for user-scoped tasks.'
+
+        if self.parent_id is not None:
+            parent = self.parent
+            if parent and parent.scope_type != self.scope_type:
+                errors['parent'] = 'Subtask must belong to the same scope as parent.'
+            if parent and self.scope_type == self.ScopeType.USER and parent.user_id != self.user_id:
+                errors['parent'] = 'Subtask must belong to the same user as parent.'
+            if parent and self.scope_type == self.ScopeType.GROUP and parent.group_id != self.group_id:
+                errors['parent'] = 'Subtask must belong to the same group as parent.'
+            if parent and self.scope_type == self.ScopeType.COHORT and parent.cohort_id != self.cohort_id:
+                errors['parent'] = 'Subtask must belong to the same cohort as parent.'
+
+        if errors:
+            raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
         if self.status == self.Status.DONE:
@@ -188,24 +163,19 @@ class Task(models.Model):
                 self.completed_at = timezone.now()
         else:
             self.completed_at = None
+        self.full_clean()
         super().save(*args, **kwargs)
 
 
 class TaskUpdate(models.Model):
-    """
-    Progress updates on a task. Visibility follows the parent Task.
-    """
+    """Progress updates on a task. Visibility follows the parent Task."""
 
     class UpdateType(models.TextChoices):
         PROGRESS = 'progress', 'Progress'
         BLOCKER = 'blocker', 'Blocker'
         NOTE = 'note', 'Note'
 
-    task = models.ForeignKey(
-        Task,
-        on_delete=models.CASCADE,
-        related_name='updates',
-    )
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='updates')
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -235,11 +205,7 @@ class TaskComment(models.Model):
     parent=null: top-level comment; parent set: reply (any depth).
     """
 
-    task = models.ForeignKey(
-        Task,
-        on_delete=models.CASCADE,
-        related_name='comments',
-    )
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='comments')
     parent = models.ForeignKey(
         'self',
         null=True,

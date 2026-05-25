@@ -9,7 +9,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('dashboard/', include('dashboard.urls')),
-    path('tracker/', include('tracker.urls')),
+    path('tasks/', include('tracker.urls')),
     path('', RedirectView.as_view(pattern_name='dashboard:dashboard', permanent=False)),
 ]
 

@@ -10,6 +10,7 @@
     <p><strong>Status:</strong> {{ task.get_status_display }}</p>
     <p><strong>Priority:</strong> {{ task.get_priority_display }}</p>
     <p><strong>Visibility:</strong> {{ task.get_visibility_display }}</p>
+    <p><strong>Scope:</strong> {{ task.get_scope_type_display }}</p>
     <p><strong>Due date:</strong> {{ task.due_date|default:"—" }}</p>
     <p><strong>Assignee:</strong> {% if task.assignee %}{{ task.assignee.display_name }}{% else %}—{% endif %}</p>
     <p><strong>Created by:</strong> {% if task.created_by %}{{ task.created_by.display_name }}{% else %}—{% endif %}</p>
@@ -64,8 +65,8 @@
 
 {% else %}
     <p><em>Private task — content hidden</em></p>
-    <p><strong>Student:</strong>
-        {% if student_user %}{{ student_user.display_name }}{% elif task.assignee %}{{ task.assignee.display_name }}{% else %}—{% endif %}
+    <p><strong>Owner:</strong>
+        {% if task.user %}{{ task.user.display_name }}{% elif task.assignee %}{{ task.assignee.display_name }}{% else %}—{% endif %}
     </p>
     <p><strong>Status:</strong> {{ task.get_status_display }}</p>
     <p><strong>Priority:</strong> {{ task.get_priority_display }}</p>

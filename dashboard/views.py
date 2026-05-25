@@ -3,19 +3,13 @@ from django.db.models import Count
 from django.shortcuts import render
 
 from cohorts.models import Group
-from tracker.models import Task, TaskBoard
+from tracker.models import Task
 from tracker.permissions import (
+    get_teacher_group_ids,
     user_is_admin,
-    user_is_student,
     user_is_teacher,
     visible_tasks_queryset,
     wrap_tasks_for_display,
-    get_teacher_group_ids,
-)
-from tracker.services import (
-    get_or_create_cohort_board,
-    get_or_create_group_board,
-    get_or_create_personal_board,
 )
 
 
@@ -43,7 +37,6 @@ def dashboard(request):
                     user,
                     all_tasks.filter(visibility=Task.Visibility.PUBLIC),
                 ),
-                'total_boards': TaskBoard.objects.count(),
             }
         )
         return render(request, 'dashboard/dashboard.html', context)
@@ -55,7 +48,7 @@ def dashboard(request):
         public_tasks = visible.filter(visibility=Task.Visibility.PUBLIC)
         private_tasks = visible.filter(
             visibility=Task.Visibility.PRIVATE,
-            board__scope_type=TaskBoard.ScopeType.USER,
+            scope_type=Task.ScopeType.USER,
         )
         context.update(
             {
@@ -63,38 +56,24 @@ def dashboard(request):
                 'public_task_rows': wrap_tasks_for_display(user, public_tasks),
                 'private_metadata_rows': wrap_tasks_for_display(user, private_tasks),
                 'tasks_by_status': _tasks_by_status(public_tasks),
-                'group_boards': [
-                    get_or_create_group_board(g, created_by=user) for g in assigned_groups
-                ],
             }
         )
         return render(request, 'dashboard/dashboard.html', context)
 
     # Student (default)
-    personal_board = get_or_create_personal_board(user)
-    group_board = (
-        get_or_create_group_board(user.group, created_by=user) if user.group_id else None
-    )
-    cohort_board = (
-        get_or_create_cohort_board(user.cohort, created_by=user) if user.cohort_id else None
-    )
-
     own_tasks = visible_tasks_queryset(user).filter(
-        board__scope_type=TaskBoard.ScopeType.USER,
-        board__user=user,
+        scope_type=Task.ScopeType.USER,
+        user=user,
     )
     group_tasks = visible_tasks_queryset(user).filter(
-        board__scope_type=TaskBoard.ScopeType.GROUP,
+        scope_type=Task.ScopeType.GROUP,
     )
     cohort_tasks = visible_tasks_queryset(user).filter(
-        board__scope_type=TaskBoard.ScopeType.COHORT,
+        scope_type=Task.ScopeType.COHORT,
     )
 
     context.update(
         {
-            'personal_board': personal_board,
-            'group_board': group_board,
-            'cohort_board': cohort_board,
             'own_task_rows': wrap_tasks_for_display(user, own_tasks),
             'group_task_rows': wrap_tasks_for_display(user, group_tasks),
             'cohort_task_rows': wrap_tasks_for_display(user, cohort_tasks),
