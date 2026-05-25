@@ -15,7 +15,8 @@
         <tr>
             <th>Title</th>
             <th>Status</th>
-            <th>Time-bound</th>
+            <th>Progress</th>
+            <th>Target date</th>
             <th>Feedback</th>
         </tr>
     </thead>
@@ -24,7 +25,8 @@
         <tr>
             <td><a href="{% url 'growth:goal_detail' pk=row.item.pk %}">{{ row.item.title }}</a></td>
             <td>{{ row.item.get_status_display }}</td>
-            <td>{{ row.item.time_bound }}</td>
+            <td>{{ row.item.progress_percent }}%</td>
+            <td>{{ row.item.target_date }}</td>
             <td>
                 {% if row.can_give_feedback %}
                     <a href="{% url 'growth:feedback_create' content_type='goal' object_id=row.item.pk %}">Leave feedback</a>
@@ -49,6 +51,7 @@
         <tr>
             <th>Week start</th>
             <th>Week end</th>
+            <th>Preview</th>
             <th>Feedback</th>
         </tr>
     </thead>
@@ -57,6 +60,7 @@
         <tr>
             <td><a href="{% url 'growth:reflection_detail' pk=row.item.pk %}">{{ row.item.week_start }}</a></td>
             <td>{{ row.item.week_end }}</td>
+            <td>{{ row.item.content|truncatewords:10 }}</td>
             <td>
                 {% if row.can_give_feedback %}
                     <a href="{% url 'growth:feedback_create' content_type='reflection' object_id=row.item.pk %}">Leave feedback</a>

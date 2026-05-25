@@ -7,7 +7,7 @@ from .models import Feedback, Goal, WeeklyReflection
 class GoalAdmin(admin.ModelAdmin):
     list_display = (
         'title', 'student', 'visibility', 'status',
-        'time_bound', 'achieved_at', 'updated_at',
+        'progress_percent', 'target_date', 'achieved_at', 'updated_at',
     )
     list_filter = ('visibility', 'status')
     search_fields = (

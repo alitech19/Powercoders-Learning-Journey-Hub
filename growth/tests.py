@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from accounts.models import User
@@ -63,15 +64,17 @@ class GrowthTestBase(TestCase):
         cls.private_goal = Goal.objects.create(
             student=cls.student,
             title='Private goal',
-            specific='s', measurable='m', achievable='a',
-            relevant='r', time_bound=today + timedelta(days=30),
+            description='My private SMART goal description.',
+            target_date=today + timedelta(days=30),
+            progress_percent=10,
             visibility=Goal.Visibility.PRIVATE,
         )
         cls.public_goal = Goal.objects.create(
             student=cls.student,
             title='Public goal',
-            specific='s', measurable='m', achievable='a',
-            relevant='r', time_bound=today + timedelta(days=30),
+            description='My public SMART goal description.',
+            target_date=today + timedelta(days=30),
+            progress_percent=25,
             visibility=Goal.Visibility.PUBLIC,
         )
 
@@ -79,9 +82,62 @@ class GrowthTestBase(TestCase):
             student=cls.student,
             week_start=today - timedelta(days=today.weekday()),
             week_end=today - timedelta(days=today.weekday()) + timedelta(days=6),
-            more_of='Code more',
+            content='More of:\nCoding\n\nLess of:\nProcrastination',
         )
         cls.reflection.save()
+
+
+# ── Goal model tests ─────────────────────────────────────────────────
+
+class GoalModelTests(GrowthTestBase):
+
+    def test_create_goal_with_simplified_fields(self):
+        goal = Goal.objects.create(
+            student=self.student,
+            title='Test goal',
+            description='A clear SMART description.',
+            target_date=date.today() + timedelta(days=14),
+            progress_percent=50,
+        )
+        self.assertEqual(goal.title, 'Test goal')
+        self.assertEqual(goal.progress_percent, 50)
+        self.assertEqual(goal.status, Goal.Status.ACTIVE)
+
+    def test_progress_percent_capped_at_100(self):
+        goal = Goal(
+            student=self.student,
+            title='Over 100',
+            description='Desc',
+            target_date=date.today() + timedelta(days=7),
+            progress_percent=150,
+        )
+        with self.assertRaises(ValidationError):
+            goal.full_clean()
+
+    def test_progress_percent_cannot_be_negative(self):
+        goal = Goal(
+            student=self.student,
+            title='Negative',
+            description='Desc',
+            target_date=date.today() + timedelta(days=7),
+            progress_percent=-5,
+        )
+        with self.assertRaises(ValidationError):
+            goal.full_clean()
+
+    def test_mark_achieved_sets_progress_100(self):
+        goal = Goal.objects.create(
+            student=self.student,
+            title='Progress test',
+            description='Desc',
+            target_date=date.today() + timedelta(days=7),
+            progress_percent=60,
+        )
+        goal.status = Goal.Status.ACHIEVED
+        goal.save()
+        goal.refresh_from_db()
+        self.assertEqual(goal.progress_percent, 100)
+        self.assertIsNotNone(goal.achieved_at)
 
 
 # ── Goal visibility ──────────────────────────────────────────────────
@@ -130,6 +186,31 @@ class GoalSelectorTests(GrowthTestBase):
     def test_other_student_selector_returns_nothing(self):
         goals = get_visible_goals_for_user(self.other_student)
         self.assertEqual(goals.count(), 0)
+
+
+# ── Reflection model tests ───────────────────────────────────────────
+
+class ReflectionModelTests(GrowthTestBase):
+
+    def test_create_reflection_with_content(self):
+        ref = WeeklyReflection(
+            student=self.other_student,
+            week_start=date(2026, 5, 18),
+            week_end=date(2026, 5, 24),
+            content='More of:\nReading docs\n\nLess of:\nGuessing',
+        )
+        ref.save()
+        self.assertEqual(ref.content, 'More of:\nReading docs\n\nLess of:\nGuessing')
+
+    def test_empty_content_raises_validation_error(self):
+        ref = WeeklyReflection(
+            student=self.other_student,
+            week_start=date(2026, 6, 1),
+            week_end=date(2026, 6, 7),
+            content='   ',
+        )
+        with self.assertRaises(ValidationError):
+            ref.full_clean()
 
 
 # ── Reflection visibility ────────────────────────────────────────────

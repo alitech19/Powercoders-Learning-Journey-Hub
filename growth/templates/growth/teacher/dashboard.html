@@ -13,6 +13,7 @@
             <th>Public goals</th>
             <th>Active public goals</th>
             <th>Overdue public goals</th>
+            <th>Avg progress</th>
             <th>Latest reflection</th>
             <th>Feedback count</th>
         </tr>
@@ -24,6 +25,7 @@
             <td>{{ row.public_goals_count }}</td>
             <td>{{ row.active_public_goals_count }}</td>
             <td>{{ row.overdue_public_goals_count }}</td>
+            <td>{% if row.avg_progress is not None %}{{ row.avg_progress }}%{% else %}—{% endif %}</td>
             <td>
                 {% if row.latest_reflection %}
                     {{ row.latest_reflection.week_start }}

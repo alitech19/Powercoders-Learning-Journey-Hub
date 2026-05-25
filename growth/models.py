@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 
@@ -23,11 +24,12 @@ class Goal(models.Model):
         related_name='goals',
     )
     title = models.CharField(max_length=255)
-    specific = models.TextField()
-    measurable = models.TextField()
-    achievable = models.TextField()
-    relevant = models.TextField()
-    time_bound = models.DateField()
+    description = models.TextField()
+    target_date = models.DateField()
+    progress_percent = models.PositiveSmallIntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    )
     visibility = models.CharField(
         max_length=20,
         choices=Visibility.choices,
@@ -66,12 +68,14 @@ class Goal(models.Model):
     def is_overdue(self):
         return (
             self.status == self.Status.ACTIVE
-            and self.time_bound < timezone.now().date()
+            and self.target_date < timezone.now().date()
         )
 
     def save(self, *args, **kwargs):
-        if self.status == self.Status.ACHIEVED and not self.achieved_at:
-            self.achieved_at = timezone.now()
+        if self.status == self.Status.ACHIEVED:
+            self.progress_percent = 100
+            if not self.achieved_at:
+                self.achieved_at = timezone.now()
         elif self.status != self.Status.ACHIEVED:
             self.achieved_at = None
         super().save(*args, **kwargs)
@@ -85,11 +89,7 @@ class WeeklyReflection(models.Model):
     )
     week_start = models.DateField()
     week_end = models.DateField()
-    more_of = models.TextField(blank=True)
-    less_of = models.TextField(blank=True)
-    start_doing = models.TextField(blank=True)
-    stop_doing = models.TextField(blank=True)
-    continue_doing = models.TextField(blank=True)
+    content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -115,14 +115,8 @@ class WeeklyReflection(models.Model):
         errors = {}
         if self.week_end and self.week_start and self.week_end <= self.week_start:
             errors['week_end'] = 'Week end must be after week start.'
-
-        agile_fields = [
-            self.more_of, self.less_of, self.start_doing,
-            self.stop_doing, self.continue_doing,
-        ]
-        if not any(f.strip() for f in agile_fields if f):
-            errors['__all__'] = 'At least one reflection field must be filled.'
-
+        if not self.content or not self.content.strip():
+            errors['content'] = 'Content is required.'
         if errors:
             raise ValidationError(errors)
 

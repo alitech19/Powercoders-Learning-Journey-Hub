@@ -112,6 +112,7 @@ def goal_mark_achieved(request, pk):
 
     if request.method == 'POST':
         goal.status = Goal.Status.ACHIEVED
+        goal.progress_percent = 100
         goal.achieved_at = timezone.now()
         goal.save()
         messages.success(request, 'Goal marked as achieved!')

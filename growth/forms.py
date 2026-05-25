@@ -5,17 +5,45 @@ from .models import Feedback, Goal, WeeklyReflection
 
 DATE_WIDGET = forms.DateInput(attrs={'type': 'date'})
 
+REFLECTION_INITIAL_CONTENT = (
+    'More of:\n\n'
+    'Less of:\n\n'
+    'Start doing:\n\n'
+    'Stop doing:\n\n'
+    'Continue doing:\n'
+)
+
+GOAL_DESCRIPTION_PLACEHOLDER = (
+    'I want to understand Django permissions well enough to protect views '
+    'and querysets for students, teachers, and admins. I will know I achieved '
+    'it when I can implement and test the access rules without help. This is '
+    'realistic because I already understand models and views. It is relevant '
+    'because the Powercoders Hub needs safe role-based access. I want to '
+    'complete this by the end of Week 4.'
+)
+
 
 class GoalForm(forms.ModelForm):
     class Meta:
         model = Goal
         fields = (
-            'title', 'specific', 'measurable', 'achievable',
-            'relevant', 'time_bound', 'visibility',
+            'title', 'description', 'target_date',
+            'progress_percent', 'visibility',
         )
-        widgets = {'time_bound': DATE_WIDGET}
+        widgets = {
+            'target_date': DATE_WIDGET,
+            'description': forms.Textarea(attrs={
+                'rows': 8,
+                'cols': 70,
+                'placeholder': GOAL_DESCRIPTION_PLACEHOLDER,
+            }),
+            'progress_percent': forms.NumberInput(attrs={
+                'min': 0, 'max': 100, 'step': 5,
+            }),
+        }
         labels = {
             'visibility': 'Visibility',
+            'progress_percent': 'Progress (%)',
         }
 
     def __init__(self, *args, **kwargs):
@@ -25,32 +53,45 @@ class GoalForm(forms.ModelForm):
             (Goal.Visibility.PUBLIC, 'Share with teaching team'),
         ]
 
-    def clean_time_bound(self):
-        time_bound = self.cleaned_data.get('time_bound')
-        if time_bound and not self.instance.pk:
-            if time_bound < timezone.now().date():
+    def clean_target_date(self):
+        target_date = self.cleaned_data.get('target_date')
+        if target_date and not self.instance.pk:
+            if target_date < timezone.now().date():
                 raise forms.ValidationError(
-                    'Time-bound date cannot be in the past for a new goal.'
+                    'Target date cannot be in the past for a new goal.'
                 )
-        return time_bound
+        return target_date
+
+    def clean_progress_percent(self):
+        value = self.cleaned_data.get('progress_percent')
+        if value is not None and (value < 0 or value > 100):
+            raise forms.ValidationError(
+                'Progress must be between 0 and 100.'
+            )
+        return value
 
 
 class ReflectionForm(forms.ModelForm):
     class Meta:
         model = WeeklyReflection
-        fields = (
-            'week_start', 'week_end',
-            'more_of', 'less_of', 'start_doing',
-            'stop_doing', 'continue_doing',
-        )
+        fields = ('week_start', 'week_end', 'content')
         widgets = {
             'week_start': DATE_WIDGET,
             'week_end': DATE_WIDGET,
+            'content': forms.Textarea(attrs={'rows': 14, 'cols': 70}),
         }
 
     def __init__(self, *args, student=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._student = student
+        if not self.instance.pk and not self.initial.get('content') and not self.data:
+            self.initial['content'] = REFLECTION_INITIAL_CONTENT
+
+    def clean_content(self):
+        content = self.cleaned_data.get('content', '')
+        if not content.strip():
+            raise forms.ValidationError('Content is required.')
+        return content
 
     def clean(self):
         cleaned = super().clean()
@@ -59,18 +100,6 @@ class ReflectionForm(forms.ModelForm):
 
         if week_start and week_end and week_end <= week_start:
             self.add_error('week_end', 'Week end must be after week start.')
-
-        agile_fields = [
-            cleaned.get('more_of', ''),
-            cleaned.get('less_of', ''),
-            cleaned.get('start_doing', ''),
-            cleaned.get('stop_doing', ''),
-            cleaned.get('continue_doing', ''),
-        ]
-        if not any(f.strip() for f in agile_fields):
-            raise forms.ValidationError(
-                'At least one reflection field must be filled.'
-            )
 
         if week_start and self._student:
             qs = WeeklyReflection.objects.filter(

@@ -1,6 +1,6 @@
 {% extends "growth/base.html" %}
 
-{% block title %}Reflections — PowerHUB{% endblock %}
+{% block title %}Weekly Reflections — PowerHUB{% endblock %}
 
 {% block growth_content %}
 <h2>Weekly Reflections</h2>
@@ -15,6 +15,7 @@
         <tr>
             <th>Week start</th>
             <th>Week end</th>
+            <th>Preview</th>
             <th>Student</th>
             <th>Created</th>
         </tr>
@@ -24,6 +25,7 @@
         <tr>
             <td><a href="{% url 'growth:reflection_detail' pk=r.pk %}">{{ r.week_start }}</a></td>
             <td>{{ r.week_end }}</td>
+            <td>{{ r.content|truncatewords:15 }}</td>
             <td>{{ r.student.display_name }}</td>
             <td>{{ r.created_at }}</td>
         </tr>

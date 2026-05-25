@@ -8,27 +8,16 @@
 <p><strong>Student:</strong> {{ goal.student.display_name }}</p>
 <p><strong>Status:</strong> {{ goal.get_status_display }}</p>
 <p><strong>Visibility:</strong> {{ goal.get_visibility_display }}</p>
+<p><strong>Target date:</strong> {{ goal.target_date }}</p>
+<p><strong>Progress:</strong> {{ goal.progress_percent }}%</p>
 {% if goal.achieved_at %}
 <p><strong>Achieved at:</strong> {{ goal.achieved_at }}</p>
 {% endif %}
+<p><strong>Created:</strong> {{ goal.created_at }}</p>
+<p><strong>Updated:</strong> {{ goal.updated_at }}</p>
 
-<h3>SMART breakdown</h3>
-<dl>
-    <dt>Specific</dt>
-    <dd>{{ goal.specific }}</dd>
-
-    <dt>Measurable</dt>
-    <dd>{{ goal.measurable }}</dd>
-
-    <dt>Achievable</dt>
-    <dd>{{ goal.achievable }}</dd>
-
-    <dt>Relevant</dt>
-    <dd>{{ goal.relevant }}</dd>
-
-    <dt>Time-bound</dt>
-    <dd>{{ goal.time_bound }}</dd>
-</dl>
+<h3>Description</h3>
+<p>{{ goal.description|linebreaksbr }}</p>
 
 {% if can_edit %}
     <p>

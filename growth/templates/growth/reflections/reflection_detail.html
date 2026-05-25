@@ -6,34 +6,11 @@
 <h2>Weekly Reflection: {{ reflection.week_start }} – {{ reflection.week_end }}</h2>
 
 <p><strong>Student:</strong> {{ reflection.student.display_name }}</p>
+<p><strong>Created:</strong> {{ reflection.created_at }}</p>
+<p><strong>Updated:</strong> {{ reflection.updated_at }}</p>
 
-<h3>Agile retrospective</h3>
-<dl>
-    {% if reflection.more_of %}
-    <dt>More of</dt>
-    <dd>{{ reflection.more_of }}</dd>
-    {% endif %}
-
-    {% if reflection.less_of %}
-    <dt>Less of</dt>
-    <dd>{{ reflection.less_of }}</dd>
-    {% endif %}
-
-    {% if reflection.start_doing %}
-    <dt>Start doing</dt>
-    <dd>{{ reflection.start_doing }}</dd>
-    {% endif %}
-
-    {% if reflection.stop_doing %}
-    <dt>Stop doing</dt>
-    <dd>{{ reflection.stop_doing }}</dd>
-    {% endif %}
-
-    {% if reflection.continue_doing %}
-    <dt>Continue doing</dt>
-    <dd>{{ reflection.continue_doing }}</dd>
-    {% endif %}
-</dl>
+<h3>Reflection</h3>
+<p>{{ reflection.content|linebreaksbr }}</p>
 
 {% if can_edit %}
     <p><a href="{% url 'growth:reflection_edit' pk=reflection.pk %}">Edit</a></p>

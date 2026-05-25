@@ -1,10 +1,13 @@
 from django.urls import path
+from django.views.generic import RedirectView
 
 from .views import feedback, goals, reflections, teacher
 
 app_name = 'growth'
 
 urlpatterns = [
+    path('', RedirectView.as_view(pattern_name='growth:goal_list', permanent=False), name='index'),
+
     # Goals
     path('goals/', goals.goal_list, name='goal_list'),
     path('goals/new/', goals.goal_create, name='goal_create'),
