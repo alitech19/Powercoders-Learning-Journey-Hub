@@ -1,0 +1,38 @@
+{% extends "growth/base.html" %}
+
+{% block title %}Goals — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>SMART Goals</h2>
+
+{% if is_student %}
+    <p><a href="{% url 'growth:goal_create' %}">New goal</a></p>
+{% endif %}
+
+{% if goals %}
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Visibility</th>
+            <th>Time-bound</th>
+            <th>Student</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for goal in goals %}
+        <tr>
+            <td><a href="{% url 'growth:goal_detail' pk=goal.pk %}">{{ goal.title }}</a></td>
+            <td>{{ goal.get_status_display }}</td>
+            <td>{{ goal.get_visibility_display }}</td>
+            <td>{{ goal.time_bound }}</td>
+            <td>{{ goal.student.display_name }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No goals to show.</p>
+{% endif %}
+{% endblock growth_content %}

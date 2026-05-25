@@ -1,0 +1,76 @@
+{% extends "growth/base.html" %}
+
+{% block title %}{{ student.display_name }} — Growth — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>{{ student.display_name }}</h2>
+<p>{{ student.email }}</p>
+
+<hr>
+
+<h3>Public SMART Goals</h3>
+{% if goal_rows %}
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Time-bound</th>
+            <th>Feedback</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in goal_rows %}
+        <tr>
+            <td><a href="{% url 'growth:goal_detail' pk=row.item.pk %}">{{ row.item.title }}</a></td>
+            <td>{{ row.item.get_status_display }}</td>
+            <td>{{ row.item.time_bound }}</td>
+            <td>
+                {% if row.can_give_feedback %}
+                    <a href="{% url 'growth:feedback_create' content_type='goal' object_id=row.item.pk %}">Leave feedback</a>
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No public goals.</p>
+{% endif %}
+
+<hr>
+
+<h3>Weekly Reflections</h3>
+{% if reflection_rows %}
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Week start</th>
+            <th>Week end</th>
+            <th>Feedback</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in reflection_rows %}
+        <tr>
+            <td><a href="{% url 'growth:reflection_detail' pk=row.item.pk %}">{{ row.item.week_start }}</a></td>
+            <td>{{ row.item.week_end }}</td>
+            <td>
+                {% if row.can_give_feedback %}
+                    <a href="{% url 'growth:feedback_create' content_type='reflection' object_id=row.item.pk %}">Leave feedback</a>
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No reflections.</p>
+{% endif %}
+
+<p><a href="{% url 'growth:teacher_dashboard' %}">Back to dashboard</a></p>
+{% endblock growth_content %}

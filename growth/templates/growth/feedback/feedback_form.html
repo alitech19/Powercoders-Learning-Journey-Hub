@@ -1,0 +1,45 @@
+{% extends "growth/base.html" %}
+
+{% block title %}Leave feedback — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>Leave feedback</h2>
+
+<p><strong>For:</strong> {{ target }}</p>
+
+<form method="post">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <ul>
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% for field in form %}
+    <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+        {% if field.errors %}
+            <ul>
+                {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </p>
+    {% endfor %}
+
+    <button type="submit">Submit feedback</button>
+</form>
+
+<p>
+    {% if content_type_label == 'goal' %}
+        <a href="{% url 'growth:goal_detail' pk=target.pk %}">Cancel</a>
+    {% elif content_type_label == 'reflection' %}
+        <a href="{% url 'growth:reflection_detail' pk=target.pk %}">Cancel</a>
+    {% endif %}
+</p>
+{% endblock growth_content %}

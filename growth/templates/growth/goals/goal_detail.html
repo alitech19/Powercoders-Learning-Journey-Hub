@@ -1,0 +1,67 @@
+{% extends "growth/base.html" %}
+
+{% block title %}{{ goal.title }} — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>{{ goal.title }}</h2>
+
+<p><strong>Student:</strong> {{ goal.student.display_name }}</p>
+<p><strong>Status:</strong> {{ goal.get_status_display }}</p>
+<p><strong>Visibility:</strong> {{ goal.get_visibility_display }}</p>
+{% if goal.achieved_at %}
+<p><strong>Achieved at:</strong> {{ goal.achieved_at }}</p>
+{% endif %}
+
+<h3>SMART breakdown</h3>
+<dl>
+    <dt>Specific</dt>
+    <dd>{{ goal.specific }}</dd>
+
+    <dt>Measurable</dt>
+    <dd>{{ goal.measurable }}</dd>
+
+    <dt>Achievable</dt>
+    <dd>{{ goal.achievable }}</dd>
+
+    <dt>Relevant</dt>
+    <dd>{{ goal.relevant }}</dd>
+
+    <dt>Time-bound</dt>
+    <dd>{{ goal.time_bound }}</dd>
+</dl>
+
+{% if can_edit %}
+    <p>
+        <a href="{% url 'growth:goal_edit' pk=goal.pk %}">Edit</a>
+        | <a href="{% url 'growth:goal_delete' pk=goal.pk %}">Delete</a>
+    </p>
+{% endif %}
+
+{% if can_mark_achieved %}
+    <form method="post" action="{% url 'growth:goal_mark_achieved' pk=goal.pk %}">
+        {% csrf_token %}
+        <button type="submit">Mark as achieved</button>
+    </form>
+{% endif %}
+
+<hr>
+
+<h3>Feedback</h3>
+{% if feedback_list %}
+    {% for fb in feedback_list %}
+    <div>
+        <p><strong>{{ fb.author.display_name }}</strong> ({{ fb.created_at }}):</p>
+        <p>{{ fb.message }}</p>
+    </div>
+    <hr>
+    {% endfor %}
+{% else %}
+    <p>No feedback yet.</p>
+{% endif %}
+
+{% if can_give_feedback %}
+    <p><a href="{% url 'growth:feedback_create' content_type='goal' object_id=goal.pk %}">Leave feedback</a></p>
+{% endif %}
+
+<p><a href="{% url 'growth:goal_list' %}">Back to goals</a></p>
+{% endblock growth_content %}

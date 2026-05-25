@@ -10,6 +10,7 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('tasks/', include('tracker.urls')),
+    path('growth/', include('growth.urls')),
     path('', RedirectView.as_view(pattern_name='dashboard:dashboard', permanent=False)),
 ]
 

@@ -19,6 +19,8 @@
         <nav>
             <a href="{% url 'dashboard:dashboard' %}">Dashboard</a> |
             <a href="{% url 'tracker:task_list' %}">Tasks</a> |
+            <a href="{% url 'growth:goal_list' %}">SMART Goals</a> |
+            <a href="{% url 'growth:reflection_list' %}">Weekly Reflections</a> |
             <a href="/admin/">Admin</a> |
             <form method="post" action="{% url 'logout' %}" style="display:inline">
                 {% csrf_token %}

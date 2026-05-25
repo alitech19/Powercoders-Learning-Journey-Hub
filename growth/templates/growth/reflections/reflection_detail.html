@@ -1,0 +1,62 @@
+{% extends "growth/base.html" %}
+
+{% block title %}Reflection {{ reflection.week_start }} — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>Weekly Reflection: {{ reflection.week_start }} – {{ reflection.week_end }}</h2>
+
+<p><strong>Student:</strong> {{ reflection.student.display_name }}</p>
+
+<h3>Agile retrospective</h3>
+<dl>
+    {% if reflection.more_of %}
+    <dt>More of</dt>
+    <dd>{{ reflection.more_of }}</dd>
+    {% endif %}
+
+    {% if reflection.less_of %}
+    <dt>Less of</dt>
+    <dd>{{ reflection.less_of }}</dd>
+    {% endif %}
+
+    {% if reflection.start_doing %}
+    <dt>Start doing</dt>
+    <dd>{{ reflection.start_doing }}</dd>
+    {% endif %}
+
+    {% if reflection.stop_doing %}
+    <dt>Stop doing</dt>
+    <dd>{{ reflection.stop_doing }}</dd>
+    {% endif %}
+
+    {% if reflection.continue_doing %}
+    <dt>Continue doing</dt>
+    <dd>{{ reflection.continue_doing }}</dd>
+    {% endif %}
+</dl>
+
+{% if can_edit %}
+    <p><a href="{% url 'growth:reflection_edit' pk=reflection.pk %}">Edit</a></p>
+{% endif %}
+
+<hr>
+
+<h3>Feedback</h3>
+{% if feedback_list %}
+    {% for fb in feedback_list %}
+    <div>
+        <p><strong>{{ fb.author.display_name }}</strong> ({{ fb.created_at }}):</p>
+        <p>{{ fb.message }}</p>
+    </div>
+    <hr>
+    {% endfor %}
+{% else %}
+    <p>No feedback yet.</p>
+{% endif %}
+
+{% if can_give_feedback %}
+    <p><a href="{% url 'growth:feedback_create' content_type='reflection' object_id=reflection.pk %}">Leave feedback</a></p>
+{% endif %}
+
+<p><a href="{% url 'growth:reflection_list' %}">Back to reflections</a></p>
+{% endblock growth_content %}

@@ -1,0 +1,36 @@
+{% extends "growth/base.html" %}
+
+{% block title %}Reflections — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>Weekly Reflections</h2>
+
+{% if is_student %}
+    <p><a href="{% url 'growth:reflection_create' %}">New weekly reflection</a></p>
+{% endif %}
+
+{% if reflections %}
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Week start</th>
+            <th>Week end</th>
+            <th>Student</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in reflections %}
+        <tr>
+            <td><a href="{% url 'growth:reflection_detail' pk=r.pk %}">{{ r.week_start }}</a></td>
+            <td>{{ r.week_end }}</td>
+            <td>{{ r.student.display_name }}</td>
+            <td>{{ r.created_at }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No reflections to show.</p>
+{% endif %}
+{% endblock growth_content %}

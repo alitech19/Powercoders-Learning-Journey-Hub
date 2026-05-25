@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<nav>
+    {% if "/growth/goals/" in request.path %}
+        <strong>SMART Goals</strong>
+    {% else %}
+        <a href="{% url 'growth:goal_list' %}">SMART Goals</a>
+    {% endif %}
+    |
+    {% if "/growth/reflections/" in request.path %}
+        <strong>Weekly Reflections</strong>
+    {% else %}
+        <a href="{% url 'growth:reflection_list' %}">Weekly Reflections</a>
+    {% endif %}
+    {% if user.role == 'teacher' or user.role == 'admin' or user.is_superuser %}
+        |
+        {% if "/growth/teaching/" in request.path %}
+            <strong>Growth Dashboard</strong>
+        {% else %}
+            <a href="{% url 'growth:teacher_dashboard' %}">Growth Dashboard</a>
+        {% endif %}
+    {% endif %}
+</nav>
+<hr>
+
+{% block growth_content %}{% endblock %}
+{% endblock %}

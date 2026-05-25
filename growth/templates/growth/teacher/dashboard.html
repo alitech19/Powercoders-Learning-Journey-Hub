@@ -1,0 +1,42 @@
+{% extends "growth/base.html" %}
+
+{% block title %}Growth Dashboard — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>Growth Dashboard</h2>
+
+{% if rows %}
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Student</th>
+            <th>Public goals</th>
+            <th>Active public goals</th>
+            <th>Overdue public goals</th>
+            <th>Latest reflection</th>
+            <th>Feedback count</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+        <tr>
+            <td><a href="{% url 'growth:student_growth_detail' student_id=row.student.pk %}">{{ row.student.display_name }}</a></td>
+            <td>{{ row.public_goals_count }}</td>
+            <td>{{ row.active_public_goals_count }}</td>
+            <td>{{ row.overdue_public_goals_count }}</td>
+            <td>
+                {% if row.latest_reflection %}
+                    {{ row.latest_reflection.week_start }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+            <td>{{ row.feedback_count }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No students found.</p>
+{% endif %}
+{% endblock growth_content %}
