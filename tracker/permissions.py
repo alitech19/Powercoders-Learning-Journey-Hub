@@ -91,10 +91,24 @@ def is_task_assignee(user, task):
     return False
 
 
+def _teacher_supervises_task_user(user, task):
+    """Teacher can see public personal tasks from students in their assigned groups."""
+    if task.assignee_type != Task.AssigneeType.USER:
+        return False
+    if not task.assignee_user_id:
+        return False
+    assignee = task.assignee_user
+    if assignee is None or getattr(assignee, 'role', None) != User.Role.STUDENT:
+        return False
+    if not assignee.group_id:
+        return False
+    return assignee.group_id in get_teacher_group_ids(user)
+
+
 def can_view_task(user, task):
     """
     Private: only owner.
-    Public: owner + assignee + admin.
+    Public: owner + assignee + admin + teacher supervising the assignee's group.
     """
     if not user.is_authenticated:
         return False
@@ -105,12 +119,11 @@ def can_view_task(user, task):
     # Public task
     if user_is_admin(user):
         return True
-    return is_task_assignee(user, task)
-
-
-def can_view_task_content(user, task):
-    """Same as can_view_task — if you can see it, you see full content."""
-    return can_view_task(user, task)
+    if is_task_assignee(user, task):
+        return True
+    if user_is_teacher(user) and _teacher_supervises_task_user(user, task):
+        return True
+    return False
 
 
 def can_update_task(user, task):
@@ -188,7 +201,7 @@ def can_create_cohort_task(user, cohort):
 def get_visible_tasks_for_user(user, *, main_tasks_only=True):
     """
     Private: only tasks where created_by=user.
-    Public: tasks where user is owner, assignee, or admin.
+    Public: tasks where user is owner, assignee, admin, or supervising teacher.
     """
     qs = Task.objects.select_related(
         'created_by', 'assignee_user', 'assignee_group', 'assignee_cohort',
@@ -227,6 +240,32 @@ def get_visible_tasks_for_user(user, *, main_tasks_only=True):
             assignee_cohort_id=user.cohort_id,
         )
 
+    # Teacher: also see public personal tasks from students in assigned groups
+    if user_is_teacher(user):
+        group_ids = get_teacher_group_ids(user)
+        if group_ids:
+            cohort_ids = get_teacher_cohort_ids(user)
+            # Public group tasks for teacher's groups
+            conditions |= Q(
+                visibility=Task.Visibility.PUBLIC,
+                assignee_type=Task.AssigneeType.GROUP,
+                assignee_group_id__in=group_ids,
+            )
+            # Public cohort tasks for teacher's cohorts
+            if cohort_ids:
+                conditions |= Q(
+                    visibility=Task.Visibility.PUBLIC,
+                    assignee_type=Task.AssigneeType.COHORT,
+                    assignee_cohort_id__in=cohort_ids,
+                )
+            # Public personal tasks of students in teacher's groups
+            conditions |= Q(
+                visibility=Task.Visibility.PUBLIC,
+                assignee_type=Task.AssigneeType.USER,
+                assignee_user__role=User.Role.STUDENT,
+                assignee_user__group_id__in=group_ids,
+            )
+
     return qs.filter(conditions).distinct()
 
 
@@ -236,10 +275,8 @@ def wrap_tasks_for_display(user, tasks):
     for task in tasks:
         wrapped.append({
             'task': task,
-            'can_view_content': can_view_task(user, task),
             'can_update': can_update_task(user, task),
             'can_delete': can_delete_task(user, task),
             'can_change_status': can_change_task_status(user, task),
-            'display_title': task.title,
         })
     return wrapped

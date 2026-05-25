@@ -14,7 +14,7 @@ from .forms import (
     TeacherGroupTaskCreateForm,
     TeacherPersonalTaskCreateForm,
 )
-from .models import Task, TaskComment, TaskUpdate
+from .models import Task, TaskComment
 from .permissions import (
     can_add_update_to_task,
     can_change_task_status,
@@ -50,16 +50,17 @@ def _get_task_or_404(user, task_id):
 
 @login_required
 def task_list(request):
-    tasks = get_visible_tasks_for_user(request.user)
-    return render(
-        request,
-        'tracker/task_list.html',
-        {
-            'task_rows': wrap_tasks_for_display(request.user, tasks),
-            'can_create_personal_task': can_create_personal_task(request.user),
-            'is_teacher': user_is_teacher(request.user),
-        },
-    )
+    user = request.user
+    visible = get_visible_tasks_for_user(user)
+
+    context = {
+        'can_create_personal_task': can_create_personal_task(user),
+        'is_teacher': user_is_teacher(user),
+        'personal_tasks': wrap_tasks_for_display(user, visible.filter(assignee_type=Task.AssigneeType.USER)),
+        'group_tasks': wrap_tasks_for_display(user, visible.filter(assignee_type=Task.AssigneeType.GROUP)),
+        'cohort_tasks': wrap_tasks_for_display(user, visible.filter(assignee_type=Task.AssigneeType.COHORT)),
+    }
+    return render(request, 'tracker/task_list.html', context)
 
 
 @login_required

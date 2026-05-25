@@ -9,7 +9,7 @@ class Task(models.Model):
     Owner (created_by) controls the task: edit, delete, reassign.
     Assignee (assignee_type + assignee_user/group/cohort) performs the task.
     Private: visible only to owner.
-    Public: visible to owner + assignee.
+    Public: visible to owner + assignee + admin + supervising teacher.
     """
 
     class AssigneeType(models.TextChoices):

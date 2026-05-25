@@ -14,7 +14,7 @@
     <tbody>
         {% for row in task_rows %}
         <tr>
-            <td>{{ row.display_title }}</td>
+            <td>{{ row.task.title }}</td>
             <td>{{ row.task.get_status_display }}</td>
             <td>{{ row.task.get_priority_display }}</td>
             <td>{{ row.task.due_date|default:"—" }}</td>

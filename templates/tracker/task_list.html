@@ -17,5 +17,13 @@
     {% endif %}
 {% endif %}
 
-{% include "tracker/_task_table.html" with task_rows=task_rows %}
+<h3>Personal tasks</h3>
+{% include "tracker/_task_table.html" with task_rows=personal_tasks %}
+
+<h3>Group tasks</h3>
+{% include "tracker/_task_table.html" with task_rows=group_tasks %}
+
+<h3>Cohort tasks</h3>
+{% include "tracker/_task_table.html" with task_rows=cohort_tasks %}
+
 {% endblock %}
