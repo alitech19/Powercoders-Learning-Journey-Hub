@@ -6,15 +6,18 @@ from django.test import TestCase
 from accounts.models import User
 from cohorts.models import Cohort, Group, GroupTeacher
 
-from .models import Feedback, Goal, WeeklyReflection
+from .models import DailyJournalEntry, Feedback, Goal, WeeklyReflection
 from .selectors import (
     get_students_for_teacher,
     get_visible_goals_for_user,
+    get_visible_journal_entries_for_user,
     get_visible_reflections_for_user,
 )
 from .services.permissions import (
     can_create_feedback,
+    can_edit_journal_entry,
     can_view_goal,
+    can_view_journal_entry,
     can_view_reflection,
 )
 
@@ -86,8 +89,14 @@ class GrowthTestBase(TestCase):
         )
         cls.reflection.save()
 
+        cls.journal_entry = DailyJournalEntry.objects.create(
+            student=cls.student,
+            entry_date=today,
+            content='What did I do today?\nStudied forms.\n\nWhat progress did I make?\nCompleted exercise.',
+        )
 
-# ── Goal model tests ─────────────────────────────────────────────────
+
+# -- Goal model tests ------------------------------------------------------
 
 class GoalModelTests(GrowthTestBase):
 
@@ -140,7 +149,7 @@ class GoalModelTests(GrowthTestBase):
         self.assertIsNotNone(goal.achieved_at)
 
 
-# ── Goal visibility ──────────────────────────────────────────────────
+# -- Goal visibility -------------------------------------------------------
 
 class GoalVisibilityTests(GrowthTestBase):
 
@@ -188,7 +197,7 @@ class GoalSelectorTests(GrowthTestBase):
         self.assertEqual(goals.count(), 0)
 
 
-# ── Reflection model tests ───────────────────────────────────────────
+# -- Reflection model tests ------------------------------------------------
 
 class ReflectionModelTests(GrowthTestBase):
 
@@ -213,7 +222,7 @@ class ReflectionModelTests(GrowthTestBase):
             ref.full_clean()
 
 
-# ── Reflection visibility ────────────────────────────────────────────
+# -- Reflection visibility -------------------------------------------------
 
 class ReflectionVisibilityTests(GrowthTestBase):
 
@@ -252,7 +261,77 @@ class ReflectionSelectorTests(GrowthTestBase):
         self.assertEqual(reflections.count(), 0)
 
 
-# ── Feedback permissions ─────────────────────────────────────────────
+# -- Journal model tests ---------------------------------------------------
+
+class JournalModelTests(GrowthTestBase):
+
+    def test_create_journal_entry_with_content(self):
+        entry = DailyJournalEntry.objects.create(
+            student=self.other_student,
+            entry_date=date.today(),
+            content='Wrote tests. All pass.',
+        )
+        self.assertEqual(entry.content, 'Wrote tests. All pass.')
+
+    def test_duplicate_date_raises_integrity_error(self):
+        from django.db import IntegrityError
+        with self.assertRaises(IntegrityError):
+            DailyJournalEntry.objects.create(
+                student=self.student,
+                entry_date=self.journal_entry.entry_date,
+                content='Duplicate.',
+            )
+
+
+# -- Journal visibility ----------------------------------------------------
+
+class JournalVisibilityTests(GrowthTestBase):
+
+    def test_student_sees_own_journal(self):
+        self.assertTrue(can_view_journal_entry(self.student, self.journal_entry))
+
+    def test_teacher_sees_assigned_student_journal(self):
+        self.assertTrue(can_view_journal_entry(self.teacher, self.journal_entry))
+
+    def test_other_student_cannot_see_journal(self):
+        self.assertFalse(
+            can_view_journal_entry(self.other_student, self.journal_entry)
+        )
+
+    def test_unrelated_teacher_cannot_see_journal(self):
+        self.assertFalse(
+            can_view_journal_entry(self.unrelated_teacher, self.journal_entry)
+        )
+
+    def test_admin_sees_journal(self):
+        self.assertTrue(can_view_journal_entry(self.admin, self.journal_entry))
+
+    def test_only_owner_can_edit_journal(self):
+        self.assertTrue(can_edit_journal_entry(self.student, self.journal_entry))
+        self.assertFalse(can_edit_journal_entry(self.teacher, self.journal_entry))
+        self.assertFalse(can_edit_journal_entry(self.admin, self.journal_entry))
+
+
+class JournalSelectorTests(GrowthTestBase):
+
+    def test_student_selector_returns_own_entries(self):
+        entries = get_visible_journal_entries_for_user(self.student)
+        self.assertIn(self.journal_entry, entries)
+
+    def test_teacher_selector_returns_assigned_student_entries(self):
+        entries = get_visible_journal_entries_for_user(self.teacher)
+        self.assertIn(self.journal_entry, entries)
+
+    def test_other_student_selector_returns_nothing(self):
+        entries = get_visible_journal_entries_for_user(self.other_student)
+        self.assertEqual(entries.count(), 0)
+
+    def test_admin_selector_returns_all(self):
+        entries = get_visible_journal_entries_for_user(self.admin)
+        self.assertIn(self.journal_entry, entries)
+
+
+# -- Feedback permissions --------------------------------------------------
 
 class FeedbackPermissionTests(GrowthTestBase):
 
@@ -265,6 +344,9 @@ class FeedbackPermissionTests(GrowthTestBase):
     def test_teacher_can_create_feedback_on_reflection(self):
         self.assertTrue(can_create_feedback(self.teacher, self.reflection))
 
+    def test_teacher_can_create_feedback_on_journal(self):
+        self.assertTrue(can_create_feedback(self.teacher, self.journal_entry))
+
     def test_student_cannot_create_feedback(self):
         self.assertFalse(can_create_feedback(self.student, self.public_goal))
 
@@ -273,14 +355,22 @@ class FeedbackPermissionTests(GrowthTestBase):
             can_create_feedback(self.unrelated_teacher, self.public_goal)
         )
 
+    def test_unrelated_teacher_cannot_create_feedback_on_journal(self):
+        self.assertFalse(
+            can_create_feedback(self.unrelated_teacher, self.journal_entry)
+        )
+
     def test_admin_can_create_feedback_on_public_goal(self):
         self.assertTrue(can_create_feedback(self.admin, self.public_goal))
 
     def test_admin_can_create_feedback_on_reflection(self):
         self.assertTrue(can_create_feedback(self.admin, self.reflection))
 
+    def test_admin_can_create_feedback_on_journal(self):
+        self.assertTrue(can_create_feedback(self.admin, self.journal_entry))
 
-# ── Teacher student mapping ──────────────────────────────────────────
+
+# -- Teacher student mapping -----------------------------------------------
 
 class TeacherStudentMappingTests(GrowthTestBase):
 

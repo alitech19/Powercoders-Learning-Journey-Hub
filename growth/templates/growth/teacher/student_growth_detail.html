@@ -76,5 +76,37 @@
 <p>No reflections.</p>
 {% endif %}
 
+<hr>
+
+<h3>Daily Journal</h3>
+{% if journal_rows %}
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Preview</th>
+            <th>Feedback</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in journal_rows %}
+        <tr>
+            <td><a href="{% url 'growth:journal_detail' pk=row.item.pk %}">{{ row.item.entry_date }}</a></td>
+            <td>{{ row.item.content|truncatewords:12 }}</td>
+            <td>
+                {% if row.can_give_feedback %}
+                    <a href="{% url 'growth:feedback_create' content_type='journal' object_id=row.item.pk %}">Leave feedback</a>
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No journal entries.</p>
+{% endif %}
+
 <p><a href="{% url 'growth:teacher_dashboard' %}">Back to dashboard</a></p>
 {% endblock growth_content %}

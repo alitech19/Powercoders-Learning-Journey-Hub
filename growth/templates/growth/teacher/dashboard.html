@@ -11,10 +11,8 @@
         <tr>
             <th>Student</th>
             <th>Public goals</th>
-            <th>Active public goals</th>
-            <th>Overdue public goals</th>
-            <th>Avg progress</th>
             <th>Latest reflection</th>
+            <th>Latest journal entry</th>
             <th>Feedback count</th>
         </tr>
     </thead>
@@ -23,12 +21,16 @@
         <tr>
             <td><a href="{% url 'growth:student_growth_detail' student_id=row.student.pk %}">{{ row.student.display_name }}</a></td>
             <td>{{ row.public_goals_count }}</td>
-            <td>{{ row.active_public_goals_count }}</td>
-            <td>{{ row.overdue_public_goals_count }}</td>
-            <td>{% if row.avg_progress is not None %}{{ row.avg_progress }}%{% else %}—{% endif %}</td>
             <td>
                 {% if row.latest_reflection %}
                     {{ row.latest_reflection.week_start }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+            <td>
+                {% if row.latest_journal_entry %}
+                    {{ row.latest_journal_entry.entry_date }}
                 {% else %}
                     —
                 {% endif %}

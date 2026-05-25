@@ -1,0 +1,40 @@
+{% extends "growth/base.html" %}
+
+{% block title %}Journal {{ entry.entry_date }} — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>Journal Entry: {{ entry.entry_date }}</h2>
+
+<p><strong>Student:</strong> {{ entry.student.display_name }}</p>
+<p><strong>Created:</strong> {{ entry.created_at }}</p>
+<p><strong>Updated:</strong> {{ entry.updated_at }}</p>
+
+<div>
+    {{ entry.content|linebreaksbr }}
+</div>
+
+{% if can_edit %}
+    <p><a href="{% url 'growth:journal_edit' pk=entry.pk %}">Edit</a></p>
+{% endif %}
+
+<hr>
+
+<h3>Feedback</h3>
+{% if feedback_list %}
+    {% for fb in feedback_list %}
+    <div>
+        <p><strong>{{ fb.author.display_name }}</strong> ({{ fb.created_at }}):</p>
+        <p>{{ fb.message }}</p>
+    </div>
+    <hr>
+    {% endfor %}
+{% else %}
+    <p>No feedback yet.</p>
+{% endif %}
+
+{% if can_give_feedback %}
+    <p><a href="{% url 'growth:feedback_create' content_type='journal' object_id=entry.pk %}">Leave feedback</a></p>
+{% endif %}
+
+<p><a href="{% url 'growth:journal_list' %}">Back to journal</a></p>
+{% endblock growth_content %}

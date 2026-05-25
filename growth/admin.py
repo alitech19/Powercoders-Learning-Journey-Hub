@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Feedback, Goal, WeeklyReflection
+from .models import DailyJournalEntry, Feedback, Goal, WeeklyReflection
 
 
 @admin.register(Goal)
@@ -28,6 +28,23 @@ class WeeklyReflectionAdmin(admin.ModelAdmin):
     )
     autocomplete_fields = ('student',)
     readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(DailyJournalEntry)
+class DailyJournalEntryAdmin(admin.ModelAdmin):
+    list_display = (
+        'student', 'entry_date', 'display_content', 'created_at',
+    )
+    list_filter = ('entry_date',)
+    search_fields = (
+        'student__display_name', 'student__email',
+    )
+    autocomplete_fields = ('student',)
+    readonly_fields = ('created_at', 'updated_at')
+
+    @admin.display(description='Content')
+    def display_content(self, obj):
+        return obj.content[:80]
 
 
 @admin.register(Feedback)

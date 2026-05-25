@@ -12,10 +12,10 @@ from tracker.permissions import (
     user_is_teacher,
 )
 
-from ..models import Goal, WeeklyReflection
+from ..models import DailyJournalEntry, Goal, WeeklyReflection
 
 
-# ── helpers ──────────────────────────────────────────────────────────
+# -- helpers ---------------------------------------------------------------
 
 def _teacher_supervises_student(user, student):
     """True when the teacher is assigned to the student's group."""
@@ -24,7 +24,7 @@ def _teacher_supervises_student(user, student):
     return student.group_id in get_teacher_group_ids(user)
 
 
-# ── Goal permissions ─────────────────────────────────────────────────
+# -- Goal permissions ------------------------------------------------------
 
 def can_view_goal(user, goal):
     if not user.is_authenticated:
@@ -41,7 +41,6 @@ def can_view_goal(user, goal):
 
 
 def can_edit_goal(user, goal):
-    """Only the student-owner can edit their own goal."""
     return user.is_authenticated and goal.student_id == user.pk
 
 
@@ -57,7 +56,7 @@ def can_delete_goal(user, goal):
     return user.is_authenticated and goal.student_id == user.pk
 
 
-# ── Reflection permissions ───────────────────────────────────────────
+# -- Reflection permissions ------------------------------------------------
 
 def can_view_reflection(user, reflection):
     if not user.is_authenticated:
@@ -75,7 +74,25 @@ def can_edit_reflection(user, reflection):
     return user.is_authenticated and reflection.student_id == user.pk
 
 
-# ── Feedback permissions ─────────────────────────────────────────────
+# -- Journal permissions ---------------------------------------------------
+
+def can_view_journal_entry(user, entry):
+    if not user.is_authenticated:
+        return False
+    if entry.student_id == user.pk:
+        return True
+    if user_is_admin(user):
+        return True
+    if user_is_teacher(user) and _teacher_supervises_student(user, entry.student):
+        return True
+    return False
+
+
+def can_edit_journal_entry(user, entry):
+    return user.is_authenticated and entry.student_id == user.pk
+
+
+# -- Feedback permissions --------------------------------------------------
 
 def can_view_feedback(user, feedback):
     if not user.is_authenticated:
@@ -103,4 +120,6 @@ def can_create_feedback(user, target):
         return can_view_goal(user, target)
     if isinstance(target, WeeklyReflection):
         return can_view_reflection(user, target)
+    if isinstance(target, DailyJournalEntry):
+        return can_view_journal_entry(user, target)
     return False

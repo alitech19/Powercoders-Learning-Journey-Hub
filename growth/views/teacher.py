@@ -5,7 +5,8 @@ from django.shortcuts import get_object_or_404, render
 from accounts.models import User
 from tracker.permissions import user_is_admin, user_is_teacher
 
-from ..selectors import get_students_for_teacher, get_visible_goals_for_user
+from ..models import DailyJournalEntry, Goal, WeeklyReflection
+from ..selectors import get_students_for_teacher
 from ..services.dashboard import get_growth_summary_for_student
 from ..services.permissions import can_create_feedback
 
@@ -44,7 +45,6 @@ def student_growth_detail(request, student_id):
         if student.pk not in allowed_ids:
             raise Http404
 
-    from ..models import Goal, WeeklyReflection
     goals = Goal.objects.filter(
         student=student, visibility=Goal.Visibility.PUBLIC,
     ).order_by('-updated_at')
@@ -53,22 +53,26 @@ def student_growth_detail(request, student_id):
         student=student,
     ).order_by('-week_start')
 
-    goal_fb = []
-    for g in goals:
-        goal_fb.append({
-            'item': g,
-            'can_give_feedback': can_create_feedback(user, g),
-        })
+    journal_entries = DailyJournalEntry.objects.filter(
+        student=student,
+    ).order_by('-entry_date')
 
-    refl_fb = []
-    for r in reflections:
-        refl_fb.append({
-            'item': r,
-            'can_give_feedback': can_create_feedback(user, r),
-        })
+    goal_fb = [
+        {'item': g, 'can_give_feedback': can_create_feedback(user, g)}
+        for g in goals
+    ]
+    refl_fb = [
+        {'item': r, 'can_give_feedback': can_create_feedback(user, r)}
+        for r in reflections
+    ]
+    journal_fb = [
+        {'item': j, 'can_give_feedback': can_create_feedback(user, j)}
+        for j in journal_entries
+    ]
 
     return render(request, 'growth/teacher/student_growth_detail.html', {
         'student': student,
         'goal_rows': goal_fb,
         'reflection_rows': refl_fb,
+        'journal_rows': journal_fb,
     })

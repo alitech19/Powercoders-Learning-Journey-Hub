@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 
-from .models import Feedback, Goal, WeeklyReflection
+from .models import DailyJournalEntry, Feedback, Goal, WeeklyReflection
 
 DATE_WIDGET = forms.DateInput(attrs={'type': 'date'})
 
@@ -14,12 +14,20 @@ REFLECTION_INITIAL_CONTENT = (
 )
 
 GOAL_DESCRIPTION_PLACEHOLDER = (
-    'I want to understand Django permissions well enough to protect views '
-    'and querysets for students, teachers, and admins. I will know I achieved '
-    'it when I can implement and test the access rules without help. This is '
-    'realistic because I already understand models and views. It is relevant '
-    'because the Powercoders Hub needs safe role-based access. I want to '
-    'complete this by the end of Week 4.'
+    'I want to understand how to build a small feature from start to finish: '
+    'read the requirements, write the code, test the result, and explain how '
+    'it works. I will know I achieved this when I can complete a simple '
+    'feature without step-by-step help and describe the main decisions I '
+    'made. This is realistic because I already know basic programming '
+    'concepts. It is relevant because building complete features is an '
+    'important skill for software development. Target date: end of this week.'
+)
+
+JOURNAL_INITIAL_CONTENT = (
+    'What did I do today?\n\n'
+    'What progress did I make?\n\n'
+    'What blocked me?\n\n'
+    'What should I do next?\n'
 )
 
 
@@ -111,6 +119,49 @@ class ReflectionForm(forms.ModelForm):
                 self.add_error(
                     'week_start',
                     'You already have a reflection for this week.',
+                )
+
+        return cleaned
+
+
+class DailyJournalEntryForm(forms.ModelForm):
+    class Meta:
+        model = DailyJournalEntry
+        fields = ('entry_date', 'content')
+        widgets = {
+            'entry_date': DATE_WIDGET,
+            'content': forms.Textarea(attrs={'rows': 12, 'cols': 70}),
+        }
+
+    def __init__(self, *args, student=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._student = student
+        if not self.instance.pk and not self.data:
+            if not self.initial.get('entry_date'):
+                self.initial['entry_date'] = timezone.now().date()
+            if not self.initial.get('content'):
+                self.initial['content'] = JOURNAL_INITIAL_CONTENT
+
+    def clean_content(self):
+        content = self.cleaned_data.get('content', '')
+        if not content.strip():
+            raise forms.ValidationError('Content is required.')
+        return content
+
+    def clean(self):
+        cleaned = super().clean()
+        entry_date = cleaned.get('entry_date')
+
+        if entry_date and self._student:
+            qs = DailyJournalEntry.objects.filter(
+                student=self._student, entry_date=entry_date,
+            )
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                self.add_error(
+                    'entry_date',
+                    'You already have a journal entry for this date.',
                 )
 
         return cleaned

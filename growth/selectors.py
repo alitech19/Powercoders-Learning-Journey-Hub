@@ -1,7 +1,7 @@
 """
 Permission-aware querysets for the growth app.
 
-Reuses the role helpers and teacher–group mapping from tracker.permissions
+Reuses the role helpers and teacher-group mapping from tracker.permissions
 so that there is a single source of truth for role checks and group assignments.
 """
 
@@ -12,7 +12,7 @@ from tracker.permissions import (
     user_is_teacher,
 )
 
-from .models import Feedback, Goal, WeeklyReflection
+from .models import DailyJournalEntry, Feedback, Goal, WeeklyReflection
 
 
 def get_students_for_teacher(user):
@@ -22,10 +22,10 @@ def get_students_for_teacher(user):
 
 def get_visible_goals_for_user(user):
     """
-    student  → own goals (private + public)
-    teacher  → public goals of assigned students
-    admin    → all public goals
-    other    → none
+    student  -> own goals (private + public)
+    teacher  -> public goals of assigned students
+    admin    -> all public goals
+    other    -> none
     """
     qs = Goal.objects.select_related('student')
 
@@ -47,10 +47,10 @@ def get_visible_goals_for_user(user):
 
 def get_visible_reflections_for_user(user):
     """
-    student  → own reflections
-    teacher  → reflections of assigned students
-    admin    → all reflections
-    other    → none
+    student  -> own reflections
+    teacher  -> reflections of assigned students
+    admin    -> all reflections
+    other    -> none
     """
     qs = WeeklyReflection.objects.select_related('student')
 
@@ -67,12 +67,34 @@ def get_visible_reflections_for_user(user):
     return qs.none()
 
 
+def get_visible_journal_entries_for_user(user):
+    """
+    student  -> own journal entries
+    teacher  -> journal entries of assigned students
+    admin    -> all journal entries
+    other    -> none
+    """
+    qs = DailyJournalEntry.objects.select_related('student')
+
+    if user_is_student(user):
+        return qs.filter(student=user)
+
+    if user_is_teacher(user):
+        student_ids = get_students_for_teacher(user).values_list('pk', flat=True)
+        return qs.filter(student_id__in=student_ids)
+
+    if user_is_admin(user):
+        return qs.all()
+
+    return qs.none()
+
+
 def get_visible_feedback_for_user(user):
     """
-    student  → feedback received by the student
-    teacher  → feedback for assigned students
-    admin    → all feedback
-    other    → none
+    student  -> feedback received by the student
+    teacher  -> feedback for assigned students
+    admin    -> all feedback
+    other    -> none
     """
     qs = Feedback.objects.select_related('author', 'student', 'content_type')
 

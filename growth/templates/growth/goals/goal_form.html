@@ -5,14 +5,17 @@
 {% block growth_content %}
 <h2>{{ title }}</h2>
 
-<p>Write your goal as a SMART goal. A good goal should explain:</p>
-<ul>
-    <li>What exactly do you want to achieve?</li>
-    <li>How will you know that you achieved it?</li>
-    <li>Why is it realistic for you now?</li>
-    <li>Why is it relevant for your learning journey?</li>
-    <li>By when do you want to achieve it?</li>
-</ul>
+<p>Write the goal as a SMART learning goal. A useful goal should describe
+what should be learned or improved, how success can be measured, why the goal is
+realistic for the current skill level, why it is relevant for learning programming,
+and by when it should be completed.</p>
+
+<p><strong>Example:</strong> "I want to understand how to build a small feature from
+start to finish: read the requirements, write the code, test the result, and explain
+how it works. I will know I achieved this when I can complete a simple feature without
+step-by-step help and describe the main decisions I made. This is realistic because I
+already know basic programming concepts. It is relevant because building complete
+features is an important skill for software development. Target date: end of this week."</p>
 
 <form method="post">
     {% csrf_token %}

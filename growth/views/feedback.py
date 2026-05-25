@@ -5,12 +5,19 @@ from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
 from ..forms import FeedbackForm
-from ..models import Goal, WeeklyReflection
+from ..models import DailyJournalEntry, Goal, WeeklyReflection
 from ..services.permissions import can_create_feedback
 
 MODEL_MAP = {
     'goal': Goal,
     'reflection': WeeklyReflection,
+    'journal': DailyJournalEntry,
+}
+
+REDIRECT_MAP = {
+    Goal: 'growth:goal_detail',
+    WeeklyReflection: 'growth:reflection_detail',
+    DailyJournalEntry: 'growth:journal_detail',
 }
 
 
@@ -42,9 +49,10 @@ def feedback_create(request, content_type, object_id):
             fb.save()
             messages.success(request, 'Feedback submitted.')
 
-            if isinstance(target, Goal):
-                return redirect('growth:goal_detail', pk=target.pk)
-            return redirect('growth:reflection_detail', pk=target.pk)
+            redirect_name = REDIRECT_MAP.get(type(target))
+            if redirect_name:
+                return redirect(redirect_name, pk=target.pk)
+            return redirect('growth:goal_list')
     else:
         form = FeedbackForm()
 

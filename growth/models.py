@@ -125,6 +125,38 @@ class WeeklyReflection(models.Model):
         super().save(*args, **kwargs)
 
 
+class DailyJournalEntry(models.Model):
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='journal_entries',
+    )
+    entry_date = models.DateField()
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    feedback = GenericRelation(
+        'growth.Feedback',
+        content_type_field='content_type',
+        object_id_field='object_id',
+    )
+
+    class Meta:
+        ordering = ['-entry_date']
+        verbose_name = 'daily journal entry'
+        verbose_name_plural = 'daily journal entries'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['student', 'entry_date'],
+                name='unique_journal_entry_per_student_per_day',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.student} — {self.entry_date}'
+
+
 class Feedback(models.Model):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,

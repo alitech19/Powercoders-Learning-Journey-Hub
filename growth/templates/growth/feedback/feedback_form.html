@@ -40,6 +40,8 @@
         <a href="{% url 'growth:goal_detail' pk=target.pk %}">Cancel</a>
     {% elif content_type_label == 'reflection' %}
         <a href="{% url 'growth:reflection_detail' pk=target.pk %}">Cancel</a>
+    {% elif content_type_label == 'journal' %}
+        <a href="{% url 'growth:journal_detail' pk=target.pk %}">Cancel</a>
     {% endif %}
 </p>
 {% endblock growth_content %}

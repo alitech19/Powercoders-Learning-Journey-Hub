@@ -2,6 +2,12 @@
 
 {% block content %}
 <nav>
+    {% if "/growth/journal/" in request.path %}
+        <strong>Daily Journal</strong>
+    {% else %}
+        <a href="{% url 'growth:journal_list' %}">Daily Journal</a>
+    {% endif %}
+    |
     {% if "/growth/goals/" in request.path %}
         <strong>SMART Goals</strong>
     {% else %}
