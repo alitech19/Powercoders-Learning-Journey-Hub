@@ -1,0 +1,17 @@
+{% extends "growth/base.html" %}
+
+{% block title %}Delete habit — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>Delete habit</h2>
+
+<p>Are you sure you want to delete this habit?</p>
+<p><strong>{{ habit.title }}</strong></p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirm delete</button>
+</form>
+
+<p><a href="{% url 'growth:habit_list' %}">Cancel</a></p>
+{% endblock growth_content %}

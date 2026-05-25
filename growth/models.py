@@ -157,6 +157,82 @@ class DailyJournalEntry(models.Model):
         return f'{self.student} — {self.entry_date}'
 
 
+class Habit(models.Model):
+    class Status(models.TextChoices):
+        ACTIVE = 'active', 'Active'
+        COMPLETED = 'completed', 'Completed'
+
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='habits',
+    )
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    target_minutes = models.PositiveSmallIntegerField(null=True, blank=True)
+    target_days_per_week = models.PositiveSmallIntegerField(
+        default=7,
+        validators=[MinValueValidator(1), MaxValueValidator(7)],
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+    )
+    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_weekly_streak = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    feedback = GenericRelation(
+        'growth.Feedback',
+        content_type_field='content_type',
+        object_id_field='object_id',
+    )
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def is_active(self):
+        return self.status == self.Status.ACTIVE
+
+
+class HabitLog(models.Model):
+    class Status(models.TextChoices):
+        DONE = 'done', 'Done'
+        NOT_DONE = 'not_done', 'Not done'
+
+    habit = models.ForeignKey(
+        Habit,
+        on_delete=models.CASCADE,
+        related_name='logs',
+    )
+    date = models.DateField()
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+    )
+    note = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['habit', 'date'],
+                name='unique_habit_log_per_day',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.habit.title} — {self.date} — {self.get_status_display()}'
+
+
 class Feedback(models.Model):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,

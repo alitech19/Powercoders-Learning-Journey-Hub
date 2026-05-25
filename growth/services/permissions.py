@@ -12,7 +12,7 @@ from tracker.permissions import (
     user_is_teacher,
 )
 
-from ..models import DailyJournalEntry, Goal, WeeklyReflection
+from ..models import DailyJournalEntry, Goal, Habit, WeeklyReflection
 
 
 # -- helpers ---------------------------------------------------------------
@@ -92,6 +92,60 @@ def can_edit_journal_entry(user, entry):
     return user.is_authenticated and entry.student_id == user.pk
 
 
+# -- Habit permissions -----------------------------------------------------
+
+def can_view_habit(user, habit):
+    if not user.is_authenticated:
+        return False
+    if habit.student_id == user.pk:
+        return True
+    if user_is_admin(user):
+        return True
+    if user_is_teacher(user) and _teacher_supervises_student(user, habit.student):
+        return True
+    return False
+
+
+def can_edit_habit(user, habit):
+    return (
+        user.is_authenticated
+        and habit.student_id == user.pk
+        and habit.status == Habit.Status.ACTIVE
+    )
+
+
+def can_delete_habit(user, habit):
+    return (
+        user.is_authenticated
+        and habit.student_id == user.pk
+        and habit.status == Habit.Status.COMPLETED
+    )
+
+
+def can_reactivate_habit(user, habit):
+    return (
+        user.is_authenticated
+        and habit.student_id == user.pk
+        and habit.status == Habit.Status.COMPLETED
+    )
+
+
+def can_log_habit(user, habit):
+    return (
+        user.is_authenticated
+        and habit.student_id == user.pk
+        and habit.status == Habit.Status.ACTIVE
+    )
+
+
+def can_complete_habit(user, habit):
+    return (
+        user.is_authenticated
+        and habit.student_id == user.pk
+        and habit.status == Habit.Status.ACTIVE
+    )
+
+
 # -- Feedback permissions --------------------------------------------------
 
 def can_view_feedback(user, feedback):
@@ -122,4 +176,6 @@ def can_create_feedback(user, target):
         return can_view_reflection(user, target)
     if isinstance(target, DailyJournalEntry):
         return can_view_journal_entry(user, target)
+    if isinstance(target, Habit):
+        return can_view_habit(user, target)
     return False

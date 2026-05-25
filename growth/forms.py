@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 
-from .models import DailyJournalEntry, Feedback, Goal, WeeklyReflection
+from .models import DailyJournalEntry, Feedback, Goal, Habit, WeeklyReflection
 
 DATE_WIDGET = forms.DateInput(attrs={'type': 'date'})
 
@@ -165,6 +165,40 @@ class DailyJournalEntryForm(forms.ModelForm):
                 )
 
         return cleaned
+
+
+class HabitForm(forms.ModelForm):
+    class Meta:
+        model = Habit
+        fields = (
+            'title', 'description', 'target_minutes',
+            'target_days_per_week',
+        )
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3, 'cols': 70}),
+            'target_minutes': forms.NumberInput(attrs={'min': 1}),
+            'target_days_per_week': forms.NumberInput(attrs={'min': 1, 'max': 7}),
+        }
+        labels = {
+            'target_minutes': 'Minutes per day (optional)',
+            'target_days_per_week': 'Days per week',
+        }
+
+    def clean_target_minutes(self):
+        value = self.cleaned_data.get('target_minutes')
+        if value is not None and value < 1:
+            raise forms.ValidationError(
+                'Target minutes must be at least 1.'
+            )
+        return value
+
+    def clean_target_days_per_week(self):
+        value = self.cleaned_data.get('target_days_per_week')
+        if value is not None and (value < 1 or value > 7):
+            raise forms.ValidationError(
+                'Days per week must be between 1 and 7.'
+            )
+        return value
 
 
 class FeedbackForm(forms.ModelForm):

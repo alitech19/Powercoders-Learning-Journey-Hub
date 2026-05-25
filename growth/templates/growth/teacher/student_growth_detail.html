@@ -8,6 +8,106 @@
 
 <hr>
 
+<h3>Daily Journal</h3>
+{% if journal_rows %}
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Preview</th>
+            <th>Feedback</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in journal_rows %}
+        <tr>
+            <td><a href="{% url 'growth:journal_detail' pk=row.item.pk %}">{{ row.item.entry_date }}</a></td>
+            <td>{{ row.item.content|truncatewords:12 }}</td>
+            <td>
+                {% if row.can_give_feedback %}
+                    <a href="{% url 'growth:feedback_create' content_type='journal' object_id=row.item.pk %}">Leave feedback</a>
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No journal entries.</p>
+{% endif %}
+
+<hr>
+
+<h3>Habits</h3>
+{% if habit_rows %}
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Min/day</th>
+            <th>Days/week</th>
+            <th>Done this week</th>
+            <th>Weekly streak</th>
+            <th>Feedback</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in habit_rows %}
+        <tr>
+            <td>{{ row.item.title }}</td>
+            <td>{{ row.item.get_status_display }}</td>
+            <td>{% if row.item.target_minutes %}{{ row.item.target_minutes }}{% else %}—{% endif %}</td>
+            <td>{{ row.item.target_days_per_week }}</td>
+            <td>{{ row.done_this_week }} / {{ row.item.target_days_per_week }}</td>
+            <td>{{ row.streak }} week{{ row.streak|pluralize }}</td>
+            <td>
+                {% if row.can_give_feedback %}
+                    <a href="{% url 'growth:feedback_create' content_type='habit' object_id=row.item.pk %}">Leave feedback</a>
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% for row in habit_rows %}
+    <h4>{{ row.item.title }} — This week</h4>
+    <table border="1" cellpadding="4">
+        <thead>
+            <tr>
+                {% for day in row.week_table %}
+                    <th>{{ day.weekday }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% for day in row.week_table %}
+                <td>
+                    {{ day.date }}<br>
+                    {% if day.log %}
+                        {{ day.log.get_status_display }}
+                    {% else %}
+                        No entry
+                    {% endif %}
+                </td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+{% endfor %}
+
+{% else %}
+<p>No habits.</p>
+{% endif %}
+
+<hr>
+
 <h3>Public SMART Goals</h3>
 {% if goal_rows %}
 <table border="1" cellpadding="4">
@@ -74,38 +174,6 @@
 </table>
 {% else %}
 <p>No reflections.</p>
-{% endif %}
-
-<hr>
-
-<h3>Daily Journal</h3>
-{% if journal_rows %}
-<table border="1" cellpadding="4">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Preview</th>
-            <th>Feedback</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for row in journal_rows %}
-        <tr>
-            <td><a href="{% url 'growth:journal_detail' pk=row.item.pk %}">{{ row.item.entry_date }}</a></td>
-            <td>{{ row.item.content|truncatewords:12 }}</td>
-            <td>
-                {% if row.can_give_feedback %}
-                    <a href="{% url 'growth:feedback_create' content_type='journal' object_id=row.item.pk %}">Leave feedback</a>
-                {% else %}
-                    —
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>No journal entries.</p>
 {% endif %}
 
 <p><a href="{% url 'growth:teacher_dashboard' %}">Back to dashboard</a></p>

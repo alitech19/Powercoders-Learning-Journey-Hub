@@ -12,7 +12,14 @@ from tracker.permissions import (
     user_is_teacher,
 )
 
-from .models import DailyJournalEntry, Feedback, Goal, WeeklyReflection
+from .models import (
+    DailyJournalEntry,
+    Feedback,
+    Goal,
+    Habit,
+    HabitLog,
+    WeeklyReflection,
+)
 
 
 def get_students_for_teacher(user):
@@ -82,6 +89,50 @@ def get_visible_journal_entries_for_user(user):
     if user_is_teacher(user):
         student_ids = get_students_for_teacher(user).values_list('pk', flat=True)
         return qs.filter(student_id__in=student_ids)
+
+    if user_is_admin(user):
+        return qs.all()
+
+    return qs.none()
+
+
+def get_visible_habits_for_user(user):
+    """
+    student  -> own habits
+    teacher  -> habits of assigned students
+    admin    -> all habits
+    other    -> none
+    """
+    qs = Habit.objects.select_related('student')
+
+    if user_is_student(user):
+        return qs.filter(student=user)
+
+    if user_is_teacher(user):
+        student_ids = get_students_for_teacher(user).values_list('pk', flat=True)
+        return qs.filter(student_id__in=student_ids)
+
+    if user_is_admin(user):
+        return qs.all()
+
+    return qs.none()
+
+
+def get_visible_habit_logs_for_user(user):
+    """
+    student  -> logs for own habits
+    teacher  -> logs for habits of assigned students
+    admin    -> all logs
+    other    -> none
+    """
+    qs = HabitLog.objects.select_related('habit__student')
+
+    if user_is_student(user):
+        return qs.filter(habit__student=user)
+
+    if user_is_teacher(user):
+        student_ids = get_students_for_teacher(user).values_list('pk', flat=True)
+        return qs.filter(habit__student_id__in=student_ids)
 
     if user_is_admin(user):
         return qs.all()

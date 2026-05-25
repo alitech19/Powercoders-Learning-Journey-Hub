@@ -10,9 +10,12 @@
     <thead>
         <tr>
             <th>Student</th>
+            <th>Latest journal</th>
+            <th>Active habits</th>
+            <th>Habit weekly progress</th>
+            <th>Completed habits</th>
             <th>Public goals</th>
             <th>Latest reflection</th>
-            <th>Latest journal entry</th>
             <th>Feedback count</th>
         </tr>
     </thead>
@@ -20,17 +23,20 @@
         {% for row in rows %}
         <tr>
             <td><a href="{% url 'growth:student_growth_detail' student_id=row.student.pk %}">{{ row.student.display_name }}</a></td>
-            <td>{{ row.public_goals_count }}</td>
             <td>
-                {% if row.latest_reflection %}
-                    {{ row.latest_reflection.week_start }}
+                {% if row.latest_journal_entry %}
+                    {{ row.latest_journal_entry.entry_date }}
                 {% else %}
                     —
                 {% endif %}
             </td>
+            <td>{{ row.active_habits_count }}</td>
+            <td>{{ row.habits_on_track }}/{{ row.active_habits_count }} on track</td>
+            <td>{{ row.completed_habits_count }}</td>
+            <td>{{ row.public_goals_count }}</td>
             <td>
-                {% if row.latest_journal_entry %}
-                    {{ row.latest_journal_entry.entry_date }}
+                {% if row.latest_reflection %}
+                    {{ row.latest_reflection.week_start }}
                 {% else %}
                     —
                 {% endif %}

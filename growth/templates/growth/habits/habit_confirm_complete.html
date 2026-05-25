@@ -1,0 +1,26 @@
+{% extends "growth/base.html" %}
+
+{% block title %}Complete habit — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>Complete habit</h2>
+
+<p>Are you sure you want to mark this habit as completed?</p>
+
+<p><strong>{{ habit.title }}</strong></p>
+{% if habit.description %}
+    <p>{{ habit.description|truncatewords:20 }}</p>
+{% endif %}
+{% if habit.target_minutes %}
+    <p>Minutes per day: {{ habit.target_minutes }}</p>
+{% endif %}
+<p>Days per week: {{ habit.target_days_per_week }}</p>
+<p>Current weekly streak: {{ streak }} week{{ streak|pluralize }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirm complete</button>
+</form>
+
+<p><a href="{% url 'growth:habit_list' %}">Cancel</a></p>
+{% endblock growth_content %}

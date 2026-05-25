@@ -8,6 +8,12 @@
         <a href="{% url 'growth:journal_list' %}">Daily Journal</a>
     {% endif %}
     |
+    {% if "/growth/habits/" in request.path %}
+        <strong>Habits</strong>
+    {% else %}
+        <a href="{% url 'growth:habit_list' %}">Habits</a>
+    {% endif %}
+    |
     {% if "/growth/goals/" in request.path %}
         <strong>SMART Goals</strong>
     {% else %}

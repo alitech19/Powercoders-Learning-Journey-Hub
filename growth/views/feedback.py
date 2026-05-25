@@ -5,13 +5,14 @@ from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
 from ..forms import FeedbackForm
-from ..models import DailyJournalEntry, Goal, WeeklyReflection
+from ..models import DailyJournalEntry, Goal, Habit, WeeklyReflection
 from ..services.permissions import can_create_feedback
 
 MODEL_MAP = {
     'goal': Goal,
     'reflection': WeeklyReflection,
     'journal': DailyJournalEntry,
+    'habit': Habit,
 }
 
 REDIRECT_MAP = {
@@ -52,6 +53,8 @@ def feedback_create(request, content_type, object_id):
             redirect_name = REDIRECT_MAP.get(type(target))
             if redirect_name:
                 return redirect(redirect_name, pk=target.pk)
+            if isinstance(target, Habit):
+                return redirect('growth:habit_list')
             return redirect('growth:goal_list')
     else:
         form = FeedbackForm()

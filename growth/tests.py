@@ -1,22 +1,45 @@
 from datetime import date, timedelta
 
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.test import TestCase
+from django.utils import timezone
 
 from accounts.models import User
 from cohorts.models import Cohort, Group, GroupTeacher
 
-from .models import DailyJournalEntry, Feedback, Goal, WeeklyReflection
+from .models import (
+    DailyJournalEntry,
+    Feedback,
+    Goal,
+    Habit,
+    HabitLog,
+    WeeklyReflection,
+)
 from .selectors import (
     get_students_for_teacher,
     get_visible_goals_for_user,
+    get_visible_habits_for_user,
     get_visible_journal_entries_for_user,
     get_visible_reflections_for_user,
 )
+from .services.habits import (
+    get_current_weekly_streak,
+    get_done_count_for_week,
+    get_week_end,
+    get_week_start,
+    is_habit_week_successful,
+)
 from .services.permissions import (
+    can_complete_habit,
     can_create_feedback,
+    can_delete_habit,
+    can_edit_habit,
     can_edit_journal_entry,
+    can_log_habit,
+    can_reactivate_habit,
     can_view_goal,
+    can_view_habit,
     can_view_journal_entry,
     can_view_reflection,
 )
@@ -92,7 +115,15 @@ class GrowthTestBase(TestCase):
         cls.journal_entry = DailyJournalEntry.objects.create(
             student=cls.student,
             entry_date=today,
-            content='What did I do today?\nStudied forms.\n\nWhat progress did I make?\nCompleted exercise.',
+            content='What did I do today?\nStudied forms.',
+        )
+
+        cls.habit = Habit.objects.create(
+            student=cls.student,
+            title='Practice English 20 min',
+            description='Daily English practice.',
+            target_minutes=20,
+            target_days_per_week=3,
         )
 
 
@@ -274,7 +305,6 @@ class JournalModelTests(GrowthTestBase):
         self.assertEqual(entry.content, 'Wrote tests. All pass.')
 
     def test_duplicate_date_raises_integrity_error(self):
-        from django.db import IntegrityError
         with self.assertRaises(IntegrityError):
             DailyJournalEntry.objects.create(
                 student=self.student,
@@ -331,6 +361,331 @@ class JournalSelectorTests(GrowthTestBase):
         self.assertIn(self.journal_entry, entries)
 
 
+# -- Habit model tests -----------------------------------------------------
+
+class HabitModelTests(GrowthTestBase):
+
+    def test_create_habit(self):
+        habit = Habit.objects.create(
+            student=self.student,
+            title='Read docs 15 min',
+            target_minutes=15,
+        )
+        self.assertEqual(habit.status, Habit.Status.ACTIVE)
+        self.assertIsNone(habit.completed_at)
+        self.assertEqual(habit.target_days_per_week, 7)
+        self.assertEqual(habit.completed_weekly_streak, 0)
+
+    def test_create_habit_with_target_days(self):
+        habit = Habit.objects.create(
+            student=self.student,
+            title='Solve exercises',
+            target_days_per_week=5,
+        )
+        self.assertEqual(habit.target_days_per_week, 5)
+
+    def test_mark_habit_completed(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.completed_at = timezone.now()
+        self.habit.save()
+        self.habit.refresh_from_db()
+        self.assertEqual(self.habit.status, Habit.Status.COMPLETED)
+        self.assertIsNotNone(self.habit.completed_at)
+
+    def test_target_days_per_week_cannot_be_zero(self):
+        habit = Habit(
+            student=self.student,
+            title='Bad habit',
+            target_days_per_week=0,
+        )
+        with self.assertRaises(ValidationError):
+            habit.full_clean()
+
+    def test_target_days_per_week_cannot_exceed_7(self):
+        habit = Habit(
+            student=self.student,
+            title='Bad habit',
+            target_days_per_week=8,
+        )
+        with self.assertRaises(ValidationError):
+            habit.full_clean()
+
+    def test_target_minutes_positive_if_provided(self):
+        habit = Habit(
+            student=self.student,
+            title='Bad habit',
+            target_minutes=0,
+        )
+        habit.full_clean()
+
+
+class HabitLogTests(GrowthTestBase):
+
+    def test_create_habit_log(self):
+        log = HabitLog.objects.create(
+            habit=self.habit,
+            date=date.today(),
+            status=HabitLog.Status.DONE,
+        )
+        self.assertEqual(log.status, HabitLog.Status.DONE)
+
+    def test_duplicate_log_same_day_raises_integrity_error(self):
+        HabitLog.objects.create(
+            habit=self.habit,
+            date=date.today(),
+            status=HabitLog.Status.DONE,
+        )
+        with self.assertRaises(IntegrityError):
+            HabitLog.objects.create(
+                habit=self.habit,
+                date=date.today(),
+                status=HabitLog.Status.NOT_DONE,
+            )
+
+    def test_update_or_create_updates_existing_log(self):
+        HabitLog.objects.create(
+            habit=self.habit,
+            date=date.today(),
+            status=HabitLog.Status.DONE,
+        )
+        log, created = HabitLog.objects.update_or_create(
+            habit=self.habit,
+            date=date.today(),
+            defaults={'status': HabitLog.Status.NOT_DONE},
+        )
+        self.assertFalse(created)
+        self.assertEqual(log.status, HabitLog.Status.NOT_DONE)
+
+
+# -- Habit visibility ------------------------------------------------------
+
+class HabitVisibilityTests(GrowthTestBase):
+
+    def test_student_sees_own_habit(self):
+        self.assertTrue(can_view_habit(self.student, self.habit))
+
+    def test_teacher_sees_assigned_student_habit(self):
+        self.assertTrue(can_view_habit(self.teacher, self.habit))
+
+    def test_other_student_cannot_see_habit(self):
+        self.assertFalse(can_view_habit(self.other_student, self.habit))
+
+    def test_unrelated_teacher_cannot_see_habit(self):
+        self.assertFalse(can_view_habit(self.unrelated_teacher, self.habit))
+
+    def test_admin_sees_habit(self):
+        self.assertTrue(can_view_habit(self.admin, self.habit))
+
+
+class HabitPermissionTests(GrowthTestBase):
+
+    def test_owner_can_edit_active_habit(self):
+        self.assertTrue(can_edit_habit(self.student, self.habit))
+
+    def test_owner_cannot_edit_completed_habit(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.assertFalse(can_edit_habit(self.student, self.habit))
+
+    def test_teacher_cannot_edit_habit(self):
+        self.assertFalse(can_edit_habit(self.teacher, self.habit))
+
+    def test_owner_cannot_delete_active_habit(self):
+        self.assertFalse(can_delete_habit(self.student, self.habit))
+
+    def test_owner_can_delete_completed_habit(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.assertTrue(can_delete_habit(self.student, self.habit))
+
+    def test_teacher_cannot_delete_habit(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.assertFalse(can_delete_habit(self.teacher, self.habit))
+
+    def test_owner_can_log_active_habit(self):
+        self.assertTrue(can_log_habit(self.student, self.habit))
+
+    def test_owner_cannot_log_completed_habit(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.assertFalse(can_log_habit(self.student, self.habit))
+
+    def test_teacher_cannot_log_habit(self):
+        self.assertFalse(can_log_habit(self.teacher, self.habit))
+
+    def test_owner_can_complete_active_habit(self):
+        self.assertTrue(can_complete_habit(self.student, self.habit))
+
+    def test_owner_cannot_complete_already_completed_habit(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.assertFalse(can_complete_habit(self.student, self.habit))
+
+    def test_teacher_cannot_complete_habit(self):
+        self.assertFalse(can_complete_habit(self.teacher, self.habit))
+
+    def test_owner_can_reactivate_completed_habit(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.assertTrue(can_reactivate_habit(self.student, self.habit))
+
+    def test_owner_cannot_reactivate_active_habit(self):
+        self.assertTrue(self.habit.is_active)
+        self.assertFalse(can_reactivate_habit(self.student, self.habit))
+
+    def test_teacher_cannot_reactivate_habit(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.assertFalse(can_reactivate_habit(self.teacher, self.habit))
+
+    def test_admin_cannot_reactivate_habit(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.assertFalse(can_reactivate_habit(self.admin, self.habit))
+
+
+class HabitSelectorTests(GrowthTestBase):
+
+    def test_student_selector_returns_own_habits(self):
+        habits = get_visible_habits_for_user(self.student)
+        self.assertIn(self.habit, habits)
+
+    def test_teacher_selector_returns_assigned_student_habits(self):
+        habits = get_visible_habits_for_user(self.teacher)
+        self.assertIn(self.habit, habits)
+
+    def test_other_student_selector_returns_nothing(self):
+        habits = get_visible_habits_for_user(self.other_student)
+        self.assertEqual(habits.count(), 0)
+
+    def test_admin_selector_returns_all(self):
+        habits = get_visible_habits_for_user(self.admin)
+        self.assertIn(self.habit, habits)
+
+
+# -- Weekly helpers --------------------------------------------------------
+
+class WeeklyHelperTests(TestCase):
+
+    def test_get_week_start_monday(self):
+        self.assertEqual(get_week_start(date(2026, 5, 25)), date(2026, 5, 25))
+
+    def test_get_week_start_wednesday(self):
+        self.assertEqual(get_week_start(date(2026, 5, 27)), date(2026, 5, 25))
+
+    def test_get_week_start_sunday(self):
+        self.assertEqual(get_week_start(date(2026, 5, 31)), date(2026, 5, 25))
+
+    def test_get_week_end_monday(self):
+        self.assertEqual(get_week_end(date(2026, 5, 25)), date(2026, 5, 31))
+
+    def test_get_week_end_sunday(self):
+        self.assertEqual(get_week_end(date(2026, 5, 31)), date(2026, 5, 31))
+
+
+class WeeklySummaryTests(GrowthTestBase):
+
+    def test_done_this_week_counts_only_done(self):
+        ws = get_week_start(date.today())
+        HabitLog.objects.create(habit=self.habit, date=ws, status=HabitLog.Status.DONE)
+        HabitLog.objects.create(habit=self.habit, date=ws + timedelta(days=1), status=HabitLog.Status.NOT_DONE)
+        HabitLog.objects.create(habit=self.habit, date=ws + timedelta(days=2), status=HabitLog.Status.DONE)
+        self.assertEqual(get_done_count_for_week(self.habit, ws), 2)
+
+    def test_week_successful_when_target_met(self):
+        ws = get_week_start(date.today())
+        for i in range(3):
+            HabitLog.objects.create(
+                habit=self.habit, date=ws + timedelta(days=i),
+                status=HabitLog.Status.DONE,
+            )
+        self.assertTrue(is_habit_week_successful(self.habit, ws))
+
+    def test_week_not_successful_when_target_not_met(self):
+        ws = get_week_start(date.today())
+        for i in range(2):
+            HabitLog.objects.create(
+                habit=self.habit, date=ws + timedelta(days=i),
+                status=HabitLog.Status.DONE,
+            )
+        self.assertFalse(is_habit_week_successful(self.habit, ws))
+
+    def test_not_done_logs_do_not_count_as_done(self):
+        ws = get_week_start(date.today())
+        for i in range(5):
+            HabitLog.objects.create(
+                habit=self.habit, date=ws + timedelta(days=i),
+                status=HabitLog.Status.NOT_DONE,
+            )
+        self.assertEqual(get_done_count_for_week(self.habit, ws), 0)
+        self.assertFalse(is_habit_week_successful(self.habit, ws))
+
+
+# -- Streak tests ----------------------------------------------------------
+
+class StreakTests(GrowthTestBase):
+
+    def _log_done_days(self, habit, week_start, count):
+        for i in range(count):
+            HabitLog.objects.update_or_create(
+                habit=habit,
+                date=week_start + timedelta(days=i),
+                defaults={'status': HabitLog.Status.DONE},
+            )
+
+    def test_streak_zero_when_no_logs(self):
+        self.assertEqual(get_current_weekly_streak(self.habit, date.today()), 0)
+
+    def test_streak_one_when_current_week_successful(self):
+        ws = get_week_start(date.today())
+        self._log_done_days(self.habit, ws, 3)
+        self.assertEqual(get_current_weekly_streak(self.habit, date.today()), 1)
+
+    def test_streak_two_consecutive_weeks(self):
+        today = date.today()
+        ws = get_week_start(today)
+        prev_ws = ws - timedelta(days=7)
+        self._log_done_days(self.habit, prev_ws, 3)
+        self._log_done_days(self.habit, ws, 3)
+        self.assertEqual(get_current_weekly_streak(self.habit, today), 2)
+
+    def test_streak_breaks_on_unsuccessful_week(self):
+        today = date.today()
+        ws = get_week_start(today)
+        prev_ws = ws - timedelta(days=7)
+        two_weeks_ago = ws - timedelta(days=14)
+        self._log_done_days(self.habit, two_weeks_ago, 3)
+        self._log_done_days(self.habit, prev_ws, 2)  # not enough
+        self._log_done_days(self.habit, ws, 3)
+        self.assertEqual(get_current_weekly_streak(self.habit, today), 1)
+
+    def test_incomplete_current_week_does_not_break_streak(self):
+        """If today < Sunday and target not yet met, count from previous week."""
+        today = date.today()
+        ws = get_week_start(today)
+        we = ws + timedelta(days=6)
+
+        if today >= we:
+            return
+
+        prev_ws = ws - timedelta(days=7)
+        self._log_done_days(self.habit, prev_ws, 3)
+        HabitLog.objects.create(
+            habit=self.habit, date=ws, status=HabitLog.Status.DONE,
+        )
+        streak = get_current_weekly_streak(self.habit, today)
+        self.assertGreaterEqual(streak, 1)
+
+    def test_streak_three_consecutive_successful_weeks(self):
+        today = date.today()
+        ws = get_week_start(today)
+        for i in range(3):
+            week = ws - timedelta(days=7 * i)
+            self._log_done_days(self.habit, week, 3)
+        self.assertEqual(get_current_weekly_streak(self.habit, today), 3)
+
+
 # -- Feedback permissions --------------------------------------------------
 
 class FeedbackPermissionTests(GrowthTestBase):
@@ -347,6 +702,9 @@ class FeedbackPermissionTests(GrowthTestBase):
     def test_teacher_can_create_feedback_on_journal(self):
         self.assertTrue(can_create_feedback(self.teacher, self.journal_entry))
 
+    def test_teacher_can_create_feedback_on_habit(self):
+        self.assertTrue(can_create_feedback(self.teacher, self.habit))
+
     def test_student_cannot_create_feedback(self):
         self.assertFalse(can_create_feedback(self.student, self.public_goal))
 
@@ -360,6 +718,11 @@ class FeedbackPermissionTests(GrowthTestBase):
             can_create_feedback(self.unrelated_teacher, self.journal_entry)
         )
 
+    def test_unrelated_teacher_cannot_create_feedback_on_habit(self):
+        self.assertFalse(
+            can_create_feedback(self.unrelated_teacher, self.habit)
+        )
+
     def test_admin_can_create_feedback_on_public_goal(self):
         self.assertTrue(can_create_feedback(self.admin, self.public_goal))
 
@@ -368,6 +731,9 @@ class FeedbackPermissionTests(GrowthTestBase):
 
     def test_admin_can_create_feedback_on_journal(self):
         self.assertTrue(can_create_feedback(self.admin, self.journal_entry))
+
+    def test_admin_can_create_feedback_on_habit(self):
+        self.assertTrue(can_create_feedback(self.admin, self.habit))
 
 
 # -- Teacher student mapping -----------------------------------------------
@@ -383,3 +749,173 @@ class TeacherStudentMappingTests(GrowthTestBase):
         students = get_students_for_teacher(self.unrelated_teacher)
         self.assertNotIn(self.student, students)
         self.assertIn(self.other_student, students)
+
+
+# -- Form validation tests ------------------------------------------------
+
+class HabitFormValidationTests(TestCase):
+
+    def test_target_days_per_week_below_1_rejected(self):
+        from .forms import HabitForm
+        data = {'title': 'Test', 'target_days_per_week': 0}
+        form = HabitForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('target_days_per_week', form.errors)
+
+    def test_target_days_per_week_above_7_rejected(self):
+        from .forms import HabitForm
+        data = {'title': 'Test', 'target_days_per_week': 8}
+        form = HabitForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('target_days_per_week', form.errors)
+
+    def test_valid_form(self):
+        from .forms import HabitForm
+        data = {
+            'title': 'Practice English',
+            'target_days_per_week': 5,
+        }
+        form = HabitForm(data=data)
+        self.assertTrue(form.is_valid())
+
+
+# -- Habit lifecycle tests -------------------------------------------------
+
+class HabitLifecycleTests(GrowthTestBase):
+
+    def test_reactivation_clears_completed_at_and_streak(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.completed_at = timezone.now()
+        self.habit.completed_weekly_streak = 5
+        self.habit.save()
+
+        self.habit.status = Habit.Status.ACTIVE
+        self.habit.completed_at = None
+        self.habit.completed_weekly_streak = 0
+        self.habit.save()
+        self.habit.refresh_from_db()
+
+        self.assertEqual(self.habit.status, Habit.Status.ACTIVE)
+        self.assertIsNone(self.habit.completed_at)
+        self.assertEqual(self.habit.completed_weekly_streak, 0)
+
+    def test_completed_habit_cannot_be_logged(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.assertFalse(can_log_habit(self.student, self.habit))
+
+    def test_completed_habit_cannot_be_edited(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.assertFalse(can_edit_habit(self.student, self.habit))
+
+    def test_active_habit_cannot_be_deleted(self):
+        self.assertTrue(self.habit.is_active)
+        self.assertFalse(can_delete_habit(self.student, self.habit))
+
+    def test_completed_habit_can_be_deleted_by_owner(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.assertTrue(can_delete_habit(self.student, self.habit))
+
+    def test_other_student_cannot_reactivate(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.assertFalse(can_reactivate_habit(self.other_student, self.habit))
+
+    def test_other_student_cannot_delete_completed_habit(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.assertFalse(can_delete_habit(self.other_student, self.habit))
+
+    def test_completion_stores_weekly_streak(self):
+        ws = get_week_start(date.today())
+        for i in range(3):
+            HabitLog.objects.create(
+                habit=self.habit, date=ws + timedelta(days=i),
+                status=HabitLog.Status.DONE,
+            )
+        streak = get_current_weekly_streak(self.habit, date.today())
+        self.habit.completed_weekly_streak = streak
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.completed_at = timezone.now()
+        self.habit.save()
+        self.habit.refresh_from_db()
+        self.assertEqual(self.habit.completed_weekly_streak, streak)
+        self.assertGreaterEqual(self.habit.completed_weekly_streak, 1)
+
+
+# -- Habit logging view tests ---------------------------------------------
+
+class HabitLoggingViewTests(GrowthTestBase):
+
+    def test_log_done_redirects_to_habit_list(self):
+        self.client.login(email='student@test.com', password='pass')
+        url = f'/growth/habits/{self.habit.pk}/log-today/done/'
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/growth/habits/')
+
+    def test_log_done_creates_today_log(self):
+        self.client.login(email='student@test.com', password='pass')
+        url = f'/growth/habits/{self.habit.pk}/log-today/done/'
+        self.client.post(url)
+        log = HabitLog.objects.get(habit=self.habit, date=timezone.localdate())
+        self.assertEqual(log.status, HabitLog.Status.DONE)
+
+    def test_log_not_done_updates_existing(self):
+        HabitLog.objects.create(
+            habit=self.habit, date=timezone.localdate(),
+            status=HabitLog.Status.DONE,
+        )
+        self.client.login(email='student@test.com', password='pass')
+        url = f'/growth/habits/{self.habit.pk}/log-today/not-done/'
+        self.client.post(url)
+        log = HabitLog.objects.get(habit=self.habit, date=timezone.localdate())
+        self.assertEqual(log.status, HabitLog.Status.NOT_DONE)
+
+    def test_log_done_toggle_back(self):
+        HabitLog.objects.create(
+            habit=self.habit, date=timezone.localdate(),
+            status=HabitLog.Status.NOT_DONE,
+        )
+        self.client.login(email='student@test.com', password='pass')
+        url = f'/growth/habits/{self.habit.pk}/log-today/done/'
+        self.client.post(url)
+        log = HabitLog.objects.get(habit=self.habit, date=timezone.localdate())
+        self.assertEqual(log.status, HabitLog.Status.DONE)
+
+    def test_repeated_post_does_not_create_duplicates(self):
+        self.client.login(email='student@test.com', password='pass')
+        url = f'/growth/habits/{self.habit.pk}/log-today/done/'
+        self.client.post(url)
+        self.client.post(url)
+        count = HabitLog.objects.filter(
+            habit=self.habit, date=timezone.localdate(),
+        ).count()
+        self.assertEqual(count, 1)
+
+    def test_get_request_redirects_without_logging(self):
+        self.client.login(email='student@test.com', password='pass')
+        url = f'/growth/habits/{self.habit.pk}/log-today/done/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(
+            HabitLog.objects.filter(
+                habit=self.habit, date=timezone.localdate(),
+            ).exists()
+        )
+
+    def test_teacher_cannot_log(self):
+        self.client.login(email='teacher@test.com', password='pass')
+        url = f'/growth/habits/{self.habit.pk}/log-today/done/'
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_completed_habit_cannot_be_logged(self):
+        self.habit.status = Habit.Status.COMPLETED
+        self.habit.save()
+        self.client.login(email='student@test.com', password='pass')
+        url = f'/growth/habits/{self.habit.pk}/log-today/done/'
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 403)

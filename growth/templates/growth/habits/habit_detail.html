@@ -1,0 +1,148 @@
+{% extends "growth/base.html" %}
+
+{% block title %}{{ habit.title }} — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>{{ habit.title }}</h2>
+
+<p><strong>Student:</strong> {{ habit.student.display_name }}</p>
+{% if habit.description %}
+    <p><strong>Description:</strong> {{ habit.description }}</p>
+{% endif %}
+{% if habit.target_minutes %}
+    <p><strong>Minutes per day:</strong> {{ habit.target_minutes }}</p>
+{% endif %}
+<p><strong>Days per week:</strong> {{ habit.target_days_per_week }}</p>
+<p><strong>Status:</strong> {{ habit.get_status_display }}</p>
+{% if habit.completed_at %}
+    <p><strong>Completed:</strong> {{ habit.completed_at }}</p>
+{% endif %}
+<p><strong>Created:</strong> {{ habit.created_at }}</p>
+<p><strong>Updated:</strong> {{ habit.updated_at }}</p>
+
+{% if can_log %}
+    <p>
+        {% if today_log %}
+            {% if today_log.status == 'done' %}
+                <strong>Done today</strong> —
+                <a href="{% url 'growth:habit_log_not_done' pk=habit.pk %}">Mark as not done</a>
+            {% else %}
+                <strong>Not done today</strong> —
+                <a href="{% url 'growth:habit_log_done' pk=habit.pk %}">Mark as done</a>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'growth:habit_log_done' pk=habit.pk %}">Done</a> |
+            <a href="{% url 'growth:habit_log_not_done' pk=habit.pk %}">Not done</a>
+        {% endif %}
+    </p>
+{% endif %}
+
+{% if can_edit %}
+    <p><a href="{% url 'growth:habit_edit' pk=habit.pk %}">Edit</a></p>
+{% endif %}
+
+{% if can_complete %}
+    <p><a href="{% url 'growth:habit_mark_completed' pk=habit.pk %}">Mark as completed</a></p>
+{% endif %}
+
+{% if can_reactivate %}
+    <p><a href="{% url 'growth:habit_reactivate' pk=habit.pk %}">Reactivate</a></p>
+{% endif %}
+
+{% if can_delete %}
+    <p><a href="{% url 'growth:habit_delete' pk=habit.pk %}">Delete</a></p>
+{% endif %}
+
+<hr>
+
+<h3>Weekly summary</h3>
+<p><strong>Target:</strong> {{ habit.target_days_per_week }} days per week</p>
+<p><strong>Done this week:</strong> {{ done_this_week }} / {{ habit.target_days_per_week }}</p>
+<p><strong>This week completed:</strong> {% if week_completed %}yes{% else %}no{% endif %}</p>
+<p><strong>Current weekly streak:</strong> {{ streak }} week{{ streak|pluralize }}</p>
+
+<hr>
+
+<h3>This week</h3>
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            {% for day in week_table %}
+                <th>{{ day.weekday }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            {% for day in week_table %}
+            <td>
+                {{ day.date }}<br>
+                {% if day.log %}
+                    {{ day.log.get_status_display }}
+                {% else %}
+                    No entry
+                {% endif %}
+                {% if can_log %}
+                    <br>
+                    {% if day.log and day.log.status == 'done' %}
+                        <a href="{% url 'growth:habit_log_date_not_done' pk=habit.pk log_date=day.date %}">Mark not done</a>
+                    {% elif day.log and day.log.status == 'not_done' %}
+                        <a href="{% url 'growth:habit_log_date_done' pk=habit.pk log_date=day.date %}">Mark done</a>
+                    {% else %}
+                        <a href="{% url 'growth:habit_log_date_done' pk=habit.pk log_date=day.date %}">Done</a> |
+                        <a href="{% url 'growth:habit_log_date_not_done' pk=habit.pk log_date=day.date %}">Not done</a>
+                    {% endif %}
+                {% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+    </tbody>
+</table>
+
+<hr>
+
+<h3>History</h3>
+{% if logs %}
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Note</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.date }}</td>
+            <td>{{ log.get_status_display }}</td>
+            <td>{{ log.note }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No logs yet.</p>
+{% endif %}
+
+<hr>
+
+<h3>Feedback</h3>
+{% if feedback_list %}
+    {% for fb in feedback_list %}
+    <div>
+        <p><strong>{{ fb.author.display_name }}</strong> ({{ fb.created_at }}):</p>
+        <p>{{ fb.message }}</p>
+    </div>
+    <hr>
+    {% endfor %}
+{% else %}
+    <p>No feedback yet.</p>
+{% endif %}
+
+{% if can_give_feedback %}
+    <p><a href="{% url 'growth:feedback_create' content_type='habit' object_id=habit.pk %}">Leave feedback</a></p>
+{% endif %}
+
+<p><a href="{% url 'growth:habit_list' %}">Back to habits</a></p>
+{% endblock growth_content %}
