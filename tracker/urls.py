@@ -7,6 +7,9 @@ app_name = 'tracker'
 urlpatterns = [
     path('', views.task_list, name='task_list'),
     path('create/', views.task_create, name='task_create'),
+    path('create/personal/', views.teacher_personal_task_create, name='teacher_personal_task_create'),
+    path('create/group/', views.teacher_group_task_create, name='teacher_group_task_create'),
+    path('create/cohort/', views.teacher_cohort_task_create, name='teacher_cohort_task_create'),
     path('<int:task_id>/', views.task_detail, name='task_detail'),
     path('<int:task_id>/edit/', views.task_update, name='task_update'),
     path('<int:task_id>/delete/', views.task_delete, name='task_delete'),
@@ -15,6 +18,4 @@ urlpatterns = [
     path('<int:task_id>/updates/create/', views.update_create, name='update_create'),
     path('<int:task_id>/comments/create/', views.comment_create, name='comment_create'),
     path('comments/<int:comment_id>/reply/', views.comment_reply_create, name='comment_reply_create'),
-    path('groups/<int:group_id>/tasks/create/', views.group_task_create, name='group_task_create'),
-    path('cohorts/<int:cohort_id>/tasks/create/', views.cohort_task_create, name='cohort_task_create'),
 ]

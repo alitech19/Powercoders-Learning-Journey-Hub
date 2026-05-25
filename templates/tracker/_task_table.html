@@ -6,8 +6,8 @@
             <th>Status</th>
             <th>Priority</th>
             <th>Due</th>
-            <th>Scope</th>
-            <th>Owner</th>
+            <th>Assigned to</th>
+            <th>Created by</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -18,29 +18,27 @@
             <td>{{ row.task.get_status_display }}</td>
             <td>{{ row.task.get_priority_display }}</td>
             <td>{{ row.task.due_date|default:"—" }}</td>
-            <td>{{ row.task.get_scope_type_display }}</td>
             <td>
-                {% if row.task.user %}
-                    {{ row.task.user.display_name }}
-                {% elif row.task.group %}
-                    {{ row.task.group.name }}
-                {% elif row.task.cohort %}
-                    {{ row.task.cohort.name }}
+                {% if row.task.assignee_type == "user" and row.task.assignee_user %}
+                    {{ row.task.assignee_user.display_name }}
+                {% elif row.task.assignee_type == "group" and row.task.assignee_group %}
+                    {{ row.task.assignee_group.name }}
+                {% elif row.task.assignee_type == "cohort" and row.task.assignee_cohort %}
+                    {{ row.task.assignee_cohort.name }}
                 {% else %}
                     —
                 {% endif %}
             </td>
+            <td>{% if row.task.created_by %}{{ row.task.created_by.display_name }}{% else %}—{% endif %}</td>
             <td>
-                {% if row.can_view_metadata %}
-                    <a href="{% url 'tracker:task_detail' row.task.pk %}">View</a>
-                {% endif %}
+                <a href="{% url 'tracker:task_detail' row.task.pk %}">View</a>
                 {% if row.can_update %}
                     | <a href="{% url 'tracker:task_update' row.task.pk %}">Edit</a>
                 {% endif %}
                 {% if row.can_delete %}
                     | <a href="{% url 'tracker:task_delete' row.task.pk %}">Delete</a>
                 {% endif %}
-                {% if row.can_edit_status %}
+                {% if row.can_change_status %}
                     | <a href="{% url 'tracker:task_edit_status' row.task.pk %}">Status</a>
                 {% endif %}
             </td>

@@ -6,13 +6,13 @@ from django.utils import timezone
 
 class Task(models.Model):
     """
-    A task scoped directly to a user, group, or cohort.
-    Public tasks: full content visible to users with scope access.
-    Private tasks: full content only for owner/assignee; teachers/admins
-    may see metadata only (enforced in views/permissions).
+    Owner (created_by) controls the task: edit, delete, reassign.
+    Assignee (assignee_type + assignee_user/group/cohort) performs the task.
+    Private: visible only to owner.
+    Public: visible to owner + assignee.
     """
 
-    class ScopeType(models.TextChoices):
+    class AssigneeType(models.TextChoices):
         USER = 'user', 'User'
         GROUP = 'group', 'Group'
         COHORT = 'cohort', 'Cohort'
@@ -32,27 +32,34 @@ class Task(models.Model):
         NORMAL = 'normal', 'Normal'
         HIGH = 'high', 'High'
 
-    scope_type = models.CharField(max_length=20, choices=ScopeType.choices)
-    user = models.ForeignKey(
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_tasks',
+    )
+    assignee_type = models.CharField(max_length=20, choices=AssigneeType.choices)
+    assignee_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='scoped_tasks',
+        related_name='assigned_tasks',
     )
-    group = models.ForeignKey(
+    assignee_group = models.ForeignKey(
         'cohorts.Group',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='tasks',
+        related_name='assigned_tasks',
     )
-    cohort = models.ForeignKey(
+    assignee_cohort = models.ForeignKey(
         'cohorts.Cohort',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='tasks',
+        related_name='assigned_tasks',
     )
     parent = models.ForeignKey(
         'self',
@@ -60,20 +67,6 @@ class Task(models.Model):
         null=True,
         blank=True,
         related_name='subtasks',
-    )
-    assignee = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='assigned_tasks',
-    )
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='created_tasks',
     )
     visibility = models.CharField(
         max_length=20,
@@ -115,50 +108,49 @@ class Task(models.Model):
     def is_public(self):
         return self.visibility == self.Visibility.PUBLIC
 
-    @property
-    def is_personal(self):
-        return self.scope_type == self.ScopeType.USER
-
-    def owner_user(self):
-        return self.assignee or self.created_by
-
     def clean(self):
         errors = {}
-        if self.scope_type == self.ScopeType.USER:
-            if not self.user_id:
-                errors['user'] = 'User is required for user-scoped tasks.'
-            if self.group_id or self.cohort_id:
-                errors['scope_type'] = 'Only user should be set for user scope.'
-        elif self.scope_type == self.ScopeType.GROUP:
-            if not self.group_id:
-                errors['group'] = 'Group is required for group-scoped tasks.'
-            if self.user_id or self.cohort_id:
-                errors['scope_type'] = 'Only group should be set for group scope.'
-        elif self.scope_type == self.ScopeType.COHORT:
-            if not self.cohort_id:
-                errors['cohort'] = 'Cohort is required for cohort-scoped tasks.'
-            if self.user_id or self.group_id:
-                errors['scope_type'] = 'Only cohort should be set for cohort scope.'
-
-        # Private visibility is allowed for all scope types.
+        if self.assignee_type == self.AssigneeType.USER:
+            if not self.assignee_user_id:
+                errors['assignee_user'] = 'Assignee user is required for user-assigned tasks.'
+            if self.assignee_group_id or self.assignee_cohort_id:
+                errors['assignee_type'] = 'Only assignee_user should be set for user type.'
+        elif self.assignee_type == self.AssigneeType.GROUP:
+            if not self.assignee_group_id:
+                errors['assignee_group'] = 'Assignee group is required for group-assigned tasks.'
+            if self.assignee_user_id or self.assignee_cohort_id:
+                errors['assignee_type'] = 'Only assignee_group should be set for group type.'
+        elif self.assignee_type == self.AssigneeType.COHORT:
+            if not self.assignee_cohort_id:
+                errors['assignee_cohort'] = 'Assignee cohort is required for cohort-assigned tasks.'
+            if self.assignee_user_id or self.assignee_group_id:
+                errors['assignee_type'] = 'Only assignee_cohort should be set for cohort type.'
 
         if self.parent_id is not None:
             if self.pk and self.parent_id == self.pk:
                 errors['parent'] = 'A task cannot be its own parent.'
             parent = self.parent
-            if parent and parent.scope_type != self.scope_type:
-                errors['parent'] = 'Subtask must belong to the same scope as parent.'
-            if parent and self.scope_type == self.ScopeType.USER and parent.user_id != self.user_id:
-                errors['parent'] = 'Subtask must belong to the same user as parent.'
-            if parent and self.scope_type == self.ScopeType.GROUP and parent.group_id != self.group_id:
-                errors['parent'] = 'Subtask must belong to the same group as parent.'
-            if parent and self.scope_type == self.ScopeType.COHORT and parent.cohort_id != self.cohort_id:
-                errors['parent'] = 'Subtask must belong to the same cohort as parent.'
+            if parent:
+                if parent.assignee_type != self.assignee_type:
+                    errors['parent'] = 'Subtask must have same assignee type as parent.'
+                if self.assignee_type == self.AssigneeType.USER and parent.assignee_user_id != self.assignee_user_id:
+                    errors['parent'] = 'Subtask must be assigned to same user as parent.'
+                if self.assignee_type == self.AssigneeType.GROUP and parent.assignee_group_id != self.assignee_group_id:
+                    errors['parent'] = 'Subtask must be assigned to same group as parent.'
+                if self.assignee_type == self.AssigneeType.COHORT and parent.assignee_cohort_id != self.assignee_cohort_id:
+                    errors['parent'] = 'Subtask must be assigned to same cohort as parent.'
 
         if errors:
             raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
+        if self.parent_id is not None and self.parent:
+            self.visibility = self.parent.visibility
+            self.assignee_type = self.parent.assignee_type
+            self.assignee_user = self.parent.assignee_user
+            self.assignee_group = self.parent.assignee_group
+            self.assignee_cohort = self.parent.assignee_cohort
+
         if self.status == self.Status.DONE:
             if not self.completed_at:
                 self.completed_at = timezone.now()

@@ -15,21 +15,21 @@
         </ul>
     {% endif %}
 
-    <h3>All public tasks</h3>
-    {% include "tracker/_task_table.html" with task_rows=public_task_rows %}
-
-    <h3>Private tasks (metadata only)</h3>
-    {% include "tracker/_task_table.html" with task_rows=private_metadata_rows %}
+    <h3>All tasks</h3>
+    {% include "tracker/_task_table.html" with task_rows=task_rows %}
 
 {% elif user.role == "teacher" %}
+    <p>
+        <a href="{% url 'tracker:teacher_personal_task_create' %}"><strong>Create personal task</strong></a> |
+        <a href="{% url 'tracker:teacher_group_task_create' %}"><strong>Create group task</strong></a> |
+        <a href="{% url 'tracker:teacher_cohort_task_create' %}"><strong>Create cohort task</strong></a>
+    </p>
+
     <h3>Assigned groups</h3>
     {% if assigned_groups %}
         <ul>
             {% for group in assigned_groups %}
-                <li>
-                    {{ group.name }} ({{ group.cohort.name }})
-                    — <a href="{% url 'tracker:group_task_create' group.pk %}">Create group task</a>
-                </li>
+                <li>{{ group.name }} ({{ group.cohort.name }})</li>
             {% endfor %}
         </ul>
     {% else %}
@@ -40,19 +40,13 @@
         <h3>Accessible cohorts</h3>
         <ul>
             {% for cohort in assigned_cohorts %}
-                <li>
-                    {{ cohort.name }}
-                    — <a href="{% url 'tracker:cohort_task_create' cohort.pk %}">Create cohort task</a>
-                </li>
+                <li>{{ cohort.name }}</li>
             {% endfor %}
         </ul>
     {% endif %}
 
-    <h3>Public tasks</h3>
-    {% include "tracker/_task_table.html" with task_rows=public_task_rows %}
-
-    <h3>Private tasks (group/cohort)</h3>
-    {% include "tracker/_task_table.html" with task_rows=private_metadata_rows %}
+    <h3>My tasks</h3>
+    {% include "tracker/_task_table.html" with task_rows=task_rows %}
 
 {% else %}
     <h3>Task counts by status</h3>
@@ -71,10 +65,10 @@
     <h3>My tasks</h3>
     {% include "tracker/_task_table.html" with task_rows=own_task_rows %}
 
-    <h3>Group tasks (public)</h3>
+    <h3>Group tasks</h3>
     {% include "tracker/_task_table.html" with task_rows=group_task_rows %}
 
-    <h3>Cohort tasks (public)</h3>
+    <h3>Cohort tasks</h3>
     {% include "tracker/_task_table.html" with task_rows=cohort_task_rows %}
 {% endif %}
 

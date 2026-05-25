@@ -7,9 +7,9 @@ from tracker.models import Task
 from tracker.permissions import (
     get_teacher_cohort_ids,
     get_teacher_group_ids,
+    get_visible_tasks_for_user,
     user_is_admin,
     user_is_teacher,
-    visible_tasks_queryset,
     wrap_tasks_for_display,
 )
 
@@ -27,18 +27,11 @@ def dashboard(request):
     }
 
     if user_is_admin(user):
-        all_tasks = Task.objects.filter(parent__isnull=True).select_related(
-            'user', 'group', 'cohort', 'assignee', 'created_by',
-        )
+        visible = get_visible_tasks_for_user(user)
         context.update(
             {
-                'private_metadata_rows': wrap_tasks_for_display(
-                    user, all_tasks.filter(visibility=Task.Visibility.PRIVATE),
-                ),
-                'public_task_rows': wrap_tasks_for_display(
-                    user, all_tasks.filter(visibility=Task.Visibility.PUBLIC),
-                ),
-                'tasks_by_status': _tasks_by_status(all_tasks),
+                'task_rows': wrap_tasks_for_display(user, visible),
+                'tasks_by_status': _tasks_by_status(visible),
             }
         )
         return render(request, 'dashboard/dashboard.html', context)
@@ -48,24 +41,22 @@ def dashboard(request):
         cohort_ids = get_teacher_cohort_ids(user)
         assigned_groups = Group.objects.filter(pk__in=group_ids).select_related('cohort')
         assigned_cohorts = Cohort.objects.filter(pk__in=cohort_ids)
-        visible = visible_tasks_queryset(user)
-        public_tasks = visible.filter(visibility=Task.Visibility.PUBLIC)
-        private_tasks = visible.filter(visibility=Task.Visibility.PRIVATE)
+        visible = get_visible_tasks_for_user(user)
         context.update(
             {
                 'assigned_groups': assigned_groups,
                 'assigned_cohorts': assigned_cohorts,
-                'public_task_rows': wrap_tasks_for_display(user, public_tasks),
-                'private_metadata_rows': wrap_tasks_for_display(user, private_tasks),
+                'task_rows': wrap_tasks_for_display(user, visible),
                 'tasks_by_status': _tasks_by_status(visible),
             }
         )
         return render(request, 'dashboard/dashboard.html', context)
 
     # Student (default)
-    own_tasks = visible_tasks_queryset(user).filter(scope_type=Task.ScopeType.USER, user=user)
-    group_tasks = visible_tasks_queryset(user).filter(scope_type=Task.ScopeType.GROUP)
-    cohort_tasks = visible_tasks_queryset(user).filter(scope_type=Task.ScopeType.COHORT)
+    visible = get_visible_tasks_for_user(user)
+    own_tasks = visible.filter(assignee_type=Task.AssigneeType.USER, assignee_user=user)
+    group_tasks = visible.filter(assignee_type=Task.AssigneeType.GROUP)
+    cohort_tasks = visible.filter(assignee_type=Task.AssigneeType.COHORT)
 
     context.update(
         {

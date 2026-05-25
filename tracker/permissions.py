@@ -1,8 +1,12 @@
 """
-Hardcoded business rules for task access control.
+Task access control — hardcoded business rules.
 
-Do NOT use user.has_perm() or Django admin permissions for task privacy.
-All access is determined by user.role, scope, visibility, and GroupTeacher relations.
+Owner = created_by: can edit/delete/manage.
+Assignee = assignee_user/group/cohort: can view public tasks, change status, comment, update.
+Private = only owner sees it (no exceptions, not even admin).
+Public = owner + assignee + admin see it.
+
+Do NOT use user.has_perm() or Django auth Groups for task visibility.
 """
 
 from django.db.models import Q
@@ -47,280 +51,195 @@ def get_teacher_cohort_ids(user):
     )
 
 
-def teacher_has_group_access(user, group):
-    if not user_is_teacher(user):
-        return False
-    return group.pk in get_teacher_group_ids(user)
+def get_teacher_accessible_students(user):
+    group_ids = get_teacher_group_ids(user)
+    if not group_ids:
+        return User.objects.none()
+    return User.objects.filter(
+        is_active=True, role=User.Role.STUDENT, group_id__in=group_ids
+    ).order_by('display_name')
 
 
-def teacher_has_cohort_access(user, cohort):
-    if not user_is_teacher(user):
-        return False
-    return cohort.pk in get_teacher_cohort_ids(user)
+def get_teacher_accessible_groups(user):
+    from cohorts.models import Group
+    group_ids = get_teacher_group_ids(user)
+    return Group.objects.filter(pk__in=group_ids).select_related('cohort')
 
 
-def task_owner(task):
-    return task.assignee or task.created_by
+def get_teacher_accessible_cohorts(user):
+    from cohorts.models import Cohort
+    cohort_ids = get_teacher_cohort_ids(user)
+    return Cohort.objects.filter(pk__in=cohort_ids)
 
 
-# --- Content visibility ---
+# --- Core permission checks ---
 
-def can_view_task_content(user, task):
-    """Full title, description, updates, comments."""
+def is_task_owner(user, task):
+    return user.is_authenticated and task.created_by_id == user.pk
+
+
+def is_task_assignee(user, task):
+    """Is the user (or their group/cohort) the assignee of this task?"""
     if not user.is_authenticated:
         return False
-
-    owner = task_owner(task)
-    if owner and owner.pk == user.pk:
-        return True
-
-    # Private personal task: only owner
-    if task.is_private and task.is_personal:
-        return False
-
-    # Private group task: teacher with group access + admin
-    if task.is_private and task.scope_type == Task.ScopeType.GROUP:
-        if user_is_teacher(user):
-            return task.group_id in get_teacher_group_ids(user)
-        if user_is_admin(user):
-            return True
-        return False
-
-    # Private cohort task: teacher with cohort access + admin
-    if task.is_private and task.scope_type == Task.ScopeType.COHORT:
-        if user_is_teacher(user):
-            return task.cohort_id in get_teacher_cohort_ids(user)
-        if user_is_admin(user):
-            return True
-        return False
-
-    # Public task — check scope access
-    if task.scope_type == Task.ScopeType.USER:
-        if task.user_id == user.pk:
-            return True
-        if user_is_teacher(user):
-            task_user = task.user
-            return bool(task_user and task_user.group_id and task_user.group_id in get_teacher_group_ids(user))
-        if user_is_admin(user):
-            return True
-        return False
-
-    if task.scope_type == Task.ScopeType.GROUP:
-        if user.group_id == task.group_id:
-            return True
-        if user_is_teacher(user):
-            return task.group_id in get_teacher_group_ids(user)
-        if user_is_admin(user):
-            return True
-        return False
-
-    if task.scope_type == Task.ScopeType.COHORT:
-        if user.cohort_id == task.cohort_id:
-            return True
-        if user_is_teacher(user):
-            return task.cohort_id in get_teacher_cohort_ids(user)
-        if user_is_admin(user):
-            return True
-        return False
-
+    if task.assignee_type == Task.AssigneeType.USER:
+        return task.assignee_user_id == user.pk
+    if task.assignee_type == Task.AssigneeType.GROUP:
+        return user.group_id is not None and user.group_id == task.assignee_group_id
+    if task.assignee_type == Task.AssigneeType.COHORT:
+        return user.cohort_id is not None and user.cohort_id == task.assignee_cohort_id
     return False
 
 
-def can_view_task_metadata(user, task):
-    """At least status/priority/dates — may hide title and body."""
-    if can_view_task_content(user, task):
+def can_view_task(user, task):
+    """
+    Private: only owner.
+    Public: owner + assignee + admin.
+    """
+    if not user.is_authenticated:
+        return False
+    if is_task_owner(user, task):
         return True
-    # Admin can see private personal task metadata
-    if user_is_admin(user) and task.is_private and task.is_personal:
+    if task.is_private:
+        return False
+    # Public task
+    if user_is_admin(user):
+        return True
+    return is_task_assignee(user, task)
+
+
+def can_view_task_content(user, task):
+    """Same as can_view_task — if you can see it, you see full content."""
+    return can_view_task(user, task)
+
+
+def can_update_task(user, task):
+    """Edit title, description, priority, visibility, due_date, assignee."""
+    return is_task_owner(user, task)
+
+
+def can_delete_task(user, task):
+    return is_task_owner(user, task)
+
+
+def can_change_task_status(user, task):
+    """Owner or assignee (if they can view) can change status."""
+    if is_task_owner(user, task):
+        return True
+    if task.is_public and is_task_assignee(user, task):
         return True
     return False
 
 
-# --- CRUD permissions ---
+def can_comment_on_task(user, task):
+    return can_view_task(user, task)
+
+
+def can_add_update_to_task(user, task):
+    return can_view_task(user, task)
+
+
+def can_create_subtask(user, task):
+    """Only owner can add subtasks (and task must not already be a subtask)."""
+    if task.parent_id is not None:
+        return False
+    return is_task_owner(user, task)
+
+
+# --- Creation permissions ---
 
 def can_create_personal_task(user):
-    return user_is_student(user)
+    return user_is_student(user) or user_is_teacher(user)
+
+
+def can_create_personal_task_for_user(user, target_user):
+    if not user.is_authenticated:
+        return False
+    if user_is_student(user):
+        return target_user.pk == user.pk
+    if user_is_teacher(user):
+        if target_user.pk == user.pk:
+            return True
+        if target_user.role != User.Role.STUDENT:
+            return False
+        group_ids = get_teacher_group_ids(user)
+        return bool(target_user.group_id and target_user.group_id in group_ids)
+    return False
 
 
 def can_create_group_task(user, group):
     if user_is_admin(user):
         return True
-    return teacher_has_group_access(user, group)
+    if user_is_teacher(user):
+        return group.pk in get_teacher_group_ids(user)
+    return False
 
 
 def can_create_cohort_task(user, cohort):
     if user_is_admin(user):
         return True
-    return teacher_has_cohort_access(user, cohort)
-
-
-def can_update_task(user, task):
-    if not user.is_authenticated:
-        return False
-    # Student can edit own personal tasks
-    if user_is_student(user):
-        if task.is_personal and task.user_id == user.pk:
-            return True
-        return False
-    # Teacher can edit group/cohort tasks in their scope
     if user_is_teacher(user):
-        if task.scope_type == Task.ScopeType.GROUP:
-            return task.group_id in get_teacher_group_ids(user)
-        if task.scope_type == Task.ScopeType.COHORT:
-            return task.cohort_id in get_teacher_cohort_ids(user)
-        return False
-    # Admin can edit group/cohort tasks and public personal tasks
-    if user_is_admin(user):
-        if task.scope_type in (Task.ScopeType.GROUP, Task.ScopeType.COHORT):
-            return True
-        if task.is_personal and task.is_public:
-            return True
-        return False
+        return cohort.pk in get_teacher_cohort_ids(user)
     return False
 
 
-def can_delete_task(user, task):
-    if not user.is_authenticated:
-        return False
-    # Student can delete own personal tasks
-    if user_is_student(user):
-        if task.is_personal and task.user_id == user.pk:
-            return True
-        return False
-    # Teacher can delete group/cohort tasks in their scope
-    if user_is_teacher(user):
-        if task.scope_type == Task.ScopeType.GROUP:
-            return task.group_id in get_teacher_group_ids(user)
-        if task.scope_type == Task.ScopeType.COHORT:
-            return task.cohort_id in get_teacher_cohort_ids(user)
-        return False
-    # Admin can delete group/cohort tasks
-    if user_is_admin(user):
-        if task.scope_type in (Task.ScopeType.GROUP, Task.ScopeType.COHORT):
-            return True
-        return False
-    return False
+# --- Queryset helper ---
 
-
-def can_comment_on_task(user, task):
-    return can_view_task_content(user, task)
-
-
-def can_reply_to_comment(user, comment):
-    return can_comment_on_task(user, comment.task)
-
-
-def can_add_update_to_task(user, task):
-    return can_view_task_content(user, task)
-
-
-def can_create_subtask(user, parent_task):
-    if not can_view_task_content(user, parent_task):
-        return False
-    if parent_task.parent_id is not None:
-        return False
-    # Owner can add subtasks
-    owner = task_owner(parent_task)
-    if owner and owner.pk == user.pk:
-        return True
-    # Teacher/admin can add subtasks to group/cohort tasks they can edit
-    if parent_task.scope_type != Task.ScopeType.USER:
-        return can_update_task(user, parent_task)
-    return False
-
-
-def can_edit_task_status(user, task):
-    """Anyone who can update the task can change status."""
-    if can_update_task(user, task):
-        return True
-    # Owner/assignee can always change status of tasks they can view
-    owner = task_owner(task)
-    if owner and owner.pk == user.pk and can_view_task_content(user, task):
-        return True
-    return False
-
-
-# --- Queryset helpers ---
-
-def visible_tasks_queryset(user, *, main_tasks_only=True):
-    """Tasks the user may see in lists (full or metadata-only)."""
+def get_visible_tasks_for_user(user, *, main_tasks_only=True):
+    """
+    Private: only tasks where created_by=user.
+    Public: tasks where user is owner, assignee, or admin.
+    """
     qs = Task.objects.select_related(
-        'user',
-        'group',
-        'cohort',
-        'assignee',
-        'created_by',
+        'created_by', 'assignee_user', 'assignee_group', 'assignee_cohort',
     )
     if main_tasks_only:
         qs = qs.filter(parent__isnull=True)
 
+    # Owner always sees own tasks (private + public)
+    conditions = Q(created_by=user)
+
+    # Public tasks visible to admin
     if user_is_admin(user):
-        return qs
+        conditions |= Q(visibility=Task.Visibility.PUBLIC)
+        return qs.filter(conditions).distinct()
 
-    teacher_group_ids = get_teacher_group_ids(user)
-    teacher_cohort_ids = get_teacher_cohort_ids(user) if teacher_group_ids else []
-    conditions = Q()
+    # Public tasks assigned to user
+    conditions |= Q(
+        visibility=Task.Visibility.PUBLIC,
+        assignee_type=Task.AssigneeType.USER,
+        assignee_user=user,
+    )
 
-    # Own personal tasks (any visibility)
-    conditions |= Q(scope_type=Task.ScopeType.USER, user=user)
-    conditions |= Q(assignee=user) | Q(created_by=user)
-
-    # Student: group public tasks
+    # Public tasks assigned to user's group
     if user.group_id:
         conditions |= Q(
-            scope_type=Task.ScopeType.GROUP,
-            group_id=user.group_id,
             visibility=Task.Visibility.PUBLIC,
+            assignee_type=Task.AssigneeType.GROUP,
+            assignee_group_id=user.group_id,
         )
 
-    # Student: cohort public tasks
+    # Public tasks assigned to user's cohort
     if user.cohort_id:
         conditions |= Q(
-            scope_type=Task.ScopeType.COHORT,
-            cohort_id=user.cohort_id,
             visibility=Task.Visibility.PUBLIC,
-        )
-
-    # Teacher: group tasks (public + private)
-    if teacher_group_ids:
-        conditions |= Q(
-            scope_type=Task.ScopeType.GROUP,
-            group_id__in=teacher_group_ids,
-        )
-        # Teacher: public personal tasks of students in assigned groups
-        conditions |= Q(
-            scope_type=Task.ScopeType.USER,
-            user__group_id__in=teacher_group_ids,
-            visibility=Task.Visibility.PUBLIC,
-        )
-
-    # Teacher: cohort tasks (public + private)
-    if teacher_cohort_ids:
-        conditions |= Q(
-            scope_type=Task.ScopeType.COHORT,
-            cohort_id__in=teacher_cohort_ids,
+            assignee_type=Task.AssigneeType.COHORT,
+            assignee_cohort_id=user.cohort_id,
         )
 
     return qs.filter(conditions).distinct()
 
 
 def wrap_tasks_for_display(user, tasks):
-    """Attach template-friendly visibility flags."""
+    """Attach template-friendly permission flags."""
     wrapped = []
     for task in tasks:
-        can_content = can_view_task_content(user, task)
-        can_meta = can_view_task_metadata(user, task)
-        wrapped.append(
-            {
-                'task': task,
-                'can_view_content': can_content,
-                'can_view_metadata': can_meta,
-                'can_edit_status': can_edit_task_status(user, task),
-                'can_update': can_update_task(user, task),
-                'can_delete': can_delete_task(user, task),
-                'display_title': (
-                    task.title if can_content else 'Private task - content hidden'
-                ),
-            }
-        )
+        wrapped.append({
+            'task': task,
+            'can_view_content': can_view_task(user, task),
+            'can_update': can_update_task(user, task),
+            'can_delete': can_delete_task(user, task),
+            'can_change_status': can_change_task_status(user, task),
+            'display_title': task.title,
+        })
     return wrapped

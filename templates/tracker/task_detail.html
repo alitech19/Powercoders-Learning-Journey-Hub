@@ -3,87 +3,72 @@
 {% block title %}Task — PowerHUB{% endblock %}
 
 {% block content %}
-<h2>{{ display_title }}</h2>
+<h2>{{ task.title }}</h2>
 
-{% if can_view_content %}
-    <p><strong>Description:</strong> {{ task.description|linebreaksbr|default:"—" }}</p>
-    <p><strong>Status:</strong> {{ task.get_status_display }}</p>
-    <p><strong>Priority:</strong> {{ task.get_priority_display }}</p>
-    <p><strong>Visibility:</strong> {{ task.get_visibility_display }}</p>
-    <p><strong>Scope:</strong> {{ task.get_scope_type_display }}</p>
-    <p><strong>Due date:</strong> {{ task.due_date|default:"—" }}</p>
-    <p><strong>Assignee:</strong> {% if task.assignee %}{{ task.assignee.display_name }}{% else %}—{% endif %}</p>
-    <p><strong>Created by:</strong> {% if task.created_by %}{{ task.created_by.display_name }}{% else %}—{% endif %}</p>
-    <p><strong>Created:</strong> {{ task.created_at }}</p>
-    <p><strong>Updated:</strong> {{ task.updated_at }}</p>
-    {% if task.completed_at %}<p><strong>Completed:</strong> {{ task.completed_at }}</p>{% endif %}
+<p><strong>Description:</strong> {{ task.description|linebreaksbr|default:"—" }}</p>
+<p><strong>Status:</strong> {{ task.get_status_display }}</p>
+<p><strong>Priority:</strong> {{ task.get_priority_display }}</p>
+<p><strong>Visibility:</strong> {{ task.get_visibility_display }}</p>
+<p><strong>Assigned to:</strong>
+    {% if task.assignee_type == "user" and task.assignee_user %}{{ task.assignee_user.display_name }}{% endif %}
+    {% if task.assignee_type == "group" and task.assignee_group %}{{ task.assignee_group.name }}{% endif %}
+    {% if task.assignee_type == "cohort" and task.assignee_cohort %}{{ task.assignee_cohort.name }}{% endif %}
+</p>
+<p><strong>Due date:</strong> {{ task.due_date|default:"—" }}</p>
+<p><strong>Created by:</strong> {% if task.created_by %}{{ task.created_by.display_name }}{% else %}—{% endif %}</p>
+<p><strong>Created:</strong> {{ task.created_at }}</p>
+<p><strong>Updated:</strong> {{ task.updated_at }}</p>
+{% if task.completed_at %}<p><strong>Completed:</strong> {{ task.completed_at }}</p>{% endif %}
 
-    <h3>Actions</h3>
+<h3>Actions</h3>
+<ul>
+    {% if can_update %}
+        <li><a href="{% url 'tracker:task_update' task.pk %}">Edit task</a></li>
+    {% endif %}
+    {% if can_delete %}
+        <li><a href="{% url 'tracker:task_delete' task.pk %}">Delete task</a></li>
+    {% endif %}
+    {% if can_change_status %}
+        <li><a href="{% url 'tracker:task_edit_status' task.pk %}">Change status</a></li>
+    {% endif %}
+    {% if can_add_subtask %}
+        <li><a href="{% url 'tracker:subtask_create' task.pk %}">Add subtask</a></li>
+    {% endif %}
+    {% if can_add_update %}
+        <li><a href="{% url 'tracker:update_create' task.pk %}">Add update</a></li>
+    {% endif %}
+</ul>
+
+<h3>Subtasks</h3>
+{% include "tracker/_task_table.html" with task_rows=subtask_rows %}
+
+<h3>Updates</h3>
+{% if updates %}
     <ul>
-        {% if can_update %}
-            <li><a href="{% url 'tracker:task_update' task.pk %}">Edit task</a></li>
-        {% endif %}
-        {% if can_delete %}
-            <li><a href="{% url 'tracker:task_delete' task.pk %}">Delete task</a></li>
-        {% endif %}
-        {% if can_edit_status %}
-            <li><a href="{% url 'tracker:task_edit_status' task.pk %}">Change status</a></li>
-        {% endif %}
-        {% if can_add_subtask %}
-            <li><a href="{% url 'tracker:subtask_create' task.pk %}">Add subtask</a></li>
-        {% endif %}
-        {% if can_add_update %}
-            <li><a href="{% url 'tracker:update_create' task.pk %}">Add update</a></li>
-        {% endif %}
+        {% for update in updates %}
+            <li>
+                <strong>{{ update.get_update_type_display }}</strong>
+                by {{ update.author.display_name }}
+                ({{ update.created_at }}): {{ update.text }}
+            </li>
+        {% endfor %}
     </ul>
-
-    <h3>Subtasks</h3>
-    {% include "tracker/_task_table.html" with task_rows=subtask_rows %}
-
-    <h3>Updates</h3>
-    {% if updates %}
-        <ul>
-            {% for update in updates %}
-                <li>
-                    <strong>{{ update.get_update_type_display }}</strong>
-                    by {{ update.author.display_name }}
-                    ({{ update.created_at }}): {{ update.text }}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No updates.</p>
-    {% endif %}
-
-    <h3>Discussion</h3>
-    {% if can_comment %}
-        <p><a href="{% url 'tracker:comment_create' task.pk %}">Add comment</a></p>
-    {% endif %}
-    {% if comment_tree %}
-        <ul>
-            {% for comment in comment_tree %}
-                {% include "tracker/comment_tree.html" with comment=comment can_comment=can_comment %}
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No comments yet.</p>
-    {% endif %}
-
 {% else %}
-    <p><em>Private task — content hidden</em></p>
-    <p><strong>Scope:</strong> {{ task.get_scope_type_display }}</p>
-    <p><strong>Owner:</strong>
-        {% if task.user %}{{ task.user.display_name }}{% elif task.assignee %}{{ task.assignee.display_name }}{% else %}—{% endif %}
-    </p>
-    <p><strong>Status:</strong> {{ task.get_status_display }}</p>
-    <p><strong>Priority:</strong> {{ task.get_priority_display }}</p>
-    <p><strong>Due date:</strong> {{ task.due_date|default:"—" }}</p>
-    <p><strong>Created:</strong> {{ task.created_at }}</p>
-    <p><strong>Updated:</strong> {{ task.updated_at }}</p>
-    {% if task.completed_at %}<p><strong>Completed:</strong> {{ task.completed_at }}</p>{% endif %}
+    <p>No updates.</p>
+{% endif %}
 
-    <h3>Discussion</h3>
-    <p><em>Discussion hidden — private task content.</em></p>
+<h3>Discussion</h3>
+{% if can_comment %}
+    <p><a href="{% url 'tracker:comment_create' task.pk %}">Add comment</a></p>
+{% endif %}
+{% if comment_tree %}
+    <ul>
+        {% for comment in comment_tree %}
+            {% include "tracker/comment_tree.html" with comment=comment can_comment=can_comment %}
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No comments yet.</p>
 {% endif %}
 
 <p><a href="{% url 'tracker:task_list' %}">Back to tasks</a></p>
