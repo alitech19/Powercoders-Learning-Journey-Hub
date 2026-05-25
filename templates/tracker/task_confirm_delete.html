@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Delete task — PowerHUB{% endblock %}
+
+{% block content %}
+<h2>Delete task</h2>
+<p>Are you sure you want to delete: <strong>{{ display_title }}</strong>?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Yes, delete</button>
+</form>
+<p><a href="{% url 'tracker:task_detail' task.pk %}">Cancel</a></p>
+{% endblock %}

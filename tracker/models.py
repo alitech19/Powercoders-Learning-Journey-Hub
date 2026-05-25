@@ -140,10 +140,11 @@ class Task(models.Model):
             if self.user_id or self.group_id:
                 errors['scope_type'] = 'Only cohort should be set for cohort scope.'
 
-        if self.visibility == self.Visibility.PRIVATE and self.scope_type != self.ScopeType.USER:
-            errors['visibility'] = 'Private visibility is only allowed for user-scoped tasks.'
+        # Private visibility is allowed for all scope types.
 
         if self.parent_id is not None:
+            if self.pk and self.parent_id == self.pk:
+                errors['parent'] = 'A task cannot be its own parent.'
             parent = self.parent
             if parent and parent.scope_type != self.scope_type:
                 errors['parent'] = 'Subtask must belong to the same scope as parent.'

@@ -6,6 +6,15 @@
 <h2>Dashboard ({{ role }})</h2>
 
 {% if user.role == "admin" %}
+    <h3>Task counts by status</h3>
+    {% if tasks_by_status %}
+        <ul>
+            {% for status, count in tasks_by_status.items %}
+                <li>{{ status }}: {{ count }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     <h3>All public tasks</h3>
     {% include "tracker/_task_table.html" with task_rows=public_task_rows %}
 
@@ -27,10 +36,22 @@
         <p>No groups assigned via GroupTeacher.</p>
     {% endif %}
 
-    <h3>Public tasks (assigned groups)</h3>
+    {% if assigned_cohorts %}
+        <h3>Accessible cohorts</h3>
+        <ul>
+            {% for cohort in assigned_cohorts %}
+                <li>
+                    {{ cohort.name }}
+                    — <a href="{% url 'tracker:cohort_task_create' cohort.pk %}">Create cohort task</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <h3>Public tasks</h3>
     {% include "tracker/_task_table.html" with task_rows=public_task_rows %}
 
-    <h3>Private personal tasks (metadata only)</h3>
+    <h3>Private tasks (group/cohort)</h3>
     {% include "tracker/_task_table.html" with task_rows=private_metadata_rows %}
 
 {% else %}
@@ -57,4 +78,5 @@
     {% include "tracker/_task_table.html" with task_rows=cohort_task_rows %}
 {% endif %}
 
+<p><a href="{% url 'tracker:task_list' %}">View all tasks</a></p>
 {% endblock %}

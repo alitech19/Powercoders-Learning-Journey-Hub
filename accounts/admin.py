@@ -1,7 +1,13 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import Group as AuthGroup
 
 from .models import User
+
+try:
+    admin.site.unregister(AuthGroup)
+except admin.sites.NotRegistered:
+    pass
 
 
 @admin.register(User)
@@ -15,8 +21,8 @@ class CustomUserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Site profile', {'fields': ('display_name', 'avatar')}),
-        ('Powerhub', {'fields': ('role', 'cohort', 'group')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('PowerHUB', {'fields': ('role', 'cohort', 'group')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
