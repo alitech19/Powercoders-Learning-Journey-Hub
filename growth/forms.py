@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 
-from .models import DailyJournalEntry, Feedback, Goal, Habit, WellbeingCheckIn, WeeklyReflection
+from .models import DailyJournalEntry, Feedback, Goal, GoalSubgoal, Habit, WellbeingCheckIn, WeeklyReflection
 
 DATE_WIDGET = forms.DateInput(attrs={'type': 'date'})
 
@@ -77,6 +77,59 @@ class GoalForm(forms.ModelForm):
                 'Progress must be between 0 and 100.'
             )
         return value
+
+
+class TeacherGoalForm(forms.ModelForm):
+    """Goal form for teachers — includes student selector, forces public visibility."""
+    student = forms.ModelChoiceField(queryset=None)
+
+    class Meta:
+        model = Goal
+        fields = (
+            'student', 'title', 'description', 'target_date',
+            'progress_percent',
+        )
+        widgets = {
+            'target_date': DATE_WIDGET,
+            'description': forms.Textarea(attrs={
+                'rows': 8,
+                'cols': 70,
+                'placeholder': GOAL_DESCRIPTION_PLACEHOLDER,
+            }),
+            'progress_percent': forms.NumberInput(attrs={
+                'min': 0, 'max': 100, 'step': 5,
+            }),
+        }
+        labels = {
+            'progress_percent': 'Progress (%)',
+        }
+
+    def __init__(self, *args, student_queryset=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if student_queryset is not None:
+            self.fields['student'].queryset = student_queryset
+
+    def clean_target_date(self):
+        target_date = self.cleaned_data.get('target_date')
+        if target_date and not self.instance.pk:
+            if target_date < timezone.now().date():
+                raise forms.ValidationError(
+                    'Target date cannot be in the past for a new goal.'
+                )
+        return target_date
+
+
+class GoalSubgoalForm(forms.ModelForm):
+    class Meta:
+        model = GoalSubgoal
+        fields = ('title', 'description', 'order')
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3, 'cols': 70}),
+            'order': forms.NumberInput(attrs={'min': 0}),
+        }
+        labels = {
+            'order': 'Sort order',
+        }
 
 
 class ReflectionForm(forms.ModelForm):

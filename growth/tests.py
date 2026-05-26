@@ -12,6 +12,7 @@ from .models import (
     DailyJournalEntry,
     Feedback,
     Goal,
+    GoalSubgoal,
     Habit,
     HabitLog,
     WellbeingCheckIn,
@@ -35,11 +36,14 @@ from .services.habits import (
 from .services.permissions import (
     can_complete_habit,
     can_create_feedback,
+    can_create_goal_for_student,
     can_delete_habit,
+    can_edit_goal,
     can_edit_habit,
     can_edit_journal_entry,
     can_edit_wellbeing_checkin,
     can_log_habit,
+    can_manage_goal_subgoals,
     can_reactivate_habit,
     can_view_goal,
     can_view_habit,
@@ -93,16 +97,18 @@ class GrowthTestBase(TestCase):
         today = date.today()
         cls.private_goal = Goal.objects.create(
             student=cls.student,
+            created_by=cls.student,
             title='Private goal',
-            description='My private SMART goal description.',
+            description='My private goal description.',
             target_date=today + timedelta(days=30),
             progress_percent=10,
             visibility=Goal.Visibility.PRIVATE,
         )
         cls.public_goal = Goal.objects.create(
             student=cls.student,
+            created_by=cls.student,
             title='Public goal',
-            description='My public SMART goal description.',
+            description='My public goal description.',
             target_date=today + timedelta(days=30),
             progress_percent=25,
             visibility=Goal.Visibility.PUBLIC,
@@ -1225,6 +1231,262 @@ class WellbeingViewTests(GrowthTestBase):
         content = response.content.decode()
         habits_pos = content.find('Habits')
         wellbeing_pos = content.find('<strong>Wellbeing</strong>')
-        goals_pos = content.find('SMART Goals')
+        goals_pos = content.find('Goals')
         self.assertGreater(wellbeing_pos, habits_pos)
         self.assertGreater(goals_pos, wellbeing_pos)
+
+
+# -- Goals naming tests ----------------------------------------------------
+
+class GoalNamingTests(GrowthTestBase):
+
+    def test_navigation_shows_goals_not_smart_goals(self):
+        self.client.login(email='student@test.com', password='pass')
+        response = self.client.get('/growth/goals/')
+        self.assertContains(response, '<strong>Goals</strong>')
+        self.assertNotContains(response, 'SMART Goals')
+
+    def test_goal_list_heading_says_goals(self):
+        self.client.login(email='student@test.com', password='pass')
+        response = self.client.get('/growth/goals/')
+        self.assertContains(response, '<h2>Goals</h2>')
+        self.assertNotContains(response, 'SMART')
+
+    def test_goal_form_heading_says_new_goal(self):
+        self.client.login(email='student@test.com', password='pass')
+        response = self.client.get('/growth/goals/new/')
+        self.assertContains(response, 'New goal')
+        self.assertNotContains(response, 'SMART goal')
+
+
+# -- Teacher goal creation tests -------------------------------------------
+
+class TeacherGoalCreationTests(GrowthTestBase):
+
+    def test_teacher_can_create_goal_for_assigned_student(self):
+        self.client.login(email='teacher@test.com', password='pass')
+        data = {
+            'student': self.student.pk,
+            'title': 'Teacher-created goal',
+            'description': 'Learn Django forms.',
+            'target_date': (date.today() + timedelta(days=14)).isoformat(),
+            'progress_percent': 0,
+        }
+        response = self.client.post('/growth/goals/new/', data)
+        self.assertEqual(response.status_code, 302)
+        goal = Goal.objects.get(title='Teacher-created goal')
+        self.assertEqual(goal.student, self.student)
+        self.assertEqual(goal.created_by, self.teacher)
+        self.assertEqual(goal.visibility, Goal.Visibility.PUBLIC)
+
+    def test_teacher_cannot_create_goal_for_unrelated_student(self):
+        self.client.login(email='teacher@test.com', password='pass')
+        data = {
+            'student': self.other_student.pk,
+            'title': 'Should not work',
+            'description': 'Desc.',
+            'target_date': (date.today() + timedelta(days=14)).isoformat(),
+            'progress_percent': 0,
+        }
+        response = self.client.post('/growth/goals/new/', data)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Goal.objects.filter(title='Should not work').exists())
+
+    def test_teacher_created_goal_visible_to_student(self):
+        goal = Goal.objects.create(
+            student=self.student,
+            created_by=self.teacher,
+            title='Teacher goal',
+            description='Desc.',
+            target_date=date.today() + timedelta(days=14),
+            visibility=Goal.Visibility.PUBLIC,
+        )
+        self.assertTrue(can_view_goal(self.student, goal))
+
+    def test_teacher_created_goal_defaults_to_public(self):
+        self.client.login(email='teacher@test.com', password='pass')
+        data = {
+            'student': self.student.pk,
+            'title': 'Public by default',
+            'description': 'Desc.',
+            'target_date': (date.today() + timedelta(days=14)).isoformat(),
+            'progress_percent': 0,
+        }
+        self.client.post('/growth/goals/new/', data)
+        goal = Goal.objects.get(title='Public by default')
+        self.assertEqual(goal.visibility, Goal.Visibility.PUBLIC)
+
+    def test_other_student_cannot_see_teacher_created_goal(self):
+        goal = Goal.objects.create(
+            student=self.student,
+            created_by=self.teacher,
+            title='Teacher goal',
+            description='Desc.',
+            target_date=date.today() + timedelta(days=14),
+            visibility=Goal.Visibility.PUBLIC,
+        )
+        self.assertFalse(can_view_goal(self.other_student, goal))
+
+    def test_can_create_goal_for_student_permission(self):
+        self.assertTrue(can_create_goal_for_student(self.teacher, self.student))
+        self.assertFalse(can_create_goal_for_student(self.teacher, self.other_student))
+        self.assertTrue(can_create_goal_for_student(self.student, self.student))
+        self.assertFalse(can_create_goal_for_student(self.student, self.other_student))
+
+    def test_teacher_can_edit_goal_they_created(self):
+        goal = Goal.objects.create(
+            student=self.student,
+            created_by=self.teacher,
+            title='Teacher goal',
+            description='Desc.',
+            target_date=date.today() + timedelta(days=14),
+            visibility=Goal.Visibility.PUBLIC,
+        )
+        self.assertTrue(can_edit_goal(self.teacher, goal))
+
+    def test_teacher_cannot_edit_student_created_goal(self):
+        self.assertFalse(can_edit_goal(self.teacher, self.public_goal))
+
+    def test_unrelated_teacher_cannot_see_goal(self):
+        goal = Goal.objects.create(
+            student=self.student,
+            created_by=self.teacher,
+            title='Teacher goal',
+            description='Desc.',
+            target_date=date.today() + timedelta(days=14),
+            visibility=Goal.Visibility.PUBLIC,
+        )
+        self.assertFalse(can_view_goal(self.unrelated_teacher, goal))
+
+
+# -- Subgoal tests ---------------------------------------------------------
+
+class SubgoalModelTests(GrowthTestBase):
+
+    def test_create_subgoal(self):
+        sg = GoalSubgoal.objects.create(
+            goal=self.public_goal,
+            title='Step 1',
+            created_by=self.student,
+        )
+        self.assertEqual(sg.status, GoalSubgoal.Status.PENDING)
+        self.assertIsNone(sg.completed_at)
+
+    def test_subgoal_progress_no_subgoals(self):
+        self.assertEqual(
+            self.public_goal.subgoal_progress_percent,
+            self.public_goal.progress_percent,
+        )
+
+    def test_subgoal_progress_half_done(self):
+        for i in range(4):
+            GoalSubgoal.objects.create(
+                goal=self.public_goal,
+                title=f'Step {i+1}',
+                status=GoalSubgoal.Status.DONE if i < 2 else GoalSubgoal.Status.PENDING,
+                created_by=self.student,
+            )
+        self.assertEqual(self.public_goal.subgoal_progress_percent, 50)
+
+    def test_subgoal_progress_all_done(self):
+        for i in range(3):
+            GoalSubgoal.objects.create(
+                goal=self.public_goal,
+                title=f'Step {i+1}',
+                status=GoalSubgoal.Status.DONE,
+                created_by=self.student,
+            )
+        self.assertEqual(self.public_goal.subgoal_progress_percent, 100)
+
+
+class SubgoalPermissionTests(GrowthTestBase):
+
+    def test_student_can_manage_subgoals_of_own_goal(self):
+        self.assertTrue(can_manage_goal_subgoals(self.student, self.public_goal))
+
+    def test_teacher_can_manage_subgoals_of_goal_they_created(self):
+        goal = Goal.objects.create(
+            student=self.student,
+            created_by=self.teacher,
+            title='Teacher goal',
+            description='Desc.',
+            target_date=date.today() + timedelta(days=14),
+            visibility=Goal.Visibility.PUBLIC,
+        )
+        self.assertTrue(can_manage_goal_subgoals(self.teacher, goal))
+
+    def test_teacher_cannot_manage_subgoals_of_student_goal(self):
+        self.assertFalse(can_manage_goal_subgoals(self.teacher, self.public_goal))
+
+    def test_teacher_cannot_manage_subgoals_of_private_goal(self):
+        self.assertFalse(can_manage_goal_subgoals(self.teacher, self.private_goal))
+
+    def test_other_student_cannot_manage_subgoals(self):
+        self.assertFalse(can_manage_goal_subgoals(self.other_student, self.public_goal))
+
+    def test_unrelated_teacher_cannot_manage_subgoals(self):
+        self.assertFalse(can_manage_goal_subgoals(self.unrelated_teacher, self.public_goal))
+
+
+class SubgoalViewTests(GrowthTestBase):
+
+    def test_student_can_add_subgoal(self):
+        self.client.login(email='student@test.com', password='pass')
+        data = {'title': 'My subgoal', 'description': '', 'order': 0}
+        response = self.client.post(
+            f'/growth/goals/{self.public_goal.pk}/subgoals/new/', data,
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            GoalSubgoal.objects.filter(
+                goal=self.public_goal, title='My subgoal',
+            ).exists()
+        )
+
+    def test_toggle_subgoal_done(self):
+        sg = GoalSubgoal.objects.create(
+            goal=self.public_goal, title='Toggle me',
+            created_by=self.student,
+        )
+        self.client.login(email='student@test.com', password='pass')
+        response = self.client.post(
+            f'/growth/goals/{self.public_goal.pk}/subgoals/{sg.pk}/toggle/',
+        )
+        self.assertEqual(response.status_code, 302)
+        sg.refresh_from_db()
+        self.assertEqual(sg.status, GoalSubgoal.Status.DONE)
+        self.assertIsNotNone(sg.completed_at)
+
+    def test_toggle_done_subgoal_back_to_pending(self):
+        sg = GoalSubgoal.objects.create(
+            goal=self.public_goal, title='Toggle back',
+            status=GoalSubgoal.Status.DONE,
+            completed_at=timezone.now(),
+            created_by=self.student,
+        )
+        self.client.login(email='student@test.com', password='pass')
+        self.client.post(
+            f'/growth/goals/{self.public_goal.pk}/subgoals/{sg.pk}/toggle/',
+        )
+        sg.refresh_from_db()
+        self.assertEqual(sg.status, GoalSubgoal.Status.PENDING)
+        self.assertIsNone(sg.completed_at)
+
+    def test_unauthorized_user_cannot_add_subgoal(self):
+        self.client.login(email='other@test.com', password='pass')
+        data = {'title': 'Blocked', 'description': '', 'order': 0}
+        response = self.client.post(
+            f'/growth/goals/{self.public_goal.pk}/subgoals/new/', data,
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(GoalSubgoal.objects.filter(title='Blocked').exists())
+
+    def test_goal_detail_shows_subgoals(self):
+        GoalSubgoal.objects.create(
+            goal=self.public_goal, title='Visible subgoal',
+            created_by=self.student,
+        )
+        self.client.login(email='student@test.com', password='pass')
+        response = self.client.get(f'/growth/goals/{self.public_goal.pk}/')
+        self.assertContains(response, 'Visible subgoal')
+        self.assertContains(response, 'Add subgoal')

@@ -21,9 +21,9 @@
     {% endif %}
     |
     {% if "/growth/goals/" in request.path %}
-        <strong>SMART Goals</strong>
+        <strong>Goals</strong>
     {% else %}
-        <a href="{% url 'growth:goal_list' %}">SMART Goals</a>
+        <a href="{% url 'growth:goal_list' %}">Goals</a>
     {% endif %}
     |
     {% if "/growth/reflections/" in request.path %}

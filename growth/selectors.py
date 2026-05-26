@@ -31,11 +31,11 @@ def get_students_for_teacher(user):
 def get_visible_goals_for_user(user):
     """
     student  -> own goals (private + public)
-    teacher  -> public goals of assigned students
+    teacher  -> public goals of assigned students (includes teacher-created)
     admin    -> all public goals
     other    -> none
     """
-    qs = Goal.objects.select_related('student')
+    qs = Goal.objects.select_related('student', 'created_by')
 
     if user_is_student(user):
         return qs.filter(student=user)

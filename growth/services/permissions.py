@@ -12,7 +12,7 @@ from tracker.permissions import (
     user_is_teacher,
 )
 
-from ..models import DailyJournalEntry, Goal, Habit, WellbeingCheckIn, WeeklyReflection
+from ..models import DailyJournalEntry, Goal, GoalSubgoal, Habit, WellbeingCheckIn, WeeklyReflection
 
 
 # -- helpers ---------------------------------------------------------------
@@ -41,19 +41,63 @@ def can_view_goal(user, goal):
 
 
 def can_edit_goal(user, goal):
-    return user.is_authenticated and goal.student_id == user.pk
+    if not user.is_authenticated:
+        return False
+    if goal.student_id == user.pk and (goal.created_by_id is None or goal.created_by_id == user.pk):
+        return True
+    if goal.created_by_id == user.pk and (user_is_teacher(user) or user_is_admin(user)):
+        return True
+    return False
 
 
 def can_mark_goal_achieved(user, goal):
-    return (
-        user.is_authenticated
-        and goal.student_id == user.pk
-        and goal.status == Goal.Status.ACTIVE
-    )
+    if not user.is_authenticated:
+        return False
+    if goal.status != Goal.Status.ACTIVE:
+        return False
+    if goal.student_id == user.pk:
+        return True
+    if goal.created_by_id == user.pk and (user_is_teacher(user) or user_is_admin(user)):
+        return True
+    return False
 
 
 def can_delete_goal(user, goal):
-    return user.is_authenticated and goal.student_id == user.pk
+    if not user.is_authenticated:
+        return False
+    if goal.student_id == user.pk and (goal.created_by_id is None or goal.created_by_id == user.pk):
+        return True
+    if goal.created_by_id == user.pk and (user_is_teacher(user) or user_is_admin(user)):
+        return True
+    return False
+
+
+def can_create_goal_for_student(user, student):
+    if not user.is_authenticated:
+        return False
+    if user_is_student(user):
+        return student.pk == user.pk
+    if user_is_teacher(user):
+        return _teacher_supervises_student(user, student)
+    if user_is_admin(user):
+        return True
+    return False
+
+
+def can_manage_goal_subgoals(user, goal):
+    return can_edit_goal(user, goal)
+
+
+def can_toggle_subgoal(user, subgoal):
+    return can_manage_goal_subgoals(user, subgoal.goal)
+
+
+def can_edit_subgoal(user, subgoal):
+    return can_manage_goal_subgoals(user, subgoal.goal)
+
+
+def can_delete_subgoal(user, subgoal):
+    return can_manage_goal_subgoals(user, subgoal.goal)
 
 
 # -- Reflection permissions ------------------------------------------------

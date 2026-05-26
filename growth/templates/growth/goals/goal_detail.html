@@ -6,10 +6,13 @@
 <h2>{{ goal.title }}</h2>
 
 <p><strong>Student:</strong> {{ goal.student.display_name }}</p>
+{% if goal.created_by %}
+<p><strong>Created by:</strong> {{ goal.created_by.display_name }}</p>
+{% endif %}
 <p><strong>Status:</strong> {{ goal.get_status_display }}</p>
 <p><strong>Visibility:</strong> {{ goal.get_visibility_display }}</p>
 <p><strong>Target date:</strong> {{ goal.target_date }}</p>
-<p><strong>Progress:</strong> {{ goal.progress_percent }}%</p>
+<p><strong>Progress:</strong> {{ goal.subgoal_progress_percent }}%</p>
 {% if goal.achieved_at %}
 <p><strong>Achieved at:</strong> {{ goal.achieved_at }}</p>
 {% endif %}
@@ -31,6 +34,55 @@
         {% csrf_token %}
         <button type="submit">Mark as achieved</button>
     </form>
+{% endif %}
+
+<hr>
+
+<h3>Subgoals</h3>
+{% if subgoals %}
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Completed</th>
+            {% if can_manage_subgoals %}
+            <th>Actions</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for sg in subgoals %}
+        <tr>
+            <td>{{ sg.title }}</td>
+            <td>{{ sg.description|truncatewords:10 }}</td>
+            <td>{{ sg.get_status_display }}</td>
+            <td>{% if sg.completed_at %}{{ sg.completed_at }}{% else %}—{% endif %}</td>
+            {% if can_manage_subgoals %}
+            <td>
+                <form method="post" action="{% url 'growth:subgoal_toggle' goal_pk=goal.pk subgoal_pk=sg.pk %}" style="display:inline">
+                    {% csrf_token %}
+                    {% if sg.status == 'pending' %}
+                        <button type="submit">Mark done</button>
+                    {% else %}
+                        <button type="submit">Mark pending</button>
+                    {% endif %}
+                </form>
+                | <a href="{% url 'growth:subgoal_edit' goal_pk=goal.pk subgoal_pk=sg.pk %}">Edit</a>
+                | <a href="{% url 'growth:subgoal_delete' goal_pk=goal.pk subgoal_pk=sg.pk %}">Delete</a>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No subgoals yet.</p>
+{% endif %}
+
+{% if can_manage_subgoals %}
+    <p><a href="{% url 'growth:subgoal_create' goal_pk=goal.pk %}">Add subgoal</a></p>
 {% endif %}
 
 <hr>

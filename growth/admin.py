@@ -1,20 +1,39 @@
 from django.contrib import admin
 
-from .models import DailyJournalEntry, Feedback, Goal, Habit, HabitLog, WellbeingCheckIn, WeeklyReflection
+from .models import DailyJournalEntry, Feedback, Goal, GoalSubgoal, Habit, HabitLog, WellbeingCheckIn, WeeklyReflection
+
+
+class GoalSubgoalInline(admin.TabularInline):
+    model = GoalSubgoal
+    extra = 0
+    readonly_fields = ('created_at', 'updated_at', 'completed_at')
 
 
 @admin.register(Goal)
 class GoalAdmin(admin.ModelAdmin):
     list_display = (
-        'title', 'student', 'visibility', 'status',
+        'title', 'student', 'created_by', 'visibility', 'status',
         'progress_percent', 'target_date', 'achieved_at', 'updated_at',
     )
     list_filter = ('visibility', 'status')
     search_fields = (
         'title', 'student__display_name', 'student__email',
     )
-    autocomplete_fields = ('student',)
+    autocomplete_fields = ('student', 'created_by')
     readonly_fields = ('created_at', 'updated_at', 'achieved_at')
+    inlines = [GoalSubgoalInline]
+
+
+@admin.register(GoalSubgoal)
+class GoalSubgoalAdmin(admin.ModelAdmin):
+    list_display = (
+        'title', 'goal', 'status', 'order',
+        'created_by', 'completed_at', 'created_at',
+    )
+    list_filter = ('status',)
+    search_fields = ('title', 'goal__title')
+    autocomplete_fields = ('goal', 'created_by')
+    readonly_fields = ('created_at', 'updated_at', 'completed_at')
 
 
 @admin.register(WeeklyReflection)

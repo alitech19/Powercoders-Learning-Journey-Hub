@@ -5,9 +5,7 @@
 {% block growth_content %}
 <h2>{{ title }}</h2>
 
-<p>Write a clear learning goal. A good goal can still follow the SMART idea:
-describe what should be learned or improved, how success can be measured, why it is
-realistic, why it is relevant, and by when it should be completed.</p>
+<p>Goal: <strong>{{ goal.title }}</strong></p>
 
 <form method="post">
     {% csrf_token %}
@@ -34,8 +32,8 @@ realistic, why it is relevant, and by when it should be completed.</p>
     </p>
     {% endfor %}
 
-    <button type="submit">Save</button>
+    <button type="submit">Save subgoal</button>
 </form>
 
-<p><a href="{% url 'growth:goal_list' %}">Cancel</a></p>
+<p><a href="{% url 'growth:goal_detail' pk=goal.pk %}">Cancel</a></p>
 {% endblock growth_content %}

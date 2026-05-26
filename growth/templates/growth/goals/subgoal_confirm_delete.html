@@ -1,0 +1,16 @@
+{% extends "growth/base.html" %}
+
+{% block title %}Delete subgoal — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>Delete subgoal</h2>
+<p>Are you sure you want to delete subgoal <strong>{{ subgoal.title }}</strong>
+from goal <strong>{{ goal.title }}</strong>?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Yes, delete</button>
+</form>
+
+<p><a href="{% url 'growth:goal_detail' pk=goal.pk %}">Cancel</a></p>
+{% endblock growth_content %}

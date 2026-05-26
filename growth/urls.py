@@ -38,6 +38,12 @@ urlpatterns = [
     path('goals/<int:pk>/delete/', goals.goal_delete, name='goal_delete'),
     path('goals/<int:pk>/mark-achieved/', goals.goal_mark_achieved, name='goal_mark_achieved'),
 
+    # Subgoals
+    path('goals/<int:goal_pk>/subgoals/new/', goals.subgoal_create, name='subgoal_create'),
+    path('goals/<int:goal_pk>/subgoals/<int:subgoal_pk>/edit/', goals.subgoal_edit, name='subgoal_edit'),
+    path('goals/<int:goal_pk>/subgoals/<int:subgoal_pk>/delete/', goals.subgoal_delete, name='subgoal_delete'),
+    path('goals/<int:goal_pk>/subgoals/<int:subgoal_pk>/toggle/', goals.subgoal_toggle, name='subgoal_toggle'),
+
     # Reflections
     path('reflections/', reflections.reflection_list, name='reflection_list'),
     path('reflections/new/', reflections.reflection_create, name='reflection_create'),

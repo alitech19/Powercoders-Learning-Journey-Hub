@@ -152,7 +152,8 @@
 
 <hr>
 
-<h3>Public SMART Goals</h3>
+<h3>Goals</h3>
+<p><a href="{% url 'growth:goal_create' %}">Create goal for this student</a></p>
 {% if goal_rows %}
 <table border="1" cellpadding="4">
     <thead>
@@ -161,6 +162,7 @@
             <th>Status</th>
             <th>Progress</th>
             <th>Target date</th>
+            <th>Created by</th>
             <th>Feedback</th>
         </tr>
     </thead>
@@ -169,8 +171,9 @@
         <tr>
             <td><a href="{% url 'growth:goal_detail' pk=row.item.pk %}">{{ row.item.title }}</a></td>
             <td>{{ row.item.get_status_display }}</td>
-            <td>{{ row.item.progress_percent }}%</td>
+            <td>{{ row.item.subgoal_progress_percent }}%</td>
             <td>{{ row.item.target_date }}</td>
+            <td>{% if row.item.created_by %}{{ row.item.created_by.display_name }}{% else %}—{% endif %}</td>
             <td>
                 {% if row.can_give_feedback %}
                     <a href="{% url 'growth:feedback_create' content_type='goal' object_id=row.item.pk %}">Leave feedback</a>
@@ -183,7 +186,7 @@
     </tbody>
 </table>
 {% else %}
-<p>No public goals.</p>
+<p>No goals.</p>
 {% endif %}
 
 <hr>

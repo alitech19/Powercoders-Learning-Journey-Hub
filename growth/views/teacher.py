@@ -61,7 +61,7 @@ def student_growth_detail(request, student_id):
 
     goals = Goal.objects.filter(
         student=student, visibility=Goal.Visibility.PUBLIC,
-    ).order_by('-updated_at')
+    ).select_related('created_by').order_by('-updated_at')
 
     reflections = WeeklyReflection.objects.filter(
         student=student,

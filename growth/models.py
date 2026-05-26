@@ -23,6 +23,13 @@ class Goal(models.Model):
         on_delete=models.CASCADE,
         related_name='goals',
     )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='goals_created',
+    )
     title = models.CharField(max_length=255)
     description = models.TextField()
     target_date = models.DateField()
@@ -71,6 +78,15 @@ class Goal(models.Model):
             and self.target_date < timezone.now().date()
         )
 
+    @property
+    def subgoal_progress_percent(self):
+        subgoals = self.subgoals.all()
+        total = subgoals.count()
+        if total == 0:
+            return self.progress_percent
+        done = subgoals.filter(status=GoalSubgoal.Status.DONE).count()
+        return round(done / total * 100)
+
     def save(self, *args, **kwargs):
         if self.status == self.Status.ACHIEVED:
             self.progress_percent = 100
@@ -79,6 +95,42 @@ class Goal(models.Model):
         elif self.status != self.Status.ACHIEVED:
             self.achieved_at = None
         super().save(*args, **kwargs)
+
+
+class GoalSubgoal(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        DONE = 'done', 'Done'
+
+    goal = models.ForeignKey(
+        Goal,
+        on_delete=models.CASCADE,
+        related_name='subgoals',
+    )
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
+    order = models.PositiveIntegerField(default=0)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='subgoals_created',
+    )
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'created_at']
+
+    def __str__(self):
+        return self.title
 
 
 class WeeklyReflection(models.Model):
