@@ -6,7 +6,7 @@ from django.utils import timezone
 from accounts.models import User
 from tracker.permissions import user_is_admin, user_is_teacher
 
-from ..models import DailyJournalEntry, Goal, Habit, WeeklyReflection
+from ..models import DailyJournalEntry, Goal, Habit, WellbeingCheckIn, WeeklyReflection
 from ..selectors import get_students_for_teacher
 from ..services.dashboard import get_growth_summary_for_student
 from ..services.habits import (
@@ -55,6 +55,10 @@ def student_growth_detail(request, student_id):
     today = timezone.now().date()
     week_start = get_week_start(today)
 
+    wellbeing_checkins = WellbeingCheckIn.objects.filter(
+        student=student,
+    ).order_by('-check_date')
+
     goals = Goal.objects.filter(
         student=student, visibility=Goal.Visibility.PUBLIC,
     ).order_by('-updated_at')
@@ -75,6 +79,10 @@ def student_growth_detail(request, student_id):
         student=student, status=Habit.Status.COMPLETED,
     ).order_by('-completed_at')
 
+    wellbeing_fb = [
+        {'item': w, 'can_give_feedback': can_create_feedback(user, w)}
+        for w in wellbeing_checkins
+    ]
     goal_fb = [
         {'item': g, 'can_give_feedback': can_create_feedback(user, g)}
         for g in goals
@@ -107,4 +115,5 @@ def student_growth_detail(request, student_id):
         'reflection_rows': refl_fb,
         'journal_rows': journal_fb,
         'habit_rows': habit_rows,
+        'wellbeing_rows': wellbeing_fb,
     })

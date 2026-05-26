@@ -233,6 +233,68 @@ class HabitLog(models.Model):
         return f'{self.habit.title} — {self.date} — {self.get_status_display()}'
 
 
+class WellbeingCheckIn(models.Model):
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='wellbeing_checkins',
+    )
+    check_date = models.DateField()
+    energy = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+    )
+    calmness = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+    )
+    engagement = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+    )
+    concentration = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+    )
+    sleep = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+    )
+    physical_activity = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+    )
+    note = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    feedback = GenericRelation(
+        'growth.Feedback',
+        content_type_field='content_type',
+        object_id_field='object_id',
+    )
+
+    class Meta:
+        ordering = ['-check_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['student', 'check_date'],
+                name='unique_wellbeing_per_student_per_day',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.student} — {self.check_date}'
+
+    @property
+    def wellbeing_average(self):
+        return round(
+            (
+                self.energy
+                + self.calmness
+                + self.engagement
+                + self.concentration
+                + self.sleep
+                + self.physical_activity
+            ) / 6,
+            1,
+        )
+
+
 class Feedback(models.Model):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,

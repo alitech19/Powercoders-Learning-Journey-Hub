@@ -5,7 +5,7 @@ from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
 from ..forms import FeedbackForm
-from ..models import DailyJournalEntry, Goal, Habit, WeeklyReflection
+from ..models import DailyJournalEntry, Goal, Habit, WellbeingCheckIn, WeeklyReflection
 from ..services.permissions import can_create_feedback
 
 MODEL_MAP = {
@@ -13,12 +13,14 @@ MODEL_MAP = {
     'reflection': WeeklyReflection,
     'journal': DailyJournalEntry,
     'habit': Habit,
+    'wellbeing': WellbeingCheckIn,
 }
 
 REDIRECT_MAP = {
     Goal: 'growth:goal_detail',
     WeeklyReflection: 'growth:reflection_detail',
     DailyJournalEntry: 'growth:journal_detail',
+    WellbeingCheckIn: 'growth:wellbeing_detail',
 }
 
 

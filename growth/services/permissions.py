@@ -12,7 +12,7 @@ from tracker.permissions import (
     user_is_teacher,
 )
 
-from ..models import DailyJournalEntry, Goal, Habit, WeeklyReflection
+from ..models import DailyJournalEntry, Goal, Habit, WellbeingCheckIn, WeeklyReflection
 
 
 # -- helpers ---------------------------------------------------------------
@@ -146,6 +146,24 @@ def can_complete_habit(user, habit):
     )
 
 
+# -- Wellbeing permissions -------------------------------------------------
+
+def can_view_wellbeing_checkin(user, checkin):
+    if not user.is_authenticated:
+        return False
+    if checkin.student_id == user.pk:
+        return True
+    if user_is_admin(user):
+        return True
+    if user_is_teacher(user) and _teacher_supervises_student(user, checkin.student):
+        return True
+    return False
+
+
+def can_edit_wellbeing_checkin(user, checkin):
+    return user.is_authenticated and checkin.student_id == user.pk
+
+
 # -- Feedback permissions --------------------------------------------------
 
 def can_view_feedback(user, feedback):
@@ -178,4 +196,6 @@ def can_create_feedback(user, target):
         return can_view_journal_entry(user, target)
     if isinstance(target, Habit):
         return can_view_habit(user, target)
+    if isinstance(target, WellbeingCheckIn):
+        return can_view_wellbeing_checkin(user, target)
     return False

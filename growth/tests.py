@@ -14,6 +14,7 @@ from .models import (
     Goal,
     Habit,
     HabitLog,
+    WellbeingCheckIn,
     WeeklyReflection,
 )
 from .selectors import (
@@ -22,6 +23,7 @@ from .selectors import (
     get_visible_habits_for_user,
     get_visible_journal_entries_for_user,
     get_visible_reflections_for_user,
+    get_visible_wellbeing_checkins_for_user,
 )
 from .services.habits import (
     get_current_weekly_streak,
@@ -36,12 +38,14 @@ from .services.permissions import (
     can_delete_habit,
     can_edit_habit,
     can_edit_journal_entry,
+    can_edit_wellbeing_checkin,
     can_log_habit,
     can_reactivate_habit,
     can_view_goal,
     can_view_habit,
     can_view_journal_entry,
     can_view_reflection,
+    can_view_wellbeing_checkin,
 )
 
 
@@ -124,6 +128,18 @@ class GrowthTestBase(TestCase):
             description='Daily English practice.',
             target_minutes=20,
             target_days_per_week=3,
+        )
+
+        cls.wellbeing = WellbeingCheckIn.objects.create(
+            student=cls.student,
+            check_date=today,
+            energy=7,
+            calmness=8,
+            engagement=8,
+            concentration=6,
+            sleep=9,
+            physical_activity=5,
+            note='Good day overall.',
         )
 
 
@@ -919,3 +935,296 @@ class HabitLoggingViewTests(GrowthTestBase):
         url = f'/growth/habits/{self.habit.pk}/log-today/done/'
         response = self.client.post(url)
         self.assertEqual(response.status_code, 403)
+
+
+# -- Wellbeing model tests -------------------------------------------------
+
+class WellbeingModelTests(GrowthTestBase):
+
+    def test_create_wellbeing_checkin(self):
+        checkin = WellbeingCheckIn.objects.create(
+            student=self.other_student,
+            check_date=date.today(),
+            energy=5, calmness=5, engagement=5,
+            concentration=5, sleep=5, physical_activity=5,
+        )
+        self.assertEqual(checkin.energy, 5)
+
+    def test_scale_below_1_raises_validation_error(self):
+        checkin = WellbeingCheckIn(
+            student=self.other_student,
+            check_date=date.today(),
+            energy=0, calmness=5, engagement=5,
+            concentration=5, sleep=5, physical_activity=5,
+        )
+        with self.assertRaises(ValidationError):
+            checkin.full_clean()
+
+    def test_calmness_below_1_raises_validation_error(self):
+        checkin = WellbeingCheckIn(
+            student=self.other_student,
+            check_date=date.today(),
+            energy=5, calmness=0, engagement=5,
+            concentration=5, sleep=5, physical_activity=5,
+        )
+        with self.assertRaises(ValidationError):
+            checkin.full_clean()
+
+    def test_calmness_above_10_raises_validation_error(self):
+        checkin = WellbeingCheckIn(
+            student=self.other_student,
+            check_date=date.today(),
+            energy=5, calmness=11, engagement=5,
+            concentration=5, sleep=5, physical_activity=5,
+        )
+        with self.assertRaises(ValidationError):
+            checkin.full_clean()
+
+    def test_scale_above_10_raises_validation_error(self):
+        checkin = WellbeingCheckIn(
+            student=self.other_student,
+            check_date=date.today(),
+            energy=11, calmness=5, engagement=5,
+            concentration=5, sleep=5, physical_activity=5,
+        )
+        with self.assertRaises(ValidationError):
+            checkin.full_clean()
+
+    def test_duplicate_checkin_same_student_date(self):
+        with self.assertRaises(IntegrityError):
+            WellbeingCheckIn.objects.create(
+                student=self.student,
+                check_date=self.wellbeing.check_date,
+                energy=5, calmness=5, engagement=5,
+                concentration=5, sleep=5, physical_activity=5,
+            )
+
+    def test_wellbeing_average_uses_calmness_directly(self):
+        checkin = WellbeingCheckIn(
+            student=self.other_student,
+            check_date=date.today(),
+            energy=8, calmness=7, engagement=6,
+            concentration=8, sleep=7, physical_activity=6,
+        )
+        expected = round((8 + 7 + 6 + 8 + 7 + 6) / 6, 1)
+        self.assertEqual(checkin.wellbeing_average, expected)
+        self.assertEqual(checkin.wellbeing_average, 7.0)
+
+    def test_wellbeing_average_does_not_invert_calmness(self):
+        checkin = WellbeingCheckIn(
+            student=self.other_student,
+            check_date=date.today(),
+            energy=5, calmness=5, engagement=5,
+            concentration=5, sleep=5, physical_activity=5,
+        )
+        self.assertEqual(checkin.wellbeing_average, 5.0)
+
+    def test_higher_calmness_raises_average(self):
+        low_calm = WellbeingCheckIn(
+            student=self.other_student,
+            check_date=date(2026, 1, 1),
+            energy=5, calmness=1, engagement=5,
+            concentration=5, sleep=5, physical_activity=5,
+        )
+        high_calm = WellbeingCheckIn(
+            student=self.other_student,
+            check_date=date(2026, 1, 2),
+            energy=5, calmness=10, engagement=5,
+            concentration=5, sleep=5, physical_activity=5,
+        )
+        self.assertGreater(high_calm.wellbeing_average, low_calm.wellbeing_average)
+
+
+# -- Wellbeing visibility --------------------------------------------------
+
+class WellbeingVisibilityTests(GrowthTestBase):
+
+    def test_student_sees_own_checkin(self):
+        self.assertTrue(can_view_wellbeing_checkin(self.student, self.wellbeing))
+
+    def test_teacher_sees_assigned_student_checkin(self):
+        self.assertTrue(can_view_wellbeing_checkin(self.teacher, self.wellbeing))
+
+    def test_other_student_cannot_see_checkin(self):
+        self.assertFalse(can_view_wellbeing_checkin(self.other_student, self.wellbeing))
+
+    def test_unrelated_teacher_cannot_see_checkin(self):
+        self.assertFalse(can_view_wellbeing_checkin(self.unrelated_teacher, self.wellbeing))
+
+    def test_admin_sees_checkin(self):
+        self.assertTrue(can_view_wellbeing_checkin(self.admin, self.wellbeing))
+
+    def test_only_owner_can_edit_checkin(self):
+        self.assertTrue(can_edit_wellbeing_checkin(self.student, self.wellbeing))
+        self.assertFalse(can_edit_wellbeing_checkin(self.teacher, self.wellbeing))
+        self.assertFalse(can_edit_wellbeing_checkin(self.admin, self.wellbeing))
+
+
+class WellbeingSelectorTests(GrowthTestBase):
+
+    def test_student_selector_returns_own_checkins(self):
+        checkins = get_visible_wellbeing_checkins_for_user(self.student)
+        self.assertIn(self.wellbeing, checkins)
+
+    def test_teacher_selector_returns_assigned_student_checkins(self):
+        checkins = get_visible_wellbeing_checkins_for_user(self.teacher)
+        self.assertIn(self.wellbeing, checkins)
+
+    def test_other_student_selector_returns_nothing(self):
+        checkins = get_visible_wellbeing_checkins_for_user(self.other_student)
+        self.assertEqual(checkins.count(), 0)
+
+    def test_admin_selector_returns_all(self):
+        checkins = get_visible_wellbeing_checkins_for_user(self.admin)
+        self.assertIn(self.wellbeing, checkins)
+
+
+# -- Wellbeing feedback permissions ----------------------------------------
+
+class WellbeingFeedbackPermissionTests(GrowthTestBase):
+
+    def test_teacher_can_create_feedback_on_wellbeing(self):
+        self.assertTrue(can_create_feedback(self.teacher, self.wellbeing))
+
+    def test_student_cannot_create_feedback_on_wellbeing(self):
+        self.assertFalse(can_create_feedback(self.student, self.wellbeing))
+
+    def test_unrelated_teacher_cannot_create_feedback_on_wellbeing(self):
+        self.assertFalse(can_create_feedback(self.unrelated_teacher, self.wellbeing))
+
+    def test_admin_can_create_feedback_on_wellbeing(self):
+        self.assertTrue(can_create_feedback(self.admin, self.wellbeing))
+
+
+# -- Wellbeing form validation tests ---------------------------------------
+
+class WellbeingFormValidationTests(TestCase):
+
+    def test_valid_form(self):
+        from .forms import WellbeingCheckInForm
+        data = {
+            'check_date': '2026-05-26',
+            'energy': 7, 'calmness': 8, 'engagement': 8,
+            'concentration': 6, 'sleep': 9, 'physical_activity': 5,
+        }
+        form = WellbeingCheckInForm(data=data)
+        self.assertTrue(form.is_valid())
+
+    def test_missing_required_field_rejected(self):
+        from .forms import WellbeingCheckInForm
+        data = {
+            'check_date': '2026-05-26',
+            'energy': 7, 'calmness': 8, 'engagement': 8,
+            'concentration': 6, 'sleep': 9,
+        }
+        form = WellbeingCheckInForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('physical_activity', form.errors)
+
+
+# -- Wellbeing view tests --------------------------------------------------
+
+class WellbeingViewTests(GrowthTestBase):
+
+    def test_student_can_create_checkin(self):
+        self.client.login(email='student@test.com', password='pass')
+        data = {
+            'check_date': '2026-06-01',
+            'energy': 7, 'calmness': 8, 'engagement': 8,
+            'concentration': 6, 'sleep': 9, 'physical_activity': 5,
+        }
+        response = self.client.post('/growth/wellbeing/new/', data)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            WellbeingCheckIn.objects.filter(
+                student=self.student, check_date=date(2026, 6, 1),
+            ).exists()
+        )
+
+    def test_student_can_view_own_list(self):
+        self.client.login(email='student@test.com', password='pass')
+        response = self.client.get('/growth/wellbeing/')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Wellbeing')
+
+    def test_student_can_view_own_detail(self):
+        self.client.login(email='student@test.com', password='pass')
+        response = self.client.get(f'/growth/wellbeing/{self.wellbeing.pk}/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_student_can_edit_own_checkin(self):
+        self.client.login(email='student@test.com', password='pass')
+        data = {
+            'check_date': self.wellbeing.check_date.isoformat(),
+            'energy': 8, 'calmness': 9, 'engagement': 9,
+            'concentration': 7, 'sleep': 10, 'physical_activity': 6,
+        }
+        response = self.client.post(
+            f'/growth/wellbeing/{self.wellbeing.pk}/edit/', data,
+        )
+        self.assertEqual(response.status_code, 302)
+        self.wellbeing.refresh_from_db()
+        self.assertEqual(self.wellbeing.energy, 8)
+
+    def test_other_student_cannot_view_checkin(self):
+        self.client.login(email='other@test.com', password='pass')
+        response = self.client.get(f'/growth/wellbeing/{self.wellbeing.pk}/')
+        self.assertEqual(response.status_code, 404)
+
+    def test_teacher_can_view_assigned_checkin(self):
+        self.client.login(email='teacher@test.com', password='pass')
+        response = self.client.get(f'/growth/wellbeing/{self.wellbeing.pk}/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_unrelated_teacher_cannot_view_checkin(self):
+        self.client.login(email='unrelated@test.com', password='pass')
+        response = self.client.get(f'/growth/wellbeing/{self.wellbeing.pk}/')
+        self.assertEqual(response.status_code, 404)
+
+    def test_admin_can_view_checkin(self):
+        self.client.login(email='admin@test.com', password='pass')
+        response = self.client.get(f'/growth/wellbeing/{self.wellbeing.pk}/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_wellbeing_list_shows_results(self):
+        self.client.login(email='student@test.com', password='pass')
+        response = self.client.get('/growth/wellbeing/')
+        self.assertContains(response, self.wellbeing.energy)
+
+    def test_form_shows_scale_explanations(self):
+        self.client.login(email='student@test.com', password='pass')
+        response = self.client.get('/growth/wellbeing/new/')
+        self.assertContains(response, '1 = exhausted, 10 = energetic')
+        self.assertContains(response, '1 = very stressed, 10 = very calm')
+        self.assertContains(response, '1 = disengaged, 10 = highly engaged')
+        self.assertContains(response, '1 = very distracted, 10 = highly focused')
+        self.assertContains(response, '1 = very poor sleep, 10 = excellent sleep')
+        self.assertContains(response, '1 = no movement, 10 = very active')
+
+    def test_form_shows_calmness_not_stress(self):
+        self.client.login(email='student@test.com', password='pass')
+        response = self.client.get('/growth/wellbeing/new/')
+        self.assertContains(response, 'Calmness')
+        self.assertNotContains(response, 'Stress')
+
+    def test_list_shows_calmness_column(self):
+        self.client.login(email='student@test.com', password='pass')
+        response = self.client.get('/growth/wellbeing/')
+        self.assertContains(response, 'Calmness')
+        self.assertNotContains(response, 'Stress')
+
+    def test_detail_shows_calmness_scale(self):
+        self.client.login(email='student@test.com', password='pass')
+        response = self.client.get(f'/growth/wellbeing/{self.wellbeing.pk}/')
+        self.assertContains(response, 'Calmness')
+        self.assertContains(response, '1 = very stressed, 10 = very calm')
+
+    def test_navigation_includes_wellbeing(self):
+        self.client.login(email='student@test.com', password='pass')
+        response = self.client.get('/growth/wellbeing/')
+        content = response.content.decode()
+        habits_pos = content.find('Habits')
+        wellbeing_pos = content.find('<strong>Wellbeing</strong>')
+        goals_pos = content.find('SMART Goals')
+        self.assertGreater(wellbeing_pos, habits_pos)
+        self.assertGreater(goals_pos, wellbeing_pos)

@@ -14,6 +14,7 @@
             <th>Active habits</th>
             <th>Habit weekly progress</th>
             <th>Completed habits</th>
+            <th>Latest wellbeing</th>
             <th>Public goals</th>
             <th>Latest reflection</th>
             <th>Feedback count</th>
@@ -33,6 +34,13 @@
             <td>{{ row.active_habits_count }}</td>
             <td>{{ row.habits_on_track }}/{{ row.active_habits_count }} on track</td>
             <td>{{ row.completed_habits_count }}</td>
+            <td>
+                {% if row.latest_wellbeing %}
+                    {{ row.latest_wellbeing.check_date }} (avg {{ row.latest_wellbeing.wellbeing_average }}, calmness {{ row.latest_wellbeing.calmness }})
+                {% else %}
+                    —
+                {% endif %}
+            </td>
             <td>{{ row.public_goals_count }}</td>
             <td>
                 {% if row.latest_reflection %}

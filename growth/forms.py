@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 
-from .models import DailyJournalEntry, Feedback, Goal, Habit, WeeklyReflection
+from .models import DailyJournalEntry, Feedback, Goal, Habit, WellbeingCheckIn, WeeklyReflection
 
 DATE_WIDGET = forms.DateInput(attrs={'type': 'date'})
 
@@ -199,6 +199,56 @@ class HabitForm(forms.ModelForm):
                 'Days per week must be between 1 and 7.'
             )
         return value
+
+
+SCALE_CHOICES = [(i, str(i)) for i in range(1, 11)]
+
+
+class WellbeingCheckInForm(forms.ModelForm):
+    class Meta:
+        model = WellbeingCheckIn
+        fields = (
+            'check_date', 'energy', 'calmness', 'engagement',
+            'concentration', 'sleep', 'physical_activity', 'note',
+        )
+        widgets = {
+            'check_date': DATE_WIDGET,
+            'energy': forms.Select(choices=SCALE_CHOICES),
+            'calmness': forms.Select(choices=SCALE_CHOICES),
+            'engagement': forms.Select(choices=SCALE_CHOICES),
+            'concentration': forms.Select(choices=SCALE_CHOICES),
+            'sleep': forms.Select(choices=SCALE_CHOICES),
+            'physical_activity': forms.Select(choices=SCALE_CHOICES),
+            'note': forms.Textarea(attrs={'rows': 3, 'cols': 70}),
+        }
+        labels = {
+            'physical_activity': 'Physical activity',
+        }
+
+    def __init__(self, *args, student=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._student = student
+        if not self.instance.pk and not self.data:
+            if not self.initial.get('check_date'):
+                self.initial['check_date'] = timezone.now().date()
+
+    def clean(self):
+        cleaned = super().clean()
+        check_date = cleaned.get('check_date')
+
+        if check_date and self._student:
+            qs = WellbeingCheckIn.objects.filter(
+                student=self._student, check_date=check_date,
+            )
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                self.add_error(
+                    'check_date',
+                    'You already have a wellbeing check-in for this date.',
+                )
+
+        return cleaned
 
 
 class FeedbackForm(forms.ModelForm):

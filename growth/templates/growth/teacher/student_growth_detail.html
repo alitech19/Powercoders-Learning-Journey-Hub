@@ -108,6 +108,50 @@
 
 <hr>
 
+<h3>Wellbeing</h3>
+{% if wellbeing_rows %}
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Energy</th>
+            <th>Calmness</th>
+            <th>Engagement</th>
+            <th>Concentration</th>
+            <th>Sleep</th>
+            <th>Physical activity</th>
+            <th>Average</th>
+            <th>Feedback</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in wellbeing_rows %}
+        <tr>
+            <td><a href="{% url 'growth:wellbeing_detail' pk=row.item.pk %}">{{ row.item.check_date }}</a></td>
+            <td>{{ row.item.energy }}</td>
+            <td>{{ row.item.calmness }}</td>
+            <td>{{ row.item.engagement }}</td>
+            <td>{{ row.item.concentration }}</td>
+            <td>{{ row.item.sleep }}</td>
+            <td>{{ row.item.physical_activity }}</td>
+            <td>{{ row.item.wellbeing_average }}</td>
+            <td>
+                {% if row.can_give_feedback %}
+                    <a href="{% url 'growth:feedback_create' content_type='wellbeing' object_id=row.item.pk %}">Leave feedback</a>
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No wellbeing check-ins.</p>
+{% endif %}
+
+<hr>
+
 <h3>Public SMART Goals</h3>
 {% if goal_rows %}
 <table border="1" cellpadding="4">

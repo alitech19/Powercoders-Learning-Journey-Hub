@@ -18,6 +18,7 @@ from .models import (
     Goal,
     Habit,
     HabitLog,
+    WellbeingCheckIn,
     WeeklyReflection,
 )
 
@@ -104,6 +105,28 @@ def get_visible_habits_for_user(user):
     other    -> none
     """
     qs = Habit.objects.select_related('student')
+
+    if user_is_student(user):
+        return qs.filter(student=user)
+
+    if user_is_teacher(user):
+        student_ids = get_students_for_teacher(user).values_list('pk', flat=True)
+        return qs.filter(student_id__in=student_ids)
+
+    if user_is_admin(user):
+        return qs.all()
+
+    return qs.none()
+
+
+def get_visible_wellbeing_checkins_for_user(user):
+    """
+    student  -> own check-ins
+    teacher  -> check-ins of assigned students
+    admin    -> all check-ins
+    other    -> none
+    """
+    qs = WellbeingCheckIn.objects.select_related('student')
 
     if user_is_student(user):
         return qs.filter(student=user)

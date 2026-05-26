@@ -1,0 +1,50 @@
+{% extends "growth/base.html" %}
+
+{% block title %}Wellbeing — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>Wellbeing</h2>
+
+{% if is_student %}
+    <p><a href="{% url 'growth:wellbeing_create' %}">New wellbeing check-in</a></p>
+{% endif %}
+
+{% if checkins %}
+<table border="1" cellpadding="4">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Energy</th>
+            <th>Calmness</th>
+            <th>Engagement</th>
+            <th>Concentration</th>
+            <th>Sleep</th>
+            <th>Physical activity</th>
+            <th>Average</th>
+            <th>Note</th>
+            <th>Student</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in checkins %}
+        <tr>
+            <td>{{ c.check_date }}</td>
+            <td>{{ c.energy }}</td>
+            <td>{{ c.calmness }}</td>
+            <td>{{ c.engagement }}</td>
+            <td>{{ c.concentration }}</td>
+            <td>{{ c.sleep }}</td>
+            <td>{{ c.physical_activity }}</td>
+            <td>{{ c.wellbeing_average }}</td>
+            <td>{{ c.note|truncatewords:8 }}</td>
+            <td>{{ c.student.display_name }}</td>
+            <td><a href="{% url 'growth:wellbeing_detail' pk=c.pk %}">Detail</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No wellbeing check-ins to show.</p>
+{% endif %}
+{% endblock growth_content %}

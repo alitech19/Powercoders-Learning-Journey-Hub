@@ -1,0 +1,98 @@
+{% extends "growth/base.html" %}
+
+{% block title %}{{ title }} — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>{{ title }}</h2>
+
+<p>Use this check-in to record how the learning day felt.
+Rate each area from 1 to 10.
+This is not a medical assessment; it is only a simple self-tracking tool.</p>
+
+<form method="post">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <ul>
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <p>
+        {{ form.check_date.label_tag }}<br>
+        {{ form.check_date }}
+        {% if form.check_date.errors %}
+            <ul>{% for e in form.check_date.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+    </p>
+
+    <p>
+        <label for="{{ form.energy.id_for_label }}">Energy</label><br>
+        <small>Scale: 1 = exhausted, 10 = energetic</small><br>
+        {{ form.energy }}
+        {% if form.energy.errors %}
+            <ul>{% for e in form.energy.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+    </p>
+
+    <p>
+        <label for="{{ form.calmness.id_for_label }}">Calmness</label><br>
+        <small>Scale: 1 = very stressed, 10 = very calm</small><br>
+        {{ form.calmness }}
+        {% if form.calmness.errors %}
+            <ul>{% for e in form.calmness.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+    </p>
+
+    <p>
+        <label for="{{ form.engagement.id_for_label }}">Engagement</label><br>
+        <small>Scale: 1 = disengaged, 10 = highly engaged</small><br>
+        {{ form.engagement }}
+        {% if form.engagement.errors %}
+            <ul>{% for e in form.engagement.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+    </p>
+
+    <p>
+        <label for="{{ form.concentration.id_for_label }}">Concentration</label><br>
+        <small>Scale: 1 = very distracted, 10 = highly focused</small><br>
+        {{ form.concentration }}
+        {% if form.concentration.errors %}
+            <ul>{% for e in form.concentration.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+    </p>
+
+    <p>
+        <label for="{{ form.sleep.id_for_label }}">Sleep</label><br>
+        <small>Scale: 1 = very poor sleep, 10 = excellent sleep</small><br>
+        {{ form.sleep }}
+        {% if form.sleep.errors %}
+            <ul>{% for e in form.sleep.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+    </p>
+
+    <p>
+        <label for="{{ form.physical_activity.id_for_label }}">Physical activity</label><br>
+        <small>Scale: 1 = no movement, 10 = very active</small><br>
+        {{ form.physical_activity }}
+        {% if form.physical_activity.errors %}
+            <ul>{% for e in form.physical_activity.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+    </p>
+
+    <p>
+        <label for="{{ form.note.id_for_label }}">Note</label><br>
+        <small>Optional short note about the day.</small><br>
+        {{ form.note }}
+        {% if form.note.errors %}
+            <ul>{% for e in form.note.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+    </p>
+
+    <button type="submit">Save wellbeing check-in</button>
+</form>
+
+<p><a href="{% url 'growth:wellbeing_list' %}">Cancel</a></p>
+{% endblock growth_content %}

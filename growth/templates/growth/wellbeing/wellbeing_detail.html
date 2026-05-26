@@ -1,0 +1,76 @@
+{% extends "growth/base.html" %}
+
+{% block title %}Wellbeing {{ checkin.check_date }} — PowerHUB{% endblock %}
+
+{% block growth_content %}
+<h2>Wellbeing Check-in: {{ checkin.check_date }}</h2>
+
+<p><strong>Student:</strong> {{ checkin.student.display_name }}</p>
+<p><strong>Created:</strong> {{ checkin.created_at }}</p>
+<p><strong>Updated:</strong> {{ checkin.updated_at }}</p>
+
+<hr>
+
+<p>
+    <strong>Energy:</strong> {{ checkin.energy }} / 10<br>
+    <small>1 = exhausted, 10 = energetic</small>
+</p>
+
+<p>
+    <strong>Calmness:</strong> {{ checkin.calmness }} / 10<br>
+    <small>1 = very stressed, 10 = very calm</small>
+</p>
+
+<p>
+    <strong>Engagement:</strong> {{ checkin.engagement }} / 10<br>
+    <small>1 = disengaged, 10 = highly engaged</small>
+</p>
+
+<p>
+    <strong>Concentration:</strong> {{ checkin.concentration }} / 10<br>
+    <small>1 = very distracted, 10 = highly focused</small>
+</p>
+
+<p>
+    <strong>Sleep:</strong> {{ checkin.sleep }} / 10<br>
+    <small>1 = very poor sleep, 10 = excellent sleep</small>
+</p>
+
+<p>
+    <strong>Physical activity:</strong> {{ checkin.physical_activity }} / 10<br>
+    <small>1 = no movement, 10 = very active</small>
+</p>
+
+<hr>
+
+<p><strong>Average wellbeing score:</strong> {{ checkin.wellbeing_average }} / 10</p>
+
+{% if checkin.note %}
+<p><strong>Note:</strong><br>{{ checkin.note|linebreaksbr }}</p>
+{% endif %}
+
+{% if can_edit %}
+    <p><a href="{% url 'growth:wellbeing_edit' pk=checkin.pk %}">Edit</a></p>
+{% endif %}
+
+<hr>
+
+<h3>Feedback</h3>
+{% if feedback_list %}
+    {% for fb in feedback_list %}
+    <div>
+        <p><strong>{{ fb.author.display_name }}</strong> ({{ fb.created_at }}):</p>
+        <p>{{ fb.message }}</p>
+    </div>
+    <hr>
+    {% endfor %}
+{% else %}
+    <p>No feedback yet.</p>
+{% endif %}
+
+{% if can_give_feedback %}
+    <p><a href="{% url 'growth:feedback_create' content_type='wellbeing' object_id=checkin.pk %}">Leave feedback</a></p>
+{% endif %}
+
+<p><a href="{% url 'growth:wellbeing_list' %}">Back to wellbeing</a></p>
+{% endblock growth_content %}

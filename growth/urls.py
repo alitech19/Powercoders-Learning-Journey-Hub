@@ -1,7 +1,7 @@
 from django.urls import path
 from django.views.generic import RedirectView
 
-from .views import feedback, goals, habits, journal, reflections, teacher
+from .views import feedback, goals, habits, journal, reflections, teacher, wellbeing
 
 app_name = 'growth'
 
@@ -23,6 +23,12 @@ urlpatterns = [
     path('habits/<int:pk>/reactivate/', habits.habit_reactivate, name='habit_reactivate'),
     path('habits/<int:pk>/log-today/done/', habits.habit_log_done, name='habit_log_done'),
     path('habits/<int:pk>/log-today/not-done/', habits.habit_log_not_done, name='habit_log_not_done'),
+
+    # Wellbeing
+    path('wellbeing/', wellbeing.wellbeing_list, name='wellbeing_list'),
+    path('wellbeing/new/', wellbeing.wellbeing_create, name='wellbeing_create'),
+    path('wellbeing/<int:pk>/', wellbeing.wellbeing_detail, name='wellbeing_detail'),
+    path('wellbeing/<int:pk>/edit/', wellbeing.wellbeing_edit, name='wellbeing_edit'),
 
     # Goals
     path('goals/', goals.goal_list, name='goal_list'),

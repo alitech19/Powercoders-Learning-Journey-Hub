@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import DailyJournalEntry, Feedback, Goal, Habit, HabitLog, WeeklyReflection
+from .models import DailyJournalEntry, Feedback, Goal, Habit, HabitLog, WellbeingCheckIn, WeeklyReflection
 
 
 @admin.register(Goal)
@@ -76,6 +76,21 @@ class HabitLogAdmin(admin.ModelAdmin):
     @admin.display(description='Note')
     def display_note(self, obj):
         return obj.note[:80] if obj.note else ''
+
+
+@admin.register(WellbeingCheckIn)
+class WellbeingCheckInAdmin(admin.ModelAdmin):
+    list_display = (
+        'student', 'check_date', 'energy', 'calmness',
+        'engagement', 'concentration', 'sleep',
+        'physical_activity', 'created_at',
+    )
+    list_filter = ('check_date',)
+    search_fields = (
+        'student__display_name', 'student__email',
+    )
+    autocomplete_fields = ('student',)
+    readonly_fields = ('created_at', 'updated_at')
 
 
 @admin.register(Feedback)

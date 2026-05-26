@@ -4,7 +4,7 @@ Teacher dashboard helpers for the growth app.
 
 from django.utils import timezone
 
-from ..models import DailyJournalEntry, Feedback, Goal, Habit, WeeklyReflection
+from ..models import DailyJournalEntry, Feedback, Goal, Habit, WellbeingCheckIn, WeeklyReflection
 from .habits import get_done_count_for_week, get_week_start
 
 
@@ -36,6 +36,9 @@ def get_growth_summary_for_student(student):
             student=student,
         ).first(),
         'latest_journal_entry': DailyJournalEntry.objects.filter(
+            student=student,
+        ).first(),
+        'latest_wellbeing': WellbeingCheckIn.objects.filter(
             student=student,
         ).first(),
         'active_habits_count': active_count,
