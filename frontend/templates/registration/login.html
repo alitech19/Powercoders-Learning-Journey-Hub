@@ -14,4 +14,17 @@
     {{ form.as_p }}
     <button type="submit">Log in</button>
 </form>
+
+{% if dev_seed_enabled %}
+<hr>
+<section style="margin-top:1.5rem;padding:1rem;border:2px dashed #c0392b;background:#fff8f6;border-radius:6px;">
+    <p><strong>Development quick login</strong> — testers only</p>
+    <p style="color:#922b21;font-size:0.9rem;">
+        <strong>Before production deploy:</strong> disable <code>ENABLE_DEV_SEED</code>,
+        remove seed commands from Docker, and verify this panel is gone.
+        See <code>{{ dev_production_checklist_path }}</code>.
+    </p>
+    {% include "registration/_dev_login_panel.html" %}
+</section>
+{% endif %}
 {% endblock %}

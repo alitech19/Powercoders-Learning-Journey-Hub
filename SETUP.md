@@ -29,6 +29,10 @@ Edit `.env` if needed. Defaults work for local Docker development.
 | `REDIS_URL` | Cache and Celery broker |
 | `SECRET_KEY` | Django secret (change in production) |
 | `DEBUG` | `True` for local dev |
+| `ENABLE_DEV_SEED` | `true` to load test users from `backend/dev/seed.yaml` (default **False** in code) |
+| `DJANGO_SUPERUSER_*` | Auto-create admin on container start (dev only) |
+
+> **Production:** before go-live, **remove dev-user code from the repository** (not just disable env flags). See [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md).
 
 ## 3. Start services
 
@@ -42,22 +46,21 @@ This starts four services:
 |---------|------|
 | `db` | PostgreSQL 17 |
 | `redis` | Cache + Celery message broker |
-| `web` | Django (`migrate`, `collectstatic`, `runserver`) |
+| `web` | Django (`migrate`, `collectstatic`, dev seed, `runserver`) |
 | `worker` | Celery worker |
 
 On first run, migrations run automatically.
 
-## 4. Create admin user
+On first run: migrations, dev superuser (if `DJANGO_SUPERUSER_*` set), and dev seed (if `ENABLE_DEV_SEED=true`).
 
-In a new terminal:
+## 4. Login
 
-```bash
-docker compose exec web python manage.py createsuperuser
-```
+Open http://localhost:8000/accounts/login/
 
-Enter **email**, **display name**, and password. Login uses email (not username).
+- **Quick login panel** (when `ENABLE_DEV_SEED=true`): one-click buttons for admin, teachers, and students grouped by cohort/group.
+- **Normal login**: email + password from `backend/dev/seed.yaml` or superuser credentials from `.env`.
 
-Then open http://localhost:8000/accounts/login/ or http://localhost:8000/admin/
+Test users are defined in `backend/dev/seed.yaml` (not in `.env`).
 
 ### Cohorts and groups (admin)
 
@@ -75,7 +78,7 @@ Teachers are linked to groups via **Group teachers**, not via fields on the user
 |-----|----------|
 | http://localhost:8000/ | Home page |
 | http://localhost:8000/health/ | `{"status": "ok"}` |
-| http://localhost:8000/accounts/login/ | Email + password login |
+| http://localhost:8000/accounts/login/ | Login + dev quick-login panel (if enabled) |
 | http://localhost:8000/accounts/profile/ | Profile (after login) |
 | http://localhost:8000/admin/ | Django admin |
 
@@ -171,7 +174,16 @@ Ensure `redis` is healthy and `CELERY_BROKER_URL` in `.env` matches (`redis://re
 
 Normal on first build. Static files are collected to `frontend/staticfiles/` (gitignored).
 
+## Production deploy
+
+**Before go-live**, **remove dev-user functionality from the codebase** and complete [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md):
+
+- Delete `backend/dev/`, seed commands, quick-login views/templates, and related settings
+- Production Docker command: `migrate` + `collectstatic` + app server only
+- Create admin manually: `docker compose exec web python manage.py createsuperuser` (on the production host)
+
+Setting `ENABLE_DEV_SEED=false` alone is **not** sufficient for production.
+
 ## Next step
 
-1. Add `create_dev_users` management command (demo cohort, groups, student, teacher via GroupTeacher, admin)
-2. Add `dashboard` app — role-based home
+1. Add `dashboard` app — role-based home

@@ -104,7 +104,7 @@ class User(AbstractUser):
         if self.role in (self.Role.TEACHER, self.Role.ADMIN):
             self.cohort = None
             self.group = None
-        if self.role == self.Role.STUDENT:
+        if self.role == self.Role.STUDENT and bool(self.password):
             self.full_clean()
         super().save(*args, **kwargs)
 

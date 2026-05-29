@@ -21,4 +21,5 @@ urlpatterns = [
         name='logout',
     ),
     path('profile/', views.profile, name='profile'),
+    path('dev-login/<str:email>/', views.dev_quick_login, name='dev_quick_login'),
 ]

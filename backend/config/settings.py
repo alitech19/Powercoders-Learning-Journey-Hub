@@ -58,6 +58,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'accounts.context_processors.dev_login_panel',
             ],
         },
     },
@@ -130,3 +131,14 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@powercoders.o
 
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# --- Development seed (local only) ---
+# WARNING: Remove this entire block from the codebase before production deploy.
+# See docs/PRODUCTION_CHECKLIST.md
+ENABLE_DEV_SEED = DEBUG and os.environ.get('ENABLE_DEV_SEED', 'False').lower() in (
+    'true',
+    '1',
+    'yes',
+)
+DEV_SEED_FILE = BASE_DIR / 'dev' / 'seed.yaml'
+DEV_SUPERUSER_EMAIL = os.environ.get('DJANGO_SUPERUSER_EMAIL', '').strip()
