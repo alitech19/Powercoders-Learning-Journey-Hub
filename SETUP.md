@@ -55,15 +55,19 @@ In a new terminal:
 docker compose exec web python manage.py createsuperuser
 ```
 
-Uses Django's default `auth.User` until the `accounts` app is added.
+Enter **email**, **display name**, and password. Login uses email (not username).
+
+Then open http://localhost:8000/accounts/login/ or http://localhost:8000/admin/
 
 ## 5. Verify
 
 | URL | Expected |
 |-----|----------|
-| http://localhost:8000/ | Home page — "Infrastructure skeleton is ready" |
+| http://localhost:8000/ | Home page |
 | http://localhost:8000/health/ | `{"status": "ok"}` |
-| http://localhost:8000/admin/ | Django admin (after superuser) |
+| http://localhost:8000/accounts/login/ | Email + password login |
+| http://localhost:8000/accounts/profile/ | Profile (after login) |
+| http://localhost:8000/admin/ | Django admin |
 
 ### Celery worker
 
@@ -147,7 +151,7 @@ docker compose down -v
 docker compose up --build
 ```
 
-This deletes local database data.
+This deletes local database data. **Required** when switching to `AUTH_USER_MODEL = accounts.User` for the first time.
 
 **Worker not processing tasks**
 
@@ -159,4 +163,5 @@ Normal on first build. Static files are collected to `frontend/staticfiles/` (gi
 
 ## Next step
 
-Add the `accounts` app — custom User model with email login, roles, and display name. This must happen before any other app that references users.
+1. Add `cohorts` app and link `User.cohort` / `User.group`
+2. Add `create_dev_users` management command for local development

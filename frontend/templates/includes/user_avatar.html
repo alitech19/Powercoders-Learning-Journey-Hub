@@ -1,0 +1,8 @@
+<img
+    src="{{ user.get_avatar_url }}"
+    alt="{{ user.display_name }}"
+    width="{{ size|default:32 }}"
+    height="{{ size|default:32 }}"
+    class="user-avatar{% if css_class %} {{ css_class }}{% endif %}"
+    style="border-radius:50%;object-fit:cover;vertical-align:middle;"
+>

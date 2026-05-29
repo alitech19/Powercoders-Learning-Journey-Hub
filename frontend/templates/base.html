@@ -7,8 +7,28 @@
 </head>
 <body>
     <header>
-        <strong>PowerHUB</strong>
+        <strong><a href="{% url 'home' %}">PowerHUB</a></strong>
+        {% if user.is_authenticated %}
+            {% include "includes/user_avatar.html" with user=user size=28 %}
+            {{ user.display_name }}
+            <a href="{% url 'accounts:profile' %}">Profile</a>
+            <form method="post" action="{% url 'accounts:logout' %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit">Log out</button>
+            </form>
+        {% else %}
+            <a href="{% url 'accounts:login' %}">Log in</a>
+        {% endif %}
     </header>
+
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     <main>
         {% block content %}{% endblock %}
     </main>

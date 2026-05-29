@@ -10,7 +10,8 @@ A web platform for Powercoders bootcamp participants to track their learning jou
 |-------|--------|
 | Structure | `backend/` + `frontend/` |
 | Docker | PostgreSQL 17, Redis, web, Celery worker |
-| Apps | None yet — `accounts` is next |
+| `accounts` | Custom User (email login, roles, profile) |
+| Next | `cohorts`, then dev users command |
 
 ## Quick start
 
@@ -25,8 +26,8 @@ Open http://localhost:8000 — health check at http://localhost:8000/health/
 
 ## Planned apps (in order)
 
-1. `accounts` — custom User, auth, roles
-2. `cohorts` — cohorts and groups
+1. ~~`accounts` — custom User, auth, roles~~ ✓
+2. `cohorts` — cohorts and groups (+ User.cohort / User.group)
 3. `dashboard` — role-based home
 4. `journal`, `goals`, `reflections`, `habits`, `wellbeing`
 5. `tracker` — task boards

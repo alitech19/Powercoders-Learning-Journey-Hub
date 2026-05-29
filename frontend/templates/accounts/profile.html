@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Profile — PowerHUB{% endblock %}
+
+{% block content %}
+<h1>Profile</h1>
+
+<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+    {% include "includes/user_avatar.html" with user=user size=80 %}
+    <div>
+        <p><strong>{{ user.display_name }}</strong></p>
+        <p>{{ user.email }} · {{ user.get_role_display }}</p>
+        {% if user.has_custom_avatar %}
+            <p><small>Custom photo uploaded</small></p>
+        {% else %}
+            <p><small>Default avatar for {{ user.get_role_display|lower }}s</small></p>
+        {% endif %}
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+{% endblock %}
