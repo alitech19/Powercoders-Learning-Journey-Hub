@@ -32,18 +32,33 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # OTP / 2FA (login wired in Phase B)
+    'django_otp',
+    'django_otp.plugins.otp_static',
+    'django_otp.plugins.otp_totp',
+    'two_factor',
+    # Brute-force protection
+    'axes',
     'accounts',
     'cohorts',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'axes.middleware.AxesMiddleware',
+    'csp.middleware.CSPMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.middleware.AuditLoggingMiddleware',
+    'accounts.middleware.PrivacyPolicyMiddleware',
+    'accounts.middleware.ForcePasswordChangeMiddleware',
+    'accounts.middleware.Require2FAMiddleware',
+    'accounts.middleware.WelcomeMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -77,6 +92,16 @@ DATABASES = {
     }
 }
 
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+]
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -100,9 +125,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.User'
 
-LOGIN_URL = 'accounts:login'
+LOGIN_URL = 'two_factor:login'
 LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'two_factor:login'
 
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 
@@ -115,6 +140,9 @@ CACHES = {
         },
     }
 }
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', REDIS_URL)
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', REDIS_URL)
@@ -131,6 +159,64 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@powercoders.o
 
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# --- Security (auth Phase A–E) ---
+
+AXES_ENABLED = True
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # hours
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_TEMPLATE = 'accounts/lockout.html'
+AXES_USERNAME_FORM_FIELD = 'auth-username'
+AXES_USERNAME_CALLABLE = 'accounts.axes_utils.get_axes_username'
+AXES_LOCKOUT_PARAMETERS = ['username', 'ip_address']
+
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = (
+    "'self'",
+    "https://cdn.tailwindcss.com",
+)
+CSP_STYLE_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+    "https://fonts.googleapis.com",
+)
+CSP_IMG_SRC = ("'self'", "data:", "blob:")
+CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
+CSP_CONNECT_SRC = ("'self'",)
+CSP_FRAME_ANCESTORS = ("'none'",)
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# --- Observability (auth Phase G) ---
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '%(asctime)s %(name)s %(levelname)s %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'json',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+        'celery': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+        'axes': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+    },
+}
 
 # --- Development seed (local only) ---
 # WARNING: Remove this entire block from the codebase before production deploy.

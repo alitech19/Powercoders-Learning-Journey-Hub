@@ -55,10 +55,11 @@ On first run: migrations, dev superuser (if `DJANGO_SUPERUSER_*` set), and dev s
 
 ## 4. Login
 
-Open http://localhost:8000/accounts/login/
+Open http://localhost:8000/account/login/ (redirect from `/accounts/login/` also works).
 
-- **Quick login panel** (when `ENABLE_DEV_SEED=true`): one-click buttons for admin, teachers, and students grouped by cohort/group.
-- **Normal login**: email + password from `backend/dev/seed.yaml` or superuser credentials from `.env`.
+- **Quick login panel** (when `ENABLE_DEV_SEED=true`): cohort cards with one-click buttons for admin, teachers, and students.
+- **Normal login**: email + password — full production flow (axes lockout, 2FA for staff, privacy, welcome).
+- **Seed passwords**: `backend/dev/seed.yaml` or superuser credentials from `.env`.
 
 Test users are defined in `backend/dev/seed.yaml` (not in `.env`).
 
@@ -78,7 +79,7 @@ Teachers are linked to groups via **Group teachers**, not via fields on the user
 |-----|----------|
 | http://localhost:8000/ | Home page |
 | http://localhost:8000/health/ | `{"status": "ok"}` |
-| http://localhost:8000/accounts/login/ | Login + dev quick-login panel (if enabled) |
+| http://localhost:8000/account/login/ | 2FA login + dev quick-login panel (if enabled) |
 | http://localhost:8000/accounts/profile/ | Profile (after login) |
 | http://localhost:8000/admin/ | Django admin |
 

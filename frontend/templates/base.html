@@ -1,36 +1,65 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}PowerHUB{% endblock %}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PowerHUB{% endblock %} — Powercoders</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-primary: #C0392B;
+      --color-primary-dark: #A93226;
+      --color-charcoal: #2B2B2B;
+      --color-cream: #F5EDE0;
+      --color-cream-dark: #EDE3D5;
+      --font-sans: 'Inter', system-ui, sans-serif;
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; }
+  </style>
+  {% block extra_head %}{% endblock %}
 </head>
-<body>
-    <header>
-        <strong><a href="{% url 'home' %}">PowerHUB</a></strong>
-        {% if user.is_authenticated %}
+<body class="h-full flex flex-col bg-gray-50 text-[#2B2B2B]">
+
+  <nav class="bg-[#2B2B2B] shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-14">
+        <a href="{% url 'home' %}" class="font-black text-lg tracking-tight leading-none">
+          <span class="text-[#C0392B]">{</span><span class="text-white">POWER</span><span class="text-[#C0392B]">.</span><span class="text-white">CODERS</span><span class="text-[#C0392B]">}</span>
+        </a>
+        <div class="flex items-center gap-3 text-sm">
+          {% if user.is_authenticated %}
             {% include "includes/user_avatar.html" with user=user size=28 %}
-            {{ user.display_name }}
-            <a href="{% url 'accounts:profile' %}">Profile</a>
-            <form method="post" action="{% url 'accounts:logout' %}" style="display:inline">
-                {% csrf_token %}
-                <button type="submit">Log out</button>
+            <span class="text-gray-200 hidden sm:inline">{{ user.display_name }}</span>
+            <a href="{% url 'accounts:profile' %}" class="text-gray-300 hover:text-white">Profile</a>
+            <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+              {% csrf_token %}
+              <button type="submit" class="text-gray-300 hover:text-white cursor-pointer">Log out</button>
             </form>
-        {% else %}
-            <a href="{% url 'accounts:login' %}">Log in</a>
-        {% endif %}
-    </header>
+          {% else %}
+            <a href="{% url 'two_factor:login' %}" class="text-gray-300 hover:text-white">Log in</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
 
-    {% if messages %}
-        <ul>
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+  {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 py-3 w-full">
+      {% for message in messages %}
+        <p class="text-sm px-4 py-2 rounded-lg mb-2 {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-green-50 text-green-800{% endif %}">
+          {{ message }}
+        </p>
+      {% endfor %}
+    </div>
+  {% endif %}
 
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+  <main class="flex-1 {% block main_class %}py-8 px-4{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
 </body>
 </html>

@@ -1,16 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}PowerHUB — Infrastructure{% endblock %}
+{% block title %}PowerHUB{% endblock %}
 
 {% block content %}
-<h1>PowerHUB</h1>
-<p>Infrastructure skeleton is ready.</p>
-<ul>
-    <li><a href="/admin/">Admin</a></li>
-    <li><a href="/health/">Health check</a></li>
-    <li><a href="{% url 'accounts:login' %}">Login</a></li>
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-3xl font-bold text-[#2B2B2B] mb-2">PowerHUB</h1>
+  <p class="text-gray-600 mb-6">Learning Journey Hub — integration branch.</p>
+  <ul class="space-y-2 text-sm">
+    <li><a href="{% url 'two_factor:login' %}" class="text-[#C0392B] hover:underline">Log in</a></li>
+    <li><a href="/health/" class="text-[#C0392B] hover:underline">Health check</a></li>
+    <li><a href="/admin/" class="text-[#C0392B] hover:underline">Admin</a></li>
     {% if user.is_authenticated %}
-        <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+    <li><a href="{% url 'accounts:profile' %}" class="text-[#C0392B] hover:underline">Profile</a></li>
     {% endif %}
-</ul>
+  </ul>
+</div>
 {% endblock %}

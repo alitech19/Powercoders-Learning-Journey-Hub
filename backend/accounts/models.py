@@ -55,6 +55,10 @@ class User(AbstractUser):
         default=Role.STUDENT,
     )
     email_notifications_enabled = models.BooleanField(default=True)
+    privacy_policy_accepted = models.BooleanField(default=False)
+    privacy_policy_accepted_at = models.DateTimeField(null=True, blank=True)
+    must_change_password = models.BooleanField(default=False)
+    welcome_seen = models.BooleanField(default=False)
     cohort = models.ForeignKey(
         'cohorts.Cohort',
         on_delete=models.SET_NULL,
@@ -124,3 +128,26 @@ class User(AbstractUser):
         from django.templatetags.static import static
 
         return static(self.get_default_avatar_path())
+
+
+class AuditLog(models.Model):
+    user = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='audit_logs',
+    )
+    user_email = models.EmailField(blank=True)
+    method = models.CharField(max_length=10)
+    path = models.CharField(max_length=500)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [models.Index(fields=['user', 'timestamp'])]
+
+    def __str__(self):
+        who = self.user_email or (self.user.display_name if self.user_id else 'anonymous')
+        return f'{self.method} {self.path} — {who}'

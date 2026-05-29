@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Powercoders Learning Journey Hub</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-primary: #C0392B;
+      --color-primary-dark: #A93226;
+      --color-charcoal: #2B2B2B;
+      --color-cream: #F5EDE0;
+      --font-sans: 'Inter', system-ui, sans-serif;
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    input[name="token-otp_token"], input[name="otp_token"], #id_token-otp_token {
+      width: 100%;
+      padding: 0.625rem 1rem;
+      border-radius: 0.5rem;
+      border: 1px solid #D1D5DB;
+      font-size: 0.875rem;
+      letter-spacing: 0.15em;
+    }
+    input[name="token-otp_token"]:focus, input[name="otp_token"]:focus, #id_token-otp_token:focus {
+      outline: none;
+      border-color: #C0392B;
+      box-shadow: 0 0 0 2px rgba(192,57,43,0.2);
+    }
+  </style>
+</head>
+
+<body class="min-h-full bg-[#F5EDE0] py-8 px-4">
+  <div class="w-full max-w-5xl mx-auto">
+
+    <div class="text-center mb-8">
+      <div class="font-black text-3xl tracking-tight leading-none mb-2">
+        <span class="text-[#C0392B]">{</span><span class="text-[#2B2B2B]">POWER</span><span class="text-[#C0392B]">.</span><span class="text-[#2B2B2B]">CODERS</span><span class="text-[#C0392B]">}</span>
+      </div>
+      <p class="text-[#2B2B2B]/50 text-sm font-medium">Learning Journey Hub</p>
+    </div>
+
+    <div class="max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-[#EDE3D5] p-8">
+
+      {% if wizard.steps.current == 'auth' %}
+      <h1 class="text-2xl font-bold text-[#2B2B2B] mb-1">Welcome back</h1>
+      <p class="text-gray-500 text-sm mb-6">Sign in with email and password (production-like flow)</p>
+
+      {% elif wizard.steps.current == 'token' %}
+      <div class="flex items-center gap-3 mb-5">
+        <div class="h-10 w-10 rounded-full bg-[#C0392B]/10 flex items-center justify-center flex-shrink-0">
+          <svg class="h-5 w-5 text-[#C0392B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-[#2B2B2B]">Two-Factor Authentication</h1>
+          <p class="text-gray-500 text-sm">Enter the code from your authenticator app</p>
+        </div>
+      </div>
+
+      {% elif wizard.steps.current == 'backup' %}
+      <h1 class="text-xl font-bold text-[#2B2B2B] mb-1">Use Backup Token</h1>
+      <p class="text-gray-500 text-sm mb-6">Enter one of your saved backup tokens</p>
+      {% endif %}
+
+      {% if form.non_field_errors %}
+      <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <span>{{ form.non_field_errors.0 }}</span>
+      </div>
+      {% elif form.errors and wizard.steps.current == 'auth' %}
+      <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <span>Invalid email or password.</span>
+      </div>
+      {% elif form.errors %}
+      <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <span>Invalid code. Please try again.</span>
+      </div>
+      {% endif %}
+
+      <form method="post" class="space-y-5">
+        {% csrf_token %}
+        {{ wizard.management_form }}
+
+        {% if wizard.steps.current == 'auth' %}
+          {% for field in wizard.form %}
+          <div>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-[#2B2B2B] mb-1.5">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ field.errors.0 }}</p>
+            {% endif %}
+          </div>
+          {% endfor %}
+
+        {% elif wizard.steps.current == 'token' %}
+          <div>
+            <label class="block text-sm font-semibold text-[#2B2B2B] mb-1.5">Authenticator code</label>
+            {{ form.otp_token }}
+            <p class="text-xs text-gray-400 mt-1.5">6-digit code from your authenticator app</p>
+          </div>
+          <p class="text-xs text-center">
+            <button type="submit" name="wizard_goto_step" value="backup" class="text-[#C0392B] hover:text-[#A93226] cursor-pointer bg-transparent border-0 p-0">
+              Use a backup token instead
+            </button>
+          </p>
+
+        {% elif wizard.steps.current == 'backup' %}
+          <div>
+            <label class="block text-sm font-semibold text-[#2B2B2B] mb-1.5">Backup token</label>
+            {{ form.otp_token }}
+          </div>
+        {% endif %}
+
+        {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+
+        <button type="submit"
+                class="w-full bg-[#C0392B] hover:bg-[#A93226] text-white font-semibold py-2.5 px-4 rounded-lg transition-colors text-sm cursor-pointer">
+          {% if wizard.steps.current == 'auth' %}Sign in{% else %}Verify{% endif %}
+        </button>
+      </form>
+    </div>
+
+    {% if dev_seed_enabled %}
+    <section class="mt-8 p-5 border-2 border-dashed border-[#C0392B] rounded-xl bg-white/80">
+      <p class="font-semibold text-[#2B2B2B] mb-2">Development quick login — testers only</p>
+      <p class="text-sm text-gray-600 mb-2">
+        Buttons below sign you in <strong>directly</strong> and skip 2FA, privacy policy, and other onboarding checks.
+        Seed users are pre-configured in the database for that purpose.
+      </p>
+      <p class="text-sm text-gray-600 mb-4">
+        The <strong>email + password form above</strong> uses the real login path — lockout, 2FA when enabled, etc.
+      </p>
+      <p class="text-xs text-[#922b21] mb-4">
+        Remove this panel and all dev-seed code before production. See <code>{{ dev_production_checklist_path }}</code>.
+      </p>
+      {% include "registration/_dev_login_panel.html" %}
+    </section>
+    {% endif %}
+
+    <p class="text-center text-xs text-[#2B2B2B]/40 mt-8">© 2026 Powercoders</p>
+  </div>
+</body>
+</html>

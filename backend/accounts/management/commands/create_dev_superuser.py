@@ -11,6 +11,8 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
+from accounts.dev_seed import apply_dev_user_security_bypass
+
 
 class Command(BaseCommand):
     help = 'Create or update a development superuser from DJANGO_SUPERUSER_* env vars.'
@@ -56,6 +58,7 @@ class Command(BaseCommand):
         user.is_superuser = True
         user.is_active = True
         user.set_password(password)
+        apply_dev_user_security_bypass(user)
         user.save()
 
         if created:

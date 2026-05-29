@@ -10,8 +10,9 @@ A web platform for Powercoders bootcamp participants to track their learning jou
 |-------|--------|
 | Structure | `backend/` + `frontend/` |
 | Docker | PostgreSQL 17, Redis, web, Celery worker |
-| `accounts` | Custom User (email login, roles, profile) |
+| `accounts` | Custom User, 2FA, onboarding middleware, profile |
 | `cohorts` | Cohort, Group, GroupTeacher (admin only) |
+| Auth (A–G) | Argon2, axes, CSP, 2FA, onboarding gates, Redis sessions, JSON logs — see [AUTH_ROADMAP](docs/AUTH_ROADMAP.md) |
 | Dev seed | `backend/dev/seed.yaml` + quick login — **remove from codebase before prod** ([checklist](docs/PRODUCTION_CHECKLIST.md)) |
 | Next | `dashboard` |
 

@@ -10,7 +10,13 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from accounts.dev_seed import allowed_dev_login_emails, load_seed_data, resolve_group, seed_file_path
+from accounts.dev_seed import (
+    allowed_dev_login_emails,
+    apply_dev_user_security_bypass,
+    load_seed_data,
+    resolve_group,
+    seed_file_path,
+)
 from cohorts.models import Cohort, Group, GroupTeacher
 
 
@@ -94,6 +100,7 @@ class Command(BaseCommand):
             user.set_password(entry['password'])
             user.group = group
             user.cohort = group.cohort
+            apply_dev_user_security_bypass(user)
             user.save()
             count += 1
         return count
@@ -115,6 +122,7 @@ class Command(BaseCommand):
             user.set_password(entry['password'])
             user.cohort = None
             user.group = None
+            apply_dev_user_security_bypass(user)
             user.save()
 
             assigned_group_ids = set()

@@ -20,7 +20,7 @@ Use this before every production (or public staging) deployment.
 - [ ] `accounts/urls.py` — `dev-login/<email>/` route
 - [ ] `accounts/context_processors.py` — `dev_login_panel` (delete file if nothing else remains)
 - [ ] `config/settings.py` — `ENABLE_DEV_SEED`, `DEV_SEED_FILE`, `DEV_SUPERUSER_EMAIL`, and `accounts.context_processors.dev_login_panel` from `TEMPLATES`
-- [ ] `frontend/templates/registration/login.html` — dev quick-login section
+- [ ] `frontend/templates/two_factor/core/login.html` — dev quick-login section
 - [ ] `docker-compose.yml` — `create_dev_superuser` and `seed_dev_data` from the web `command`
 - [ ] `.env.example` — `ENABLE_DEV_SEED` and `DJANGO_SUPERUSER_*` blocks
 - [ ] `requirements.txt` — `PyYAML` if no longer used elsewhere
@@ -29,7 +29,7 @@ Use this before every production (or public staging) deployment.
 
 - [ ] `DEBUG=False` in production `.env`
 - [ ] Production start command runs only: `migrate`, `collectstatic`, app server (no seed commands)
-- [ ] `/accounts/login/` — normal email/password form only
+- [ ] `/account/login/` — normal email/password form only (no dev panel include)
 - [ ] No `dev-login` URL in the project (`grep -r dev.login` / search for `dev_quick_login`)
 - [ ] Create production admin manually: `python manage.py createsuperuser`
 
