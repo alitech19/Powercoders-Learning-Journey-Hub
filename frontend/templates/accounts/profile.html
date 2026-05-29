@@ -15,6 +15,22 @@
         {% else %}
             <p><small>Default avatar for {{ user.get_role_display|lower }}s</small></p>
         {% endif %}
+        {% if user.role == "student" %}
+            <p><small>
+                Cohort: {{ user.cohort|default:"—" }}
+                · Group: {{ user.group|default:"—" }}
+            </small></p>
+        {% elif user.role == "teacher" %}
+            <p><small>Teaching groups:
+                {% with groups=user.group_teacher_assignments.all %}
+                    {% if groups %}
+                        {% for assignment in groups %}{{ assignment.group }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    {% else %}
+                        —
+                    {% endif %}
+                {% endwith %}
+            </small></p>
+        {% endif %}
     </div>
 </div>
 

@@ -59,6 +59,16 @@ Enter **email**, **display name**, and password. Login uses email (not username)
 
 Then open http://localhost:8000/accounts/login/ or http://localhost:8000/admin/
 
+### Cohorts and groups (admin)
+
+All cohort/group setup is in Django admin:
+
+1. **Cohorts** — create a cohort (name, dates, status); add **Groups** inline on the same page
+2. **Groups** — open a group to assign **Group teachers** (teachers only, via `GroupTeacher`)
+3. **Users** — set **cohort** and **group** on **students** only; cohort auto-syncs from group
+
+Teachers are linked to groups via **Group teachers**, not via fields on the user record.
+
 ## 5. Verify
 
 | URL | Expected |
@@ -163,5 +173,5 @@ Normal on first build. Static files are collected to `frontend/staticfiles/` (gi
 
 ## Next step
 
-1. Add `cohorts` app and link `User.cohort` / `User.group`
-2. Add `create_dev_users` management command for local development
+1. Add `create_dev_users` management command (demo cohort, groups, student, teacher via GroupTeacher, admin)
+2. Add `dashboard` app — role-based home

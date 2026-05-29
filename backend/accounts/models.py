@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -54,6 +55,20 @@ class User(AbstractUser):
         default=Role.STUDENT,
     )
     email_notifications_enabled = models.BooleanField(default=True)
+    cohort = models.ForeignKey(
+        'cohorts.Cohort',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='users',
+    )
+    group = models.ForeignKey(
+        'cohorts.Group',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='students',
+    )
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['display_name']
@@ -68,6 +83,30 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.display_name
+
+    def clean(self):
+        errors = {}
+        if self.role == self.Role.STUDENT:
+            if self.group_id and self.cohort_id and self.group.cohort_id != self.cohort_id:
+                errors['cohort'] = "Cohort must match the selected group's cohort."
+        elif self.role in (self.Role.TEACHER, self.Role.ADMIN):
+            if self.cohort_id or self.group_id:
+                errors['cohort'] = (
+                    'Teachers and admins are not assigned to a cohort or group here. '
+                    'Assign teachers via Group teachers in admin.'
+                )
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        if self.role == self.Role.STUDENT and self.group_id:
+            self.cohort = self.group.cohort
+        if self.role in (self.Role.TEACHER, self.Role.ADMIN):
+            self.cohort = None
+            self.group = None
+        if self.role == self.Role.STUDENT:
+            self.full_clean()
+        super().save(*args, **kwargs)
 
     @property
     def has_custom_avatar(self):
