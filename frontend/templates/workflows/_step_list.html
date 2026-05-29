@@ -1,0 +1,39 @@
+<div class="space-y-3">
+  {% for item in step_data %}
+  <div class="bg-white rounded-xl border p-5
+              {% if item.done %}border-green-200 bg-green-50/30
+              {% elif item.locked %}border-gray-100 opacity-60
+              {% else %}border-gray-200{% endif %}">
+    <div class="flex items-start gap-4">
+      <div class="flex-shrink-0 mt-0.5">
+        {% if item.done %}
+        <div class="h-7 w-7 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</div>
+        {% elif item.locked %}
+        <div class="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">🔒</div>
+        {% else %}
+        <div class="h-7 w-7 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs font-bold text-gray-400">{{ forloop.counter }}</div>
+        {% endif %}
+      </div>
+      <div class="flex-1 min-w-0">
+        <h3 class="font-semibold text-sm {% if item.done %}line-through text-gray-400{% endif %}">{{ item.step.title }}</h3>
+        {% if item.step.description %}
+        <p class="text-xs text-gray-500 mt-0.5">{{ item.step.description }}</p>
+        {% endif %}
+        {% if item.locked %}
+        <p class="text-xs text-amber-600 mt-1">Complete the previous step first.</p>
+        {% endif %}
+      </div>
+      {% if can_toggle and not item.locked %}
+      <form method="post" action="{% url 'workflows:step_toggle' item.step.pk %}" class="flex-shrink-0">
+        {% csrf_token %}
+        <button type="submit"
+                class="text-xs px-3 py-1.5 rounded-lg border cursor-pointer
+                       {% if item.done %}border-green-300 text-green-700{% else %}border-gray-200 text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]{% endif %}">
+          {% if item.done %}Mark incomplete{% else %}Mark done{% endif %}
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>

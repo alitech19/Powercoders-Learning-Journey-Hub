@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'axes',
     'accounts',
     'cohorts',
+    'workflows',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +75,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'accounts.context_processors.dev_login_panel',
+                'config.context_processors.integrated_nav',
             ],
         },
     },

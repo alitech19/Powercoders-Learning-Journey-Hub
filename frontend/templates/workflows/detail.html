@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}{{ workflow.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+
+  <div class="mb-5">
+    <a href="{% url 'workflows:list' %}" class="text-sm text-gray-400 hover:text-[#C0392B] mb-3 inline-block">← All Workflows</a>
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-[#2B2B2B]">{{ workflow.title }}</h1>
+        <div class="flex flex-wrap gap-3 mt-1 text-xs text-gray-400">
+          <span>{{ workflow.get_progress_mode_display }}</span>
+          <span>{{ workflow.get_assignee_label }}</span>
+          <span>{{ workflow.get_visibility_display }}</span>
+          {% if workflow.created_by %}<span>by {{ workflow.created_by.display_name }}</span>{% endif %}
+        </div>
+        {% if workflow.description %}
+        <p class="text-sm text-gray-600 mt-2">{{ workflow.description }}</p>
+        {% endif %}
+      </div>
+      {% if view_as == 'staff' and can_manage %}
+      <div class="flex gap-2 flex-shrink-0">
+        <a href="{% url 'workflows:edit' workflow.pk %}"
+           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]">Edit</a>
+        <a href="{% url 'workflows:delete' workflow.pk %}"
+           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-400 hover:border-red-300 hover:text-red-500">Delete</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if not_assigned %}
+  <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+    <p class="text-amber-800 text-sm font-medium">You are not assigned to this workflow.</p>
+  </div>
+
+  {% elif view_as == 'student' %}
+  <div class="bg-white rounded-xl border border-gray-200 p-5 mb-5">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-sm font-semibold">Your Progress</span>
+      <span class="text-sm font-bold text-[#C0392B]">{{ progress }}%</span>
+    </div>
+    <div class="w-full bg-gray-100 rounded-full h-2.5">
+      <div class="bg-[#C0392B] h-2.5 rounded-full" style="width: {{ progress }}%"></div>
+    </div>
+  </div>
+
+  {% include "workflows/_step_list.html" with step_data=step_data can_toggle=can_toggle %}
+
+  {% else %}
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="md:col-span-2 space-y-4">
+      {% if workflow.is_shared %}
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-sm font-semibold">Shared Progress</span>
+          <span class="text-sm font-bold text-[#C0392B]">{{ shared_progress }}%</span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2.5 mb-4">
+          <div class="bg-[#C0392B] h-2.5 rounded-full" style="width: {{ shared_progress }}%"></div>
+        </div>
+        {% include "workflows/_step_list.html" with step_data=step_data can_toggle=False %}
+      </div>
+      {% endif %}
+
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="text-sm font-semibold mb-4">{% if can_manage %}Manage steps{% else %}Steps{% endif %}</h2>
+        {% for step in workflow.steps.all %}
+        <div class="flex items-start gap-3 p-3 border border-gray-100 rounded-lg mb-2">
+          <span class="text-xs font-bold text-gray-400 w-5">{{ forloop.counter }}</span>
+          <div class="flex-1">
+            <p class="text-sm font-medium">{{ step.title }}</p>
+            {% if step.description %}<p class="text-xs text-gray-400">{{ step.description }}</p>{% endif %}
+          </div>
+          {% if can_manage %}
+          <form method="post" action="{% url 'workflows:step_delete' step.pk %}">
+            {% csrf_token %}
+            <button type="submit" onclick="return confirm('Remove this step?')" class="text-gray-300 hover:text-red-400 cursor-pointer">×</button>
+          </form>
+          {% endif %}
+        </div>
+        {% empty %}
+        <p class="text-sm text-gray-400">No steps yet.</p>
+        {% endfor %}
+
+        {% if can_manage %}
+        <form method="post" action="{% url 'workflows:step_add' workflow.pk %}" class="space-y-2 pt-4 border-t border-gray-100 mt-4">
+          {% csrf_token %}
+          <input type="text" name="title" required placeholder="Step title"
+                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+          <textarea name="description" rows="2" placeholder="Description (optional)"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+          <label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+            <input type="checkbox" name="requires_previous" checked class="accent-[#C0392B]">
+            Requires previous step
+          </label>
+          <button type="submit" class="w-full bg-[#2B2B2B] hover:bg-[#C0392B] text-white text-sm font-semibold py-2 rounded-lg cursor-pointer">
+            Add Step
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <div>
+      {% if workflow.progress_mode == 'individual' %}
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="text-sm font-semibold mb-4">Enrolled Students</h2>
+        {% for enrollment in enrollments %}
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <div>
+            <p class="text-sm font-medium">{{ enrollment.student.display_name }}</p>
+            <p class="text-xs text-gray-400">{{ enrollment.progress_pct }}% complete</p>
+          </div>
+          {% if can_manage %}
+          <form method="post" action="{% url 'workflows:unenroll' workflow.pk enrollment.student.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="text-gray-300 hover:text-red-400 cursor-pointer">×</button>
+          </form>
+          {% endif %}
+        </div>
+        {% empty %}
+        <p class="text-xs text-gray-400 mb-4">No students enrolled.</p>
+        {% endfor %}
+        {% if can_manage and available_students %}
+        <form method="post" action="{% url 'workflows:enroll' workflow.pk %}" class="pt-3 border-t border-gray-100 space-y-2">
+          {% csrf_token %}
+          <select name="student_id" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+            <option value="">— Add student —</option>
+            {% for student in available_students %}
+            <option value="{{ student.pk }}">{{ student.display_name }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="w-full bg-[#C0392B] text-white text-sm font-semibold py-2 rounded-lg cursor-pointer">Enroll</button>
+        </form>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="text-sm font-semibold mb-2">Assigned</h2>
+        <p class="text-sm text-gray-600">{{ assigned_count }} active students</p>
+        <p class="text-xs text-gray-400 mt-1">Shared progress for entire {{ workflow.get_assignee_type_display|lower }}.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -28,9 +28,18 @@
   <nav class="bg-[#2B2B2B] shadow-lg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14">
-        <a href="{% url 'home' %}" class="font-black text-lg tracking-tight leading-none">
-          <span class="text-[#C0392B]">{</span><span class="text-white">POWER</span><span class="text-[#C0392B]">.</span><span class="text-white">CODERS</span><span class="text-[#C0392B]">}</span>
-        </a>
+        <div class="flex items-center gap-6 min-w-0">
+          <a href="{% url 'home' %}" class="font-black text-lg tracking-tight leading-none shrink-0">
+            <span class="text-[#C0392B]">{</span><span class="text-white">POWER</span><span class="text-[#C0392B]">.</span><span class="text-white">CODERS</span><span class="text-[#C0392B]">}</span>
+          </a>
+          {% if user.is_authenticated and integrated_nav %}
+          <div class="hidden md:flex items-center gap-4 text-sm">
+            {% for item in integrated_nav %}
+            <a href="{{ item.url }}" class="text-gray-300 hover:text-white whitespace-nowrap">{{ item.label }}</a>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
         <div class="flex items-center gap-3 text-sm">
           {% if user.is_authenticated %}
             {% include "includes/user_avatar.html" with user=user size=28 %}
@@ -61,5 +70,6 @@
   <main class="flex-1 {% block main_class %}py-8 px-4{% endblock %}">
     {% block content %}{% endblock %}
   </main>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 </body>
 </html>

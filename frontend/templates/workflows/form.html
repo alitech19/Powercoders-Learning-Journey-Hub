@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}{% if editing %}Edit Workflow{% else %}New Workflow{% endif %}{% endblock %}
+
+{% block content %}
+{{ cohort_students_json|json_script:"cohort-students-data" }}
+{{ group_students_json|json_script:"group-students-data" }}
+
+<div class="max-w-3xl mx-auto"
+     x-data="workflowForm({
+       editing: {{ editing|yesno:'true,false' }},
+       progressMode: '{{ workflow.progress_mode|default:'individual' }}',
+       assigneeType: '{{ workflow.assignee_type|default:'group' }}',
+       targetId: '{% if workflow.assignee_type == 'cohort' and workflow.assignee_cohort_id %}{{ workflow.assignee_cohort_id }}{% elif workflow.assignee_group_id %}{{ workflow.assignee_group_id }}{% endif %}',
+       enrolledIds: {{ enrolled_ids|default:'[]' }},
+     })">
+
+  <div class="mb-5">
+    <a href="{% if editing %}{% url 'workflows:detail' workflow.pk %}{% else %}{% url 'workflows:list' %}{% endif %}"
+       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] mb-3">
+      ← Back
+    </a>
+    <h1 class="text-2xl font-bold text-[#2B2B2B]">
+      {% if editing %}Edit Workflow{% else %}New Workflow{% endif %}
+    </h1>
+  </div>
+
+  {% if editing %}
+  <form method="post" class="space-y-5 mb-8">
+    {% csrf_token %}
+    <input type="hidden" name="form_section" value="metadata">
+    <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+      <h2 class="text-sm font-semibold">Details</h2>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Title</label>
+        <input type="text" name="title" required value="{{ workflow.title }}"
+               class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Description</label>
+        <textarea name="description" rows="3"
+                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none">{{ workflow.description }}</textarea>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Visibility</label>
+        <select name="visibility" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+          <option value="public" {% if workflow.visibility == 'public' %}selected{% endif %}>Public</option>
+          <option value="private" {% if workflow.visibility == 'private' %}selected{% endif %}>Private</option>
+        </select>
+      </div>
+      <button type="submit" class="bg-[#2B2B2B] hover:bg-[#C0392B] text-white text-sm font-semibold px-4 py-2 rounded-lg">
+        Save details
+      </button>
+    </div>
+  </form>
+
+  <form method="post" class="space-y-5">
+    {% csrf_token %}
+    <input type="hidden" name="form_section" value="assignment">
+  {% else %}
+  <form method="post" class="space-y-5">
+    {% csrf_token %}
+  {% endif %}
+
+    {% if not editing %}
+    <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+      <h2 class="text-sm font-semibold">Details</h2>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Title</label>
+        <input type="text" name="title" required
+               class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Description</label>
+        <textarea name="description" rows="3"
+                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Visibility</label>
+        <select name="visibility" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+          <option value="public">Public</option>
+          <option value="private">Private</option>
+        </select>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+      <h2 class="text-sm font-semibold">Assignment</h2>
+
+      <div>
+        <p class="text-xs font-medium text-gray-500 mb-2">Progress mode</p>
+        <div class="flex gap-4 text-sm">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="progress_mode" value="shared" x-model="progressMode" class="accent-[#C0392B]">
+            Shared (cohort/group moves together)
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="progress_mode" value="individual" x-model="progressMode" class="accent-[#C0392B]">
+            Individual (per student)
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <p class="text-xs font-medium text-gray-500 mb-2">Target type</p>
+        <div class="flex gap-4 text-sm">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="assignee_type" value="cohort" x-model="assigneeType" @change="targetId = ''" class="accent-[#C0392B]">
+            Cohort
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="assignee_type" value="group" x-model="assigneeType" @change="targetId = ''" class="accent-[#C0392B]">
+            Group
+          </label>
+        </div>
+      </div>
+
+      <div x-show="assigneeType === 'cohort'">
+        <p class="text-xs font-medium text-gray-500 mb-2">Cohort</p>
+        <div class="space-y-2 max-h-48 overflow-y-auto">
+          {% for cohort in cohorts %}
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input type="radio" name="assignee_target_id" value="{{ cohort.pk }}"
+                   x-model="targetId" class="accent-[#C0392B]">
+            {{ cohort.name }}
+          </label>
+          {% empty %}
+          <p class="text-xs text-gray-400">No active cohorts available.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div x-show="assigneeType === 'group'">
+        <p class="text-xs font-medium text-gray-500 mb-2">Group</p>
+        <div class="space-y-2 max-h-48 overflow-y-auto">
+          {% for group in groups %}
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input type="radio" name="assignee_target_id" value="{{ group.pk }}"
+                   x-model="targetId" class="accent-[#C0392B]">
+            {{ group }}
+          </label>
+          {% empty %}
+          <p class="text-xs text-gray-400">No active groups available.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div x-show="progressMode === 'individual' && targetId" class="pt-3 border-t border-gray-100 space-y-3">
+        <label class="flex items-center gap-2 text-sm cursor-pointer">
+          <input type="checkbox" name="select_all_students" x-model="selectAll" @change="toggleSelectAll()"
+                 class="accent-[#C0392B]">
+          All students in selected {{ assigneeType }}
+        </label>
+        <button type="button" @click="expanded = !expanded"
+                class="text-xs text-[#C0392B] font-medium">
+          <span x-text="expanded ? 'Hide student list' : 'Select individual students'"></span>
+        </button>
+        <div x-show="expanded || !selectAll" class="space-y-2 max-h-56 overflow-y-auto pl-1">
+          <template x-for="student in currentStudents()" :key="student.id">
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" name="student_ids" :value="student.id"
+                     x-model="selectedStudents" :disabled="selectAll"
+                     class="accent-[#C0392B]">
+              <span x-text="student.name"></span>
+            </label>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    {% if not editing %}
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-sm font-semibold">Steps</h2>
+        <button type="button" @click="addStep()"
+                class="text-xs text-[#C0392B] font-medium">+ Add step</button>
+      </div>
+      <div class="space-y-3">
+        <template x-for="(step, i) in steps" :key="i">
+          <div class="border border-gray-100 rounded-lg p-4 bg-gray-50">
+            <div class="flex gap-2 mb-2">
+              <span class="text-xs font-bold text-gray-400 w-5" x-text="i+1"></span>
+              <input type="text" :name="'step_title_' + (i+1)" x-model="step.title" required placeholder="Step title"
+                     class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm">
+            </div>
+            <textarea :name="'step_desc_' + (i+1)" x-model="step.desc" rows="2" placeholder="Description (optional)"
+                      class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none mb-2"></textarea>
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                <input type="checkbox" :name="'step_req_' + (i+1)" x-model="step.req" class="accent-[#C0392B]">
+                Requires previous step
+              </label>
+              <button type="button" @click="removeStep(i)" x-show="steps.length > 1"
+                      class="text-xs text-red-400">Remove</button>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+    {% endif %}
+
+    <button type="submit"
+            class="w-full bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold py-3 rounded-lg">
+      {% if editing %}Save assignment{% else %}Create workflow{% endif %}
+    </button>
+  </form>
+</div>
+
+<script>
+function workflowForm(config) {
+  const cohortStudents = JSON.parse(document.getElementById('cohort-students-data').textContent);
+  const groupStudents = JSON.parse(document.getElementById('group-students-data').textContent);
+  return {
+    editing: config.editing,
+    progressMode: config.progressMode,
+    assigneeType: config.assigneeType,
+    targetId: config.targetId ? String(config.targetId) : '',
+    selectAll: false,
+    expanded: false,
+    selectedStudents: (config.enrolledIds || []).map(String),
+    steps: [{ title: '', desc: '', req: true }],
+    currentStudents() {
+      if (!this.targetId) return [];
+      const map = this.assigneeType === 'cohort' ? cohortStudents : groupStudents;
+      return map[this.targetId] || [];
+    },
+    toggleSelectAll() {
+      if (this.selectAll) {
+        this.selectedStudents = this.currentStudents().map(s => String(s.id));
+      }
+    },
+    addStep() { this.steps.push({ title: '', desc: '', req: true }); },
+    removeStep(i) { if (this.steps.length > 1) this.steps.splice(i, 1); },
+  };
+}
+</script>
+{% endblock %}

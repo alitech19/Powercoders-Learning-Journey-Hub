@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Workflows{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-[#2B2B2B]">Workflows</h1>
+    {% if can_create %}
+    <a href="{% url 'workflows:create' %}"
+       class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+      New Workflow
+    </a>
+    {% endif %}
+  </div>
+
+  {% if view_as == 'student' %}
+    {% if rows %}
+    <div class="space-y-4">
+      {% for row in rows %}
+      <a href="{% url 'workflows:detail' row.workflow.pk %}"
+         class="block bg-white rounded-xl border border-gray-200 p-5 hover:border-[#C0392B]/30 transition-colors">
+        <div class="flex items-start justify-between gap-4 mb-3">
+          <div class="flex-1">
+            <h2 class="font-semibold text-[#2B2B2B]">{{ row.workflow.title }}</h2>
+            <p class="text-xs text-gray-400 mt-0.5">{{ row.workflow.get_assignee_label }}</p>
+            {% if row.workflow.description %}
+            <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ row.workflow.description }}</p>
+            {% endif %}
+          </div>
+          <div class="text-right flex-shrink-0">
+            <span class="text-2xl font-bold text-[#C0392B]">{{ row.progress }}%</span>
+            <p class="text-xs text-gray-400">complete</p>
+          </div>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2">
+          <div class="bg-[#C0392B] h-2 rounded-full transition-all" style="width: {{ row.progress }}%"></div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 bg-white rounded-xl border border-gray-200">
+      <p class="text-gray-400 text-sm">You have not been assigned to any workflows yet.</p>
+    </div>
+    {% endif %}
+  {% else %}
+    {% if workflows %}
+    <div class="space-y-3">
+      {% for wf in workflows %}
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <a href="{% url 'workflows:detail' wf.pk %}"
+               class="font-semibold text-[#2B2B2B] hover:text-[#C0392B] transition-colors">
+              {{ wf.title }}
+            </a>
+            <div class="flex items-center gap-3 mt-1 flex-wrap text-xs text-gray-400">
+              <span>{{ wf.get_progress_mode_display }}</span>
+              <span>{{ wf.get_assignee_label }}</span>
+              <span>{{ wf.get_visibility_display }}</span>
+              <span>{{ wf.step_count }} step{{ wf.step_count|pluralize }}</span>
+              {% if wf.created_by %}<span>by {{ wf.created_by.display_name }}</span>{% endif %}
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <a href="{% url 'workflows:edit' wf.pk %}"
+               class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]">
+              Edit
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 bg-white rounded-xl border border-gray-200">
+      <p class="text-gray-400 text-sm">No workflows yet.</p>
+      {% if can_create %}
+      <a href="{% url 'workflows:create' %}"
+         class="inline-flex items-center gap-2 mt-4 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-5 py-2.5 rounded-lg">
+        Create First Workflow
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

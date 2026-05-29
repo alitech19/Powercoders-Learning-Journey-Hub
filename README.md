@@ -14,7 +14,7 @@ A web platform for Powercoders bootcamp participants to track their learning jou
 | `cohorts` | Cohort, Group, GroupTeacher (admin only) |
 | Auth (A–G) | Argon2, axes, CSP, 2FA, onboarding gates, Redis sessions, JSON logs — see [AUTH_ROADMAP](docs/AUTH_ROADMAP.md) |
 | Dev seed | `backend/dev/seed.yaml` + quick login — **remove from codebase before prod** ([checklist](docs/PRODUCTION_CHECKLIST.md)) |
-| Next | `dashboard` |
+| Next | `workflows` — see [APPS_ROADMAP](docs/APPS_ROADMAP.md) |
 
 ## Quick start
 
@@ -27,15 +27,16 @@ docker compose up --build
 
 Open http://localhost:8000 — health check at http://localhost:8000/health/
 
-## Planned apps (in order)
+## Planned apps (customer priority → nav order)
 
-1. ~~`accounts` — custom User, auth, roles~~ ✓
-2. ~~`cohorts` — cohorts, groups, group teachers (admin)~~ ✓
-3. ~~`create_dev_users` — demo users with cohort/group assignments~~ ✓ (see `backend/dev/seed.yaml`)
-4. `dashboard` — role-based home
-5. `journal`, `goals`, `reflections`, `habits`, `wellbeing`
-6. `tracker` — task boards
-7. `group_space`, `workflows` — collaboration and learning paths
+See [docs/APPS_ROADMAP.md](docs/APPS_ROADMAP.md) for the full checklist.
+
+1. ~~`accounts`, `cohorts`, auth, dev seed~~ ✓
+2. **`home`** — placeholder hub until dashboard replaces it
+3. `workflows` → `goals` → `tracker` (Tasks) → `reflections` / `wellbeing` → `journal` → `habits` → `group_space` (Group) → Resources
+4. **`dashboard`** — last; replaces `home` as `/`
+
+App names may be split or renamed during port (Ali split vs django-test `growth`).
 
 ## Project structure
 
