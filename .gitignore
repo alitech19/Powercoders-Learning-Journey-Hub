@@ -216,3 +216,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- PowerHUB / Django project ---
+
+.env.local
+.env.*.local
+
+frontend/staticfiles/
+backend/media/*
+!backend/media/.gitkeep
+
+docker-compose.override.yml
+
+.DS_Store
+Thumbs.db
