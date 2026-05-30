@@ -23,7 +23,7 @@ class NavItem:
 NAV_REGISTRY: tuple[NavItem, ...] = (
     NavItem('Workflows', 'workflows:list', enabled=True),
     NavItem('Goals', 'goals:list', enabled=True),
-    NavItem('Tasks', 'tracker:task_list'),
+    NavItem('Tasks', 'tasks:task_list', enabled=True),
     NavItem('Reflections', 'reflections:list'),
     NavItem('Wellbeing', 'wellbeing:list'),
     NavItem('Journal', 'journal:list'),

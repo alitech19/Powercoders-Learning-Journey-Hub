@@ -1,0 +1,18 @@
+<section class="border-l-4 {{ section.accent }} pl-4">
+  <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <h2 class="text-lg font-semibold text-[#2B2B2B]">{{ section.label }}</h2>
+        <span class="text-xs font-semibold px-2 py-0.5 rounded-full {{ section.badge }}">
+          {{ section.rows|length }}
+        </span>
+      </div>
+      <p class="text-sm text-gray-500">{{ section.description }}</p>
+    </div>
+    <a href="?kind={{ section.kind }}&sort={{ sort_by }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if student_filter %}&student={{ student_filter }}{% endif %}"
+       class="text-xs text-[#C0392B] hover:text-[#A93226] font-medium whitespace-nowrap">
+      Filter {{ section.label|lower }} only →
+    </a>
+  </div>
+  {% include "tasks/_task_table.html" with task_rows=section.rows show_empty=False %}
+</section>

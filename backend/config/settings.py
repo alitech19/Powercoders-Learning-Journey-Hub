@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'workflows',
     'feedback',
     'goals',
+    'tasks',
 ]
 
 MIDDLEWARE = [

@@ -19,7 +19,7 @@ Build sequence **2 → 9**, then **dashboard (1)**. Status and names may change 
 |---------|-------------------|-----------|--------|--------|
 | 2 | `workflows` | Workflows | Ali | Done |
 | 3 | `goals` | Goals | Ali | Done |
-| 4 | `tracker` | Tasks | Ali (+ django-test permission ideas) | Pending |
+| 4 | `tasks` | Tasks | django-test models + Ali UI + enrollment ([TASKS_INTEGRATION.md](TASKS_INTEGRATION.md)) | Done |
 | 5a | `reflections` | Reflections | Ali | Pending |
 | 5b | `wellbeing` | Wellbeing | django-test (`growth`) | Pending — same phase as reflections |
 | 6 | `journal` | Journal | Ali | Pending |
@@ -28,7 +28,31 @@ Build sequence **2 → 9**, then **dashboard (1)**. Status and names may change 
 | 9 | `group_space` (resources view) | Resources | Ali | Pending — likely same app, separate nav route |
 | **1 (last)** | `dashboard` | — (replaces `home` URL) | Ali | Pending |
 
-**Next app to port:** `tracker` (Tasks)
+**Next app to port:** `tasks` — see [TASKS_INTEGRATION.md](TASKS_INTEGRATION.md)
+
+## Backport from `origin/Ali` (parallel work during integration)
+
+Cherry-pick or re-port **selected** changes from Ali's branch — **not** a merge of `goals` / `workflows` app code (integration architecture differs). Source: commits on `origin/Ali` since project split (~Phase 14–19 + latest refactor).
+
+| # | Area | What to integrate | Source (Ali) | Status |
+|---|------|-------------------|--------------|--------|
+| B1 | **CI / infra** | GitHub Actions pipeline (PostgreSQL 17 + Redis, migrate + test) | `.github/workflows/ci.yml` | Pending |
+| B2 | **CI / infra** | Celery worker and beat as separate containers | `docker-compose.yml` | Pending |
+| B3 | **CI / infra** | Guard dev superuser behind `CREATE_DEV_SUPERUSER=true` | `docker-compose.yml`, `.env.example` | Pending |
+| B4 | **accounts** | Role decorators (`admin_required`, `teacher_or_admin_required`, `student_required`) | `accounts/decorators.py` | Pending |
+| B5 | **accounts** | GDPR self-service account deletion | `accounts/views.py`, templates | Pending |
+| B6 | **accounts** | User management UI (list, create, CSV import, deactivate) | `accounts/views.py`, templates | Pending |
+| B7 | **accounts** | Student detail + progress overview pages | `accounts/student_detail`, `student_progress` | Pending |
+| B8 | **accounts** | In-app notification centre + email preferences | Phase 16 (US-59) | Pending |
+| B9 | **notifications** | Slack webhooks (feedback, new users, missing reflections) | Phase 18 (US-65) — wire to `feedback` app, not `GoalComment` | Pending |
+| B10 | **feedback / goals** | Email on new feedback | `accounts/emails.py` — target `GoalEnrollment` via generic feedback | Pending |
+| B11 | **tests** | Automated test suite pattern (127 tests on Ali) | `*/tests.py` — **rewrite** for integration models, not copy | Pending |
+| B12 | **docs** | Incident response runbook + scaling roadmap | `docs/INCIDENT_RESPONSE.md`, `docs/SCALING_ROADMAP.md` | Pending |
+| B13 | **group_space** | File uploads on posts | Phase 19 (US-26) — port with `group_space` app | Pending |
+| B14 | **cohorts / accounts** | Bulk assign students to group (admin UI) | Phase 19 (US-39) | Pending |
+| B15 | ~~**tasks** Cohort default tasks~~ | — | **Won't do** — teachers assign; enroll on existing task instead |
+
+**Do not backport as-is:** Ali `goals/` and `workflows/` models/views (1 goal per student, goal-level feedback, no shared/private workflow modes). Integration branch is ahead on those; take ideas and tests only after adapting.
 
 ### Not in main nav (by design)
 
@@ -49,12 +73,13 @@ Build sequence **2 → 9**, then **dashboard (1)**. Status and names may change 
 
 ## Rename / split policy
 
-- App package names may differ from nav labels (e.g. `tracker` → "Tasks")
+- App package names may differ from nav labels (e.g. nav label "Tasks" → app `tasks`)
 - **Reflections + wellbeing** — one integration phase; keep separate apps if models diverge
 - **Resources** — port with `group_space` unless customer wants a standalone app later
 - Monolithic django-test `growth` is **not** ported as-is; split per rows above
 
 ## Reference
 
+- Tasks full plan: [TASKS_INTEGRATION.md](TASKS_INTEGRATION.md)
 - Auth complete: [AUTH_ROADMAP.md](AUTH_ROADMAP.md)
 - Prod dev removal: [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md)

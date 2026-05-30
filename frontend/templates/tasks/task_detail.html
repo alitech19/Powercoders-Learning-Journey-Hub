@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% block title %}{{ display_title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+  <a href="{% url 'tasks:task_list' %}"
+     class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] transition-colors mb-4">
+    ← Back to tasks
+  </a>
+
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+    <div class="flex items-start justify-between gap-4 mb-4">
+      <div class="flex-1">
+        <div class="flex flex-wrap items-center gap-2 mb-2">
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full
+            {% if task.priority == 'high' %}bg-orange-100 text-orange-700
+            {% elif task.priority == 'low' %}bg-gray-100 text-gray-500
+            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+            {{ task.get_priority_display }}
+          </span>
+          {% include "tasks/_visibility_badge.html" %}
+          {% if task.is_group_shared %}
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">Group task</span>
+          {% elif task.assignee_cohort_id %}
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-50 text-purple-600">Cohort · {{ task.assignee_cohort.name }}</span>
+          {% elif task.author_id %}
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">Personal</span>
+          {% endif %}
+          {% if task.due_date %}
+          <span class="text-xs font-medium {% if display_status != 'done' and task.due_date < today %}text-red-500{% else %}text-gray-400{% endif %}">
+            Due {{ task.due_date|date:"d M Y" }}
+          </span>
+          {% endif %}
+        </div>
+        <h1 class="text-xl font-bold text-[#2B2B2B]">{{ display_title }}</h1>
+        {% if task.is_group_shared and task.assignee_group %}
+        <p class="text-xs text-gray-400 mt-1">Group: {{ task.assignee_group }}</p>
+        {% elif enrollment %}
+        <p class="text-xs text-gray-400 mt-1">{{ enrollment.student.display_name }}</p>
+        {% elif task.assignee_user %}
+        <p class="text-xs text-gray-400 mt-1">{{ task.assignee_user.display_name }}</p>
+        {% endif %}
+      </div>
+      <div class="flex gap-2 flex-shrink-0">
+        {% if can_edit %}
+        <a href="{% url 'tasks:task_edit' task.pk %}"
+           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]">Edit</a>
+        {% endif %}
+        {% if can_delete %}
+        <a href="{% url 'tasks:task_delete' task.pk %}"
+           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-400 hover:text-red-500">Delete</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if can_view_content and task.description %}
+    <p class="text-sm text-gray-600 leading-relaxed mb-4 pb-4 border-b border-gray-100">{{ task.description|linebreaksbr }}</p>
+    {% endif %}
+
+    {% if view_as == 'student' or task.is_group_shared %}
+    {% include "tasks/_task_status_section.html" %}
+    {% endif %}
+  </div>
+
+  {% if can_view_content %}
+
+  {% if show_subtasks %}
+    {% if enrollment %}
+      {% include "tasks/_subtasks_section.html" %}
+    {% elif template_subtasks %}
+    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+      <h2 class="text-sm font-semibold text-[#2B2B2B] mb-3">Checklist</h2>
+      <ul class="space-y-1">
+        {% for item in template_subtasks %}
+        <li class="text-sm text-gray-600">{{ item.subtask.title }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  {% endif %}
+
+  {% if show_updates %}
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold text-[#2B2B2B]">Progress Updates</h2>
+      {% if can_add_update %}
+      <a href="{% url 'tasks:update_create' task.pk %}" class="text-xs text-[#C0392B] font-medium">+ Add update</a>
+      {% endif %}
+    </div>
+    {% if updates %}
+    <div class="space-y-3">
+      {% for update in updates %}
+      <div class="flex gap-3">
+        <span class="text-xs font-semibold px-2 py-0.5 rounded-full h-fit
+          {% if update.update_type == 'blocker' %}bg-red-100 text-red-700
+          {% elif update.update_type == 'progress' %}bg-green-100 text-green-700
+          {% else %}bg-gray-100 text-gray-600{% endif %}">
+          {{ update.get_update_type_display }}
+        </span>
+        <div>
+          <p class="text-sm text-gray-700">{{ update.text }}</p>
+          <p class="text-xs text-gray-400 mt-0.5">{{ update.author.display_name }} · {{ update.created_at|date:"d M Y" }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-gray-400">No updates yet.</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if show_comments %}
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold text-[#2B2B2B]">Discussion</h2>
+      {% if can_comment %}
+      <a href="{% url 'tasks:comment_create' task.pk %}" class="text-xs text-[#C0392B] font-medium">+ Comment</a>
+      {% endif %}
+    </div>
+    {% if comment_tree %}
+    <ul class="space-y-4">
+      {% for comment in comment_tree %}
+      {% include "tasks/comment_tree.html" with comment=comment can_comment=can_comment %}
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-sm text-gray-400">No comments yet.</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if show_feedback %}
+  {% include "feedback/_section.html" %}
+  {% endif %}
+
+  {% else %}
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+    <p class="text-sm text-gray-500 italic">Private task — content is only visible to the owner.</p>
+    {% if task.assignee_user %}
+    <p class="text-xs text-gray-400 mt-2">Student: {{ task.assignee_user.display_name }}</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if view_as == 'staff' and enrollment_rows %}
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-semibold text-[#2B2B2B]">Student progress</h2>
+      <span class="text-xs text-gray-400">{{ task.enrolled_count }} enrolled</span>
+    </div>
+    {% include "tasks/_staff_enrollments.html" %}
+  </div>
+  {% endif %}
+
+  {% if can_add_enrollment %}
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4" x-data="enrollForm()">
+    <h2 class="text-sm font-semibold text-[#2B2B2B] mb-3">Add students</h2>
+    <p class="text-xs text-gray-500 mb-4">Enroll late joiners on this existing task.</p>
+    {{ cohort_students_json|json_script:"cohort-students-data" }}
+    {{ group_students_json|json_script:"group-students-data" }}
+    <form method="post" action="{% url 'tasks:task_add_enrollment' task.pk %}" class="space-y-3">
+      {% csrf_token %}
+      <div class="flex gap-4 text-sm">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="assignee_type" value="cohort" x-model="assigneeType" @change="targetId = ''" class="accent-[#C0392B]">
+          Cohort
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="assignee_type" value="group" x-model="assigneeType" @change="targetId = ''" class="accent-[#C0392B]">
+          Group
+        </label>
+      </div>
+      <div x-show="assigneeType === 'cohort'" class="space-y-2 max-h-40 overflow-y-auto">
+        {% for cohort in cohorts %}
+        <label class="flex items-center gap-2 text-sm cursor-pointer">
+          <input type="radio" name="assignee_target_id" value="{{ cohort.pk }}" x-model="targetId" class="accent-[#C0392B]">
+          {{ cohort.name }}
+        </label>
+        {% endfor %}
+      </div>
+      <div x-show="assigneeType === 'group'" class="space-y-2 max-h-40 overflow-y-auto">
+        {% for group in groups %}
+        <label class="flex items-center gap-2 text-sm cursor-pointer">
+          <input type="radio" name="assignee_target_id" value="{{ group.pk }}" x-model="targetId" class="accent-[#C0392B]">
+          {{ group }}
+        </label>
+        {% endfor %}
+      </div>
+      <div x-show="targetId" class="pt-3 border-t border-gray-100 space-y-2">
+        <label class="flex items-center gap-2 text-sm cursor-pointer">
+          <input type="checkbox" name="select_all_students" x-model="selectAll" @change="toggleSelectAll()" class="accent-[#C0392B]">
+          All students in selected <span x-text="assigneeType"></span>
+        </label>
+        <div class="space-y-2 max-h-40 overflow-y-auto">
+          <template x-for="student in currentStudents()" :key="student.id">
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" name="student_ids" :value="student.id" x-model="selectedStudents" :disabled="selectAll" class="accent-[#C0392B]">
+              <span x-text="student.name"></span>
+            </label>
+          </template>
+        </div>
+      </div>
+      <button type="submit" class="bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer">
+        Add enrollments
+      </button>
+    </form>
+  </div>
+  <script>
+  function enrollForm() {
+    const cohortStudents = JSON.parse(document.getElementById('cohort-students-data').textContent);
+    const groupStudents = JSON.parse(document.getElementById('group-students-data').textContent);
+    return {
+      assigneeType: 'group',
+      targetId: '',
+      selectAll: false,
+      selectedStudents: [],
+      currentStudents() {
+        if (!this.targetId) return [];
+        const map = this.assigneeType === 'cohort' ? cohortStudents : groupStudents;
+        return map[this.targetId] || [];
+      },
+      toggleSelectAll() {
+        if (this.selectAll) {
+          this.selectedStudents = this.currentStudents().map(s => String(s.id));
+        }
+      },
+    };
+  }
+  </script>
+  {% endif %}
+
+</div>
+{% endblock %}

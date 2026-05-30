@@ -1,0 +1,63 @@
+<div id="subtasks-section" class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="text-sm font-semibold text-[#2B2B2B]">Subtasks</h2>
+    <div class="flex items-center gap-3">
+      <span class="text-xs text-gray-400">{{ subtask_done }}/{{ subtask_total }} done</span>
+      {% if can_add_participant_subtask %}
+      <a href="{% url 'tasks:participant_subtask_create' task.pk %}"
+         class="text-xs text-[#C0392B] hover:text-[#A93226] font-medium">+ Add</a>
+      {% endif %}
+    </div>
+  </div>
+  {% if subtask_total > 0 %}
+  <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-4">
+    <div class="h-full bg-[#C0392B] rounded-full transition-all"
+         style="width: {% widthratio subtask_done subtask_total 100 %}%"></div>
+  </div>
+  <div class="space-y-2">
+    {% for item in template_subtasks %}
+    <div class="flex items-center gap-3">
+      {% if can_toggle_subtasks %}
+      <form hx-post="{% url 'tasks:subtask_toggle' item.subtask.pk %}"
+            hx-target="#subtasks-section"
+            hx-swap="outerHTML">
+        {% csrf_token %}
+        <button type="submit" class="h-5 w-5 rounded-full border-2 flex items-center justify-center cursor-pointer
+          {% if item.completed %}border-green-500 bg-green-500{% else %}border-gray-300 hover:border-[#C0392B]{% endif %}">
+          {% if item.completed %}
+          <svg class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+          {% endif %}
+        </button>
+      </form>
+      {% else %}
+      <div class="h-5 w-5 rounded-full border-2 {% if item.completed %}border-green-500 bg-green-500{% else %}border-gray-200{% endif %}"></div>
+      {% endif %}
+      <span class="text-sm {% if item.completed %}line-through text-gray-400{% else %}text-gray-700{% endif %}">{{ item.subtask.title }}</span>
+    </div>
+    {% endfor %}
+    {% for item in participant_subtasks %}
+    <div class="flex items-center gap-3">
+      <form hx-post="{% url 'tasks:subtask_toggle' item.subtask.pk %}"
+            hx-target="#subtasks-section"
+            hx-swap="outerHTML">
+        {% csrf_token %}
+        <button type="submit" class="h-5 w-5 rounded-full border-2 flex items-center justify-center cursor-pointer
+          {% if item.completed %}border-green-500 bg-green-500{% else %}border-gray-300 hover:border-[#C0392B]{% endif %}">
+          {% if item.completed %}
+          <svg class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+          {% endif %}
+        </button>
+      </form>
+      <span class="text-sm {% if item.completed %}line-through text-gray-400{% else %}text-gray-700{% endif %}">{{ item.subtask.title }}</span>
+      <span class="text-xs text-gray-400">(yours)</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-sm text-gray-400">No subtasks yet.</p>
+  {% endif %}
+</div>

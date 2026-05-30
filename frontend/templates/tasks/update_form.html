@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Add update{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+  <a href="{% url 'tasks:task_detail' task.pk %}" class="text-sm text-gray-400 hover:text-[#C0392B] mb-4 inline-block">← Back</a>
+  <h1 class="text-xl font-bold mb-1">Add update</h1>
+  <p class="text-sm text-gray-500 mb-6">{{ task.title }}</p>
+  <form method="post" class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+    {% csrf_token %}
+    <div>
+      <label class="block text-xs font-medium text-gray-500 mb-1">Update type</label>
+      <select name="update_type" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30 focus:border-[#C0392B]">
+        {% for val, label in form.fields.update_type.choices %}
+        <option value="{{ val }}" {% if form.update_type.value|default:'note' == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-500 mb-1">Update <span class="text-red-500">*</span></label>
+      <textarea name="text" rows="5" required placeholder="What changed? Any blockers?"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30 focus:border-[#C0392B] resize-y">{{ form.text.value|default:'' }}</textarea>
+      {% if form.text.errors %}
+      <p class="text-xs text-red-500 mt-1">{{ form.text.errors|join:", " }}</p>
+      {% endif %}
+    </div>
+    <button type="submit" class="bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer">Save update</button>
+  </form>
+</div>
+{% endblock %}

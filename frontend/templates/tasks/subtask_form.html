@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Add subtask{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+  <a href="{% url 'tasks:task_detail' task.pk %}" class="text-sm text-gray-400 hover:text-[#C0392B] mb-4 inline-block">← Back</a>
+  <h1 class="text-xl font-bold mb-6">Add subtask</h1>
+  <form method="post" class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+    {% csrf_token %}
+    <input type="text" name="title" required placeholder="Subtask title"
+           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+    <button type="submit" class="bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer">Add</button>
+  </form>
+</div>
+{% endblock %}

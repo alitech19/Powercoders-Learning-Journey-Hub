@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block title %}{% if action == 'edit' %}Edit Task{% else %}New Task{% endif %}{% endblock %}
+
+{% block content %}
+{{ subtasks_data|json_script:"task-subtasks-data" }}
+{% if is_staff_create %}
+{{ cohort_students_json|json_script:"cohort-students-data" }}
+{{ group_students_json|json_script:"group-students-data" }}
+{% endif %}
+
+<div class="max-w-2xl mx-auto"
+     x-data="taskForm({
+       isStaff: {{ is_staff_create|yesno:'true,false' }},
+       assignMode: 'students',
+       assigneeType: 'group',
+       targetId: '',
+       selectAll: false,
+       expanded: false,
+       selectedStudents: [],
+       groupId: '',
+     })">
+
+  <div class="mb-5">
+    <a href="{% if action == 'edit' %}{% url 'tasks:task_detail' task.pk %}{% else %}{% url 'tasks:task_list' %}{% endif %}"
+       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] transition-colors mb-3">
+      ← Back
+    </a>
+    <h1 class="text-2xl font-bold text-[#2B2B2B]">
+      {% if action == 'edit' %}Edit Task
+      {% elif is_staff_create %}New Task for Students
+      {% else %}New Task{% endif %}
+    </h1>
+  </div>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    <input type="hidden" name="assign_mode" :value="assignMode">
+
+    <template x-for="(st, i) in subtasks" :key="i">
+      <input type="hidden" :name="'st_' + i" :value="st">
+    </template>
+    <input type="hidden" name="visibility" :value="visibility">
+
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Title <span class="text-[#C0392B]">*</span></label>
+      <input type="text" name="title" value="{{ form.title.value|default:'' }}" required
+             class="w-full text-lg font-semibold border-0 outline-none bg-transparent">
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Description</label>
+      <textarea name="description" rows="3"
+                class="w-full text-sm border-0 outline-none bg-transparent resize-none">{{ form.description.value|default:'' }}</textarea>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="bg-white rounded-xl border border-gray-200 p-4">
+        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Priority</label>
+        <select name="priority" class="w-full text-sm border-0 outline-none bg-transparent">
+          {% for value, label in priority_choices %}
+          <option value="{{ value }}" {% if form.priority.value == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-200 p-4">
+        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Due date</label>
+        <input type="date" name="due_date" value="{{ form.due_date.value|default:'' }}"
+               class="w-full text-sm border-0 outline-none bg-transparent">
+      </div>
+    </div>
+
+    {% if form.fields.status %}
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Status</label>
+      <select name="status" class="w-full text-sm border-0 outline-none bg-transparent">
+        {% for value, label in status_choices %}
+        <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+
+    {% if is_staff_create and action != 'edit' %}
+    <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+      <h2 class="text-sm font-semibold">Assignment</h2>
+      <div class="flex gap-4 text-sm">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" value="students" x-model="assignMode" class="accent-[#C0392B]">
+          Individual students
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" value="group" x-model="assignMode" class="accent-[#C0392B]">
+          Whole group (shared)
+        </label>
+      </div>
+
+      <div x-show="assignMode === 'group'" class="space-y-2">
+        <p class="text-xs text-gray-500">One shared status for the entire group.</p>
+        {% for group in groups %}
+        <label class="flex items-center gap-2 text-sm cursor-pointer">
+          <input type="radio" name="group_id" value="{{ group.pk }}" x-model="groupId" class="accent-[#C0392B]">
+          {{ group }}
+        </label>
+        {% endfor %}
+      </div>
+
+      <div x-show="assignMode === 'students'" class="space-y-4">
+        <div class="flex gap-4 text-sm">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="assignee_type" value="cohort" x-model="assigneeType" @change="targetId = ''" class="accent-[#C0392B]">
+            Cohort
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="assignee_type" value="group" x-model="assigneeType" @change="targetId = ''" class="accent-[#C0392B]">
+            Group
+          </label>
+        </div>
+        <div x-show="assigneeType === 'cohort'" class="space-y-2 max-h-48 overflow-y-auto">
+          {% for cohort in cohorts %}
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input type="radio" name="assignee_target_id" value="{{ cohort.pk }}" x-model="targetId" class="accent-[#C0392B]">
+            {{ cohort.name }}
+          </label>
+          {% endfor %}
+        </div>
+        <div x-show="assigneeType === 'group'" class="space-y-2 max-h-48 overflow-y-auto">
+          {% for group in groups %}
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input type="radio" name="assignee_target_id" value="{{ group.pk }}" x-model="targetId" class="accent-[#C0392B]">
+            {{ group }}
+          </label>
+          {% endfor %}
+        </div>
+        <div x-show="targetId" class="pt-3 border-t border-gray-100 space-y-3">
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input type="checkbox" name="select_all_students" x-model="selectAll" @change="toggleSelectAll()" class="accent-[#C0392B]">
+            All students in selected <span x-text="assigneeType"></span>
+          </label>
+          <div class="space-y-2 max-h-56 overflow-y-auto">
+            <template x-for="student in currentStudents()" :key="student.id">
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" name="student_ids" :value="student.id" x-model="selectedStudents" :disabled="selectAll" class="accent-[#C0392B]">
+                <span x-text="student.name"></span>
+              </label>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if is_staff_create or action == 'edit' and task.is_staff_assigned %}
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <div class="flex items-center justify-between mb-3">
+        <label class="text-xs font-semibold text-gray-400 uppercase">Template subtasks</label>
+        <button type="button" @click="addSt()" class="text-xs text-[#C0392B] font-medium">+ Add</button>
+      </div>
+      <div class="space-y-2 mb-3">
+        <template x-for="(st, i) in subtasks" :key="i">
+          <div class="flex items-center gap-2">
+            <input type="text" x-model="subtasks[i]" class="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2">
+            <button type="button" @click="removeSt(i)" class="text-gray-400 hover:text-red-500">×</button>
+          </div>
+        </template>
+      </div>
+      <div class="flex gap-2">
+        <input type="text" x-model="newSt" @keydown.enter.prevent="addSt()" placeholder="Add subtask…"
+               class="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2">
+        <button type="button" @click="addSt()" class="px-3 py-2 bg-gray-100 rounded-lg text-sm">Add</button>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if form.fields.allow_updates %}
+    <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+      <p class="text-xs font-semibold text-gray-400 uppercase">Sections</p>
+      <label class="flex items-center gap-2 text-sm cursor-pointer">
+        <input type="checkbox" name="allow_updates" {% if form.allow_updates.value|default:True %}checked{% endif %} class="accent-[#C0392B]">
+        Allow progress updates
+      </label>
+      <label class="flex items-center gap-2 text-sm cursor-pointer">
+        <input type="checkbox" name="allow_comments" {% if form.allow_comments.value|default:True %}checked{% endif %} class="accent-[#C0392B]">
+        Allow comments
+      </label>
+      <label class="flex items-center gap-2 text-sm cursor-pointer">
+        <input type="checkbox" name="allow_subtasks" {% if form.allow_subtasks.value|default:True %}checked{% endif %} class="accent-[#C0392B]">
+        Allow subtasks / checklist
+      </label>
+    </div>
+    {% endif %}
+
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <label class="block text-xs font-semibold text-gray-400 uppercase mb-3">Visibility</label>
+      <div class="flex gap-3">
+        <button type="button" @click="visibility = 'private'"
+                :class="visibility === 'private' ? 'border-[#2B2B2B] bg-[#2B2B2B] text-white' : 'border-gray-200 text-gray-500'"
+                class="flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium cursor-pointer">
+          {% if visibility_mode == 'staff' %}Draft (staff only){% else %}Only me{% endif %}
+        </button>
+        <button type="button" @click="visibility = 'shared'"
+                :class="visibility === 'shared' ? 'border-[#C0392B] bg-[#C0392B]/5 text-[#C0392B]' : 'border-gray-200 text-gray-500'"
+                class="flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium cursor-pointer">
+          {% if visibility_mode == 'staff' %}Share with students{% else %}Share with teachers{% endif %}
+        </button>
+      </div>
+    </div>
+
+    <button type="submit" class="w-full bg-[#C0392B] hover:bg-[#A93226] text-white font-semibold py-2.5 rounded-lg text-sm cursor-pointer">
+      {% if action == 'edit' %}Save Changes{% else %}Create Task{% endif %}
+    </button>
+  </form>
+</div>
+
+<script>
+function taskForm(config) {
+  const subtasksEl = document.getElementById('task-subtasks-data');
+  const base = {
+    subtasks: subtasksEl ? JSON.parse(subtasksEl.textContent) : [],
+    newSt: '',
+    visibility: '{{ form.visibility.value|default:"private" }}',
+    assignMode: config.assignMode || 'students',
+    groupId: '',
+    addSt() {
+      const t = this.newSt.trim();
+      if (t) { this.subtasks.push(t); this.newSt = ''; }
+    },
+    removeSt(i) { this.subtasks.splice(i, 1); },
+  };
+  if (!config.isStaff) return base;
+
+  const cohortStudents = JSON.parse(document.getElementById('cohort-students-data').textContent);
+  const groupStudents = JSON.parse(document.getElementById('group-students-data').textContent);
+  return {
+    ...base,
+    assigneeType: config.assigneeType,
+    targetId: config.targetId,
+    selectAll: false,
+    expanded: false,
+    selectedStudents: [],
+    currentStudents() {
+      if (!this.targetId) return [];
+      const map = this.assigneeType === 'cohort' ? cohortStudents : groupStudents;
+      return map[this.targetId] || [];
+    },
+    toggleSelectAll() {
+      if (this.selectAll) {
+        this.selectedStudents = this.currentStudents().map(s => String(s.id));
+      }
+    },
+  };
+}
+</script>
+{% endblock %}

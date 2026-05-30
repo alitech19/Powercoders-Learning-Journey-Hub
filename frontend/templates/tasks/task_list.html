@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Tasks{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-[#2B2B2B]">{% if view_as == 'student' %}My Tasks{% else %}Student Tasks{% endif %}</h1>
+    <p class="text-gray-500 text-sm mt-0.5">Individual → group → cohort tasks, separated below.</p>
+  </div>
+  {% if can_create_personal_task %}
+  <a href="{% url 'tasks:task_create' %}"
+     class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+    </svg>
+    New Task
+  </a>
+  {% elif can_create %}
+  <a href="{% url 'tasks:task_create' %}"
+     class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+    New Task
+  </a>
+  {% endif %}
+</div>
+
+{% if view_as == 'student' %}
+<div class="grid grid-cols-3 gap-4 mb-6">
+  <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
+    <p class="text-2xl font-bold text-[#C0392B]">{{ total }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">Total</p>
+  </div>
+  <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
+    <p class="text-2xl font-bold text-blue-500">{{ doing }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">In Progress</p>
+  </div>
+  <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
+    <p class="text-2xl font-bold text-green-500">{{ done }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">Done</p>
+  </div>
+</div>
+{% elif students %}
+<div class="flex gap-2 flex-wrap mb-4">
+  <a href="{% url 'tasks:task_list' %}?sort={{ sort_by }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if kind_filter %}&kind={{ kind_filter }}{% endif %}"
+     class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+            {% if not student_filter %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]{% endif %}">
+    All Students
+  </a>
+  {% for s in students %}
+  <a href="?student={{ s.pk }}{% if status_filter %}&status={{ status_filter }}{% endif %}&sort={{ sort_by }}{% if kind_filter %}&kind={{ kind_filter }}{% endif %}"
+     class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+            {% if student_filter == s.pk|stringformat:'s' %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]{% endif %}">
+    {{ s.display_name }}
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Kind filter -->
+<div class="flex flex-wrap gap-2 mb-4">
+  <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}sort={{ sort_by }}{% if student_filter %}&student={{ student_filter }}{% endif %}"
+     class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+            {% if not kind_filter %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B]{% endif %}">
+    All types
+  </a>
+  {% for section in kind_choices %}
+  <a href="?kind={{ section.kind }}&sort={{ sort_by }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if student_filter %}&student={{ student_filter }}{% endif %}"
+     class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+            {% if kind_filter == section.kind %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B]{% endif %}">
+    {{ section.label }}
+  </a>
+  {% endfor %}
+</div>
+
+<div class="flex flex-wrap items-center gap-3 mb-5">
+  <div class="flex gap-1 bg-white border border-gray-200 rounded-lg p-1">
+    <a href="?sort={{ sort_by }}{% if student_filter %}&student={{ student_filter }}{% endif %}{% if kind_filter %}&kind={{ kind_filter }}{% endif %}"
+       class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
+              {% if not status_filter %}bg-[#2B2B2B] text-white{% else %}text-gray-500 hover:text-[#2B2B2B]{% endif %}">
+      All
+    </a>
+    {% for value, label in status_choices %}
+    <a href="?status={{ value }}&sort={{ sort_by }}{% if student_filter %}&student={{ student_filter }}{% endif %}{% if kind_filter %}&kind={{ kind_filter }}{% endif %}"
+       class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
+              {% if status_filter == value %}bg-[#2B2B2B] text-white{% else %}text-gray-500 hover:text-[#2B2B2B]{% endif %}">
+      {{ label }}
+    </a>
+    {% endfor %}
+  </div>
+  <select onchange="location='?{% if status_filter %}status={{ status_filter }}&{% endif %}{% if student_filter %}student={{ student_filter }}&{% endif %}{% if kind_filter %}kind={{ kind_filter }}&{% endif %}sort='+this.value"
+          class="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600 focus:outline-none cursor-pointer">
+    <option value="updated" {% if sort_by == 'updated' or not sort_by %}selected{% endif %}>Sort: Latest</option>
+    <option value="due" {% if sort_by == 'due' %}selected{% endif %}>Sort: Due Date</option>
+    <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>Sort: Priority</option>
+  </select>
+</div>
+
+{% if kind_filter %}
+  {% include "tasks/_task_table.html" with task_rows=task_rows show_empty=True %}
+  {% if page_obj %}
+  {% include "_pagination.html" %}
+  {% endif %}
+{% else %}
+  {% if has_any_tasks %}
+  <div class="space-y-8">
+    {% for section in task_sections %}
+    {% if section.rows %}
+    {% include "tasks/_task_section.html" with section=section %}
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% else %}
+  {% include "tasks/_task_table.html" with task_rows=task_rows show_empty=True %}
+  {% endif %}
+{% endif %}
+{% endblock %}

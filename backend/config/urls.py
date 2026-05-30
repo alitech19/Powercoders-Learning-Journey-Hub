@@ -34,6 +34,7 @@ urlpatterns = [
     path('workflows/', include('workflows.urls')),
     path('feedback/', include('feedback.urls')),
     path('goals/', include('goals.urls')),
+    path('tasks/', include('tasks.urls')),
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]
 
