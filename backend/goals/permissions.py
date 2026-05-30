@@ -117,14 +117,6 @@ def can_reactivate_enrollment(user, enrollment):
     return False
 
 
-def can_add_feedback(user, goal):
-    if not user_is_staff(user):
-        return False
-    if goal.visibility != Goal.Visibility.SHARED:
-        return False
-    return can_view_goal(user, goal)
-
-
 def can_create_goals(user):
     return user.is_authenticated and (
         user.role == User.Role.STUDENT or user_is_staff(user)

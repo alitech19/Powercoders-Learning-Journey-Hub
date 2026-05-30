@@ -16,10 +16,11 @@ from cohorts.permissions import (
     user_is_student,
 )
 
+from feedback.services import build_section_context
+
 from .forms import GoalForm
-from .models import Goal, GoalComment, GoalEnrollment, Milestone
+from .models import Goal, GoalEnrollment, Milestone
 from .permissions import (
-    can_add_feedback,
     can_create_goals,
     can_delete_goal,
     can_edit_goal,
@@ -90,12 +91,14 @@ def _goal_progress_ctx(user, enrollment):
     }
 
 
-def _goal_feedback_ctx(goal, viewer):
-    return {
-        'goal': goal,
-        'comments': goal.comments.select_related('author').order_by('created_at'),
-        'can_add_feedback': can_add_feedback(viewer, goal),
-    }
+def _apply_feedback_context(ctx, *, target, viewer):
+    feedback_ctx = build_section_context(target=target, viewer=viewer)
+    if feedback_ctx:
+        ctx.update(feedback_ctx)
+        ctx['show_feedback'] = True
+    else:
+        ctx['show_feedback'] = False
+    return ctx
 
 
 def _visibility_form_mode(user, *, goal=None, creating=False):
@@ -219,7 +222,7 @@ def goal_detail(request, pk):
             'can_delete': can_delete_goal(user, goal),
         }
         ctx.update(_goal_progress_ctx(user, enrollment))
-        ctx.update(_goal_feedback_ctx(goal, user))
+        _apply_feedback_context(ctx, target=enrollment, viewer=user)
         return render(request, 'goals/goal_detail.html', ctx)
 
     enrollments = (
@@ -231,14 +234,18 @@ def goal_detail(request, pk):
     milestones = list(goal.milestones.all())
     for enrollment in enrollments:
         completed_ids = enrollment.completed_milestone_ids()
-        enrollment_rows.append({
+        row = {
             'enrollment': enrollment,
             'milestones': [
                 {'milestone': ms, 'completed': ms.pk in completed_ids}
                 for ms in milestones
             ],
             'can_reactivate': can_reactivate_enrollment(user, enrollment),
-        })
+        }
+        feedback_ctx = build_section_context(target=enrollment, viewer=user)
+        if feedback_ctx:
+            row['feedback'] = feedback_ctx
+        enrollment_rows.append(row)
 
     ctx = {
         'goal': goal,
@@ -248,7 +255,6 @@ def goal_detail(request, pk):
         'can_edit': can_edit_goal(user, goal),
         'can_delete': can_delete_goal(user, goal),
     }
-    ctx.update(_goal_feedback_ctx(goal, user))
     return render(request, 'goals/goal_detail.html', ctx)
 
 
@@ -364,31 +370,3 @@ def milestone_toggle(request, pk):
         'goal__milestones',
     ).get(pk=enrollment.pk)
     return render(request, 'goals/_goal_progress.html', _goal_progress_ctx(request.user, enrollment))
-
-
-@login_required
-@require_POST
-def goal_add_feedback(request, pk):
-    goal = get_object_or_404(Goal.objects.prefetch_related('enrollments__student'), pk=pk)
-    if not can_add_feedback(request.user, goal):
-        return HttpResponseForbidden()
-
-    body = request.POST.get('body', '').strip()
-    if body:
-        GoalComment.objects.create(goal=goal, author=request.user, body=body)
-
-    return render(request, 'goals/_feedback_section.html', _goal_feedback_ctx(goal, request.user))
-
-
-@login_required
-@require_POST
-def goal_delete_feedback(request, comment_pk):
-    comment = get_object_or_404(
-        GoalComment.objects.select_related('goal'),
-        pk=comment_pk,
-    )
-    if request.user != comment.author and not user_is_admin(request.user):
-        return HttpResponseForbidden()
-    goal = comment.goal
-    comment.delete()
-    return render(request, 'goals/_feedback_section.html', _goal_feedback_ctx(goal, request.user))

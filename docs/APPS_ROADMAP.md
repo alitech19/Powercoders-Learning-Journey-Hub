@@ -32,6 +32,7 @@ Build sequence **2 → 9**, then **dashboard (1)**. Status and names may change 
 
 ### Not in main nav (by design)
 
+- **`feedback`** — generic staff feedback (admin only); wired per app via registry
 - **`cohorts`** — admin only (done)
 - **`accounts`** — profile, onboarding (done); user mgmt UI later
 - **`api`** — health/scaffold when needed

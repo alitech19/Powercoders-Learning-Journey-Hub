@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'accounts',
     'cohorts',
     'workflows',
+    'feedback',
     'goals',
 ]
 

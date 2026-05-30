@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Goal, GoalComment, GoalEnrollment, Milestone, MilestoneCompletion
+from .models import Goal, GoalEnrollment, Milestone, MilestoneCompletion
 
 
 class MilestoneInline(admin.TabularInline):
@@ -17,19 +17,13 @@ class GoalEnrollmentInline(admin.TabularInline):
     autocomplete_fields = ('student',)
 
 
-class GoalCommentInline(admin.TabularInline):
-    model = GoalComment
-    extra = 0
-    readonly_fields = ('created_at',)
-
-
 @admin.register(Goal)
 class GoalAdmin(admin.ModelAdmin):
     list_display = ('title', 'author', 'created_by', 'category', 'visibility', 'target_date', 'created_at')
     list_filter = ('category', 'visibility')
     search_fields = ('title', 'author__display_name', 'author__email')
     autocomplete_fields = ('author', 'created_by')
-    inlines = [MilestoneInline, GoalEnrollmentInline, GoalCommentInline]
+    inlines = [MilestoneInline, GoalEnrollmentInline]
     readonly_fields = ('created_at', 'updated_at')
 
 
@@ -52,10 +46,3 @@ class MilestoneAdmin(admin.ModelAdmin):
 class MilestoneCompletionAdmin(admin.ModelAdmin):
     list_display = ('enrollment', 'milestone', 'completed_at')
     autocomplete_fields = ('enrollment', 'milestone')
-
-
-@admin.register(GoalComment)
-class GoalCommentAdmin(admin.ModelAdmin):
-    list_display = ('goal', 'author', 'created_at')
-    search_fields = ('body', 'goal__title', 'author__display_name')
-    autocomplete_fields = ('goal', 'author')

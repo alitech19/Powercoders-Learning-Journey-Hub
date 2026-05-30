@@ -72,4 +72,13 @@
   {% else %}
   <p class="text-sm text-gray-400">No milestones defined yet.</p>
   {% endif %}
+
+  {% for row in enrollment_rows %}
+  {% if row.feedback %}
+  <div class="mt-6 pt-6 border-t border-gray-100">
+    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{{ row.enrollment.student.display_name }}</p>
+    {% include "feedback/_section.html" with panel_id=row.feedback.panel_id content_type_id=row.feedback.content_type_id object_id=row.feedback.object_id entries=row.feedback.entries can_add_feedback=row.feedback.can_add_feedback visibility_shared=row.feedback.visibility_shared feedback_placeholder=row.feedback.feedback_placeholder %}
+  </div>
+  {% endif %}
+  {% endfor %}
 </div>

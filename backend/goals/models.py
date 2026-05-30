@@ -152,23 +152,6 @@ class GoalEnrollment(models.Model):
         return milestone.pk in self.completed_milestone_ids()
 
 
-class GoalComment(models.Model):
-    goal = models.ForeignKey(Goal, on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='goal_comments',
-    )
-    body = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['created_at']
-
-    def __str__(self):
-        return f'{self.author} on "{self.goal.title}"'
-
-
 class Milestone(models.Model):
     goal = models.ForeignKey(Goal, on_delete=models.CASCADE, related_name='milestones')
     title = models.CharField(max_length=255)
