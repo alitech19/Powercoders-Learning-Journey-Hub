@@ -22,7 +22,7 @@ class NavItem:
 # Customer priority order (see docs/APPS_ROADMAP.md). Set enabled=True when app lands.
 NAV_REGISTRY: tuple[NavItem, ...] = (
     NavItem('Workflows', 'workflows:list', enabled=True),
-    NavItem('Goals', 'goals:list'),
+    NavItem('Goals', 'goals:list', enabled=True),
     NavItem('Tasks', 'tracker:task_list'),
     NavItem('Reflections', 'reflections:list'),
     NavItem('Wellbeing', 'wellbeing:list'),

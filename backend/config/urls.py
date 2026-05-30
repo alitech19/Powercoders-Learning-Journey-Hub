@@ -32,6 +32,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('health/', health_check, name='health'),
     path('workflows/', include('workflows.urls')),
+    path('goals/', include('goals.urls')),
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]
 

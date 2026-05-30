@@ -1,0 +1,22 @@
+<div id="goal-progress-panel">
+  {% include "goals/_milestones.html" with can_toggle_milestone=can_toggle_milestone %}
+
+  <div id="goal-actions" class="{% if can_mark_achieved or can_reactivate %}flex gap-2 mt-4 pt-4 border-t border-gray-100{% else %}hidden{% endif %}">
+    {% if can_mark_achieved %}
+    <form method="post" action="{% url 'goals:mark_achieved' goal.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="text-xs px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold cursor-pointer">
+        Mark achieved
+      </button>
+    </form>
+    {% endif %}
+    {% if can_reactivate %}
+    <form method="post" action="{% url 'goals:reactivate' goal.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="text-xs px-4 py-2 border border-gray-200 rounded-lg text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B] cursor-pointer">
+        Reactivate
+      </button>
+    </form>
+    {% endif %}
+  </div>
+</div>

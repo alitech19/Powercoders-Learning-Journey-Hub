@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{{ goal.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+  <div class="mb-5">
+    <a href="{% url 'goals:list' %}"
+       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] transition-colors mb-3">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Back to goals
+    </a>
+  </div>
+
+  <!-- Header -->
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+    <div class="flex items-start justify-between gap-4 mb-4">
+      <div class="flex-1">
+        <div class="flex flex-wrap items-center gap-2 mb-2">
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full
+            {% if goal.category == 'technical' %}bg-purple-100 text-purple-700
+            {% elif goal.category == 'soft_skill' %}bg-yellow-100 text-yellow-700
+            {% elif goal.category == 'project' %}bg-blue-100 text-blue-700
+            {% elif goal.category == 'career' %}bg-orange-100 text-orange-700
+            {% else %}bg-gray-100 text-gray-600{% endif %}">
+            {{ goal.get_category_display }}
+          </span>
+          {% if view_as == 'student' %}
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full
+            {% if enrollment.status == 'completed' %}bg-green-100 text-green-700
+            {% elif enrollment.status == 'in_progress' %}bg-blue-100 text-blue-700
+            {% elif enrollment.status == 'abandoned' %}bg-red-100 text-red-600
+            {% else %}bg-gray-100 text-gray-500{% endif %}">
+            {{ enrollment.get_status_display }}
+          </span>
+          {% if enrollment.is_overdue %}
+          <span class="text-xs text-amber-600 font-medium">⚠ Overdue</span>
+          {% endif %}
+          {% endif %}
+          {% if goal.created_by %}
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">set by {{ goal.created_by.display_name }}</span>
+          {% endif %}
+          {% include "goals/_visibility_badge.html" %}
+        </div>
+        <h1 class="text-xl font-bold text-[#2B2B2B]">{{ goal.title }}</h1>
+        {% if view_as == 'staff' %}
+        <p class="text-xs text-gray-400 mt-0.5">{{ goal.enrolled_count }} student{{ goal.enrolled_count|pluralize }} enrolled</p>
+        {% endif %}
+        {% if goal.target_date %}
+        <p class="text-xs text-gray-400 mt-1">🗓 Target: {{ goal.target_date|date:"d F Y" }}</p>
+        {% endif %}
+        {% if view_as == 'student' and enrollment.achieved_at %}
+        <p class="text-xs text-green-600 mt-1">✓ Achieved {{ enrollment.achieved_at|date:"d F Y" }}</p>
+        {% endif %}
+      </div>
+      {% if can_edit or can_delete %}
+      <div class="flex gap-2 flex-shrink-0 flex-wrap justify-end">
+        {% if can_edit %}
+        <a href="{% url 'goals:edit' goal.pk %}"
+           class="inline-flex items-center gap-1 text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]">
+          Edit
+        </a>
+        {% endif %}
+        {% if can_delete %}
+        <a href="{% url 'goals:delete' goal.pk %}"
+           class="inline-flex items-center gap-1 text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-400 hover:border-red-300 hover:text-red-500">
+          Delete
+        </a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    {% if goal.description %}
+    <p class="text-sm text-gray-600 leading-relaxed mb-4 pb-4 border-b border-gray-100">{{ goal.description }}</p>
+    {% endif %}
+
+    {% if view_as == 'student' %}
+    {% include "goals/_goal_progress.html" %}
+    {% else %}
+    {% include "goals/_staff_enrollments.html" %}
+    {% endif %}
+  </div>
+
+  <p class="text-xs text-gray-400 text-center mb-6">
+    Created {{ goal.created_at|date:"d M Y" }}
+    {% if goal.updated_at != goal.created_at %}· updated {{ goal.updated_at|date:"d M Y" }}{% endif %}
+  </p>
+
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    {% include "goals/_feedback_section.html" %}
+  </div>
+
+</div>
+{% endblock %}

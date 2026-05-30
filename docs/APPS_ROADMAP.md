@@ -18,7 +18,7 @@ Build sequence **2 → 9**, then **dashboard (1)**. Status and names may change 
 | Build # | App (working name) | Nav label | Source | Status |
 |---------|-------------------|-----------|--------|--------|
 | 2 | `workflows` | Workflows | Ali | Done |
-| 3 | `goals` | Goals | Ali | Pending |
+| 3 | `goals` | Goals | Ali | Done |
 | 4 | `tracker` | Tasks | Ali (+ django-test permission ideas) | Pending |
 | 5a | `reflections` | Reflections | Ali | Pending |
 | 5b | `wellbeing` | Wellbeing | django-test (`growth`) | Pending — same phase as reflections |
@@ -28,7 +28,7 @@ Build sequence **2 → 9**, then **dashboard (1)**. Status and names may change 
 | 9 | `group_space` (resources view) | Resources | Ali | Pending — likely same app, separate nav route |
 | **1 (last)** | `dashboard` | — (replaces `home` URL) | Ali | Pending |
 
-**Next app to port:** `goals`
+**Next app to port:** `tracker` (Tasks)
 
 ### Not in main nav (by design)
 

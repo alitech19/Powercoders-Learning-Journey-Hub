@@ -1,0 +1,31 @@
+{% if page_obj.has_other_pages %}
+<div class="flex items-center justify-center gap-1 mt-6">
+  {% if page_obj.has_previous %}
+  <a href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}"
+     class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B] transition-colors">
+    ← Prev
+  </a>
+  {% endif %}
+
+  {% for num in page_obj.paginator.page_range %}
+    {% if page_obj.number == num %}
+    <span class="px-3 py-1.5 rounded-lg bg-[#C0392B] text-white text-sm font-semibold">{{ num }}</span>
+    {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+    <a href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ num }}"
+       class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B] transition-colors">
+      {{ num }}
+    </a>
+    {% endif %}
+  {% endfor %}
+
+  {% if page_obj.has_next %}
+  <a href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}"
+     class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B] transition-colors">
+    Next →
+  </a>
+  {% endif %}
+</div>
+<p class="text-center text-xs text-gray-400 mt-2">
+  Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} · {{ page_obj.paginator.count }} total
+</p>
+{% endif %}
