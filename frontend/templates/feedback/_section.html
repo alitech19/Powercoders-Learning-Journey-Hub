@@ -47,7 +47,7 @@
         hx-swap="outerHTML"
         hx-on::after-request="this.reset()">
     {% csrf_token %}
-    <textarea name="body" rows="3" required placeholder="{{ feedback_placeholder|default:'Leave feedback…' }}"
+    <textarea name="body" rows="3" required placeholder="{{ feedback_placeholder|default:'Leave feedback…' }}" maxlength="{{ limits.body }}"
               class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#2B2B2B] focus:outline-none focus:border-[#C0392B] focus:ring-1 focus:ring-[#C0392B]/20 resize-none mb-2"></textarea>
     <button type="submit"
             class="bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">

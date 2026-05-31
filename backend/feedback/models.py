@@ -1,7 +1,10 @@
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.validators import MaxLengthValidator
 from django.db import models
+
+from config.input_limits import BODY_TEXT_MAX_LENGTH
 
 
 class FeedbackEntry(models.Model):
@@ -15,7 +18,7 @@ class FeedbackEntry(models.Model):
         on_delete=models.CASCADE,
         related_name='feedback_entries',
     )
-    body = models.TextField()
+    body = models.TextField(validators=[MaxLengthValidator(BODY_TEXT_MAX_LENGTH)])
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

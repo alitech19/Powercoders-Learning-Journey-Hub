@@ -1,6 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 
 from cohorts.permissions import user_is_admin
+from config.input_limits import BODY_TEXT_MAX_LENGTH
 
 from .models import FeedbackEntry
 from .registry import get_handlers
@@ -16,6 +17,9 @@ def get_entries_for(target):
 
 
 def create_entry(*, target, author, body):
+    body = (body or '').strip()
+    if not body or len(body) > BODY_TEXT_MAX_LENGTH:
+        return None
     ct = ContentType.objects.get_for_model(target)
     return FeedbackEntry.objects.create(
         content_type=ct,

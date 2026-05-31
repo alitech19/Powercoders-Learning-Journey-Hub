@@ -43,7 +43,7 @@
   <div class="flex-1 min-w-[200px] max-w-md">
     <input type="search" name="q" value="{{ search_query }}"
            placeholder="Search by title, e.g. week 7…"
-           maxlength="{{ search_max_length }}"
+           maxlength="{{ limits.search }}"
            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30 focus:border-[#C0392B]">
   </div>
   {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
@@ -81,7 +81,7 @@
   {% if view_as == 'student' %}
   <form method="get" class="flex gap-2 flex-1 min-w-[200px] max-w-md">
     <input type="search" name="q" value="{{ search_query }}" placeholder="Search by title…"
-           maxlength="{{ search_max_length }}"
+           maxlength="{{ limits.search }}"
            class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30">
     {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
     <button type="submit" class="px-3 py-2 text-sm bg-gray-100 rounded-lg cursor-pointer">Search</button>

@@ -6,7 +6,7 @@ from django.db.models.functions import Coalesce
 from accounts.models import User
 from cohorts.permissions import get_teacher_group_ids, user_is_admin, user_is_teacher
 
-from .constants import SEARCH_QUERY_MAX_LENGTH
+from config.input_limits import SEARCH_QUERY_MAX_LENGTH
 from .models import Reflection
 
 

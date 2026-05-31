@@ -5,6 +5,8 @@ from django.db import transaction
 
 from accounts.models import User
 from cohorts.models import Cohort, Group
+from config.input_limits import TITLE_MAX_LENGTH
+from config.text_validation import clamp_text
 from cohorts.permissions import (
     get_active_students_for_cohort,
     get_active_students_for_group,
@@ -46,7 +48,7 @@ def parse_milestones_from_post(post):
     order = 0
     for key in sorted(post.keys()):
         if key.startswith('ms_'):
-            title = normalize_milestone_title(post[key])
+            title = clamp_text(normalize_milestone_title(post[key]), TITLE_MAX_LENGTH)
             if title:
                 milestones.append({'title': title, 'order': order})
                 order += 1

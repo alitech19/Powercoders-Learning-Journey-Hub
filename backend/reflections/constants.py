@@ -1,3 +1,12 @@
+# Input limits — re-export shared config for app-local imports.
+from config.input_limits import (  # noqa: F401
+    LONG_TEXT_MAX_LENGTH as EXPECTATIONS_MAX_LENGTH,
+    LONG_TEXT_MAX_LENGTH as FINAL_REFLECTION_MAX_LENGTH,
+    SEARCH_QUERY_MAX_LENGTH,
+    SHORT_LABEL_MAX_LENGTH as CUSTOM_LABEL_MAX_LENGTH,
+    TITLE_MAX_LENGTH,
+)
+
 EXPECTATIONS_TEMPLATE = """What do I expect to learn or achieve?
 
 What is my plan for this period or project?
@@ -37,10 +46,3 @@ TAG_CHOICES = (
     (TAG_PROJECT, 'Project'),
     (TAG_CUSTOM, 'Custom'),
 )
-
-# Input limits — enforced in forms and list search (abuse prevention).
-TITLE_MAX_LENGTH = 100
-CUSTOM_LABEL_MAX_LENGTH = 40
-EXPECTATIONS_MAX_LENGTH = 4000
-FINAL_REFLECTION_MAX_LENGTH = 4000
-SEARCH_QUERY_MAX_LENGTH = 100

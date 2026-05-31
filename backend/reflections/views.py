@@ -14,15 +14,9 @@ from cohorts.permissions import (
 
 from feedback.services import build_section_context
 
-from .constants import (
-    MOOD_OPTIONS,
-    SEARCH_QUERY_MAX_LENGTH,
-    TAG_CHOICES,
-    TAG_CUSTOM,
-    TAG_PROJECT,
-    TAG_WEEKLY,
-    WELLBEING_DIMENSIONS,
-)
+from config.input_limits import SEARCH_QUERY_MAX_LENGTH
+
+from .constants import MOOD_OPTIONS, TAG_CHOICES, TAG_CUSTOM, TAG_PROJECT, TAG_WEEKLY, WELLBEING_DIMENSIONS
 from .forms import ReflectionForm, wellbeing_form_context
 from .models import Reflection
 from .permissions import (
@@ -116,7 +110,6 @@ def reflection_list(request):
         'search_query': params['search_query'],
         'student_filter': params['student_filter'],
         'tag_choices': TAG_CHOICES,
-        'search_max_length': SEARCH_QUERY_MAX_LENGTH,
     })
     return render(request, 'reflections/list.html', context)
 

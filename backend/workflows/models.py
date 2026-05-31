@@ -1,6 +1,13 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxLengthValidator
 from django.db import models
+
+from config.input_limits import (
+    DESCRIPTION_MAX_LENGTH,
+    STEP_DESCRIPTION_MAX_LENGTH,
+    TITLE_MAX_LENGTH,
+)
 
 
 class Workflow(models.Model):
@@ -16,8 +23,11 @@ class Workflow(models.Model):
         COHORT = 'cohort', 'Cohort'
         GROUP = 'group', 'Group'
 
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    title = models.CharField(max_length=TITLE_MAX_LENGTH)
+    description = models.TextField(
+        blank=True,
+        validators=[MaxLengthValidator(DESCRIPTION_MAX_LENGTH)],
+    )
     visibility = models.CharField(
         max_length=20,
         choices=Visibility.choices,
@@ -95,8 +105,11 @@ class Workflow(models.Model):
 
 class WorkflowStep(models.Model):
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE, related_name='steps')
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    title = models.CharField(max_length=TITLE_MAX_LENGTH)
+    description = models.TextField(
+        blank=True,
+        validators=[MaxLengthValidator(STEP_DESCRIPTION_MAX_LENGTH)],
+    )
     order = models.PositiveSmallIntegerField(default=0)
     requires_previous = models.BooleanField(
         default=True,

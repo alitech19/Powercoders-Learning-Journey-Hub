@@ -2,17 +2,11 @@ from django import forms
 
 from django.utils import timezone
 
-from .constants import (
-    CUSTOM_LABEL_MAX_LENGTH,
-    EXPECTATIONS_MAX_LENGTH,
-    EXPECTATIONS_TEMPLATE,
-    FINAL_REFLECTION_MAX_LENGTH,
-    FINAL_REFLECTION_TEMPLATE,
-    MOOD_OPTIONS,
-    TAG_CHOICES,
-    TAG_CUSTOM,
+from config.input_limits import (
+    LONG_TEXT_MAX_LENGTH,
+    SEARCH_QUERY_MAX_LENGTH,
+    SHORT_LABEL_MAX_LENGTH,
     TITLE_MAX_LENGTH,
-    WELLBEING_DIMENSIONS,
 )
 from .models import Reflection, expectations_is_started, final_reflection_is_started
 
@@ -59,14 +53,14 @@ class ReflectionForm(forms.ModelForm):
             'maxlength': TITLE_MAX_LENGTH,
             'class': 'w-full text-lg font-semibold border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30',
         })
-        self.fields['custom_label'].max_length = CUSTOM_LABEL_MAX_LENGTH
-        self.fields['custom_label'].widget.attrs['maxlength'] = CUSTOM_LABEL_MAX_LENGTH
+        self.fields['custom_label'].max_length = SHORT_LABEL_MAX_LENGTH
+        self.fields['custom_label'].widget.attrs['maxlength'] = SHORT_LABEL_MAX_LENGTH
         self.fields['expectations'].widget.attrs.update({
-            'maxlength': EXPECTATIONS_MAX_LENGTH,
+            'maxlength': LONG_TEXT_MAX_LENGTH,
             'rows': 6,
         })
         self.fields['final_reflection'].widget.attrs.update({
-            'maxlength': FINAL_REFLECTION_MAX_LENGTH,
+            'maxlength': LONG_TEXT_MAX_LENGTH,
             'rows': 8,
         })
         for field_name in Reflection.wellbeing_field_names():
@@ -139,10 +133,4 @@ def wellbeing_form_context(form):
         'final_reflection_template': FINAL_REFLECTION_TEMPLATE.strip(),
         'final_reflection_initial': final_text,
         'final_reflection_started': final_reflection_is_started(final_text),
-        'field_limits': {
-            'title': TITLE_MAX_LENGTH,
-            'custom_label': CUSTOM_LABEL_MAX_LENGTH,
-            'expectations': EXPECTATIONS_MAX_LENGTH,
-            'final_reflection': FINAL_REFLECTION_MAX_LENGTH,
-        },
     }

@@ -1,7 +1,10 @@
 from datetime import date
 
 from django.conf import settings
+from django.core.validators import MaxLengthValidator
 from django.db import models
+
+from config.input_limits import DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH
 
 
 class Goal(models.Model):
@@ -32,8 +35,11 @@ class Goal(models.Model):
         blank=True,
         related_name='goals_created_for_students',
     )
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    title = models.CharField(max_length=TITLE_MAX_LENGTH)
+    description = models.TextField(
+        blank=True,
+        validators=[MaxLengthValidator(DESCRIPTION_MAX_LENGTH)],
+    )
     category = models.CharField(
         max_length=20,
         choices=Category.choices,
@@ -154,7 +160,7 @@ class GoalEnrollment(models.Model):
 
 class Milestone(models.Model):
     goal = models.ForeignKey(Goal, on_delete=models.CASCADE, related_name='milestones')
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=TITLE_MAX_LENGTH)
     order = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 

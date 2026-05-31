@@ -1,7 +1,14 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxLengthValidator
 from django.db import models
 from django.utils import timezone
+
+from config.input_limits import (
+    BODY_TEXT_MAX_LENGTH,
+    DESCRIPTION_MAX_LENGTH,
+    TITLE_MAX_LENGTH,
+)
 
 
 class Task(models.Model):
@@ -83,8 +90,11 @@ class Task(models.Model):
     allow_updates = models.BooleanField(default=True)
     allow_comments = models.BooleanField(default=True)
     allow_subtasks = models.BooleanField(default=True)
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    title = models.CharField(max_length=TITLE_MAX_LENGTH)
+    description = models.TextField(
+        blank=True,
+        validators=[MaxLengthValidator(DESCRIPTION_MAX_LENGTH)],
+    )
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -249,7 +259,7 @@ class TaskEnrollment(models.Model):
 
 class Subtask(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='subtasks')
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=TITLE_MAX_LENGTH)
     order = models.PositiveSmallIntegerField(default=0)
     added_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -319,7 +329,7 @@ class TaskUpdate(models.Model):
         choices=UpdateType.choices,
         default=UpdateType.NOTE,
     )
-    text = models.TextField()
+    text = models.TextField(validators=[MaxLengthValidator(BODY_TEXT_MAX_LENGTH)])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -348,7 +358,7 @@ class TaskComment(models.Model):
         on_delete=models.CASCADE,
         related_name='task_comments',
     )
-    text = models.TextField()
+    text = models.TextField(validators=[MaxLengthValidator(BODY_TEXT_MAX_LENGTH)])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

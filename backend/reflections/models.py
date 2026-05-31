@@ -2,18 +2,13 @@ from django.conf import settings
 from django.core.validators import MaxLengthValidator
 from django.db import models
 
-from .constants import (
-    CUSTOM_LABEL_MAX_LENGTH,
-    EXPECTATIONS_MAX_LENGTH,
-    EXPECTATIONS_TEMPLATE,
-    FINAL_REFLECTION_MAX_LENGTH,
-    FINAL_REFLECTION_TEMPLATE,
-    TAG_CHOICES,
-    TAG_CUSTOM,
-    TAG_PROJECT,
-    TAG_WEEKLY,
+from config.input_limits import (
+    LONG_TEXT_MAX_LENGTH,
+    SHORT_LABEL_MAX_LENGTH,
     TITLE_MAX_LENGTH,
 )
+
+from .constants import EXPECTATIONS_TEMPLATE, FINAL_REFLECTION_TEMPLATE
 
 
 def expectations_is_started(text):
@@ -51,14 +46,14 @@ class Reflection(models.Model):
     )
     title = models.CharField(max_length=TITLE_MAX_LENGTH)
     tags = models.JSONField(default=list, blank=True)
-    custom_label = models.CharField(max_length=CUSTOM_LABEL_MAX_LENGTH, blank=True)
+    custom_label = models.CharField(max_length=SHORT_LABEL_MAX_LENGTH, blank=True)
     expectations = models.TextField(
         blank=True,
-        validators=[MaxLengthValidator(EXPECTATIONS_MAX_LENGTH)],
+        validators=[MaxLengthValidator(LONG_TEXT_MAX_LENGTH)],
     )
     final_reflection = models.TextField(
         blank=True,
-        validators=[MaxLengthValidator(FINAL_REFLECTION_MAX_LENGTH)],
+        validators=[MaxLengthValidator(LONG_TEXT_MAX_LENGTH)],
     )
     energy = models.CharField(
         max_length=20, choices=WellbeingLevel.choices, blank=True,

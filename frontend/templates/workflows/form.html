@@ -32,12 +32,12 @@
       <h2 class="text-sm font-semibold">Details</h2>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1">Title</label>
-        <input type="text" name="title" required value="{{ workflow.title }}"
+        <input type="text" name="title" required value="{{ workflow.title }}" maxlength="{{ limits.title }}"
                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1">Description</label>
-        <textarea name="description" rows="3"
+        <textarea name="description" rows="3" maxlength="{{ limits.description }}"
                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none">{{ workflow.description }}</textarea>
       </div>
       <div>
@@ -66,12 +66,12 @@
       <h2 class="text-sm font-semibold">Details</h2>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1">Title</label>
-        <input type="text" name="title" required
+        <input type="text" name="title" required maxlength="{{ limits.title }}"
                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1">Description</label>
-        <textarea name="description" rows="3"
+        <textarea name="description" rows="3" maxlength="{{ limits.description }}"
                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
       </div>
       <div>
@@ -180,10 +180,10 @@
           <div class="border border-gray-100 rounded-lg p-4 bg-gray-50">
             <div class="flex gap-2 mb-2">
               <span class="text-xs font-bold text-gray-400 w-5" x-text="i+1"></span>
-              <input type="text" :name="'step_title_' + (i+1)" x-model="step.title" required placeholder="Step title"
+              <input type="text" :name="'step_title_' + (i+1)" x-model="step.title" required placeholder="Step title" maxlength="{{ limits.title }}"
                      class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm">
             </div>
-            <textarea :name="'step_desc_' + (i+1)" x-model="step.desc" rows="2" placeholder="Description (optional)"
+            <textarea :name="'step_desc_' + (i+1)" x-model="step.desc" rows="2" placeholder="Description (optional)" maxlength="{{ limits.step_description }}"
                       class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none mb-2"></textarea>
             <div class="flex items-center justify-between">
               <label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">

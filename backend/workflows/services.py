@@ -3,6 +3,8 @@ from django.db import transaction
 
 from accounts.models import User
 from cohorts.models import Cohort, Group
+from config.input_limits import STEP_DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH
+from config.text_validation import clamp_text
 from cohorts.permissions import (
     get_active_students_for_cohort,
     get_active_students_for_group,
@@ -19,12 +21,15 @@ def parse_steps_from_post(post):
     steps = []
     index = 1
     while True:
-        title = post.get(f'step_title_{index}', '').strip()
+        title = clamp_text(post.get(f'step_title_{index}', '').strip(), TITLE_MAX_LENGTH)
         if not title:
             break
         steps.append({
             'title': title,
-            'description': post.get(f'step_desc_{index}', '').strip(),
+            'description': clamp_text(
+                post.get(f'step_desc_{index}', '').strip(),
+                STEP_DESCRIPTION_MAX_LENGTH,
+            ),
             'requires_previous': post.get(f'step_req_{index}') == 'on',
             'order': index,
         })

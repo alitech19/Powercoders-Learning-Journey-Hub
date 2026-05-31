@@ -87,9 +87,9 @@
         {% if can_manage %}
         <form method="post" action="{% url 'workflows:step_add' workflow.pk %}" class="space-y-2 pt-4 border-t border-gray-100 mt-4">
           {% csrf_token %}
-          <input type="text" name="title" required placeholder="Step title"
+          <input type="text" name="title" required placeholder="Step title" maxlength="{{ limits.title }}"
                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
-          <textarea name="description" rows="2" placeholder="Description (optional)"
+          <textarea name="description" rows="2" placeholder="Description (optional)" maxlength="{{ limits.step_description }}"
                     class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
           <label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
             <input type="checkbox" name="requires_previous" checked class="accent-[#C0392B]">
