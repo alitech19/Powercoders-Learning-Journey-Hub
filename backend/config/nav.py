@@ -25,7 +25,7 @@ NAV_REGISTRY: tuple[NavItem, ...] = (
     NavItem('Goals', 'goals:list', enabled=True),
     NavItem('Tasks', 'tasks:task_list', enabled=True),
     NavItem('Reflections', 'reflections:list', enabled=True),
-    NavItem('Journal', 'journal:list'),
+    NavItem('Journal', 'journal:list', enabled=True),
     NavItem('Habits', 'habits:list'),
     NavItem('Group', 'group_space:feed'),
     NavItem('Resources', 'group_space:resource_list'),

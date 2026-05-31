@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ entry.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+  <a href="{% url 'journal:list' %}"
+     class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] transition-colors mb-4">
+    ← Back to journal
+  </a>
+
+  {% if is_staff_view %}
+  <div class="flex items-center gap-3 mb-4 px-4 py-3 bg-[#2B2B2B] text-white rounded-xl">
+    <span class="flex-shrink-0 w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-sm font-bold uppercase">
+      {{ entry.author.display_name|slice:":1" }}
+    </span>
+    <div class="min-w-0">
+      <p class="font-semibold truncate">{{ entry.author.display_name }}</p>
+      {% if entry.author.group %}
+      <p class="text-xs text-white/60">{{ entry.author.group.name }}</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+    <div class="flex items-start justify-between gap-4 mb-4">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1 flex-wrap">
+          {% if entry.mood_emoji %}
+          <span class="text-2xl">{{ entry.mood_emoji }}</span>
+          {% endif %}
+          <h1 class="text-xl font-bold text-[#2B2B2B]">{{ entry.title }}</h1>
+          {% include "journal/_visibility_badge.html" %}
+        </div>
+        <div class="flex items-center gap-3 text-xs text-gray-400 mt-1 flex-wrap">
+          <span>{{ entry.entry_date|date:"l, d F Y" }}</span>
+          <span>·</span>
+          <span>{{ entry.word_count }} words</span>
+        </div>
+      </div>
+      {% if can_edit or can_delete %}
+      <div class="flex gap-2 flex-shrink-0 flex-wrap">
+        {% if can_edit %}
+        <a href="{% url 'journal:edit' entry.pk %}"
+           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]">Edit</a>
+        {% endif %}
+        {% if can_delete %}
+        <a href="{% url 'journal:delete' entry.pk %}"
+           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-400 hover:text-red-500">
+          {% if admin_delete %}Remove{% else %}Delete{% endif %}
+        </a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    {% if entry.get_tags_list %}
+    <div class="flex flex-wrap gap-1.5 mb-4 pb-4 border-b border-gray-100">
+      {% for tag in entry.get_tags_list %}
+      <a href="{% url 'journal:list' %}?tag={{ tag|urlencode }}"
+         class="text-xs px-2.5 py-1 bg-[#F5EDE0] text-[#C0392B] rounded-full font-medium hover:bg-[#EDE3D5] transition-colors">
+        #{{ tag }}
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="text-[#2B2B2B] text-sm leading-relaxed whitespace-pre-wrap">{{ entry.content }}</div>
+  </div>
+
+  <p class="text-xs text-gray-400 text-center mb-6">
+    Written {{ entry.created_at|date:"d M Y" }}
+    {% if entry.updated_at != entry.created_at %}· edited {{ entry.updated_at|date:"d M Y" }}{% endif %}
+  </p>
+
+  {% if show_feedback %}
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    {% include "feedback/_section.html" %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

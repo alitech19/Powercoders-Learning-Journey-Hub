@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'goals',
     'tasks',
     'reflections',
+    'journal',
 ]
 
 MIDDLEWARE = [

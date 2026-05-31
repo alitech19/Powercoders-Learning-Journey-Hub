@@ -36,6 +36,7 @@ urlpatterns = [
     path('goals/', include('goals.urls')),
     path('tasks/', include('tasks.urls')),
     path('reflections/', include('reflections.urls')),
+    path('journal/', include('journal.urls')),
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]
 

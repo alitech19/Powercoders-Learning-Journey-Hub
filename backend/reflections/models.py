@@ -8,7 +8,13 @@ from config.input_limits import (
     TITLE_MAX_LENGTH,
 )
 
-from .constants import EXPECTATIONS_TEMPLATE, FINAL_REFLECTION_TEMPLATE
+from .constants import (
+    EXPECTATIONS_TEMPLATE,
+    FINAL_REFLECTION_TEMPLATE,
+    TAG_CUSTOM,
+    TAG_PROJECT,
+    TAG_WEEKLY,
+)
 
 
 def expectations_is_started(text):
