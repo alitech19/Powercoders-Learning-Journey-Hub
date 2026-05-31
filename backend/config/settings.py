@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'reflections',
     'journal',
     'habits',
+    'group_space.apps.GroupSpaceConfig',
 ]
 
 MIDDLEWARE = [

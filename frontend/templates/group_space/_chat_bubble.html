@@ -1,0 +1,62 @@
+{% if item.kind == "post" %}
+  {% with post=item.post %}
+  <article id="chat-msg-{{ post.pk }}" class="group/msg hover:bg-gray-50/80 -mx-2 px-2 py-2 rounded-lg">
+    <header class="flex items-center gap-2 mb-1.5">
+      {% include "includes/user_avatar.html" with user=post.author size=36 %}
+      <span class="text-sm font-semibold text-[#2B2B2B] truncate min-w-0">{{ post.author.display_name }}</span>
+      {% if post.snapshot_kind %}
+      <span class="text-xs px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 shrink-0 whitespace-nowrap">Shared · {{ post.get_snapshot_kind_display }}</span>
+      {% elif post.resource_label %}
+      <span class="text-xs px-1.5 py-0.5 rounded bg-green-100 text-green-700 shrink-0 whitespace-nowrap">Resource</span>
+      {% endif %}
+      <time class="text-xs text-gray-400 ml-auto shrink-0 whitespace-nowrap" datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|date:"d M Y, H:i" }}</time>
+    </header>
+
+    <div class="pl-11 space-y-1.5">
+      {% if post.pinned %}
+      <span class="text-xs font-medium text-amber-600">📌 pinned</span>
+      {% endif %}
+
+      <div class="text-sm text-gray-800 space-y-2">
+        {% if post.resource_label and not post.snapshot_html %}
+        <p class="font-medium text-[#2B2B2B]">{{ post.resource_label }}</p>
+        {% endif %}
+        {% if post.snapshot_html %}
+        <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm snapshot-card">{{ post.snapshot_html|safe }}</div>
+        {% endif %}
+        {% if post.body %}
+        <p class="whitespace-pre-wrap leading-relaxed">{{ post.body }}</p>
+        {% endif %}
+        {% if post.file %}
+        <a href="{{ post.file.url }}" target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center gap-1.5 text-xs text-green-700 hover:text-green-900 font-medium">
+          📎 Download attachment
+        </a>
+        {% endif %}
+      </div>
+
+      {% if user == post.author or user.role == "teacher" or user.role == "admin" %}
+      <div class="flex gap-2 opacity-0 group-hover/msg:opacity-100 transition-opacity">
+        {% if user == post.author %}
+        <a href="{% url 'group_space:post_edit' post.pk %}" class="text-xs text-gray-400 hover:text-[#C0392B]">Edit</a>
+        {% endif %}
+        {% if user == post.author or user.role == "teacher" or user.role == "admin" %}
+        <a href="{% url 'group_space:post_delete' post.pk %}" class="text-xs text-gray-400 hover:text-red-600">Delete</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </article>
+  {% endwith %}
+{% else %}
+  {% with comment=item.comment %}
+  <article id="chat-comment-{{ comment.pk }}" class="-mx-2 px-2 py-1.5 ml-6 opacity-90">
+    <header class="flex items-center gap-2 mb-0.5">
+      {% include "includes/user_avatar.html" with user=comment.author size=28 %}
+      <span class="text-xs font-semibold text-[#2B2B2B] truncate">{{ comment.author.display_name }}</span>
+      <time class="text-xs text-gray-400 ml-auto shrink-0">{{ comment.created_at|date:"d M Y, H:i" }}</time>
+    </header>
+    <p class="text-sm text-gray-700 whitespace-pre-wrap pl-9">{{ comment.body }}</p>
+  </article>
+  {% endwith %}
+{% endif %}

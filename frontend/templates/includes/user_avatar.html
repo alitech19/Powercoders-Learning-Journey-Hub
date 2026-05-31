@@ -3,6 +3,6 @@
     alt="{{ user.display_name }}"
     width="{{ size|default:32 }}"
     height="{{ size|default:32 }}"
-    class="user-avatar{% if css_class %} {{ css_class }}{% endif %}"
-    style="border-radius:50%;object-fit:cover;vertical-align:middle;"
+    class="user-avatar shrink-0 rounded-full object-cover{% if css_class %} {{ css_class }}{% endif %}"
+    style="width:{{ size|default:32 }}px;height:{{ size|default:32 }}px;min-width:{{ size|default:32 }}px;min-height:{{ size|default:32 }}px;"
 >

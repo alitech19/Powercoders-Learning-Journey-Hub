@@ -14,7 +14,7 @@ A web platform for Powercoders bootcamp participants to track their learning jou
 | `cohorts` | Cohort, Group, GroupTeacher (admin only) |
 | Auth (A–G) | Argon2, axes, CSP, 2FA, onboarding gates, Redis sessions, JSON logs — see [AUTH_ROADMAP](docs/AUTH_ROADMAP.md) |
 | Dev seed | `backend/dev/seed.yaml` + quick login — **remove from codebase before prod** ([checklist](docs/PRODUCTION_CHECKLIST.md)) |
-| Next | `workflows` — see [APPS_ROADMAP](docs/APPS_ROADMAP.md) |
+| Next | `resources` — see [APP_PLAN](docs/APP_PLAN.md) |
 
 ## Quick start
 
@@ -29,7 +29,7 @@ Open http://localhost:8000 — health check at http://localhost:8000/health/
 
 ## Planned apps (customer priority → nav order)
 
-See [docs/APPS_ROADMAP.md](docs/APPS_ROADMAP.md) for the full checklist.
+See [docs/APP_PLAN.md](docs/APP_PLAN.md) for integration status and [docs/RESOURCE_FILE_STORAGE.md](docs/RESOURCE_FILE_STORAGE.md) for resource file storage.
 
 1. ~~`accounts`, `cohorts`, auth, dev seed~~ ✓
 2. **`home`** — placeholder hub until dashboard replaces it

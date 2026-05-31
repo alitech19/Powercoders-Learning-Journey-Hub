@@ -1,0 +1,11 @@
+<div class="space-y-2">
+  <div class="flex flex-wrap items-center gap-2">
+    {% if entry.mood_emoji %}<span class="text-lg">{{ entry.mood_emoji }}</span>{% endif %}
+    <h3 class="font-semibold text-[#2B2B2B]">{{ entry.title }}</h3>
+  </div>
+  <p class="text-xs text-gray-500">{{ entry.entry_date|date:"l, d F Y" }} · {{ entry.word_count }} words</p>
+  {% if entry.get_tags_list %}
+  <p class="text-xs text-gray-500">{% for tag in entry.get_tags_list %}#{{ tag }} {% endfor %}</p>
+  {% endif %}
+  <div class="text-gray-700 whitespace-pre-wrap leading-relaxed">{{ entry.content }}</div>
+</div>

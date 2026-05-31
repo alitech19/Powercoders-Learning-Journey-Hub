@@ -1,0 +1,54 @@
+<div id="share-list-{{ kind }}" class="share-list hidden max-h-40 overflow-y-auto space-y-1 pt-1">
+  {% if kind == "journal" %}
+    {% for obj in share_menu.journal %}
+    <form hx-post="{% url 'group_space:share_create' %}" hx-target="#chat-messages" hx-swap="beforeend">
+      {% csrf_token %}
+      <input type="hidden" name="group_pk" value="{{ group.pk }}">
+      <input type="hidden" name="kind" value="journal">
+      <input type="hidden" name="obj_id" value="{{ obj.pk }}">
+      <button type="submit" class="w-full text-left text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 hover:border-[#C0392B]">
+        <span class="font-medium">{{ obj.title }}</span>
+        <span class="text-gray-400 text-xs ml-1">{{ obj.entry_date|date:"d M Y" }}</span>
+      </button>
+    </form>
+    {% empty %}
+    <p class="text-xs text-gray-500 px-1 py-2">No shared journal entries — set visibility to “visible to teachers” first.</p>
+    {% endfor %}
+  {% elif kind == "habit" %}
+    {% for obj in share_menu.habit %}
+    <form hx-post="{% url 'group_space:share_create' %}" hx-target="#chat-messages" hx-swap="beforeend">
+      {% csrf_token %}
+      <input type="hidden" name="group_pk" value="{{ group.pk }}">
+      <input type="hidden" name="kind" value="habit">
+      <input type="hidden" name="obj_id" value="{{ obj.pk }}">
+      <button type="submit" class="w-full text-left text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 hover:border-[#C0392B]">{{ obj.title }}</button>
+    </form>
+    {% empty %}
+    <p class="text-xs text-gray-500 px-1 py-2">No shared habits yet.</p>
+    {% endfor %}
+  {% elif kind == "goal" %}
+    {% for obj in share_menu.goal %}
+    <form hx-post="{% url 'group_space:share_create' %}" hx-target="#chat-messages" hx-swap="beforeend">
+      {% csrf_token %}
+      <input type="hidden" name="group_pk" value="{{ group.pk }}">
+      <input type="hidden" name="kind" value="goal">
+      <input type="hidden" name="obj_id" value="{{ obj.pk }}">
+      <button type="submit" class="w-full text-left text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 hover:border-[#C0392B]">{{ obj.title }}</button>
+    </form>
+    {% empty %}
+    <p class="text-xs text-gray-500 px-1 py-2">No shared goals yet.</p>
+    {% endfor %}
+  {% elif kind == "task" %}
+    {% for obj in share_menu.task %}
+    <form hx-post="{% url 'group_space:share_create' %}" hx-target="#chat-messages" hx-swap="beforeend">
+      {% csrf_token %}
+      <input type="hidden" name="group_pk" value="{{ group.pk }}">
+      <input type="hidden" name="kind" value="task">
+      <input type="hidden" name="obj_id" value="{{ obj.pk }}">
+      <button type="submit" class="w-full text-left text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 hover:border-[#C0392B]">{{ obj.title }}</button>
+    </form>
+    {% empty %}
+    <p class="text-xs text-gray-500 px-1 py-2">No shared tasks yet.</p>
+    {% endfor %}
+  {% endif %}
+</div>

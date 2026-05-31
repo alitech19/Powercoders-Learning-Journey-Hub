@@ -38,6 +38,7 @@ urlpatterns = [
     path('reflections/', include('reflections.urls')),
     path('journal/', include('journal.urls')),
     path('habits/', include('habits.urls')),
+    path('group/', include('group_space.urls')),
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]
 

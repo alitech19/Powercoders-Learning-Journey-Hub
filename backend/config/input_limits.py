@@ -23,3 +23,6 @@ SHORT_LABEL_MAX_LENGTH = 40
 
 # List/search query strings (?q=)
 SEARCH_QUERY_MAX_LENGTH = 100
+
+# Group Space resource label (shown on Resources tiles when post has link/file)
+RESOURCE_LABEL_MAX_LENGTH = 100

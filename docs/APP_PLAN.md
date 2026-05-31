@@ -23,11 +23,11 @@ Build sequence **2 → 9**, then **dashboard (1)**. Status and names may change 
 | 5 | `reflections` | Reflections | Ali UI + django-test wellbeing dims (embedded) | Done |
 | 6 | `journal` | Journal | Ali | Done |
 | 7 | `habits` | Habits | django-test (`growth`) | Done |
-| 8 | `group_space` | Group | Ali | Pending |
-| 9 | `group_space` (resources view) | Resources | Ali | Pending — likely same app, separate nav route |
+| 8 | `group_space` | Group | Group chat + resource posts | Done |
+| 9 | `resources` | Resources | Group / personal / thematic tiles; file storage: [RESOURCE_FILE_STORAGE.md](RESOURCE_FILE_STORAGE.md) | Pending |
 | **1 (last)** | `dashboard` | — (replaces `home` URL) | Ali | Pending |
 
-**Next app to port:** `group_space` — see Ali branch
+**Next app to build:** `resources` — file storage decision: [RESOURCE_FILE_STORAGE.md](RESOURCE_FILE_STORAGE.md)
 
 ## Backport from `origin/Ali` (parallel work during integration)
 
@@ -47,7 +47,7 @@ Cherry-pick or re-port **selected** changes from Ali's branch — **not** a merg
 | B10 | **feedback / goals** | Email on new feedback | `accounts/emails.py` — target `GoalEnrollment` via generic feedback | Pending |
 | B11 | **tests** | Automated test suite pattern (127 tests on Ali) | `*/tests.py` — **rewrite** for integration models, not copy | Pending |
 | B12 | **docs** | Incident response runbook + scaling roadmap | `docs/INCIDENT_RESPONSE.md`, `docs/SCALING_ROADMAP.md` | Pending |
-| B13 | **group_space** | File uploads on posts | Phase 19 (US-26) — port with `group_space` app | Pending |
+| B13 | **group_space** | File uploads on posts (local `media/`) | [RESOURCE_FILE_STORAGE.md](RESOURCE_FILE_STORAGE.md) — Option 1 | Done |
 | B14 | **cohorts / accounts** | Bulk assign students to group (admin UI) | Phase 19 (US-39) | Pending |
 | B15 | ~~**tasks** Cohort default tasks~~ | — | **Won't do** — teachers assign; enroll on existing task instead |
 
@@ -74,7 +74,8 @@ Cherry-pick or re-port **selected** changes from Ali's branch — **not** a merg
 
 - App package names may differ from nav labels (e.g. nav label "Tasks" → app `tasks`)
 - **Reflections** — includes embedded wellbeing check-in; no separate `wellbeing` app
-- **Resources** — port with `group_space` unless customer wants a standalone app later
+- **Group Space** — single chat lane; any group member can post; achievement snapshots chat-only (not Resources)
+- **Resources** — separate app; personal / group / thematic link containers — storage: [RESOURCE_FILE_STORAGE.md](RESOURCE_FILE_STORAGE.md)
 - Monolithic django-test `growth` is **not** ported as-is; split per rows above
 
 ## Reference

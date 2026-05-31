@@ -1,0 +1,132 @@
+<div id="post-{{ post.pk }}" class="bg-white rounded-xl border border-gray-200 p-5">
+
+  <div class="flex items-start justify-between gap-3 mb-3">
+    <div class="flex items-center gap-2 flex-wrap">
+      {% if post.pinned %}
+      <span class="text-xs font-semibold text-amber-600">📌 Pinned</span>
+      {% endif %}
+      {% if post.snapshot_kind %}
+      <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+        Shared {{ post.get_snapshot_kind_display|lower }}
+      </span>
+      {% elif post.resource_label %}
+      <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+        Resource
+      </span>
+      {% endif %}
+      <span class="text-xs text-gray-400">{{ post.author.display_name }}</span>
+      <span class="text-xs text-gray-300">·</span>
+      <span class="text-xs text-gray-400">{{ post.created_at|date:"d M Y, H:i" }}</span>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0">
+      {% if user == post.author %}
+      <a href="{% url 'group_space:post_edit' post.pk %}" class="text-gray-300 hover:text-blue-400 transition-colors" title="Edit">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        </svg>
+      </a>
+      {% endif %}
+      {% if user == post.author or user.role == "teacher" or user.role == "admin" %}
+      <a href="{% url 'group_space:post_delete' post.pk %}" class="text-gray-300 hover:text-red-400 transition-colors" title="Delete">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if post.resource_label %}
+  <p class="text-sm font-semibold text-[#2B2B2B] mb-1">{{ post.resource_label }}</p>
+  {% endif %}
+
+  {% if post.snapshot_html %}
+  <div class="rounded-lg border border-amber-100 bg-amber-50/50 p-4 mb-3 text-sm">
+    {{ post.snapshot_html|safe }}
+  </div>
+  {% endif %}
+
+  {% if post.body %}
+  <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{{ post.body }}</p>
+  {% endif %}
+
+  {% if post.file %}
+  <a href="{{ post.file.url }}" target="_blank" rel="noopener noreferrer"
+     class="inline-flex items-center gap-1.5 mt-2 text-xs text-green-700 hover:text-green-900 font-medium transition-colors">
+    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+    </svg>
+    Download attachment
+  </a>
+  {% endif %}
+
+  {% with comments=post.comments.all %}
+  {% if comments %}
+  <div class="mt-4 pt-4 border-t border-gray-100 space-y-3">
+    {% for comment in comments %}
+    <div class="flex items-start gap-2" x-data="{ editing: false, body: '{{ comment.body|escapejs }}' }">
+      <div class="h-7 w-7 rounded-full bg-[#C0392B] flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span class="text-white text-xs font-bold">{{ comment.author.display_name|first|upper }}</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-baseline gap-2 mb-0.5">
+          <span class="text-xs font-semibold text-[#2B2B2B]">{{ comment.author.display_name }}</span>
+          <span class="text-xs text-gray-400">{{ comment.created_at|date:"d M, H:i" }}</span>
+        </div>
+        <p x-show="!editing" class="text-sm text-gray-600">{{ comment.body }}</p>
+        <form x-show="editing" x-cloak
+              hx-post="{% url 'group_space:comment_edit' comment.pk %}"
+              hx-target="#post-{{ post.pk }}"
+              hx-swap="outerHTML"
+              class="flex gap-2 mt-1">
+          {% csrf_token %}
+          <textarea name="body" x-model="body" rows="2"
+                    class="flex-1 border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30 focus:border-[#C0392B] resize-none"></textarea>
+          <div class="flex flex-col gap-1">
+            <button type="submit" class="bg-[#C0392B] text-white text-xs font-semibold px-2 py-1 rounded-lg cursor-pointer">Save</button>
+            <button type="button" @click="editing = false" class="border border-gray-200 text-gray-500 text-xs px-2 py-1 rounded-lg cursor-pointer hover:bg-gray-50">Cancel</button>
+          </div>
+        </form>
+      </div>
+      <div class="flex items-center gap-1 flex-shrink-0 mt-0.5">
+        {% if user == comment.author %}
+        <button type="button" @click="editing = !editing" class="text-gray-300 hover:text-blue-400 transition-colors cursor-pointer">
+          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+        </button>
+        {% endif %}
+        {% if user == comment.author or user.role == "teacher" or user.role == "admin" %}
+        <form hx-post="{% url 'group_space:comment_delete' comment.pk %}"
+              hx-target="#post-{{ post.pk }}"
+              hx-swap="outerHTML">
+          {% csrf_token %}
+          <button type="submit" class="text-gray-200 hover:text-red-400 transition-colors cursor-pointer">
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <form hx-post="{% url 'group_space:comment_create' post.pk %}"
+        hx-target="#post-{{ post.pk }}"
+        hx-swap="outerHTML"
+        hx-on::after-request="this.reset()"
+        class="mt-4 flex gap-2">
+    {% csrf_token %}
+    <textarea name="body" rows="1" placeholder="Write a comment…"
+              class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30 focus:border-[#C0392B] resize-none"
+              required></textarea>
+    <button type="submit"
+            class="bg-[#2B2B2B] hover:bg-[#C0392B] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors cursor-pointer flex-shrink-0">
+      Reply
+    </button>
+  </form>
+</div>
