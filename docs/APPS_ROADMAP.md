@@ -19,16 +19,15 @@ Build sequence **2 → 9**, then **dashboard (1)**. Status and names may change 
 |---------|-------------------|-----------|--------|--------|
 | 2 | `workflows` | Workflows | Ali | Done |
 | 3 | `goals` | Goals | Ali | Done |
-| 4 | `tasks` | Tasks | django-test models + Ali UI + enrollment ([TASKS_INTEGRATION.md](TASKS_INTEGRATION.md)) | Done |
-| 5a | `reflections` | Reflections | Ali | Pending |
-| 5b | `wellbeing` | Wellbeing | django-test (`growth`) | Pending — same phase as reflections |
+| 4 | `tasks` | Tasks | django-test models + Ali UI + enrollment | Done |
+| 5 | `reflections` | Reflections | Ali UI + django-test wellbeing dims (embedded) | Done |
 | 6 | `journal` | Journal | Ali | Pending |
 | 7 | `habits` | Habits | django-test (`growth`) | Pending |
 | 8 | `group_space` | Group | Ali | Pending |
 | 9 | `group_space` (resources view) | Resources | Ali | Pending — likely same app, separate nav route |
 | **1 (last)** | `dashboard` | — (replaces `home` URL) | Ali | Pending |
 
-**Next app to port:** `tasks` — see [TASKS_INTEGRATION.md](TASKS_INTEGRATION.md)
+**Next app to port:** `journal` — see Ali branch
 
 ## Backport from `origin/Ali` (parallel work during integration)
 
@@ -74,12 +73,11 @@ Cherry-pick or re-port **selected** changes from Ali's branch — **not** a merg
 ## Rename / split policy
 
 - App package names may differ from nav labels (e.g. nav label "Tasks" → app `tasks`)
-- **Reflections + wellbeing** — one integration phase; keep separate apps if models diverge
+- **Reflections** — includes embedded wellbeing check-in; no separate `wellbeing` app
 - **Resources** — port with `group_space` unless customer wants a standalone app later
 - Monolithic django-test `growth` is **not** ported as-is; split per rows above
 
 ## Reference
 
-- Tasks full plan: [TASKS_INTEGRATION.md](TASKS_INTEGRATION.md)
 - Auth complete: [AUTH_ROADMAP.md](AUTH_ROADMAP.md)
 - Prod dev removal: [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md)

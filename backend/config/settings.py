@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'feedback',
     'goals',
     'tasks',
+    'reflections',
 ]
 
 MIDDLEWARE = [
