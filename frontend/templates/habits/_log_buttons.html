@@ -1,0 +1,49 @@
+{% if row.can_log %}
+<div class="flex flex-wrap gap-2">
+  {% if row.today_log and row.today_log.status == 'done' %}
+  <form method="post" action="{% url 'habits:log_not_done' row.habit.pk %}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <button type="submit"
+            class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:border-amber-400 hover:text-amber-600 transition-colors cursor-pointer">
+      Mark not done
+    </button>
+  </form>
+  {% elif row.today_log and row.today_log.status == 'not_done' %}
+  <form method="post" action="{% url 'habits:log_done' row.habit.pk %}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <button type="submit"
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors cursor-pointer">
+      Mark done
+    </button>
+  </form>
+  {% else %}
+  <form method="post" action="{% url 'habits:log_done' row.habit.pk %}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <button type="submit"
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors cursor-pointer">
+      Done today
+    </button>
+  </form>
+  <form method="post" action="{% url 'habits:log_not_done' row.habit.pk %}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <button type="submit"
+            class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-500 hover:border-gray-300 transition-colors cursor-pointer">
+      Not done
+    </button>
+  </form>
+  {% endif %}
+</div>
+{% elif row.today_log %}
+<p class="text-xs text-gray-400">
+  Today:
+  {% if row.today_log.status == 'done' %}
+  <span class="text-sm font-extrabold text-green-600 uppercase">Done</span>
+  {% else %}
+  <span class="text-xs font-bold text-amber-600 uppercase">Not done</span>
+  {% endif %}
+</p>
+{% endif %}

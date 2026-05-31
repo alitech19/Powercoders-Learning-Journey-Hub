@@ -22,12 +22,12 @@ Build sequence **2 → 9**, then **dashboard (1)**. Status and names may change 
 | 4 | `tasks` | Tasks | django-test models + Ali UI + enrollment | Done |
 | 5 | `reflections` | Reflections | Ali UI + django-test wellbeing dims (embedded) | Done |
 | 6 | `journal` | Journal | Ali | Done |
-| 7 | `habits` | Habits | django-test (`growth`) | Pending |
+| 7 | `habits` | Habits | django-test (`growth`) | Done |
 | 8 | `group_space` | Group | Ali | Pending |
 | 9 | `group_space` (resources view) | Resources | Ali | Pending — likely same app, separate nav route |
 | **1 (last)** | `dashboard` | — (replaces `home` URL) | Ali | Pending |
 
-**Next app to port:** `habits` — see django-test (`growth`) branch
+**Next app to port:** `group_space` — see Ali branch
 
 ## Backport from `origin/Ali` (parallel work during integration)
 

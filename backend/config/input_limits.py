@@ -1,6 +1,6 @@
 """Shared max lengths for user-editable text (abuse prevention).
 
-Used by goals, tasks, workflows, reflections, and feedback.
+Used by goals, tasks, workflows, reflections, journal, habits, and feedback.
 """
 
 # Titles — goal, task, workflow, step, milestone, subtask, reflection name

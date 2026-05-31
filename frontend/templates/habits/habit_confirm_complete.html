@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Complete Habit{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+  <div class="bg-white rounded-xl border border-gray-200 p-6 text-center">
+    <div class="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4 text-2xl">🎉</div>
+    <h1 class="text-lg font-bold text-[#2B2B2B] mb-1">Mark habit as completed?</h1>
+    <p class="text-gray-500 text-sm mb-1">«{{ habit.title }}»</p>
+    <p class="text-gray-400 text-xs mb-4">
+      Current weekly streak: <span class="font-semibold text-[#C0392B]">{{ streak }} week{{ streak|pluralize }}</span>
+    </p>
+    <p class="text-sm text-gray-600 bg-gray-50 rounded-lg px-4 py-2 mb-6">
+      You can reactivate this habit later if you want to pick it up again.
+    </p>
+    <div class="flex gap-3">
+      <form method="post" class="flex-1">
+        {% csrf_token %}
+        <button type="submit"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm cursor-pointer">
+          Yes, complete
+        </button>
+      </form>
+      <a href="{% url 'habits:detail' habit.pk %}"
+         class="flex-1 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors text-center">
+        Cancel
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

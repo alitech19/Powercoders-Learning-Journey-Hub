@@ -1,0 +1,23 @@
+<div class="grid grid-cols-7 gap-2 {% if list_view %}mt-4 pt-4 border-t border-gray-100{% endif %}">
+  {% for day in week_table %}
+  <div class="flex flex-col items-center justify-center text-center min-w-0 rounded-xl border py-3 min-h-[4rem]
+              {% if day.is_today %}border-[#C0392B]/30 bg-red-50/40
+              {% elif day.log and day.log.status == 'done' %}border-green-200 bg-green-50/60
+              {% elif day.log %}border-amber-200 bg-amber-50/60
+              {% else %}border-gray-100 bg-gray-50/50{% endif %}">
+    <span class="text-[10px] text-gray-400 uppercase leading-none">{{ day.weekday }}</span>
+    <span class="text-xs text-gray-400 leading-none mt-0.5">{{ day.date|date:"d" }}</span>
+    <span class="mt-1 leading-none">
+      {% if day.log %}
+        {% if day.log.status == 'done' %}
+        <span class="text-sm font-bold text-green-600 uppercase">Done</span>
+        {% else %}
+        <span class="text-xs font-bold text-amber-600 uppercase">Not done</span>
+        {% endif %}
+      {% else %}
+        <span class="text-sm text-gray-200">—</span>
+      {% endif %}
+    </span>
+  </div>
+  {% endfor %}
+</div>
