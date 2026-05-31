@@ -4,49 +4,14 @@
 {% block content %}
 
 {% if view_as == 'student' %}
-<div class="flex items-center justify-between mb-6">
-  <div>
-    <h1 class="text-2xl font-bold text-[#2B2B2B]">My Goals</h1>
-    <p class="text-gray-500 text-sm mt-0.5">Set targets, track milestones, measure growth.</p>
-  </div>
-  <a href="{% url 'goals:create' %}"
-     class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
-    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-    </svg>
-    New Goal
-  </a>
-</div>
+{% url 'goals:create' as goals_create_url %}
+{% include "includes/_page_header.html" with title="My Goals" subtitle="Set targets, track milestones, measure growth." cta_url=goals_create_url cta_label="New Goal" cta_icon="plus" %}
 
-<!-- Stats -->
-<div class="grid grid-cols-3 gap-4 mb-6">
-  <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-[#C0392B]">{{ total }}</p>
-    <p class="text-xs text-gray-500 mt-0.5">Total Goals</p>
-  </div>
-  <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-blue-500">{{ in_progress }}</p>
-    <p class="text-xs text-gray-500 mt-0.5">In Progress</p>
-  </div>
-  <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-green-500">{{ completed }}</p>
-    <p class="text-xs text-gray-500 mt-0.5">Completed</p>
-  </div>
-</div>
+{% include "includes/_stats_grid.html" with stat1_value=total stat1_label="Total Goals" stat2_value=in_progress stat2_label="In Progress" stat2_color="text-blue-500" stat3_value=completed stat3_label="Completed" stat3_color="text-green-500" %}
 
 {% else %}
-<div class="flex items-center justify-between mb-6">
-  <div>
-    <h1 class="text-2xl font-bold text-[#2B2B2B]">Student Goals</h1>
-    <p class="text-gray-500 text-sm mt-0.5">Shared goals and staff drafts from your students.</p>
-  </div>
-  {% if can_create %}
-  <a href="{% url 'goals:create' %}"
-     class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
-    New Goals
-  </a>
-  {% endif %}
-</div>
+{% if can_create %}{% url 'goals:create' as goals_create_url %}{% endif %}
+{% include "includes/_page_header.html" with title="Student Goals" subtitle="Shared goals and staff drafts from your students." cta_url=goals_create_url cta_label="New Goals" cta_icon="plus" %}
 
 {% if students %}
 <div class="flex gap-2 flex-wrap mb-4">
@@ -67,7 +32,7 @@
 {% endif %}
 
 <!-- Status filter -->
-<div class="flex gap-1 mb-5 bg-white border border-gray-200 rounded-lg p-1 w-fit">
+<div class="flex gap-1 mb-5 bg-white border border-gray-200 rounded-lg p-1 w-fit flex-wrap">
   <a href="{% if student_filter %}?student={{ student_filter }}{% else %}?{% endif %}"
      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
             {% if not status_filter %}bg-[#2B2B2B] text-white{% else %}text-gray-500 hover:text-[#2B2B2B]{% endif %}">

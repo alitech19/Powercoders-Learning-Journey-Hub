@@ -2,16 +2,8 @@
 {% block title %}Workflows{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-[#2B2B2B]">Workflows</h1>
-    {% if can_create %}
-    <a href="{% url 'workflows:create' %}"
-       class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
-      New Workflow
-    </a>
-    {% endif %}
-  </div>
+{% if can_create %}{% url 'workflows:create' as workflows_create_url %}{% endif %}
+{% include "includes/_page_header.html" with title="Workflows" cta_url=workflows_create_url cta_label="New Workflow" %}
 
   {% if view_as == 'student' %}
     {% if rows %}
@@ -84,5 +76,4 @@
     </div>
     {% endif %}
   {% endif %}
-</div>
 {% endblock %}

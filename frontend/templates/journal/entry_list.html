@@ -4,33 +4,10 @@
 {% block content %}
 
 {% if view_as == 'student' %}
-<div class="flex items-center justify-between mb-6">
-  <div>
-    <h1 class="text-2xl font-bold text-[#2B2B2B]">My Journal</h1>
-    <p class="text-gray-500 text-sm mt-0.5">Document your learning journey, one entry at a time.</p>
-  </div>
-  {% if can_create %}
-  <a href="{% url 'journal:create' %}"
-     class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
-    + New Entry
-  </a>
-  {% endif %}
-</div>
+{% if can_create %}{% url 'journal:create' as journal_create_url %}{% endif %}
+{% include "includes/_page_header.html" with title="My Journal" subtitle="Document your learning journey, one entry at a time." cta_url=journal_create_url cta_label="+ New Entry" %}
 
-<div class="grid grid-cols-3 gap-4 mb-6">
-  <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-[#C0392B]">{{ total }}</p>
-    <p class="text-xs text-gray-500 mt-0.5">Total Entries</p>
-  </div>
-  <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-[#C0392B]">{{ this_week }}</p>
-    <p class="text-xs text-gray-500 mt-0.5">This Week</p>
-  </div>
-  <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-[#C0392B]">{{ streak }}🔥</p>
-    <p class="text-xs text-gray-500 mt-0.5">Day Streak</p>
-  </div>
-</div>
+{% include "includes/_stats_grid.html" with stat1_value=total stat1_label="Total Entries" stat2_value=this_week stat2_label="This Week" stat3_value=streak stat3_suffix="🔥" stat3_label="Day Streak" %}
 
 <form method="get" class="mb-4 flex flex-wrap gap-3 items-center">
   <div class="flex-1 min-w-[200px] max-w-md">
@@ -61,12 +38,7 @@
 {% endif %}
 
 {% else %}
-<div class="flex items-center justify-between mb-6">
-  <div>
-    <h1 class="text-2xl font-bold text-[#2B2B2B]">Student Journals</h1>
-    <p class="text-gray-500 text-sm mt-0.5">Shared entries from your students · newest first</p>
-  </div>
-</div>
+{% include "includes/_page_header.html" with title="Student Journals" subtitle="Shared entries from your students · newest first" %}
 
 <form method="get" class="mb-4 flex flex-wrap gap-3 items-center">
   <div class="flex-1 min-w-[200px] max-w-md">

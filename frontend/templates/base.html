@@ -58,7 +58,7 @@
   </nav>
 
   {% if messages %}
-    <div class="max-w-7xl mx-auto px-4 py-3 w-full">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 w-full">
       {% for message in messages %}
         <p class="text-sm px-4 py-2 rounded-lg mb-2 {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-green-50 text-green-800{% endif %}">
           {{ message }}
@@ -67,7 +67,7 @@
     </div>
   {% endif %}
 
-  <main class="flex-1 {% block main_class %}py-8 px-4{% endblock %}">
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
     {% block content %}{% endblock %}
   </main>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>

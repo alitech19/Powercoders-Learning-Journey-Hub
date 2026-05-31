@@ -4,40 +4,30 @@
 {% block content %}
 
 {% if view_as == 'student' %}
-<div class="flex items-center justify-between mb-6">
-  <div>
-    <h1 class="text-2xl font-bold text-[#2B2B2B]">My Reflections</h1>
-    <p class="text-gray-500 text-sm mt-0.5">Expectations, wellbeing, and final thoughts — at your own pace.</p>
-  </div>
-  {% if can_create %}
-  <a href="{% url 'reflections:create' %}"
-     class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
-    + New Reflection
-  </a>
-  {% endif %}
-</div>
+{% if can_create %}{% url 'reflections:create' as reflections_create_url %}{% endif %}
+{% include "includes/_page_header.html" with title="My Reflections" subtitle="Expectations, wellbeing, and final thoughts — at your own pace." cta_url=reflections_create_url cta_label="+ New Reflection" %}
 
-<div class="grid grid-cols-3 gap-4 mb-6">
-  <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-[#C0392B]">{{ total }}</p>
-    <p class="text-xs text-gray-500 mt-0.5">Total</p>
+{% include "includes/_stats_grid.html" with stat1_value=total stat1_label="Total" stat2_value=weekly_tag_count stat2_label="Weekly tag" stat2_color="text-blue-500" stat3_value=project_tag_count stat3_label="Project tag" stat3_color="text-purple-500" %}
+
+<form method="get" class="mb-4 flex flex-wrap gap-3 items-center">
+  <div class="flex-1 min-w-[200px] max-w-md">
+    <input type="search" name="q" value="{{ search_query }}" placeholder="Search by title…"
+           maxlength="{{ limits.search }}"
+           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30 focus:border-[#C0392B]">
   </div>
-  <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-blue-500">{{ weekly_tag_count }}</p>
-    <p class="text-xs text-gray-500 mt-0.5">Weekly tag</p>
-  </div>
-  <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-purple-500">{{ project_tag_count }}</p>
-    <p class="text-xs text-gray-500 mt-0.5">Project tag</p>
-  </div>
-</div>
+  {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
+  <button type="submit"
+          class="px-4 py-2 bg-[#2B2B2B] text-white text-sm font-medium rounded-lg cursor-pointer">
+    Search
+  </button>
+  {% if search_query %}
+  <a href="{% url 'reflections:list' %}{% if tag_filter %}?tag={{ tag_filter }}{% endif %}"
+     class="text-sm text-gray-500 hover:text-[#C0392B]">Clear search</a>
+  {% endif %}
+</form>
+
 {% else %}
-<div class="flex items-center justify-between mb-6">
-  <div>
-    <h1 class="text-2xl font-bold text-[#2B2B2B]">Student Reflections</h1>
-    <p class="text-gray-500 text-sm mt-0.5">Shared reflections from your students · newest first</p>
-  </div>
-</div>
+{% include "includes/_page_header.html" with title="Student Reflections" subtitle="Shared reflections from your students · newest first" %}
 
 <form method="get" class="mb-4 flex flex-wrap gap-3 items-center">
   <div class="flex-1 min-w-[200px] max-w-md">
@@ -77,16 +67,7 @@
 {% endif %}
 
 <!-- Tag filter -->
-<div class="flex flex-wrap items-center gap-3 mb-5">
-  {% if view_as == 'student' %}
-  <form method="get" class="flex gap-2 flex-1 min-w-[200px] max-w-md">
-    <input type="search" name="q" value="{{ search_query }}" placeholder="Search by title…"
-           maxlength="{{ limits.search }}"
-           class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30">
-    {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
-    <button type="submit" class="px-3 py-2 text-sm bg-gray-100 rounded-lg cursor-pointer">Search</button>
-  </form>
-  {% endif %}
+<div class="mb-5">
   <div class="flex gap-1 bg-white border border-gray-200 rounded-lg p-1 w-fit flex-wrap">
   <a href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}{% if student_filter %}student={{ student_filter }}{% endif %}"
      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
