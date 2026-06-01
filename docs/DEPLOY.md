@@ -4,7 +4,15 @@ This guide is for a **shared tester environment** on [Render](https://render.com
 
 Related: [SETUP.md](SETUP.md) (local) · [TESTING.md](TESTING.md) · [README](../README.md)
 
-**Branch model:** maintain a long-lived Git branch `deploy` on GitHub. Merge into `deploy` only what you want on the tester URL (e.g. from `integration`). Connect Render services to **`deploy`**, not `main`.
+**Branch model:** develop on **`integration`** (local Docker — [SETUP.md](SETUP.md)). When ready for testers, merge `integration` → **`deploy`** and push; Render services use branch **`deploy`**, not `main` or `integration`.
+
+```bash
+git checkout deploy
+git merge integration
+git push origin deploy
+```
+
+App code is the same on both branches; Render uses **Start commands** and **`.env.render-test.example`**, not `docker compose`.
 
 ---
 

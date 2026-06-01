@@ -2,7 +2,18 @@
 
 Local development for PowerHUB: Django, PostgreSQL 17, Redis, Celery (five Compose services).
 
-Related: [TESTING.md](TESTING.md) · [DEPLOY.md](DEPLOY.md) (Render tester) · [README](../README.md)
+Related: [TESTING.md](TESTING.md) · [DEPLOY.md](DEPLOY.md) (Render only) · [README](../README.md)
+
+## Local vs Render
+
+| | **`integration` branch (this guide)** | **`deploy` branch on Render** |
+|--|--------------------------------------|-------------------------------|
+| Config | [`.env.example`](../.env.example) → `.env` | [`.env.render-test.example`](../.env.render-test.example) in Render dashboard |
+| Start | `docker compose up` → **runserver** | Gunicorn + `scripts/render-web-start.sh` (migrate in start on free tier) |
+| Database | `POSTGRES_HOST=db` | `DATABASE_URL` or internal `POSTGRES_HOST` |
+| Do not use locally | `scripts/render-*.sh`, Render env template | — |
+
+Code is shared after merging `deploy` → `integration`; only **how you run** the app differs.
 
 ## Prerequisites
 

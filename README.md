@@ -124,11 +124,11 @@ Roles are set on the user record (`student`, `teacher`, `admin`).
 
 | Branch | Purpose |
 |--------|---------|
-| `integration` | Main development |
-| `deploy` | Tester environment on Render — merge from `integration` when ready for QA |
+| `integration` | **Default for development** — Docker Compose, [docs/SETUP.md](docs/SETUP.md), `.env` |
+| `deploy` | **Render tester** — same app code; connect Render to this branch, [docs/DEPLOY.md](docs/DEPLOY.md), `.env.render-test.example` |
 | `main` | Production target when go-live is ready |
 
-Develop on `integration` → merge to `deploy` for shared tester URL → production follows [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md).
+Workflow: feature work on `integration` → when ready for testers, `git merge integration` into `deploy` and push → Render redeploys. Keep `deploy` in sync with `integration` so both branches share Gunicorn/Whitenoise/`DATABASE_URL` support; only runbooks and env templates differ.
 
 ---
 
