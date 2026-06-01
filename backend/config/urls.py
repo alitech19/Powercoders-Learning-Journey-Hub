@@ -22,8 +22,22 @@ def _two_factor_urlpatterns():
 tf_urlpatterns = _two_factor_urlpatterns()
 
 
-def health_check(_request):
-    return JsonResponse({'status': 'ok'})
+def health_check(request):
+    payload = {'status': 'ok'}
+    if request.GET.get('db'):
+        from django.conf import settings
+        from django.db import connection
+
+        host = settings.DATABASES['default'].get('HOST', '?')
+        payload['db_host'] = host
+        try:
+            connection.ensure_connection()
+            payload['db'] = 'connected'
+        except Exception as exc:
+            payload['status'] = 'degraded'
+            payload['db'] = 'error'
+            payload['db_error'] = str(exc)[:300]
+    return JsonResponse(payload)
 
 
 urlpatterns = [

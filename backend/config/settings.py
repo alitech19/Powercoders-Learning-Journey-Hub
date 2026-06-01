@@ -98,8 +98,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-DATABASES = {
-    'default': {
+
+def _database_config() -> dict:
+    """POSTGRES_* for Docker; DATABASE_URL for Render/Heroku (Internal URL)."""
+    url = os.environ.get('DATABASE_URL', '').strip()
+    if url:
+        from urllib.parse import urlparse
+
+        parsed = urlparse(url)
+        return {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': (parsed.path or '/').lstrip('/'),
+            'USER': parsed.username or '',
+            'PASSWORD': parsed.password or '',
+            'HOST': parsed.hostname or 'localhost',
+            'PORT': str(parsed.port or 5432),
+        }
+    return {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('POSTGRES_DB', 'powerhub'),
         'USER': os.environ.get('POSTGRES_USER', 'powerhub'),
@@ -107,7 +122,9 @@ DATABASES = {
         'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
         'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
-}
+
+
+DATABASES = {'default': _database_config()}
 
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesStandaloneBackend',
@@ -177,6 +194,8 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+# Render free/small instances OOM with default prefork (~CPU count). Override via env.
+CELERY_WORKER_CONCURRENCY = int(os.environ.get('CELERY_WORKER_CONCURRENCY', '4'))
 
 EMAIL_BACKEND = os.environ.get(
     'EMAIL_BACKEND',

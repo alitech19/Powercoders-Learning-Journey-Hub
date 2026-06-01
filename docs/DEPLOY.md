@@ -107,15 +107,19 @@ Render auto-deploys when `deploy` is pushed (if auto-deploy is enabled).
 1. **New → PostgreSQL** → name `powerhub-db`, region close to users (e.g. Frankfurt).
 2. After create, copy **Internal Database URL** (use internal hostname from other Render services).
 
-Map to Django env vars (from Render’s connection fields or by parsing the URL):
+**Option A (recommended):** Web service → **Connections** → link `powerhub-db` → Render adds **`DATABASE_URL`**. The app reads it automatically (Internal URL).
+
+**Option B:** Set each variable manually (from Postgres → **Connect** → Internal):
 
 | Variable | Source |
 |----------|--------|
 | `POSTGRES_DB` | database name |
 | `POSTGRES_USER` | user |
 | `POSTGRES_PASSWORD` | password |
-| `POSTGRES_HOST` | hostname (internal) |
+| `POSTGRES_HOST` | hostname (e.g. `dpg-xxxxx-a`) — **never** `localhost` on Render |
 | `POSTGRES_PORT` | `5432` |
+
+If login shows `connection to 127.0.0.1:5432 refused`, Django is using the default host `localhost` — **`DATABASE_URL` and `POSTGRES_HOST` are not set on the web service** (or the deploy branch lacks `DATABASE_URL` support in `settings.py`). Fix env, redeploy, then check `https://<host>/health/?db=1` — `db_host` must be `dpg-…`, not `localhost`.
 
 ### 2. Redis
 
@@ -124,9 +128,12 @@ Map to Django env vars (from Render’s connection fields or by parsing the URL)
 
 ### 3. Web service
 
-1. **New → Web Service** → connect repo → branch **`deploy`**.
-2. **Root directory:** leave empty (repo root).
-3. **Runtime:** Docker *or* Python — below assumes **Python** native build.
+1. **New → Web Service** → connect repo.
+2. **Branch:** **`deploy`** — not `main`. (`main` is only an initial stub; no `requirements.txt` there.)
+3. **Root Directory:** leave **empty** (project root must contain `requirements.txt`, `backend/`, `runtime.txt`).
+4. **Runtime:** Native **Python** (not Docker) — see build/start below.
+
+Repo includes **`runtime.txt`** (`python-3.12.12`) so Render does not default to Python 3.14.
 
 **Build command:**
 
@@ -147,34 +154,48 @@ cd backend && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 
 ### 4. Celery worker
 
 1. **New → Background Worker** → same repo, branch **`deploy`**.
-2. **Start command:**
+2. **Build command:** `pip install -r requirements.txt` (no `collectstatic`).
+3. **Start command** (low memory — required on small Render plans):
 
 ```bash
-cd backend && celery -A config worker --loglevel=info
+cd backend && celery -A config worker --loglevel=info --concurrency=1
 ```
 
-3. Attach the **same environment group** as the web service (DB + Redis vars).
+4. **Environment:** same group as web, plus `CELERY_WORKER_CONCURRENCY=1`.
+
+Default Celery prefork uses ~16 processes; each loads Django → **OOM** → restart loop (you never see `celery@… ready.` in logs).
 
 ### 5. Celery beat
 
 1. **New → Background Worker** → same repo, branch **`deploy`**.
-2. **Start command:**
-
-```bash
-cd backend && celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-```
-
-3. **Only one Beat instance** — do not scale beat horizontally.
-
-### 6. Release command (recommended)
-
-On the **web** service, **Settings → Deploy → Pre-deploy command** (or “Release command”):
+2. **Build command:** `pip install -r requirements.txt`
+3. **Pre-deploy / Release command** (important — `DatabaseScheduler` needs DB tables):
 
 ```bash
 cd backend && python manage.py migrate --noinput
 ```
 
-Runs before each deploy so the DB schema stays current.
+4. **Start command:**
+
+```bash
+cd backend && celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+```
+
+5. **Environment:** same group as web (all `POSTGRES_*`, `REDIS_URL`, `SECRET_KEY`, `DEBUG`, …).
+6. **Instance count: 1** only — never scale beat horizontally.
+7. **Optional for first QA:** suspend/delete the beat service until you add a **Periodic task** in admin ([TODO.md](TODO.md)). Web + worker are enough for manual testing.
+
+**Healthy logs** should continue past `Configuration ->` with something like `beat: Starting...` / `DatabaseScheduler: Schedule changed.` If the instance **restarts** right after `maxinterval -> 5.00 seconds`, open **Logs** (full stderr) for `OperationalError`, `django.db`, or OOM — usually missing migrate on shared Postgres, missing `POSTGRES_*` on beat, or Python 3.14 (use `PYTHON_VERSION=3.12.12` / `runtime.txt`).
+
+### 6. Release command (web)
+
+On the **web** service, **Pre-deploy command**:
+
+```bash
+cd backend && python manage.py migrate --noinput && python manage.py create_dev_superuser && python manage.py seed_dev_data
+```
+
+(Adjust for your tester profile — see [Tester profile](#tester-profile---debugtrue-default-for-this-deploy).)
 
 ---
 
@@ -225,11 +246,16 @@ Share the URL and test accounts with testers via a **private** channel (not in t
 
 | Symptom | Check |
 |---------|--------|
+| `No such file: requirements.txt` | **Branch** must be `deploy` (or `integration`), not `main`. **Root Directory** must be empty. |
+| Python 3.14 / wrong version | Add `runtime.txt` at repo root or env `PYTHON_VERSION=3.12.12` |
+| `We don't have access to your repo` | GitHub: Settings → Applications → authorize Render; or deploy with public repo access |
 | 502 / app not listening | Start command uses `$PORT` and `gunicorn` |
 | DisallowedHost | `ALLOWED_HOSTS` includes exact hostname |
 | CSRF failed on login | `CSRF_TRUSTED_ORIGINS` includes `https://...` |
-| 500 DB errors | `POSTGRES_HOST` is **internal** URL from Render Postgres |
+| 500 DB errors / `127.0.0.1:5432 refused` | Set **`DATABASE_URL`** (link Postgres) or `POSTGRES_HOST` = internal hostname (not localhost) on **web, worker, beat** |
 | Celery tasks never run | Worker service running; `CELERY_BROKER_URL` set; check worker logs |
+| Worker restart loop, no `ready` | Set `--concurrency=1` and `CELERY_WORKER_CONCURRENCY=1`; upgrade plan or reduce memory |
+| Beat restart loop after `maxinterval` | **Pre-deploy:** `migrate` on beat service; full `POSTGRES_*` env; `PYTHON_VERSION=3.12.12`; 1 instance; or **suspend beat** until periodic tasks needed |
 | Beat schedule missing | Beat service running; task registered in admin |
 | Static files 404 | Whitenoise middleware + `collectstatic` in build |
 | Uploads vanished | Expected on redeploy without persistent disk/S3 |
