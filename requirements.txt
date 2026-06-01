@@ -6,6 +6,7 @@ bleach>=6.0
 markdown>=3.5
 
 celery[redis]>=5.4
+django-celery-beat>=2.7
 django-redis>=5.4
 redis>=5.2
 PyYAML>=6.0

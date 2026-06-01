@@ -30,7 +30,8 @@ Edit `.env` if needed. Defaults work for local Docker development.
 | `SECRET_KEY` | Django secret (change in production) |
 | `DEBUG` | `True` for local dev |
 | `ENABLE_DEV_SEED` | `true` to load test users from `backend/dev/seed.yaml` (default **False** in code) |
-| `DJANGO_SUPERUSER_*` | Auto-create admin on container start (dev only) |
+| `CREATE_DEV_SUPERUSER` | `true` to run `create_dev_superuser` on Docker web start (default **false**; set in `.env.example` for local dev) |
+| `DJANGO_SUPERUSER_*` | Credentials for dev superuser when `CREATE_DEV_SUPERUSER=true` |
 
 > **Production:** before go-live, **remove dev-user code from the repository** (not just disable env flags). See [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md).
 
@@ -40,18 +41,19 @@ Edit `.env` if needed. Defaults work for local Docker development.
 docker compose up --build
 ```
 
-This starts four services:
+This starts five services:
 
 | Service | Role |
 |---------|------|
 | `db` | PostgreSQL 17 |
 | `redis` | Cache + Celery message broker |
-| `web` | Django (`migrate`, `collectstatic`, dev seed, `runserver`) |
-| `worker` | Celery worker |
+| `web` | Django (`migrate`, `collectstatic`, optional dev superuser/seed, `runserver`) |
+| `worker` | Celery worker (runs tasks) |
+| `beat` | Celery beat (`django-celery-beat` — schedules in Django admin) |
 
 On first run, migrations run automatically.
 
-On first run: migrations, dev superuser (if `DJANGO_SUPERUSER_*` set), and dev seed (if `ENABLE_DEV_SEED=true`).
+On first run: migrations; dev superuser if `CREATE_DEV_SUPERUSER=true` and `DJANGO_SUPERUSER_*` set; dev seed if `ENABLE_DEV_SEED=true`.
 
 ## 4. Login
 
@@ -83,13 +85,16 @@ Teachers are linked to groups via **Group teachers**, not via fields on the user
 | http://localhost:8000/accounts/profile/ | Profile (after login) |
 | http://localhost:8000/admin/ | Django admin |
 
-### Celery worker
+### Celery worker and beat
 
 ```bash
 docker compose logs worker
+docker compose logs beat
 ```
 
-Should show `celery@... ready.`
+Worker should show `celery@... ready.` Beat should show scheduler started (no periodic tasks until you add them in admin or [TODO.md](docs/TODO.md)).
+
+**Periodic schedules:** Django admin → **Periodic tasks** (after `migrate` creates `django_celery_beat` tables).
 
 Test the ping task:
 
@@ -185,6 +190,10 @@ Normal on first build. Static files are collected to `frontend/staticfiles/` (gi
 
 Setting `ENABLE_DEV_SEED=false` alone is **not** sufficient for production.
 
-## Next step
+## CI
 
-1. Add `dashboard` app — role-based home
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push/PR: migrate, migration check, then `manage.py test <app>` per business app (sequential steps). Tests pass with zero cases until you add them.
+
+## Next steps
+
+See [docs/APP_PLAN.md](docs/APP_PLAN.md) for remaining integration work.

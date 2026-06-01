@@ -1,87 +1,127 @@
-# Business apps roadmap (integration branch)
+# Integration — remaining work
 
-Greenfield port from `origin/Ali` and `origin/django-test`. Apps are added **one at a time** in **customer priority order** — the same order drives the **main navigation** (left → right).
+Compared to **`origin/Ali`** (`42f74c2`). On **`integration`**, customer-facing apps are in place: Workflows → Resources (nav), role-based **dashboard** at `/`, contextual **info** help (ⓘ), generic **feedback**, **tasks** (not `tracker`), **resources** sync from group chat, embedded wellbeing in **reflections**.
 
-## Hub vs dashboard
+Below is only what is **still to do**. Scheduled **task code**: **[TODO.md](TODO.md)**. Port or rewrite from Ali where noted — **do not** merge Ali `goals/`, `workflows/`, or `tracker/` as-is; integration architecture is ahead there.
 
-| Phase | URL `/` | Role |
-|-------|---------|------|
-| **Done** | `dashboard` | Role-based home at `/`; logo links here (not duplicated in nav) |
+---
 
-Nav reads from `config/nav.py`. Per-page **ⓘ** (top-right) opens contextual help (`info` app). `/home/` redirects to dashboard.
+## 1. CI and Docker
 
-## Integration order (customer priority)
+| Step | Detail | Notes |
+|------|--------|--------|
+| ~~**Dev superuser guard**~~ | `CREATE_DEV_SUPERUSER=true` only | Done — `docker-compose.yml`, `.env.example` |
+| ~~**GitHub Actions**~~ | PG 17 + Redis, `migrate`, `migrate --check`, tests per app | Done — `.github/workflows/ci.yml` |
+| ~~**Celery beat (infra)**~~ | `beat` service + `django-celery-beat` | Done — schedules via admin when tasks exist |
+| ~~pgvector~~ | — | **Won’t do** — keep `postgres:17-alpine` |
 
-Build sequence **2 → 9**, then **dashboard (1)**. Status and names may change during port.
+**§1 open:** automated tests (see §5). **Scheduled task implementations:** [TODO.md](TODO.md).
 
-| Build # | App (working name) | Nav label | Source | Status |
-|---------|-------------------|-----------|--------|--------|
-| 2 | `workflows` | Workflows | Ali | Done |
-| 3 | `goals` | Goals | Ali | Done |
-| 4 | `tasks` | Tasks | django-test models + Ali UI + enrollment | Done |
-| 5 | `reflections` | Reflections | Ali UI + django-test wellbeing dims (embedded) | Done |
-| 6 | `journal` | Journal | Ali | Done |
-| 7 | `habits` | Habits | django-test (`growth`) | Done |
-| 8 | `group_space` | Group | Group chat + resource posts | Done |
-| 9 | `resources` | Resources | Group / personal / thematic tiles; file storage: [RESOURCE_FILE_STORAGE.md](RESOURCE_FILE_STORAGE.md) | Done |
-| **1 (last)** | `dashboard` | Dashboard | Ali + integration apps | Done |
+---
 
-**Next app to build:** — (integration apps complete; backports remain)
+## 2. Accounts and admin UI
 
-~~**dashboard**~~ ✓ — role-based home at `/`; aggregates tasks, journal, goals, reflections, habits, workflows, group, resources.
+| Step | Detail | Ali reference |
+|------|--------|---------------|
+| Role decorators | `admin_required`, `teacher_or_admin_required`, `student_required` | `accounts/decorators.py` |
+| User management | List, create, CSV import, deactivate / reactivate | `accounts/views.py`, templates |
+| Student oversight | `student_detail`, `student_progress` | same |
+| Cohort / group UI | CRUD + assign teachers + **bulk assign students to group** (US-39) | same (not only Django admin) |
+| GDPR | `data_export`, self-service `delete_own_account`, admin `user_delete_account` | same |
+| Notification centre | `Notification` model, list + mark read, tie to email prefs | migration `0008_add_notifications`, views/templates |
+| Audit log (UI) | Admin-facing audit log page | `audit_log` view — model + `AuditLoggingMiddleware` already exist on integration |
 
-| 10 | `info` | — (ⓘ on pages) | In-app help per app | Done |
+**Integration today:** profile, welcome, privacy policy, password-change gate, 2FA, dev quick-login, `AuditLog` in admin only; cohorts/groups via **admin** only.
 
-## Backport from `origin/Ali` (parallel work during integration)
+---
 
-Cherry-pick or re-port **selected** changes from Ali's branch — **not** a merge of `goals` / `workflows` app code (integration architecture differs). Source: commits on `origin/Ali` since project split (~Phase 14–19 + latest refactor).
+## 3. Notifications and integrations
 
-| # | Area | What to integrate | Source (Ali) | Status |
-|---|------|-------------------|--------------|--------|
-| B1 | **CI / infra** | GitHub Actions pipeline (PostgreSQL 17 + Redis, migrate + test) | `.github/workflows/ci.yml` | Pending |
-| B2 | **CI / infra** | Celery worker and beat as separate containers | `docker-compose.yml` | Pending |
-| B3 | **CI / infra** | Guard dev superuser behind `CREATE_DEV_SUPERUSER=true` | `docker-compose.yml`, `.env.example` | Pending |
-| B4 | **accounts** | Role decorators (`admin_required`, `teacher_or_admin_required`, `student_required`) | `accounts/decorators.py` | Pending |
-| B5 | **accounts** | GDPR self-service account deletion | `accounts/views.py`, templates | Pending |
-| B6 | **accounts** | User management UI (list, create, CSV import, deactivate) | `accounts/views.py`, templates | Pending |
-| B7 | **accounts** | Student detail + progress overview pages | `accounts/student_detail`, `student_progress` | Pending |
-| B8 | **accounts** | In-app notification centre + email preferences | Phase 16 (US-59) | Pending |
-| B9 | **notifications** | Slack webhooks (feedback, new users, missing reflections) | Phase 18 (US-65) — wire to `feedback` app, not `GoalComment` | Pending |
-| B10 | **feedback / goals** | Email on new feedback | `accounts/emails.py` — target `GoalEnrollment` via generic feedback | Pending |
-| B11 | **tests** | Automated test suite pattern (127 tests on Ali) | `*/tests.py` — **rewrite** for integration models, not copy | Pending |
-| B12 | **docs** | Incident response runbook + scaling roadmap | `docs/INCIDENT_RESPONSE.md`, `docs/SCALING_ROADMAP.md` | Pending |
-| B13 | **group_space** | File uploads on posts (local `media/`) | [RESOURCE_FILE_STORAGE.md](RESOURCE_FILE_STORAGE.md) — Option 1 | Done |
-| B14 | **cohorts / accounts** | Bulk assign students to group (admin UI) | Phase 19 (US-39) | Pending |
-| B15 | ~~**tasks** Cohort default tasks~~ | — | **Won't do** — teachers assign; enroll on existing task instead |
+| Step | Detail | Ali reference |
+|------|--------|---------------|
+| Slack | Webhooks for feedback, new users, missing weekly reflections | `accounts/slack.py` |
+| Celery task | `notify_missing_reflections` on a schedule | [TODO.md](TODO.md) — Beat infra ready |
+| Email on feedback | Notify students when staff leave feedback | `accounts/emails.py` — wire to generic **`feedback`** app / enrollments, not legacy `GoalComment` |
 
-**Do not backport as-is:** Ali `goals/` and `workflows/` models/views (1 goal per student, goal-level feedback, no shared/private workflow modes). Integration branch is ahead on those; take ideas and tests only after adapting.
+**Integration today:** `email_notifications_enabled` on `User`; no Slack, no outbound feedback email, no scheduled reflection reminders.
 
-### Not in main nav (by design)
+---
 
-- **`feedback`** — generic staff feedback (admin only); wired per app via registry
-- **`cohorts`** — admin only (done)
-- **`accounts`** — profile, onboarding (done); user mgmt UI later
-- **`api`** — health/scaffold when needed
-- **`info`** — contextual help (ⓘ top-right); one markdown doc per app with anchors; not in main nav
-- **`dashboard`** — landing at `/`; logo target
+## 4. API (optional)
 
-## Per-app checklist (each PR)
+| Step | Detail |
+|------|--------|
+| Django Ninja scaffold | Ali exposes `GET /api/health` via Ninja; integration has `GET /health/` only — add Ninja only if we want a versioned API surface |
 
-1. Create `backend/<app>/` (models, views, urls, admin if needed)
-2. Templates under `frontend/templates/<app>/`
-3. Set `enabled=True` on the matching row(s) in `config/nav.py`
-4. Migrations + seed touch-ups if dev users need sample data
-5. Mark **Done** in the table above
+---
 
-## Rename / split policy
+## 5. Automated tests
 
-- App package names may differ from nav labels (e.g. nav label "Tasks" → app `tasks`)
-- **Reflections** — includes embedded wellbeing check-in; no separate `wellbeing` app
-- **Group Space** — single chat lane; any group member can post; achievement snapshots chat-only (not Resources)
-- **Resources** — separate app; personal / group / thematic link containers — storage: [RESOURCE_FILE_STORAGE.md](RESOURCE_FILE_STORAGE.md)
-- Monolithic django-test `growth` is **not** ported as-is; split per rows above
+Integration has **no** `tests/` modules yet. Goal: **as full coverage as practical** without brittle HTML snapshots. Prefer behaviour, permissions, and data invariants. **Rewrite** for integration models — do not copy Ali `tracker` tests.
 
-## Reference
+### Layout (per Django app)
 
-- Auth complete: [AUTH_ROADMAP.md](AUTH_ROADMAP.md)
-- Prod dev removal: [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md)
+```
+backend/<app>/tests/
+  test_models.py
+  test_services.py
+  test_permissions.py
+  test_views.py
+  test_signals.py   # e.g. resources ← group_space
+```
+
+Add shared factories in `backend/test_utils/` (`make_student`, `make_teacher`, `make_cohort`, `make_group`, `login_as`).
+
+**Cross-app:** e.g. group post → Resources item, feedback on goals/reflections, dashboard aggregates — `dashboard/tests/` or `backend/tests/`.
+
+### What to test (priority)
+
+| Layer | Examples |
+|-------|----------|
+| Models | `clean()`, progress %, due dates |
+| Services | task visibility, goal enrollments, resources sync, feedback registry |
+| Permissions | role matrix, wrong group denied |
+| Views | HTTP, redirects, messages |
+| Celery | eager + mock Slack (with [TODO.md](TODO.md) tasks) |
+
+### Build order
+
+1. `cohorts` + `accounts` → 2. `tasks` → 3. `goals` → 4. `feedback` + one consumer → 5. `workflows`, `reflections`, `journal`, `habits` → 6. `group_space` + `resources` → 7. `dashboard` → 8. `info`
+
+### CI
+
+Run sequentially, e.g. `test cohorts accounts`, then `tasks goals workflows`, etc. Optional later: `coverage` with threshold.
+
+### Test settings
+
+`CELERY_TASK_ALWAYS_EAGER`, locmem email, Redis service in CI (sessions match prod), disable axes if it blocks logins.
+
+---
+
+## 6. Operations documentation
+
+| Step | Detail | Ali reference |
+|------|--------|---------------|
+| Runbooks | Incident response, scaling roadmap | `docs/INCIDENT_RESPONSE.md`, `docs/SCALING_ROADMAP.md` |
+| UX process | Usability testing notes | `docs/USABILITY_TESTING.md` |
+
+---
+
+## 7. Pre-production hardening
+
+Follow [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md): remove dev seed, `dev_quick_login`, docker seed commands, etc. Overlaps §1 dev superuser guard.
+
+---
+
+## Explicitly out of scope
+
+- **Cohort default tasks** (US-58) — teachers assign tasks; enroll on existing tasks instead.
+- **Ali `goals` / `workflows` / `tracker`** code paths — take ideas/tests only after adapting to integration.
+- Separate **`wellbeing`** app — wellbeing stays inside **reflections** on integration.
+
+---
+
+## Reference (no open tasks)
+
+- Resource files: [RESOURCE_FILE_STORAGE.md](RESOURCE_FILE_STORAGE.md) — group uploads (Option 1) implemented on integration.
+- Deploy: [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md)
