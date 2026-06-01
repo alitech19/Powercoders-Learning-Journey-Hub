@@ -2,7 +2,7 @@
 Integrated app navigation — single source for navbar.
 
 Enable items only when the app is wired (urls + templates). Order = customer priority.
-Dashboard is first; logo also links to dashboard.
+Dashboard is not in nav — logo links to dashboard. Per-page ⓘ opens contextual help.
 """
 
 from __future__ import annotations
@@ -21,7 +21,6 @@ class NavItem:
 
 # Customer priority order (see docs/APP_PLAN.md). Set enabled=True when app lands.
 NAV_REGISTRY: tuple[NavItem, ...] = (
-    NavItem('Dashboard', 'dashboard:dashboard', enabled=True),
     NavItem('Workflows', 'workflows:list', enabled=True),
     NavItem('Goals', 'goals:list', enabled=True),
     NavItem('Tasks', 'tasks:task_list', enabled=True),

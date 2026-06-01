@@ -74,7 +74,8 @@
     </div>
   {% endif %}
 
-  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative{% if page_help.enabled %} pr-14{% endif %}">
+    {% include "includes/_page_help_button.html" %}
     {% block content %}{% endblock %}
   </main>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>

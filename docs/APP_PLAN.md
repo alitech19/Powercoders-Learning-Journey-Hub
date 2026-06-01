@@ -6,9 +6,9 @@ Greenfield port from `origin/Ali` and `origin/django-test`. Apps are added **one
 
 | Phase | URL `/` | Role |
 |-------|---------|------|
-| **Done** | `dashboard` | Role-based home — first item in nav; logo links here |
+| **Done** | `dashboard` | Role-based home at `/`; logo links here (not duplicated in nav) |
 
-Nav and dashboard read from a single registry (`config/nav.py`). `/home/` redirects to dashboard.
+Nav reads from `config/nav.py`. Per-page **ⓘ** (top-right) opens contextual help (`info` app). `/home/` redirects to dashboard.
 
 ## Integration order (customer priority)
 
@@ -28,7 +28,9 @@ Build sequence **2 → 9**, then **dashboard (1)**. Status and names may change 
 
 **Next app to build:** — (integration apps complete; backports remain)
 
-~~**dashboard**~~ ✓ — role-based home at `/`; first nav item; aggregates tasks, journal, goals, reflections, habits, workflows, group, resources.
+~~**dashboard**~~ ✓ — role-based home at `/`; aggregates tasks, journal, goals, reflections, habits, workflows, group, resources.
+
+| 10 | `info` | — (ⓘ on pages) | In-app help per app | Done |
 
 ## Backport from `origin/Ali` (parallel work during integration)
 
@@ -60,7 +62,8 @@ Cherry-pick or re-port **selected** changes from Ali's branch — **not** a merg
 - **`cohorts`** — admin only (done)
 - **`accounts`** — profile, onboarding (done); user mgmt UI later
 - **`api`** — health/scaffold when needed
-- **`dashboard`** — first nav item; role-based landing at `/`
+- **`info`** — contextual help (ⓘ top-right); one markdown doc per app with anchors; not in main nav
+- **`dashboard`** — landing at `/`; logo target
 
 ## Per-app checklist (each PR)
 

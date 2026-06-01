@@ -40,6 +40,7 @@ urlpatterns = [
     path('habits/', include('habits.urls')),
     path('group/', include('group_space.urls')),
     path('resources/', include('resources.urls')),
+    path('', include('info.urls')),
     path('', include('dashboard.urls')),
     path('home/', RedirectView.as_view(pattern_name='dashboard:dashboard', permanent=False), name='home'),
 ]

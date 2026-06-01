@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'group_space.apps.GroupSpaceConfig',
     'resources.apps.ResourcesConfig',
     'dashboard.apps.DashboardConfig',
+    'info.apps.InfoConfig',
 ]
 
 MIDDLEWARE = [
@@ -85,6 +86,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'accounts.context_processors.dev_login_panel',
                 'config.context_processors.integrated_nav',
+                'info.context_processors.page_help',
                 'config.context_processors.input_limits',
             ],
         },

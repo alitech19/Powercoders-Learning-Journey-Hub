@@ -71,15 +71,28 @@ def index(request):
             )
         )
 
+    can_create_personal = can_create_personal_container(request.user)
+    can_create_thematic = bool(
+        selected_group and can_create_thematic_container(request.user, selected_group),
+    )
+    create_url = None
+    create_label = None
+    if tab == 'my' and can_create_personal:
+        create_url = f"{reverse('resources:container_create')}?tab=my"
+        create_label = 'New list'
+    elif tab == 'themes' and can_create_thematic:
+        create_url = f"{reverse('resources:container_create')}?tab=themes&group={selected_group.pk}"
+        create_label = 'New theme'
+
     return render(request, 'resources/index.html', {
         'tab': tab,
         'containers': containers,
         'selected_group': selected_group,
         'available_groups': available_groups,
-        'can_create_personal': can_create_personal_container(request.user),
-        'can_create_thematic': (
-            selected_group and can_create_thematic_container(request.user, selected_group)
-        ),
+        'can_create_personal': can_create_personal,
+        'can_create_thematic': can_create_thematic,
+        'create_url': create_url,
+        'create_label': create_label,
     })
 
 

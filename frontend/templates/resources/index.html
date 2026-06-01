@@ -2,13 +2,7 @@
 {% block title %}Resources{% endblock %}
 
 {% block content %}
-{% include "includes/_page_header.html" with title="Resources" subtitle="Link collections — personal lists, group chat resources, and themes." %}
-
-{% if tab == "my" and can_create_personal %}
-{% url 'resources:container_create' as create_url %}
-{% elif tab == "themes" and can_create_thematic %}
-{% url 'resources:container_create' as create_url %}
-{% endif %}
+{% include "includes/_page_header.html" with title="Resources" subtitle="Link collections — personal lists, group chat resources, and themes." cta_url=create_url cta_label=create_label cta_icon="plus" %}
 
 <div class="flex gap-1 mb-4 bg-white border border-gray-200 rounded-lg p-1 w-fit flex-wrap">
   <a href="?tab=my"
@@ -37,22 +31,6 @@
     {{ g.name }}
   </a>
   {% endfor %}
-</div>
-{% endif %}
-
-{% if tab == "my" and can_create_personal %}
-<div class="mb-4">
-  <a href="{% url 'resources:container_create' %}?tab=my"
-     class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2 rounded-lg">
-    + New list
-  </a>
-</div>
-{% elif tab == "themes" and can_create_thematic %}
-<div class="mb-4">
-  <a href="{% url 'resources:container_create' %}?tab=themes&group={{ selected_group.pk }}"
-     class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2 rounded-lg">
-    + New theme
-  </a>
 </div>
 {% endif %}
 
