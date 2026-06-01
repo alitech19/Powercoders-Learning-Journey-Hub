@@ -19,7 +19,7 @@ class NavItem:
     enabled: bool = False
 
 
-# Customer priority order (see docs/APP_PLAN.md). Set enabled=True when app lands.
+# Customer priority order. Set enabled=True when app is wired (urls + templates).
 NAV_REGISTRY: tuple[NavItem, ...] = (
     NavItem('Workflows', 'workflows:list', enabled=True),
     NavItem('Goals', 'goals:list', enabled=True),

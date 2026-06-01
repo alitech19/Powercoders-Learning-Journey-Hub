@@ -1,6 +1,8 @@
 # Production deploy checklist
 
-Use this before every production (or public staging) deployment.
+Use this before every **production** deployment.
+
+For a **tester-only** host on Render (`deploy` branch), see [DEPLOY.md](DEPLOY.md). Local dev: [SETUP.md](SETUP.md). Dev seed may stay in the repo until a production release, but do not expose weak dev passwords on a public URL.
 
 ## Dev users — remove from the codebase
 

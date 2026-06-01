@@ -1,6 +1,8 @@
 # PowerHUB — Setup Guide
 
-Infrastructure skeleton for the `integration` branch: Django, PostgreSQL 17, Redis, Celery.
+Local development for PowerHUB: Django, PostgreSQL 17, Redis, Celery (five Compose services).
+
+Related: [TESTING.md](TESTING.md) · [DEPLOY.md](DEPLOY.md) (Render tester) · [README](../README.md)
 
 ## Prerequisites
 
@@ -33,7 +35,7 @@ Edit `.env` if needed. Defaults work for local Docker development.
 | `CREATE_DEV_SUPERUSER` | `true` to run `create_dev_superuser` on Docker web start (default **false**; set in `.env.example` for local dev) |
 | `DJANGO_SUPERUSER_*` | Credentials for dev superuser when `CREATE_DEV_SUPERUSER=true` |
 
-> **Production:** before go-live, **remove dev-user code from the repository** (not just disable env flags). See [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md).
+> **Production:** before go-live, **remove dev-user code from the repository** (not just disable env flags). See [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md).
 
 ## 3. Start services
 
@@ -92,7 +94,7 @@ docker compose logs worker
 docker compose logs beat
 ```
 
-Worker should show `celery@... ready.` Beat should show scheduler started (no periodic tasks until you add them in admin or [TODO.md](docs/TODO.md)).
+Worker should show `celery@... ready.` Beat should show scheduler started (no periodic tasks until you add them in admin or [TODO.md](TODO.md)).
 
 **Periodic schedules:** Django admin → **Periodic tasks** (after `migrate` creates `django_celery_beat` tables).
 
@@ -189,9 +191,16 @@ Ensure `redis` is healthy and `CELERY_BROKER_URL` in `.env` matches (`redis://re
 
 Normal on first build. Static files are collected to `frontend/staticfiles/` (gitignored).
 
+## Tester deploy (Render)
+
+Shared environment for QA and usability testing — **not** production.
+
+1. Use Git branch **`deploy`** (merge from `integration` when ready).
+2. Follow **[DEPLOY.md](DEPLOY.md)** (Gunicorn, Whitenoise, env vars, web + worker + beat).
+
 ## Production deploy
 
-**Before go-live**, **remove dev-user functionality from the codebase** and complete [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md):
+**Before go-live**, **remove dev-user functionality from the codebase** and complete [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md):
 
 - Delete `backend/dev/`, seed commands, quick-login views/templates, and related settings
 - Production Docker command: `migrate` + `collectstatic` + app server only
@@ -207,6 +216,12 @@ See **[TESTING.md](TESTING.md)**.
 
 GitHub Actions (`.github/workflows/ci.yml`) runs on every push/PR: migrate, migration check, then `manage.py test <app>` per business app (sequential steps).
 
-## Next steps
+## Related documentation
 
-See [docs/APP_PLAN.md](docs/APP_PLAN.md) for remaining integration work.
+| Doc | Topic |
+|-----|--------|
+| [TESTING.md](TESTING.md) | Automated tests |
+| [DEPLOY.md](DEPLOY.md) | Render (tester) |
+| [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) | Production go-live |
+| [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) | Incidents |
+| [TODO.md](TODO.md) | Beat / Slack follow-ups |

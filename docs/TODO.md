@@ -1,6 +1,6 @@
 # TODO
 
-Scheduled **tasks** (not infrastructure — Beat is in Docker/settings). Roadmap: [APP_PLAN.md](APP_PLAN.md).
+Scheduled **tasks** (not infrastructure — Beat runs in Docker or on Render). Deploy notes: [DEPLOY.md](DEPLOY.md).
 
 - [ ] **Scheduled actions** — register in Beat when Slack is configured:
   - [x] `accounts.tasks.notify_missing_reflections` — weekly digest (integration reflections: `TAG_WEEKLY` + `final_reflection_at`).

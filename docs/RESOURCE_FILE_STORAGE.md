@@ -4,7 +4,7 @@ PowerHUB stores **resource files and links** when group members post to chat wit
 
 This document compares the **two approaches** we consider for where file bytes live.
 
-Related: [APP_PLAN.md](APP_PLAN.md) (build #9 `resources`, backport B13).
+Implemented on integration: group chat uploads with **Resource** label sync to the Resources app (Option 1 — local `MEDIA_ROOT`). For cloud storage see [SCALING_ROADMAP.md](SCALING_ROADMAP.md).
 
 ---
 

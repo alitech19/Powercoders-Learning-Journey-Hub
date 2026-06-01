@@ -1,45 +1,180 @@
-# Powercoders Learning Journey Hub (PowerHUB)
+# Powercoders Learning Journey Hub
 
-A web platform for Powercoders bootcamp participants to track their learning journey.
+A web platform for Powercoders bootcamp participants to track their learning journey — journal entries, weekly reflections, goals, tasks, habits, group collaboration, teacher workflows, and resources — all in one place.
 
-**Branch `integration`:** greenfield rebuild with nav apps, dashboard, and in-app help shipped; ops/admin backports from `origin/Ali` remain.
+Codename: **PowerHUB**.
 
-## Status
+---
 
-| Layer | State |
-|-------|--------|
-| Structure | `backend/` + `frontend/` |
-| Docker | PostgreSQL 17, Redis, web, Celery worker + beat |
-| Nav apps | Workflows, Goals, Tasks, Reflections, Journal, Habits, Group, Resources |
-| `dashboard` | Role-based home at `/` |
-| `info` | Contextual help (ⓘ) per app |
-| `accounts` | Custom User, 2FA, onboarding middleware, profile |
-| `cohorts` | Cohort, Group, GroupTeacher (admin only; in-app CRUD still TODO) |
-| Auth | Argon2, axes, CSP, 2FA, onboarding gates, Redis sessions, JSON logs |
-| Dev seed | `backend/dev/seed.yaml` + quick login — **remove from codebase before prod** ([checklist](docs/PRODUCTION_CHECKLIST.md)) |
-| Next | [APP_PLAN](docs/APP_PLAN.md) — active: [TODO](docs/TODO.md) |
+## Table of Contents
 
-## Quick start
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [User Roles](#user-roles)
+- [Branches](#branches)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
 
-See [SETUP.md](SETUP.md) for full instructions.
+---
+
+## Overview
+
+The Learning Journey Hub is a private Django application for the Powercoders coding bootcamp. Three roles, each with a tailored experience:
+
+- **Students** — journal, reflections (including wellbeing), personal goals and tasks, habits, group feed, teacher workflows, and resource board; export their data; manage notification preferences
+- **Teachers** — dashboard with cohort/group context, students missing weekly reflections, student detail (shared journal, goals, reflections), feedback on entries, goals and tasks for learners, group announcements
+- **Admins** — user list, create, CSV import, cohort and group CRUD, student progress, audit-oriented tooling, plus full teacher capabilities
+
+The home page at `/` is a **role-based dashboard**. Contextual **ⓘ help** is available per app from the navbar.
+
+---
+
+## Features
+
+| Area | Capabilities |
+|------|-------------|
+| **Dashboard** | Student, teacher, and admin home — cards for goals, tasks, reflections, management links, and cohort-aware group context |
+| **Journal** | Personal entries with mood, tags, visibility (private / shared with teachers), teacher feedback |
+| **Reflections** | Weekly and structured reflections; wellbeing embedded in the reflections app |
+| **Goals** | Goals with milestones, categories, progress; teachers can set goals for students |
+| **Tasks** | Personal and assigned tasks with status workflow (not a separate tracker app) |
+| **Habits** | Habit tracking with streaks |
+| **Workflows** | Teacher-defined ordered learning paths; students complete steps |
+| **Group Space** | Per-group feed — announcements, comments, shared snapshots, file posts |
+| **Resources** | Group resource tiles synced from group chat posts labelled **Resource** |
+| **Accounts & privacy** | Email login, onboarding (privacy policy, password change, welcome), profile; **Markdown data export**; delete own account |
+| **Notifications** | In-app centre with unread badge; optional email for feedback and related events |
+| **Integrations** | Welcome email on user create/import; feedback notifications; optional **Slack** webhook for staff digests; **Celery** + **Beat** for scheduled jobs |
+| **Admin & cohorts** | In-app user management (`/accounts/users/`), cohorts and groups (`/accounts/cohorts/`), student progress and detail |
+| **Security** | Argon2 passwords, **TOTP 2FA** for staff, django-axes lockout, CSP, Redis-backed sessions, JSON request logging |
+| **Help** | In-app topics under `backend/info/topics/` (dashboard, accounts, …) |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Language | Python 3.12 |
+| Framework | Django 5.x |
+| Database | PostgreSQL 17 |
+| Cache / sessions | Redis (`django-redis`) |
+| Task queue | Celery + `django-celery-beat` |
+| Frontend | Tailwind CSS (CDN), HTMX, Alpine.js |
+| Auth | `django-two-factor-auth` (TOTP), `django-axes` |
+| Containerisation | Docker Compose (local); [Render](docs/DEPLOY.md) (tester deploy) |
+
+Health check: `GET /health/`.
+
+---
+
+## Project Structure
+
+```
+Powercoders-Learning-Journey-Hub/
+├── backend/                 # Django apps and config
+│   ├── accounts/            # Users, 2FA, notifications, GDPR, management UI
+│   ├── cohorts/           # Cohort, group, group–teacher models
+│   ├── config/              # settings, URLs, Celery, nav registry
+│   ├── dashboard/           # Role-based home
+│   ├── goals/ journal/ reflections/ tasks/ habits/
+│   ├── workflows/ group_space/ resources/
+│   ├── feedback/ info/
+│   └── manage.py
+├── frontend/
+│   ├── templates/           # Server-rendered UI + HTMX partials
+│   └── static/
+├── docs/                    # Setup, testing, deploy, ops (see below)
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
+└── .env.example
+```
+
+---
+
+## User Roles
+
+### Student
+
+- Journal, reflections, goals, tasks, habits, workflows assigned by teachers
+- Group feed and resources for their cohort group
+- Profile: export data (Markdown), notification settings, delete account
+
+### Teacher
+
+- Everything relevant to their **groups** (via group–teacher links)
+- Dashboard alerts for missing weekly reflections
+- Student progress and detail; feedback on journal and related items
+- Group posts and resource-labelled uploads
+
+### Admin
+
+- User create / import / deactivate; cohort and group management
+- Student oversight and Django admin (`/admin/`) for low-level data
+- Platform configuration (e.g. periodic Celery tasks in admin)
+
+Roles are set on the user record (`student`, `teacher`, `admin`).
+
+---
+
+## Branches
+
+| Branch | Purpose |
+|--------|---------|
+| `integration` | Main development |
+| `deploy` | Tester environment on Render — merge from `integration` when ready for QA |
+| `main` | Production target when go-live is ready |
+
+Develop on `integration` → merge to `deploy` for shared tester URL → production follows [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md).
+
+---
+
+## Documentation
+
+Guides live in **`docs/`** (setup, tests, deploy, ops).
+
+| Document | Description |
+|----------|-------------|
+| [docs/SETUP.md](docs/SETUP.md) | **Local development** — Docker Compose, `.env`, login, Celery, troubleshooting |
+| [docs/TESTING.md](docs/TESTING.md) | **Automated tests** — venv, Postgres, coverage, CI |
+| [docs/DEPLOY.md](docs/DEPLOY.md) | **Tester deploy on Render** — `deploy` branch, Gunicorn, env vars, worker + beat |
+| [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md) | Production go-live (remove dev auth, secrets) |
+| [docs/INCIDENT_RESPONSE.md](docs/INCIDENT_RESPONSE.md) | Incident runbook |
+| [docs/SCALING_ROADMAP.md](docs/SCALING_ROADMAP.md) | Scaling and architecture phases |
+| [docs/USABILITY_TESTING.md](docs/USABILITY_TESTING.md) | Usability test plan (≥5 participants) |
+| [docs/RESOURCE_FILE_STORAGE.md](docs/RESOURCE_FILE_STORAGE.md) | Group file storage options |
+| [docs/TODO.md](docs/TODO.md) | Beat schedules, Slack follow-ups |
+
+**Quick pointers:** run locally → [docs/SETUP.md](docs/SETUP.md) · run tests → [docs/TESTING.md](docs/TESTING.md) · deploy for testers → [docs/DEPLOY.md](docs/DEPLOY.md)
+
+---
+
+## Contributing
+
+### Workflow
 
 ```bash
-cp .env.example .env
-docker compose up --build
+git checkout integration
+git pull origin integration
+# make changes, run tests — see docs/TESTING.md
+git push origin integration
 ```
 
-Open http://localhost:8000 — health check at http://localhost:8000/health/
+For tester deploy: merge into `deploy` and follow [docs/DEPLOY.md](docs/DEPLOY.md).
 
-## Roadmap
+### Code style
 
-Customer-facing apps are integrated. Remaining work (CI, admin UI, Slack/email, tests, ops docs) is listed in [docs/APP_PLAN.md](docs/APP_PLAN.md). Resource file storage: [docs/RESOURCE_FILE_STORAGE.md](docs/RESOURCE_FILE_STORAGE.md).
+- Python: PEP 8, match existing app patterns
+- Templates: Tailwind utilities; HTMX for partial updates; Alpine.js where needed
+- Prefer extending existing services and permissions over new abstractions
 
-## Project structure
+### CI
 
-```
-backend/          Django apps, config, manage.py
-frontend/         templates and static assets
-docs/             project documentation
-docker-compose.yml
-requirements.txt
-```
+GitHub Actions (`.github/workflows/ci.yml`): migrations check and `manage.py test` per app on push/PR.
+
+---
+
+*Built for [Powercoders](https://powercoders.org) — a coding bootcamp for refugees and people with a migrant background.*
