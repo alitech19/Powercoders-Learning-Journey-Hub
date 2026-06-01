@@ -25,23 +25,30 @@
 </head>
 <body class="h-full flex flex-col bg-gray-50 text-[#2B2B2B]">
 
-  <nav class="bg-[#2B2B2B] shadow-lg">
+  <nav class="bg-[#2B2B2B] shadow-lg sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14">
         <div class="flex items-center gap-6 min-w-0">
-          <a href="{% url 'home' %}" class="font-black text-lg tracking-tight leading-none shrink-0">
+          <a href="{% url 'dashboard:dashboard' %}" class="font-black text-lg tracking-tight leading-none shrink-0">
             <span class="text-[#C0392B]">{</span><span class="text-white">POWER</span><span class="text-[#C0392B]">.</span><span class="text-white">CODERS</span><span class="text-[#C0392B]">}</span>
           </a>
           {% if user.is_authenticated and integrated_nav %}
-          <div class="hidden md:flex items-center gap-4 text-sm">
+          <div class="hidden md:flex items-center gap-1 text-sm">
             {% for item in integrated_nav %}
-            <a href="{{ item.url }}" class="text-gray-300 hover:text-white whitespace-nowrap">{{ item.label }}</a>
+            <a href="{{ item.url }}"
+               class="px-3 py-2 rounded-md font-medium whitespace-nowrap transition-colors
+                      {% if item.active %}text-white bg-white/10{% else %}text-gray-300 hover:text-white hover:bg-white/10{% endif %}">
+              {{ item.label }}
+            </a>
             {% endfor %}
           </div>
           {% endif %}
         </div>
         <div class="flex items-center gap-3 text-sm">
           {% if user.is_authenticated %}
+            {% if user.role == 'admin' or user.is_superuser %}
+            <a href="{% url 'admin:index' %}" class="text-gray-300 hover:text-white hidden sm:inline">Admin</a>
+            {% endif %}
             {% include "includes/user_avatar.html" with user=user size=28 %}
             <span class="text-gray-200 hidden sm:inline">{{ user.display_name }}</span>
             <a href="{% url 'accounts:profile' %}" class="text-gray-300 hover:text-white">Profile</a>

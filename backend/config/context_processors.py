@@ -3,7 +3,9 @@ from config import input_limits as il
 
 
 def integrated_nav(request):
-    return {'integrated_nav': integrated_nav_items()}
+    resolver = getattr(request, 'resolver_match', None)
+    current_view_name = resolver.view_name if resolver else None
+    return {'integrated_nav': integrated_nav_items(current_view_name=current_view_name)}
 
 
 def input_limits(request):

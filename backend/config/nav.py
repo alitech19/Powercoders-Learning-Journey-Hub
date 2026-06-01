@@ -1,8 +1,8 @@
 """
-Integrated app navigation — single source for navbar and home hub.
+Integrated app navigation — single source for navbar.
 
 Enable items only when the app is wired (urls + templates). Order = customer priority.
-Dashboard is NOT here — it replaces `home` as `/` when integrated last.
+Dashboard is first; logo also links to dashboard.
 """
 
 from __future__ import annotations
@@ -19,8 +19,9 @@ class NavItem:
     enabled: bool = False
 
 
-# Customer priority order (see docs/APPS_ROADMAP.md). Set enabled=True when app lands.
+# Customer priority order (see docs/APP_PLAN.md). Set enabled=True when app lands.
 NAV_REGISTRY: tuple[NavItem, ...] = (
+    NavItem('Dashboard', 'dashboard:dashboard', enabled=True),
     NavItem('Workflows', 'workflows:list', enabled=True),
     NavItem('Goals', 'goals:list', enabled=True),
     NavItem('Tasks', 'tasks:task_list', enabled=True),
@@ -32,8 +33,8 @@ NAV_REGISTRY: tuple[NavItem, ...] = (
 )
 
 
-def integrated_nav_items() -> list[dict[str, str]]:
-    items: list[dict[str, str]] = []
+def integrated_nav_items(*, current_view_name: str | None = None) -> list[dict[str, str | bool]]:
+    items: list[dict[str, str | bool]] = []
     for entry in NAV_REGISTRY:
         if not entry.enabled:
             continue
@@ -41,5 +42,12 @@ def integrated_nav_items() -> list[dict[str, str]]:
             url = reverse(entry.url_name)
         except NoReverseMatch:
             continue
-        items.append({'label': entry.label, 'url': url})
+        items.append(
+            {
+                'label': entry.label,
+                'url': url,
+                'url_name': entry.url_name,
+                'active': entry.url_name == current_view_name,
+            }
+        )
     return items

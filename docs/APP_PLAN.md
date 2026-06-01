@@ -6,10 +6,9 @@ Greenfield port from `origin/Ali` and `origin/django-test`. Apps are added **one
 
 | Phase | URL `/` | Role |
 |-------|---------|------|
-| **Now** | `home` | Placeholder hub — links only to **already integrated** apps (+ profile, admin) |
-| **Last** | `dashboard` | Role-based home **replaces `home`**; `LOGIN_REDIRECT_URL` switches to dashboard |
+| **Done** | `dashboard` | Role-based home — first item in nav; logo links here |
 
-No dead links: nav and home read from a single registry (`config/nav.py`). Entries are enabled only when the app is wired.
+Nav and dashboard read from a single registry (`config/nav.py`). `/home/` redirects to dashboard.
 
 ## Integration order (customer priority)
 
@@ -25,11 +24,11 @@ Build sequence **2 → 9**, then **dashboard (1)**. Status and names may change 
 | 7 | `habits` | Habits | django-test (`growth`) | Done |
 | 8 | `group_space` | Group | Group chat + resource posts | Done |
 | 9 | `resources` | Resources | Group / personal / thematic tiles; file storage: [RESOURCE_FILE_STORAGE.md](RESOURCE_FILE_STORAGE.md) | Done |
-| **1 (last)** | `dashboard` | — (replaces `home` URL) | Ali | Pending |
+| **1 (last)** | `dashboard` | Dashboard | Ali + integration apps | Done |
 
-**Next app to build:** `dashboard` (replaces `home` as `/`)
+**Next app to build:** — (integration apps complete; backports remain)
 
-~~**resources**~~ ✓ — tabs My | Group | Themes; auto-sync from group chat to system container per group.
+~~**dashboard**~~ ✓ — role-based home at `/`; first nav item; aggregates tasks, journal, goals, reflections, habits, workflows, group, resources.
 
 ## Backport from `origin/Ali` (parallel work during integration)
 
@@ -61,7 +60,7 @@ Cherry-pick or re-port **selected** changes from Ali's branch — **not** a merg
 - **`cohorts`** — admin only (done)
 - **`accounts`** — profile, onboarding (done); user mgmt UI later
 - **`api`** — health/scaffold when needed
-- **`dashboard`** — not a nav item; becomes the `/` landing page at the end
+- **`dashboard`** — first nav item; role-based landing at `/`
 
 ## Per-app checklist (each PR)
 
@@ -69,8 +68,7 @@ Cherry-pick or re-port **selected** changes from Ali's branch — **not** a merg
 2. Templates under `frontend/templates/<app>/`
 3. Set `enabled=True` on the matching row(s) in `config/nav.py`
 4. Migrations + seed touch-ups if dev users need sample data
-5. Home hub + navbar update automatically (same registry)
-6. Mark **Done** in the table above
+5. Mark **Done** in the table above
 
 ## Rename / split policy
 

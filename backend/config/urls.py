@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import include, path
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView
 from two_factor import urls as two_factor_urls
 
 from accounts.two_factor_views import EmailLoginView
@@ -40,7 +40,8 @@ urlpatterns = [
     path('habits/', include('habits.urls')),
     path('group/', include('group_space.urls')),
     path('resources/', include('resources.urls')),
-    path('', TemplateView.as_view(template_name='home.html'), name='home'),
+    path('', include('dashboard.urls')),
+    path('home/', RedirectView.as_view(pattern_name='dashboard:dashboard', permanent=False), name='home'),
 ]
 
 if settings.DEBUG:

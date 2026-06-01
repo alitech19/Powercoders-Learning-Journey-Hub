@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'habits',
     'group_space.apps.GroupSpaceConfig',
     'resources.apps.ResourcesConfig',
+    'dashboard.apps.DashboardConfig',
 ]
 
 MIDDLEWARE = [
@@ -137,7 +138,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.User'
 
 LOGIN_URL = 'two_factor:login'
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'dashboard:dashboard'
 LOGOUT_REDIRECT_URL = 'two_factor:login'
 
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
