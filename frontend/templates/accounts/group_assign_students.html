@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Assign Students — {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+  <div class="mb-5">
+    <a href="{% url 'accounts:cohort_list' %}"
+       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] transition-colors mb-3">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Back to cohorts
+    </a>
+    <h1 class="text-2xl font-bold text-[#2B2B2B]">Assign Students</h1>
+    <p class="text-gray-500 text-sm mt-0.5">
+      Group: <span class="font-medium text-[#2B2B2B]">{{ group.name }}</span>
+      · Cohort: <span class="font-medium text-[#2B2B2B]">{{ group.cohort.name }}</span>
+    </p>
+  </div>
+
+  {% if students %}
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+
+    <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-50">
+      {% for student in students %}
+      <label class="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-gray-50 transition-colors">
+        <input type="checkbox" name="students" value="{{ student.pk }}"
+               class="h-4 w-4 accent-[#C0392B]">
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-[#2B2B2B]">{{ student.display_name }}</p>
+          <p class="text-xs text-gray-400">{{ student.email }}
+            {% if student.group %}· currently in {{ student.group.name }}{% else %}· no group{% endif %}
+          </p>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+
+    <div class="flex gap-3">
+      <button type="submit"
+              class="flex-1 bg-[#C0392B] hover:bg-[#A93226] text-white font-semibold py-2.5 rounded-lg transition-colors text-sm cursor-pointer">
+        Assign Selected Students
+      </button>
+      <a href="{% url 'accounts:cohort_list' %}"
+         class="px-5 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+        Cancel
+      </a>
+    </div>
+  </form>
+
+  {% else %}
+  <div class="bg-white rounded-xl border border-gray-200 p-10 text-center">
+    <div class="text-4xl mb-3">✅</div>
+    <h2 class="text-base font-semibold text-[#2B2B2B] mb-1">All students assigned</h2>
+    <p class="text-sm text-gray-400">Every student in {{ group.cohort.name }} is already in this group or another group.</p>
+    <a href="{% url 'accounts:cohort_list' %}"
+       class="inline-block mt-4 text-sm font-medium text-[#C0392B] hover:underline">Back to cohorts</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

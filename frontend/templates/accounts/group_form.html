@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+<div class="max-w-lg mx-auto">
+  <div class="mb-6">
+    <a href="{% url 'accounts:cohort_list' %}" class="text-sm text-gray-400 hover:text-[#C0392B] transition-colors">← Back to Cohorts</a>
+    <h1 class="text-2xl font-bold text-[#2B2B2B] mt-2">{{ title }}</h1>
+    {% if cohort %}<p class="text-gray-500 text-sm mt-0.5">Cohort: {{ cohort.name }}</p>{% endif %}
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <!-- Cohort -->
+      <div class="mb-5">
+        <label for="{{ form.cohort.id_for_label }}" class="block text-sm font-medium text-[#2B2B2B] mb-1.5">
+          Cohort <span class="text-[#C0392B]">*</span>
+        </label>
+        <select name="cohort" id="{{ form.cohort.id_for_label }}"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#2B2B2B] focus:outline-none focus:border-[#C0392B] focus:ring-1 focus:ring-[#C0392B]/20 bg-white">
+          {% for val, label in form.cohort.field.choices %}
+          <option value="{{ val }}" {% if form.cohort.value|stringformat:"s" == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        {% if form.cohort.errors %}<p class="mt-1 text-xs text-red-500">{{ form.cohort.errors|join:", " }}</p>{% endif %}
+      </div>
+
+      <!-- Group name -->
+      <div class="mb-5">
+        <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-[#2B2B2B] mb-1.5">
+          Group name <span class="text-[#C0392B]">*</span>
+        </label>
+        <input type="text" name="name" id="{{ form.name.id_for_label }}"
+               value="{{ form.name.value|default_if_none:'' }}" required
+               class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#2B2B2B] focus:outline-none focus:border-[#C0392B] focus:ring-1 focus:ring-[#C0392B]/20">
+        {% if form.name.errors %}<p class="mt-1 text-xs text-red-500">{{ form.name.errors|join:", " }}</p>{% endif %}
+      </div>
+
+      <!-- Teachers -->
+      <div class="mb-5">
+        <label class="block text-sm font-medium text-[#2B2B2B] mb-2">Assigned teachers</label>
+        {% if form.teachers.field.queryset %}
+        <div class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
+          {% for teacher in form.teachers.field.queryset %}
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="teachers" value="{{ teacher.pk }}"
+                   {% if teacher.pk in form.fields.teachers.initial %}checked{% endif %}
+                   class="h-4 w-4 rounded border-gray-300 text-[#C0392B] focus:ring-[#C0392B]">
+            <span class="text-sm text-[#2B2B2B]">{{ teacher.display_name }}</span>
+            <span class="text-xs text-gray-400">{{ teacher.email }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm text-gray-400">No teachers found. Create teacher accounts first.</p>
+        {% endif %}
+        {% if form.teachers.errors %}<p class="mt-1 text-xs text-red-500">{{ form.teachers.errors|join:", " }}</p>{% endif %}
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit"
+                class="bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors">
+          Save
+        </button>
+        <a href="{% url 'accounts:cohort_list' %}"
+           class="border border-gray-200 hover:border-gray-300 text-gray-600 text-sm font-medium px-6 py-2.5 rounded-lg transition-colors">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

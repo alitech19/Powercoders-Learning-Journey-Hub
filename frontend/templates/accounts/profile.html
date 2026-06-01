@@ -1,46 +1,190 @@
 {% extends "base.html" %}
-
-{% block title %}Profile — PowerHUB{% endblock %}
+{% block title %}My Profile{% endblock %}
 
 {% block content %}
-<h1>Profile</h1>
+<div class="max-w-3xl mx-auto">
 
-<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
-    {% include "includes/user_avatar.html" with user=user size=80 %}
-    <div>
-        <p><strong>{{ user.display_name }}</strong></p>
-        <p>{{ user.email }} · {{ user.get_role_display }}</p>
-        {% if user.has_custom_avatar %}
-            <p><small>Custom photo uploaded</small></p>
-        {% else %}
-            <p><small>Default avatar for {{ user.get_role_display|lower }}s</small></p>
-        {% endif %}
-        {% if user.role == "student" %}
-            <p><small>
-                Cohort: {{ user.cohort|default:"—" }}
-                · Group: {{ user.group|default:"—" }}
-            </small></p>
-        {% elif user.role == "teacher" %}
-            <p><small>Teaching groups:
-                {% with groups=user.group_teacher_assignments.all %}
-                    {% if groups %}
-                        {% for assignment in groups %}{{ assignment.group }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                    {% else %}
-                        —
-                    {% endif %}
-                {% endwith %}
-            </small></p>
-        {% endif %}
+  <h1 class="text-2xl font-bold text-[#2B2B2B] mb-6">My Profile</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <div class="md:col-span-2 space-y-4">
+      <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 class="text-base font-semibold text-[#2B2B2B] mb-4">Profile Information</h2>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-4">
+          {% csrf_token %}
+
+          <div>
+            <label class="block text-sm font-semibold text-[#2B2B2B] mb-2">Profile photo</label>
+            <div class="flex items-center gap-4">
+              {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" alt="" class="h-16 w-16 rounded-full object-cover ring-2 ring-[#EDE3D5]">
+              {% else %}
+                <div class="h-16 w-16 rounded-full bg-[#C0392B]/10 flex items-center justify-center ring-2 ring-[#EDE3D5]">
+                  <span class="text-[#C0392B] text-2xl font-bold">{{ user.display_name|first|upper }}</span>
+                </div>
+              {% endif %}
+              <div>
+                <input type="file" name="avatar" id="avatar" accept="image/*"
+                       class="block text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3
+                              file:rounded-lg file:border-0 file:text-xs file:font-semibold
+                              file:bg-[#C0392B]/10 file:text-[#C0392B] hover:file:bg-[#C0392B]/20
+                              file:cursor-pointer cursor-pointer">
+                <p class="text-xs text-gray-400 mt-1">JPG or PNG, max 2 MB</p>
+              </div>
+            </div>
+            {% if form.avatar.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.avatar.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-[#2B2B2B] mb-1.5">Display name</label>
+            <input type="text" name="display_name" value="{{ form.display_name.value|default:'' }}" required
+                   class="w-full px-4 py-2.5 rounded-lg border text-sm text-[#2B2B2B]
+                          focus:outline-none focus:ring-2 focus:ring-[#C0392B] focus:border-[#C0392B] transition-colors
+                          {% if form.display_name.errors %}border-red-400 bg-red-50{% else %}border-gray-300{% endif %}">
+            {% if form.display_name.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.display_name.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-[#2B2B2B] mb-1.5">Email address</label>
+            <input type="email" value="{{ user.email }}" disabled
+                   class="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-400 cursor-not-allowed">
+            <p class="text-xs text-gray-400 mt-1">Email cannot be changed. Contact an admin if needed.</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-[#2B2B2B] mb-1.5">Role</label>
+            <div class="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold
+                {% if user.role == 'admin' %}bg-purple-100 text-purple-700
+                {% elif user.role == 'teacher' %}bg-blue-100 text-blue-700
+                {% else %}bg-green-100 text-green-700{% endif %}">
+                {{ user.get_role_display }}
+              </span>
+              {% if user.cohort or user.group %}
+              <span class="text-gray-400 text-xs">
+                {% if user.group %}{{ user.group.name }}{% endif %}
+                {% if user.cohort %} · {{ user.cohort.name }}{% endif %}
+              </span>
+              {% endif %}
+            </div>
+          </div>
+
+          <button type="submit"
+                  class="w-full bg-[#C0392B] hover:bg-[#A93226] text-white font-semibold py-2.5 rounded-lg transition-colors text-sm cursor-pointer">
+            Save Changes
+          </button>
+        </form>
+      </div>
     </div>
+
+    <div class="space-y-4">
+
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="text-base font-semibold text-[#2B2B2B] mb-4">Security</h2>
+        <div class="space-y-3">
+          <a href="{% url 'accounts:password_change_required' %}"
+             class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-[#EDE3D5] hover:bg-[#F5EDE0]/30 transition-colors group">
+            <div class="h-8 w-8 rounded-lg bg-gray-100 group-hover:bg-[#C0392B]/10 flex items-center justify-center flex-shrink-0">
+              <svg class="h-4 w-4 text-gray-400 group-hover:text-[#C0392B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-[#2B2B2B]">Change password</p>
+              <p class="text-xs text-gray-400">Update your login password</p>
+            </div>
+          </a>
+          <a href="{% url 'two_factor:profile' %}"
+             class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-[#EDE3D5] hover:bg-[#F5EDE0]/30 transition-colors group">
+            <div class="h-8 w-8 rounded-lg bg-gray-100 group-hover:bg-[#C0392B]/10 flex items-center justify-center flex-shrink-0">
+              <svg class="h-4 w-4 text-gray-400 group-hover:text-[#C0392B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-[#2B2B2B]">Two-factor authentication</p>
+              <p class="text-xs text-gray-400">Manage your authenticator app</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="text-base font-semibold text-[#2B2B2B] mb-1">Your data</h2>
+        <p class="text-xs text-gray-400 mb-4">
+          Download everything linked to your account (journal, goals, tasks, workflows, group posts, resources, feedback, and more) as one Markdown file — Swiss nDSG / GDPR.
+        </p>
+        <a href="{% url 'accounts:data_export' %}"
+           class="flex items-center justify-center gap-2 w-full border-2 border-[#C0392B]/30 bg-[#F5EDE0] hover:border-[#C0392B] text-[#C0392B] text-sm font-semibold py-2.5 px-3 rounded-lg transition-colors">
+          <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          Export as Markdown (.md)
+        </a>
+        <p class="text-xs text-gray-400 mt-3">
+          <a href="{% url 'accounts:privacy_policy' %}" class="text-[#C0392B] hover:underline">Privacy policy</a>
+        </p>
+      </div>
+
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="text-base font-semibold text-[#2B2B2B] mb-1">Notifications</h2>
+        <p class="text-xs text-gray-400 mb-3">
+          <a href="{% url 'accounts:notifications' %}" class="text-[#C0392B] hover:underline font-medium">View notification centre</a>
+          — in-app alerts are always on.
+        </p>
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="display_name" value="{{ form.display_name.value|default:'' }}">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <div class="relative">
+              <input type="checkbox" name="email_notifications_enabled" id="email_notif"
+                     {% if user.email_notifications_enabled %}checked{% endif %}
+                     class="sr-only peer"
+                     onchange="this.form.submit()">
+              <div class="w-9 h-5 bg-gray-200 peer-checked:bg-[#C0392B] rounded-full transition-colors"></div>
+              <div class="absolute left-0.5 top-0.5 h-4 w-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
+            </div>
+            <span class="text-sm font-medium text-[#2B2B2B]">Email notifications</span>
+          </label>
+        </form>
+      </div>
+
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="text-base font-semibold text-[#2B2B2B] mb-3">Account info</h2>
+        <dl class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <dt class="text-gray-400">Member since</dt>
+            <dd class="text-[#2B2B2B] font-medium">{{ user.date_joined|date:"d M Y" }}</dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-gray-400">Last login</dt>
+            <dd class="text-[#2B2B2B] font-medium">{% if user.last_login %}{{ user.last_login|date:"d M Y" }}{% else %}—{% endif %}</dd>
+          </div>
+          {% if user.privacy_policy_accepted %}
+          <div class="flex justify-between">
+            <dt class="text-gray-400">Privacy policy</dt>
+            <dd class="text-green-600 font-medium text-xs">Accepted {{ user.privacy_policy_accepted_at|date:"d M Y" }}</dd>
+          </div>
+          {% endif %}
+        </dl>
+      </div>
+
+      <div class="bg-white rounded-xl border border-red-100 p-5">
+        <h2 class="text-base font-semibold text-red-700 mb-1">Danger zone</h2>
+        <p class="text-xs text-gray-400 mb-3">Permanently delete your account and all your data. This cannot be undone.</p>
+        <a href="{% url 'accounts:delete_own_account' %}"
+           class="block w-full text-center border border-red-200 hover:border-red-400 text-red-500 hover:text-red-700 text-sm font-medium py-2 rounded-lg transition-colors">
+          Delete my account
+        </a>
+      </div>
+
+    </div>
+  </div>
 </div>
-
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-</form>
-
-<p class="mt-6 text-sm">
-    <a href="{% url 'accounts:welcome' %}" class="text-[#C0392B] hover:underline">Help / Getting Started</a>
-</p>
 {% endblock %}

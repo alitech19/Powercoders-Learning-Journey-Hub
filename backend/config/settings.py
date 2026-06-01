@@ -86,6 +86,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'accounts.context_processors.dev_login_panel',
+                'accounts.context_processors.unread_notifications',
                 'config.context_processors.integrated_nav',
                 'info.context_processors.page_help',
                 'config.context_processors.input_limits',
@@ -172,6 +173,8 @@ EMAIL_BACKEND = os.environ.get(
     'django.core.mail.backends.console.EmailBackend',
 )
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@powercoders.org')
+SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8000').rstrip('/')
+SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL', '').strip()
 
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

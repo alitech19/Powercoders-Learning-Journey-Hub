@@ -12,6 +12,8 @@ from reflections.constants import TAG_WEEKLY
 from reflections.models import Reflection
 from tasks.models import Task
 
+from accounts.student_oversight import build_student_progress_rows
+
 from . import services
 
 User = get_user_model()
@@ -27,23 +29,13 @@ def dashboard(request):
 
     if user_is_admin(user):
         one_week_ago = timezone.now() - timedelta(days=7)
-        all_tasks = services.tasks_queryset()
         context.update(
             {
-                'private_metadata_rows': services.build_task_rows(
-                    all_tasks.filter(visibility=Task.Visibility.PRIVATE),
-                    user=user,
-                ),
-                'public_task_rows': services.build_task_rows(
-                    all_tasks.filter(visibility=Task.Visibility.SHARED),
-                    user=user,
-                ),
                 'total_students': User.objects.filter(role=User.Role.STUDENT).count(),
                 'total_teachers': User.objects.filter(role=User.Role.TEACHER).count(),
                 'total_cohorts': Cohort.objects.count(),
                 'active_cohorts': Cohort.objects.filter(status=Cohort.Status.ACTIVE).count(),
                 'total_groups': Group.objects.count(),
-                'tasks_week': Task.objects.filter(created_at__gte=one_week_ago).count(),
                 'journal_week': JournalEntry.objects.filter(created_at__gte=one_week_ago).count(),
                 **services.admin_extra_stats(),
             }
@@ -56,18 +48,18 @@ def dashboard(request):
         students_in_groups = User.objects.filter(
             role=User.Role.STUDENT,
             group_id__in=group_ids,
-        ).select_related('group')
+        ).select_related('group', 'cohort')
         missing_students = services.students_missing_weekly_reflection(students_in_groups)
-
-        public_tasks = services.public_tasks_queryset(user)
+        student_preview_rows = build_student_progress_rows(students_in_groups)[:10]
 
         one_week_ago = timezone.now() - timedelta(days=7)
         context.update(
             {
                 'assigned_groups': assigned_groups,
-                'public_task_rows': services.build_task_rows(public_tasks, user=user),
                 'missing_students': missing_students,
                 'missing_count': len(missing_students),
+                'student_count': students_in_groups.count(),
+                'student_preview_rows': student_preview_rows,
                 'group_posts_week': Post.objects.filter(
                     group_space__group_id__in=group_ids,
                     created_at__gte=one_week_ago,
@@ -96,18 +88,6 @@ def dashboard(request):
 
     context.update(
         {
-            'own_task_rows': services.build_task_rows(
-                services.tasks_for_kind(user, Task.ListKind.INDIVIDUAL),
-                user=user,
-            ),
-            'group_task_rows': services.build_task_rows(
-                services.tasks_for_kind(user, Task.ListKind.GROUP),
-                user=user,
-            ),
-            'cohort_task_rows': services.build_task_rows(
-                services.tasks_for_kind(user, Task.ListKind.COHORT),
-                user=user,
-            ),
             'tasks_by_status': services.tasks_by_status_for_student(user, own_tasks),
             'journal_count': JournalEntry.objects.filter(author=user).count(),
             'recent_journal_entries': JournalEntry.objects.filter(author=user)

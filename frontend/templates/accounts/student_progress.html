@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Student Progress{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-[#2B2B2B]">Student Progress</h1>
+    <p class="text-gray-500 text-sm mt-0.5">Workflows → Goals → Tasks → Reflections → Journal → Habits → Group → Resources (nav order).</p>
+  </div>
+</div>
+
+<div class="flex flex-wrap items-center gap-2 mb-5">
+  {% if available_groups|length > 1 %}
+  <a href="{% url 'accounts:student_progress' %}"
+     class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+            {% if not group_filter and not missing_filter %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]{% endif %}">
+    All Groups
+  </a>
+  {% for g in available_groups %}
+  <a href="?group={{ g.pk }}"
+     class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+            {% if group_filter == g.pk|stringformat:'s' %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]{% endif %}">
+    {{ g.name }}
+    <span class="text-xs opacity-60 ml-1">{{ g.cohort.name }}</span>
+  </a>
+  {% endfor %}
+  <span class="text-gray-200">|</span>
+  {% endif %}
+  <a href="?{% if group_filter %}group={{ group_filter }}&{% endif %}filter=missing_reflection"
+     class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5
+            {% if missing_filter %}bg-amber-500 text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-amber-400 hover:text-amber-600{% endif %}">
+    Missing reflection this week
+  </a>
+  {% if missing_filter %}
+  <a href="{% url 'accounts:student_progress' %}{% if group_filter %}?group={{ group_filter }}{% endif %}"
+     class="text-xs text-gray-400 hover:text-[#C0392B] transition-colors">× Clear</a>
+  {% endif %}
+</div>
+
+{% if student_rows %}
+
+<div class="hidden lg:block overflow-x-auto rounded-xl border border-gray-200 mb-6">
+  <table class="min-w-full divide-y divide-gray-100 text-sm bg-white">
+    <thead class="bg-[#2B2B2B]">
+      <tr>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider sticky left-0 bg-[#2B2B2B]">Student</th>
+        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Group</th>
+        {% include "accounts/_student_metric_headers.html" %}
+        <th class="px-4 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for row in student_rows %}
+      {% with s=row.student %}
+      <tr class="hover:bg-gray-50 transition-colors {% if row.missing_reflection %}bg-amber-50/40{% endif %}">
+        <td class="px-5 py-4 sticky left-0 bg-white {% if row.missing_reflection %}bg-amber-50/40{% endif %}">
+          <div class="flex items-center gap-3 min-w-[200px]">
+            {% if s.avatar %}
+            <img src="{{ s.avatar.url }}" alt="" class="h-8 w-8 rounded-full object-cover flex-shrink-0">
+            {% else %}
+            <div class="h-8 w-8 rounded-full bg-[#C0392B] flex items-center justify-center flex-shrink-0">
+              <span class="text-white text-xs font-bold">{{ s.display_name|first|upper }}</span>
+            </div>
+            {% endif %}
+            <div>
+              <p class="font-semibold text-[#2B2B2B]">{{ s.display_name }}</p>
+              <p class="text-xs text-gray-400">{{ s.email }}</p>
+            </div>
+          </div>
+        </td>
+        <td class="px-5 py-4 whitespace-nowrap">
+          {% if s.group %}
+          <p class="text-sm font-medium text-[#2B2B2B]">{{ s.group.name }}</p>
+          <p class="text-xs text-gray-400">{{ s.cohort.name|default:"—" }}</p>
+          {% else %}
+          <span class="text-gray-300">—</span>
+          {% endif %}
+        </td>
+        {% include "accounts/_student_metric_cells.html" %}
+        <td class="px-4 py-4 text-right whitespace-nowrap">
+          <a href="{% url 'accounts:student_detail' s.pk %}" class="text-xs font-medium text-[#C0392B] hover:text-[#A93226]">View →</a>
+        </td>
+      </tr>
+      {% endwith %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="lg:hidden space-y-3 mb-6">
+  {% for row in student_rows %}
+  {% with s=row.student %}
+  <div class="bg-white rounded-xl border border-gray-200 p-4 {% if row.missing_reflection %}ring-1 ring-amber-200{% endif %}">
+    <div class="flex items-center justify-between gap-2 mb-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="h-9 w-9 rounded-full bg-[#C0392B] flex items-center justify-center flex-shrink-0">
+          <span class="text-white text-sm font-bold">{{ s.display_name|first|upper }}</span>
+        </div>
+        <div class="min-w-0">
+          <p class="font-semibold text-[#2B2B2B] truncate">{{ s.display_name }}</p>
+          <p class="text-xs text-gray-400">{{ s.group.name|default:"No group" }}</p>
+        </div>
+      </div>
+      <a href="{% url 'accounts:student_detail' s.pk %}" class="text-xs font-semibold text-[#C0392B] flex-shrink-0">View →</a>
+    </div>
+    {% include "accounts/_student_metric_cards.html" %}
+  </div>
+  {% endwith %}
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="text-center py-20">
+  <h2 class="text-lg font-semibold text-[#2B2B2B] mb-1">No students found</h2>
+  <p class="text-gray-500 text-sm">No students are assigned to your groups yet.</p>
+</div>
+{% endif %}
+
+{% include "_pagination.html" %}
+
+{% endblock %}

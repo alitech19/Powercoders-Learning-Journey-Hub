@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}{{ student.display_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+  <div class="mb-5">
+    <a href="{% url 'accounts:student_progress' %}"
+       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] transition-colors mb-3">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Back to Student Progress
+    </a>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <div class="flex items-center gap-4">
+      {% if student.avatar %}
+      <img src="{{ student.avatar.url }}" alt="" class="h-16 w-16 rounded-full object-cover flex-shrink-0">
+      {% else %}
+      <div class="h-16 w-16 rounded-full bg-[#C0392B] flex items-center justify-center flex-shrink-0">
+        <span class="text-white text-2xl font-bold">{{ student.display_name|first|upper }}</span>
+      </div>
+      {% endif %}
+      <div>
+        <h1 class="text-xl font-bold text-[#2B2B2B]">{{ student.display_name }}</h1>
+        <p class="text-sm text-gray-400">{{ student.email }}</p>
+        {% if student.group %}
+        <p class="text-xs text-gray-400 mt-0.5">{{ student.group.name }}{% if student.cohort %} · {{ student.cohort.name }}{% endif %}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div x-data="{ tab: '{{ tab }}' }">
+    <div class="flex flex-wrap gap-1 bg-white border border-gray-200 rounded-xl p-1 mb-6">
+      <button @click="tab = 'workflows'" :class="tab === 'workflows' ? 'bg-[#2B2B2B] text-white' : 'text-gray-500'" class="px-3 py-2 rounded-lg text-sm font-medium">Workflows ({{ workflow_enrollments|length }})</button>
+      <button @click="tab = 'goals'" :class="tab === 'goals' ? 'bg-[#2B2B2B] text-white' : 'text-gray-500'" class="px-3 py-2 rounded-lg text-sm font-medium">Goals ({{ goal_enrollments|length }})</button>
+      <button @click="tab = 'tasks'" :class="tab === 'tasks' ? 'bg-[#2B2B2B] text-white' : 'text-gray-500'" class="px-3 py-2 rounded-lg text-sm font-medium">Tasks ({{ task_enrollments|length }})</button>
+      <button @click="tab = 'reflections'" :class="tab === 'reflections' ? 'bg-[#2B2B2B] text-white' : 'text-gray-500'" class="px-3 py-2 rounded-lg text-sm font-medium">Reflections ({{ reflections|length }})</button>
+      <button @click="tab = 'journal'" :class="tab === 'journal' ? 'bg-[#2B2B2B] text-white' : 'text-gray-500'" class="px-3 py-2 rounded-lg text-sm font-medium">Journal ({{ journal_entries|length }})</button>
+      <button @click="tab = 'habits'" :class="tab === 'habits' ? 'bg-[#2B2B2B] text-white' : 'text-gray-500'" class="px-3 py-2 rounded-lg text-sm font-medium">Habits ({{ habits|length }})</button>
+    </div>
+
+    <div x-show="tab === 'workflows'">
+      {% if workflow_enrollments %}
+      <div class="space-y-3">
+        {% for enrollment in workflow_enrollments %}
+        <a href="{% url 'workflows:detail' enrollment.workflow.pk %}"
+           class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-[#C0392B]/30">
+          <div class="flex justify-between gap-2">
+            <span class="font-semibold text-sm text-[#2B2B2B]">{{ enrollment.workflow.title }}</span>
+            <span class="text-xs font-semibold text-[#C0392B]">{{ enrollment.progress_pct }}%</span>
+          </div>
+          <p class="text-xs text-gray-400 mt-1">{{ enrollment.workflow.get_assignee_label }}</p>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-center py-12 text-gray-400 text-sm bg-white rounded-xl border border-gray-200">No workflow enrollments.</p>
+      {% endif %}
+    </div>
+
+    <div x-show="tab === 'goals'">
+      {% if goal_enrollments %}
+      <div class="space-y-3">
+        {% for enrollment in goal_enrollments %}
+        <a href="{% url 'goals:detail' enrollment.goal.pk %}" class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-[#C0392B]/30">
+          <div class="flex justify-between gap-2">
+            <span class="font-semibold text-sm">{{ enrollment.goal.title }}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100">{{ enrollment.get_status_display }}</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-center py-12 text-gray-400 text-sm bg-white rounded-xl border border-gray-200">No shared goals.</p>
+      {% endif %}
+    </div>
+
+    <div x-show="tab === 'tasks'">
+      {% if task_enrollments %}
+      <div class="space-y-3">
+        {% for enrollment in task_enrollments %}
+        <a href="{% url 'tasks:task_detail' enrollment.task.pk %}" class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-[#C0392B]/30">
+          <div class="flex justify-between gap-2">
+            <span class="font-semibold text-sm">{{ enrollment.task.title }}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100">{{ enrollment.get_status_display }}</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-center py-12 text-gray-400 text-sm bg-white rounded-xl border border-gray-200">No task enrollments.</p>
+      {% endif %}
+    </div>
+
+    <div x-show="tab === 'reflections'">
+      {% if reflections %}
+      <div class="space-y-3">
+        {% for r in reflections %}
+        <a href="{% url 'reflections:detail' r.pk %}" class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-[#C0392B]/30">
+          <p class="font-semibold text-sm">{{ r.title }}</p>
+          <p class="text-xs text-gray-400 mt-1">{% if r.final_reflection_at %}{{ r.final_reflection_at|date:"d M Y" }}{% else %}{{ r.created_at|date:"d M Y" }}{% endif %}</p>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-center py-12 text-gray-400 text-sm bg-white rounded-xl border border-gray-200">No shared reflections.</p>
+      {% endif %}
+    </div>
+
+    <div x-show="tab === 'journal'">
+      {% if journal_entries %}
+      <div class="space-y-3">
+        {% for entry in journal_entries %}
+        <a href="{% url 'journal:detail' entry.pk %}" class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-[#C0392B]/30">
+          <p class="font-semibold text-sm">{{ entry.title }}</p>
+          <p class="text-xs text-gray-400">{{ entry.entry_date|date:"d M Y" }} · {{ entry.word_count }} words</p>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-center py-12 text-gray-400 text-sm bg-white rounded-xl border border-gray-200">No shared journal entries.</p>
+      {% endif %}
+    </div>
+
+    <div x-show="tab === 'habits'">
+      {% if habits %}
+      <div class="space-y-3">
+        {% for habit in habits %}
+        <a href="{% url 'habits:detail' habit.pk %}" class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-[#C0392B]/30">
+          <p class="font-semibold text-sm">{{ habit.title }}</p>
+          <p class="text-xs text-gray-400">{{ habit.get_status_display }}</p>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-center py-12 text-gray-400 text-sm bg-white rounded-xl border border-gray-200">No shared habits.</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

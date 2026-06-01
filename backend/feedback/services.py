@@ -21,12 +21,16 @@ def create_entry(*, target, author, body):
     if not body or len(body) > BODY_TEXT_MAX_LENGTH:
         return None
     ct = ContentType.objects.get_for_model(target)
-    return FeedbackEntry.objects.create(
+    entry = FeedbackEntry.objects.create(
         content_type=ct,
         object_id=target.pk,
         author=author,
         body=body,
     )
+    from accounts.feedback_notify import dispatch_feedback_notifications
+
+    dispatch_feedback_notifications(entry)
+    return entry
 
 
 def can_delete_entry(user, entry):

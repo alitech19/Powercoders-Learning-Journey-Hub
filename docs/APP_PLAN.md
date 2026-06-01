@@ -21,17 +21,17 @@ Below is only what is **still to do**. Scheduled **task code**: **[TODO.md](TODO
 
 ## 2. Accounts and admin UI
 
-| Step | Detail | Ali reference |
-|------|--------|---------------|
-| Role decorators | `admin_required`, `teacher_or_admin_required`, `student_required` | `accounts/decorators.py` |
-| User management | List, create, CSV import, deactivate / reactivate | `accounts/views.py`, templates |
-| Student oversight | `student_detail`, `student_progress` | same |
-| Cohort / group UI | CRUD + assign teachers + **bulk assign students to group** (US-39) | same (not only Django admin) |
-| GDPR | `data_export`, self-service `delete_own_account`, admin `user_delete_account` | same |
-| Notification centre | `Notification` model, list + mark read, tie to email prefs | migration `0008_add_notifications`, views/templates |
-| Audit log (UI) | Admin-facing audit log page | `audit_log` view — model + `AuditLoggingMiddleware` already exist on integration |
+| Step | Detail | Status |
+|------|--------|--------|
+| ~~Role decorators~~ | `admin_required`, `teacher_or_admin_required`, `student_required` | Done — `accounts/decorators.py` |
+| ~~User management~~ | List, create, CSV import, deactivate / reactivate / admin delete | Done — `accounts/management_views.py`, `/accounts/users/` |
+| ~~Student oversight~~ | `student_progress`, `student_detail` (shared journal/goals/reflections) | Done — powers teacher dashboard preview |
+| ~~Cohort / group UI~~ | CRUD, assign teachers, bulk assign students (US-39) | Done — `/accounts/cohorts/` |
+| ~~GDPR~~ | `data_export` (full Markdown), `delete_own_account` | Done — profile UI |
+| ~~Notification centre~~ | `Notification` model + in-app list + nav bell | Done |
+| Audit log (UI) | Optional staff page | **Admin only** — `AuditLog` + middleware exist |
 
-**Integration today:** profile, welcome, privacy policy, password-change gate, 2FA, dev quick-login, `AuditLog` in admin only; cohorts/groups via **admin** only.
+**Integration today:** staff workflows in app UI; Django admin still available for edge cases.
 
 ---
 
@@ -39,11 +39,13 @@ Below is only what is **still to do**. Scheduled **task code**: **[TODO.md](TODO
 
 | Step | Detail | Ali reference |
 |------|--------|---------------|
-| Slack | Webhooks for feedback, new users, missing weekly reflections | `accounts/slack.py` |
-| Celery task | `notify_missing_reflections` on a schedule | [TODO.md](TODO.md) — Beat infra ready |
-| Email on feedback | Notify students when staff leave feedback | `accounts/emails.py` — wire to generic **`feedback`** app / enrollments, not legacy `GoalComment` |
+| ~~Welcome email~~ | On **user create** and **CSV import** | Done — `accounts/emails.py` |
+| ~~Slack — new users~~ | Webhook when users are created or imported | Done — `accounts/slack.py` (`SLACK_WEBHOOK_URL`) |
+| ~~Slack — feedback~~ | Webhook when staff leaves feedback | Done — via `feedback` app |
+| Slack — reflections | Missing weekly reflections digest | `accounts.tasks.notify_missing_reflections` — register in Beat ([TODO.md](TODO.md)) |
+| ~~Email on feedback~~ | Notify students when staff leave feedback | Done — generic **`feedback`** + `email_notifications_enabled` |
 
-**Integration today:** `email_notifications_enabled` on `User`; no Slack, no outbound feedback email, no scheduled reflection reminders.
+**Integration today:** welcome email + Slack on create/import; in-app + email on staff feedback; Celery task ready — configure periodic schedule in admin when enabling Slack in production.
 
 ---
 

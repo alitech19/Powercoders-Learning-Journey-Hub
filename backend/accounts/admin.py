@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group as AuthGroup
 
-from .models import AuditLog, User
+from .models import AuditLog, Notification, User
 
 try:
     admin.site.unregister(AuthGroup)
@@ -93,6 +93,14 @@ class CustomUserAdmin(BaseUserAdmin):
                     fieldsets[index] = (title, options)
                     break
         return fieldsets
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'recipient', 'title', 'is_read')
+    list_filter = ('is_read',)
+    search_fields = ('title', 'recipient__email', 'recipient__display_name')
+    readonly_fields = ('created_at',)
 
 
 @admin.register(AuditLog)

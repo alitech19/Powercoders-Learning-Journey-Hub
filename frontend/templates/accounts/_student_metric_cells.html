@@ -1,0 +1,65 @@
+{# Metric cells for one student row — order matches nav #}
+{% with s=row.student %}
+
+<td class="px-4 py-4 whitespace-nowrap">
+  <span class="text-sm text-gray-800 font-medium">{{ s.workflow_label }}</span>
+  {% if s.workflow_total > 0 %}
+  <p class="text-xs text-gray-400">done</p>
+  {% endif %}
+</td>
+
+<td class="px-4 py-4 whitespace-nowrap">
+  <span class="text-sm text-gray-800 font-medium">{{ s.goal_label }}</span>
+  {% if s.goal_total > 0 %}
+  <p class="text-xs text-gray-400">completed</p>
+  {% endif %}
+</td>
+
+<td class="px-4 py-4 whitespace-nowrap">
+  <span class="text-sm text-gray-800 font-medium">{{ s.task_label }}</span>
+  {% if s.task_total > 0 %}
+  <p class="text-xs text-gray-400">done</p>
+  {% endif %}
+</td>
+
+<td class="px-4 py-4 whitespace-nowrap">
+  <p class="text-sm text-[#2B2B2B] font-medium">
+    {{ s.reflection_total }}
+    {% if row.missing_reflection %}
+    <span class="text-amber-600" title="Missing weekly reflection">⚠</span>
+    {% endif %}
+  </p>
+  {% if s.last_reflection %}
+  <p class="text-xs text-gray-400">{{ s.last_reflection|date:"d M" }}</p>
+  {% else %}
+  <p class="text-xs text-gray-300">—</p>
+  {% endif %}
+</td>
+
+<td class="px-4 py-4 whitespace-nowrap">
+  <p class="text-sm text-[#2B2B2B] font-medium">{{ s.journal_total }}</p>
+  {% if row.streak > 0 %}
+  <p class="text-xs text-amber-600 font-medium">🔥 {{ row.streak }}d</p>
+  {% elif s.last_journal %}
+  <p class="text-xs text-gray-400">{{ s.last_journal|date:"d M" }}</p>
+  {% else %}
+  <p class="text-xs text-gray-300">—</p>
+  {% endif %}
+</td>
+
+<td class="px-4 py-4 whitespace-nowrap">
+  <p class="text-sm text-[#2B2B2B] font-medium">{{ s.habits_active }} active</p>
+  <p class="text-xs text-gray-400">{{ s.habit_logs_week }} log{{ s.habit_logs_week|pluralize }} (wk)</p>
+</td>
+
+<td class="px-4 py-4 whitespace-nowrap">
+  <p class="text-sm text-[#2B2B2B] font-medium">{{ s.group_posts_week }}</p>
+  <p class="text-xs text-gray-400">posts (7d)</p>
+</td>
+
+<td class="px-4 py-4 whitespace-nowrap">
+  <p class="text-sm text-[#2B2B2B] font-medium">{{ s.resources_count }}</p>
+  <p class="text-xs text-gray-400">links</p>
+</td>
+
+{% endwith %}
