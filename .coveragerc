@@ -1,0 +1,29 @@
+[run]
+source = backend
+branch = True
+omit =
+    # Boilerplate / wiring (not product logic)
+    **/migrations/**
+    **/tests/**
+    **/test_*.py
+    **/test_utils/**
+    **/management/**
+    **/dev/**
+    **/dev_seed.py
+    **/apps.py
+    **/admin.py
+    **/urls.py
+    config/asgi.py
+    config/wsgi.py
+    config/nav.py
+    config/context_processors.py
+    accounts/context_processors.py
+    accounts/two_factor_views.py
+    manage.py
+
+[report]
+show_missing = True
+skip_empty = True
+precision = 1
+# Optional gate on *included* code only (raise when view tests land):
+# fail_under = 70

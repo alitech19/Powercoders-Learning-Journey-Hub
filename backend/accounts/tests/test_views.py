@@ -1,0 +1,130 @@
+from unittest.mock import patch
+
+from django.test import Client, TestCase, override_settings
+from django.urls import reverse
+
+from accounts.dev_seed import DEV_AUTH_BYPASS_SESSION_KEY
+from accounts.models import User
+from test_utils.users import DEFAULT_PASSWORD, login_as, make_student, make_teacher
+
+
+class ProfileViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = make_student('profile@example.com', display_name='Before')
+        login_as(self.client, self.user)
+
+    def test_get_profile(self):
+        response = self.client.get(reverse('accounts:profile'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_updates_display_name(self):
+        response = self.client.post(
+            reverse('accounts:profile'),
+            {
+                'display_name': 'After',
+                'email_notifications_enabled': 'on',
+            },
+        )
+        self.assertRedirects(response, reverse('accounts:profile'))
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.display_name, 'After')
+        self.assertTrue(self.user.email_notifications_enabled)
+
+
+class OnboardingViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = make_student(
+            'onboard@example.com',
+            bypass_onboarding=False,
+        )
+        self.user.privacy_policy_accepted = True
+        self.user.must_change_password = False
+        self.user.save(
+            update_fields=['privacy_policy_accepted', 'must_change_password'],
+        )
+        login_as(self.client, self.user)
+
+    def test_welcome_post_marks_seen(self):
+        response = self.client.post(reverse('accounts:welcome'))
+        self.assertEqual(response.status_code, 302)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.welcome_seen)
+
+    def test_privacy_policy_post_accepts(self):
+        self.user.privacy_policy_accepted = False
+        self.user.save(update_fields=['privacy_policy_accepted'])
+        response = self.client.post(reverse('accounts:privacy_policy'))
+        self.assertEqual(response.status_code, 302)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.privacy_policy_accepted)
+        self.assertIsNotNone(self.user.privacy_policy_accepted_at)
+
+
+class PasswordChangeRequiredViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = make_student('pwd@example.com', bypass_onboarding=False)
+        self.user.privacy_policy_accepted = True
+        self.user.welcome_seen = True
+        self.user.must_change_password = True
+        self.user.save(
+            update_fields=[
+                'privacy_policy_accepted',
+                'welcome_seen',
+                'must_change_password',
+            ],
+        )
+        login_as(self.client, self.user)
+
+    def test_get_shows_form(self):
+        response = self.client.get(reverse('accounts:password_change_required'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_clears_must_change_password(self):
+        response = self.client.post(
+            reverse('accounts:password_change_required'),
+            {
+                'old_password': DEFAULT_PASSWORD,
+                'new_password1': 'new-pass-456',
+                'new_password2': 'new-pass-456',
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.must_change_password)
+
+
+class DevQuickLoginTests(TestCase):
+    def test_disabled_returns_404(self):
+        client = Client()
+        response = client.post(reverse('accounts:dev_quick_login', args=['any@example.com']))
+        self.assertEqual(response.status_code, 404)
+
+    @override_settings(ENABLE_DEV_SEED=True, DEBUG=True)
+    @patch('accounts.views.allowed_dev_login_emails', return_value=frozenset({'dev@example.com'}))
+    def test_enabled_logs_in_allowed_email(self, _mock_emails):
+        user = make_teacher('dev@example.com')
+        client = Client()
+        response = client.post(reverse('accounts:dev_quick_login', args=[user.email]))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(client.session.get(DEV_AUTH_BYPASS_SESSION_KEY))
+        self.assertEqual(int(client.session['_auth_user_id']), user.pk)
+
+    @override_settings(ENABLE_DEV_SEED=True, DEBUG=True)
+    @patch('accounts.views.allowed_dev_login_emails', return_value=frozenset({'other@example.com'}))
+    def test_unknown_email_returns_404(self, _mock_emails):
+        make_teacher('dev@example.com')
+        client = Client()
+        response = client.post(
+            reverse('accounts:dev_quick_login', args=['dev@example.com']),
+        )
+        self.assertEqual(response.status_code, 404)
+
+
+class LoginRequiredTests(TestCase):
+    def test_profile_redirects_anonymous(self):
+        response = Client().get(reverse('accounts:profile'))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('login', response.url)

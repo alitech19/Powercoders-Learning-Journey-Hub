@@ -57,7 +57,7 @@ Below is only what is **still to do**. Scheduled **task code**: **[TODO.md](TODO
 
 ## 5. Automated tests
 
-Integration has **no** `tests/` modules yet. Goal: **as full coverage as practical** without brittle HTML snapshots. Prefer behaviour, permissions, and data invariants. **Rewrite** for integration models — do not copy Ali `tracker` tests.
+**Guide:** [TESTING.md](../TESTING.md). **Done:** all business apps (`cohorts` … `info`). Goal: **as full coverage as practical** without brittle HTML snapshots. Prefer behaviour, permissions, and data invariants. **Rewrite** for integration models — do not copy Ali `tracker` tests.
 
 ### Layout (per Django app)
 
@@ -90,7 +90,7 @@ Add shared factories in `backend/test_utils/` (`make_student`, `make_teacher`, `
 
 ### CI
 
-Run sequentially, e.g. `test cohorts accounts`, then `tasks goals workflows`, etc. Optional later: `coverage` with threshold.
+Run sequentially, e.g. `test cohorts accounts`, then `tasks goals workflows`, etc. Coverage: see [TESTING.md](../TESTING.md) — `.coveragerc` omits migrations/admin/urls; **views/forms** still need tests for a high honest %.
 
 ### Test settings
 

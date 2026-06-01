@@ -111,11 +111,18 @@ Expected output: `pong`
 ## Common commands
 
 ```bash
-# Stop services
+# Stop all services (containers keep named volumes)
 docker compose down
 
-# Stop and remove database volume (fresh start)
-docker compose down -v
+# Stop and remove containers + compose network (recommended after local tests)
+docker compose down --remove-orphans
+
+# Stop and wipe Postgres volume (fresh DB on next up)
+docker compose down -v --remove-orphans
+
+# Postgres only (e.g. you ran `docker compose up -d db` for host tests)
+docker compose stop db
+docker compose rm -f db
 
 # Run migrations manually
 docker compose exec web python manage.py migrate
@@ -127,6 +134,8 @@ docker compose exec web python manage.py shell
 docker compose logs -f web
 docker compose logs -f worker
 ```
+
+Host tests and coverage: [TESTING.md](TESTING.md).
 
 ## Local development without Docker
 
@@ -190,9 +199,13 @@ Normal on first build. Static files are collected to `frontend/staticfiles/` (gi
 
 Setting `ENABLE_DEV_SEED=false` alone is **not** sufficient for production.
 
+## Tests
+
+See **[TESTING.md](TESTING.md)**.
+
 ## CI
 
-GitHub Actions (`.github/workflows/ci.yml`) runs on every push/PR: migrate, migration check, then `manage.py test <app>` per business app (sequential steps). Tests pass with zero cases until you add them.
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push/PR: migrate, migration check, then `manage.py test <app>` per business app (sequential steps).
 
 ## Next steps
 
