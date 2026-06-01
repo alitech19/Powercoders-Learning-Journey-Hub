@@ -75,5 +75,8 @@ def confirm_totp_for_staff(user):
 
 
 def login_as(client, user, *, password=DEFAULT_PASSWORD):
+    """Log in for view tests without hitting Axes or the 2FA login form."""
+    del password  # force_login does not verify password; use make_user password for POST tests
     confirm_totp_for_staff(user)
-    return client.login(username=user.email, password=password)
+    client.force_login(user)
+    return True

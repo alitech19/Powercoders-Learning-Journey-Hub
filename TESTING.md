@@ -40,6 +40,7 @@ docker compose down --remove-orphans
 ```
 
 One app: `python manage.py test cohorts --verbosity=2`  
+Cross-app flows: `python manage.py test tests --verbosity=2`  
 Faster re-run (before cleanup): `python manage.py test --keepdb`
 
 ### Coverage
@@ -190,5 +191,5 @@ Not targeted by unit tests:
 
 - **`views.py`** in most apps — partial coverage in `accounts`, `feedback` only
 - **`forms.py`** — exercise via view POST tests when added
-- **Integrations**: Slack, outbound email, Celery beat ([docs/TODO.md](docs/TODO.md))
+- **Integrations**: production Slack webhook / Beat schedule (unit tests in `accounts.tests.test_integrations`)
 - Full **2FA login** flows beyond staff TOTP helpers in `test_utils`

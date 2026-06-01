@@ -37,6 +37,7 @@ jobs:
           --health-retries 5
 
     env:
+      DJANGO_SETTINGS_MODULE: config.settings_test
       DEBUG: 'True'
       SECRET_KEY: ci-insecure-key-not-for-production
       ALLOWED_HOSTS: localhost,127.0.0.1
@@ -125,3 +126,7 @@ jobs:
       - name: Test info
         working-directory: backend
         run: python manage.py test info --verbosity=2
+
+      - name: Test cross-app integration
+        working-directory: backend
+        run: python manage.py test tests --verbosity=2

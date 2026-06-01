@@ -49,11 +49,9 @@ Below is only what is **still to do**. Scheduled **task code**: **[TODO.md](TODO
 
 ---
 
-## 4. API (optional)
+## 4. API — skipped
 
-| Step | Detail |
-|------|--------|
-| Django Ninja scaffold | Ali exposes `GET /api/health` via Ninja; integration has `GET /health/` only — add Ninja only if we want a versioned API surface |
+Server-rendered app + `GET /health/` is enough. Add Django Ninja / REST only when a concrete client appears (mobile, M2M, Slack Events inbound). See team notes in conversation / skip unless requirements change.
 
 ---
 
