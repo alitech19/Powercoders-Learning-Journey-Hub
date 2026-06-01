@@ -24,10 +24,12 @@ Build sequence **2 → 9**, then **dashboard (1)**. Status and names may change 
 | 6 | `journal` | Journal | Ali | Done |
 | 7 | `habits` | Habits | django-test (`growth`) | Done |
 | 8 | `group_space` | Group | Group chat + resource posts | Done |
-| 9 | `resources` | Resources | Group / personal / thematic tiles; file storage: [RESOURCE_FILE_STORAGE.md](RESOURCE_FILE_STORAGE.md) | Pending |
+| 9 | `resources` | Resources | Group / personal / thematic tiles; file storage: [RESOURCE_FILE_STORAGE.md](RESOURCE_FILE_STORAGE.md) | Done |
 | **1 (last)** | `dashboard` | — (replaces `home` URL) | Ali | Pending |
 
-**Next app to build:** `resources` — file storage decision: [RESOURCE_FILE_STORAGE.md](RESOURCE_FILE_STORAGE.md)
+**Next app to build:** `dashboard` (replaces `home` as `/`)
+
+~~**resources**~~ ✓ — tabs My | Group | Themes; auto-sync from group chat to system container per group.
 
 ## Backport from `origin/Ali` (parallel work during integration)
 

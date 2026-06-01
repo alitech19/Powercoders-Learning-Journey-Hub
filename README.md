@@ -14,7 +14,7 @@ A web platform for Powercoders bootcamp participants to track their learning jou
 | `cohorts` | Cohort, Group, GroupTeacher (admin only) |
 | Auth (A–G) | Argon2, axes, CSP, 2FA, onboarding gates, Redis sessions, JSON logs — see [AUTH_ROADMAP](docs/AUTH_ROADMAP.md) |
 | Dev seed | `backend/dev/seed.yaml` + quick login — **remove from codebase before prod** ([checklist](docs/PRODUCTION_CHECKLIST.md)) |
-| Next | `resources` — see [APP_PLAN](docs/APP_PLAN.md) |
+| Next | `dashboard` — see [APP_PLAN](docs/APP_PLAN.md) |
 
 ## Quick start
 

@@ -72,10 +72,13 @@ def validate_uploaded_file(uploaded_file):
 
 
 def sync_group_resource_from_post(post):
-    """No-op until the resources app exists — see docs/RESOURCE_FILE_STORAGE.md."""
+    from resources.models import ResourceItem
+    from resources.services import sync_from_group_post
+
     if not post_qualifies_for_resources(post):
+        ResourceItem.objects.filter(source_post=post).delete()
         return
-    # resources.services.sync_from_group_post(post)
+    sync_from_group_post(post)
 
 
 def after_post_saved(post):
