@@ -140,7 +140,8 @@ Guides live in **`docs/`** (setup, tests, deploy, ops).
 |----------|-------------|
 | [docs/SETUP.md](docs/SETUP.md) | **Local development** — Docker Compose, `.env`, login, Celery, troubleshooting |
 | [docs/TESTING.md](docs/TESTING.md) | **Automated tests** — venv, Postgres, coverage, CI |
-| [docs/DEPLOY.md](docs/DEPLOY.md) | **Tester deploy on Render** — `deploy` branch, Gunicorn, env vars, worker + beat |
+| [docs/DEPLOY.md](docs/DEPLOY.md) | **Tester deploy on Render** — `deploy` branch, profiles, worker + beat |
+| `.env.render-test.example` | Env template for Render tester deploy (`DEBUG=True` + seed) |
 | [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md) | Production go-live (remove dev auth, secrets) |
 | [docs/INCIDENT_RESPONSE.md](docs/INCIDENT_RESPONSE.md) | Incident runbook |
 | [docs/SCALING_ROADMAP.md](docs/SCALING_ROADMAP.md) | Scaling and architecture phases |

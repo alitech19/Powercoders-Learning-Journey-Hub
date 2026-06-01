@@ -22,49 +22,20 @@ Local development stays on Docker Compose — see [SETUP.md](SETUP.md).
 
 ---
 
-## Code changes on the `deploy` branch (before first Render deploy)
+## Application code (in repo)
 
-The `integration` branch is optimized for local Docker (`runserver`, volume-mounted media). For Render, add these on **`deploy`** (commit on `deploy` or merge a small “Render prep” PR into `deploy`):
+These are already in `requirements.txt` and `backend/config/settings.py`:
 
-### 1. Dependencies
+- **Gunicorn** + **Whitenoise** (`WhiteNoiseMiddleware` after `SecurityMiddleware`, `CompressedStaticFilesStorage`)
+- **`CSRF_TRUSTED_ORIGINS`**, secure cookies, and `SECURE_PROXY_SSL_HEADER` when `DEBUG=False`
 
-In `requirements.txt`:
+Run **`collectstatic`** on every web deploy (build command below). Local Docker still uses `runserver`; Render uses Gunicorn.
 
-```
-gunicorn>=22.0
-whitenoise>=6.6
-```
-
-### 2. Static files (Whitenoise)
-
-In `backend/config/settings.py`:
-
-- Add `'whitenoise.middleware.WhiteNoiseMiddleware'` **immediately after** `SecurityMiddleware`.
-- Optional: `STORAGES = {"staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"}}` (or default WhiteNoise storage).
-
-Run `collectstatic` on every web deploy (see start command below).
-
-### 3. HTTPS / host / CSRF
-
-Set via Render environment variables (see table below). Add to `settings.py` on `deploy` if not already present:
-
-```python
-CSRF_TRUSTED_ORIGINS = [
-    origin.strip()
-    for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
-    if origin.strip()
-]
-if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-```
-
-### 4. Media files (tester env)
+### Media files (tester env)
 
 Uploaded files (avatars, group chat attachments) use `MEDIA_ROOT` on disk. Render web disks are **ephemeral** — uploads can disappear on redeploy. For tester QA this is often acceptable; for stable files use S3 later ([SCALING_ROADMAP.md](SCALING_ROADMAP.md)).
 
-### 5. Dev seed on Render
+### Dev seed on Render
 
 `ENABLE_DEV_SEED` only applies when `DEBUG=True` in settings. For a tester host you can either:
 
@@ -72,6 +43,44 @@ Uploaded files (avatars, group chat attachments) use `MEDIA_ROOT` on disk. Rende
 - **`DEBUG=False`**: create users via Django admin or CSV import; no dev quick-login panel.
 
 Do **not** treat a `DEBUG=True` Render URL as production.
+
+---
+
+## Tester profile — `DEBUG=True` (default for this deploy)
+
+Template: [`.env.render-test.example`](../.env.render-test.example).
+
+| Variable | Value |
+|----------|--------|
+| `DEBUG` | `True` |
+| `ENABLE_DEV_SEED` | `true` |
+| `CREATE_DEV_SUPERUSER` | `true` (set strong `DJANGO_SUPERUSER_*` in Render — not the local dev default) |
+| `ALLOWED_HOSTS` | `your-app.onrender.com` (no `https://`) |
+| `CSRF_TRUSTED_ORIGINS` | `https://your-app.onrender.com` |
+| `SITE_URL` | `https://your-app.onrender.com` |
+
+Enables dev **quick-login** panel and loads users from `backend/dev/seed.yaml` on deploy. Emails go to **Render logs** only. **Not** for production — treat the URL as internal QA.
+
+**Release command (web):**
+
+```bash
+cd backend && python manage.py migrate --noinput && python manage.py create_dev_superuser && python manage.py seed_dev_data
+```
+
+Login: `/account/login/` — quick-login cohort cards (if seed ran) or seed emails from `backend/dev/seed.yaml`.
+
+### Alternative — `DEBUG=False` (stricter staging)
+
+No dev panel; create users manually after deploy.
+
+| Variable | Value |
+|----------|--------|
+| `DEBUG` | `False` |
+| `ENABLE_DEV_SEED` | `false` |
+| `CREATE_DEV_SUPERUSER` | `false` |
+
+**Release command:** `cd backend && python manage.py migrate --noinput`  
+Then Shell: `python manage.py createsuperuser`.
 
 ---
 
@@ -171,26 +180,17 @@ Runs before each deploy so the DB schema stays current.
 
 ## Environment variables (web + worker + beat)
 
-Create one **Environment Group** in Render and attach it to all three services.
+Create one **Environment Group** in Render and attach it to all three services. Use a [tester profile](#tester-profiles-pick-one) above or the table below.
 
-| Variable | Tester example | Notes |
-|----------|----------------|-------|
-| `DEBUG` | `False` or `True` | `True` only for short-lived QA; see dev seed above |
-| `SECRET_KEY` | long random string | Generate once; never commit |
-| `ALLOWED_HOSTS` | `powerhub-test.onrender.com` | Your `*.onrender.com` host **without** `https://` |
-| `CSRF_TRUSTED_ORIGINS` | `https://powerhub-test.onrender.com` | Comma-separated if multiple |
-| `POSTGRES_*` | from Render Postgres | See above |
-| `REDIS_URL` | internal Redis URL | `rediss://` if Render provides TLS |
-| `CELERY_BROKER_URL` | same as `REDIS_URL` | |
-| `SITE_URL` | `https://powerhub-test.onrender.com` | Used in emails and Slack links |
-| `EMAIL_BACKEND` | SMTP backend class | Use [SendGrid](https://sendgrid.com) / Mailgun / Resend for real mail |
-| `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | provider values | |
-| `DEFAULT_FROM_EMAIL` | `noreply@yourdomain.org` | |
-| `SLACK_WEBHOOK_URL` | optional | Staff channel for digests / alerts — [TODO.md](TODO.md) |
-| `ENABLE_DEV_SEED` | `false` on shared tester | Only works with `DEBUG=True` |
-| `CREATE_DEV_SUPERUSER` | `false` | Prefer manual `createsuperuser` on Render shell |
+| Variable | Notes |
+|----------|--------|
+| `SECRET_KEY` | Long random string; never commit |
+| `POSTGRES_*` | From Render Postgres (**internal** host) |
+| `REDIS_URL` / `CELERY_BROKER_URL` | Internal Redis URL (`rediss://` if TLS) |
+| `SLACK_WEBHOOK_URL` | Optional — [TODO.md](TODO.md) |
+| `EMAIL_HOST`, … | Only if using SMTP instead of console backend |
 
-**Do not** set weak `DJANGO_SUPERUSER_*` on a public URL unless the service is firewalled.
+**Do not** use weak `DJANGO_SUPERUSER_*` on a public tester URL.
 
 ---
 
