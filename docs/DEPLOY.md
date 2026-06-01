@@ -141,11 +141,19 @@ Repo includes **`runtime.txt`** (`python-3.12.12`) so Render does not default to
 pip install -r requirements.txt && cd backend && python manage.py collectstatic --noinput
 ```
 
-**Start command:**
+**Start command** — free/starter plans have **no Pre-deploy**. Run migrate in **Start** (or use `scripts/render-web-start.sh`):
 
 ```bash
-cd backend && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+chmod +x scripts/render-web-start.sh && ./scripts/render-web-start.sh
 ```
+
+Inline equivalent (DEBUG=True tester):
+
+```bash
+cd backend && python manage.py migrate --noinput && python manage.py create_dev_superuser && python manage.py seed_dev_data && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+```
+
+`migrate` / seed on every restart is normal for QA; seed is idempotent. **Do not** put `migrate` in **Build** — build has no access to the internal database.
 
 (Render sets `$PORT`.)
 
@@ -169,16 +177,16 @@ Default Celery prefork uses ~16 processes; each loads Django → **OOM** → res
 
 1. **New → Background Worker** → same repo, branch **`deploy`**.
 2. **Build command:** `pip install -r requirements.txt`
-3. **Pre-deploy / Release command** (important — `DatabaseScheduler` needs DB tables):
+3. **Start command** (migrate first — no pre-deploy on free tier):
 
 ```bash
-cd backend && python manage.py migrate --noinput
+chmod +x scripts/render-beat-start.sh && ./scripts/render-beat-start.sh
 ```
 
-4. **Start command:**
+Or inline:
 
 ```bash
-cd backend && celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+cd backend && python manage.py migrate --noinput && celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
 ```
 
 5. **Environment:** same group as web (all `POSTGRES_*`, `REDIS_URL`, `SECRET_KEY`, `DEBUG`, …).
@@ -187,15 +195,13 @@ cd backend && celery -A config beat --loglevel=info --scheduler django_celery_be
 
 **Healthy logs** should continue past `Configuration ->` with something like `beat: Starting...` / `DatabaseScheduler: Schedule changed.` If the instance **restarts** right after `maxinterval -> 5.00 seconds`, open **Logs** (full stderr) for `OperationalError`, `django.db`, or OOM — usually missing migrate on shared Postgres, missing `POSTGRES_*` on beat, or Python 3.14 (use `PYTHON_VERSION=3.12.12` / `runtime.txt`).
 
-### 6. Release command (web)
+### 6. Migrations without Pre-deploy (free tier)
 
-On the **web** service, **Pre-deploy command**:
+Paid Render can use **Pre-deploy** for migrate only. On **free** plans use **Start command** (section 3) or **Shell** once:
 
 ```bash
 cd backend && python manage.py migrate --noinput && python manage.py create_dev_superuser && python manage.py seed_dev_data
 ```
-
-(Adjust for your tester profile — see [Tester profile](#tester-profile---debugtrue-default-for-this-deploy).)
 
 ---
 
