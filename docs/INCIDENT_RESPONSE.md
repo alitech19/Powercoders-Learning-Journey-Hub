@@ -126,7 +126,7 @@ docker compose exec redis redis-cli ping   # PONG
 docker compose restart worker beat
 ```
 
-**Render:** check worker and beat services are **running** (not suspended). Verify `CELERY_BROKER_URL` / `REDIS_URL`. Register periodic tasks in admin — [TODO.md](TODO.md).
+**Render:** check worker and beat services are **running** (not suspended). Verify `CELERY_BROKER_URL` / `REDIS_URL`. Register periodic tasks in admin — [plans/TODO.md](plans/TODO.md).
 
 ---
 

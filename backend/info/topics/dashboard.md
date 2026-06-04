@@ -71,7 +71,7 @@ Django admin remains available for edge cases (raw model edits, rare fields). Pr
 | GDPR export / self-delete | **Profile** → Your data (Markdown export, delete account) |
 | Notification centre | Nav bell → `/accounts/notifications/` |
 | Welcome email + Slack on user create/import | Automatic when `EMAIL_*` and optional `SLACK_WEBHOOK_URL` are set |
-| Weekly missing-reflection Slack | Celery `accounts.tasks.notify_missing_reflections` — register in Beat ([TODO.md](../../../docs/TODO.md)) |
+| Weekly missing-reflection Slack | Celery `accounts.tasks.notify_missing_reflections` — register in Beat ([TODO.md](../../../docs/plans/TODO.md)) |
 
 ## For students {#for-students}
 

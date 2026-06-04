@@ -105,7 +105,7 @@ docker compose logs worker
 docker compose logs beat
 ```
 
-Worker should show `celery@... ready.` Beat should show scheduler started (no periodic tasks until you add them in admin or [TODO.md](TODO.md)).
+Worker should show `celery@... ready.` Beat should show scheduler started (no periodic tasks until you add them in admin or [plans/TODO.md](plans/TODO.md)).
 
 **Periodic schedules:** Django admin → **Periodic tasks** (after `migrate` creates `django_celery_beat` tables).
 
@@ -235,4 +235,4 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push/PR: migrate, migr
 | [DEPLOY.md](DEPLOY.md) | Render (tester) |
 | [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) | Production go-live |
 | [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) | Incidents |
-| [TODO.md](TODO.md) | Beat / Slack follow-ups |
+| [plans/TODO.md](plans/TODO.md) | Beat / Slack follow-ups |

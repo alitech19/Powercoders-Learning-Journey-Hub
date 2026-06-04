@@ -199,7 +199,7 @@ cd backend && python manage.py migrate --noinput && celery -A config beat --logl
 
 5. **Environment:** same group as web (all `POSTGRES_*`, `REDIS_URL`, `SECRET_KEY`, `DEBUG`, …).
 6. **Instance count: 1** only — never scale beat horizontally.
-7. **Optional for first QA:** suspend/delete the beat service until you add a **Periodic task** in admin ([TODO.md](TODO.md)). Web + worker are enough for manual testing.
+7. **Optional for first QA:** suspend/delete the beat service until you add a **Periodic task** in admin ([plans/TODO.md](plans/TODO.md)). Web + worker are enough for manual testing.
 
 **Healthy logs** should continue past `Configuration ->` with something like `beat: Starting...` / `DatabaseScheduler: Schedule changed.` If the instance **restarts** right after `maxinterval -> 5.00 seconds`, open **Logs** (full stderr) for `OperationalError`, `django.db`, or OOM — usually missing migrate on shared Postgres, missing `POSTGRES_*` on beat, or Python 3.14 (use `PYTHON_VERSION=3.12.12` / `runtime.txt`).
 
@@ -222,7 +222,7 @@ Create one **Environment Group** in Render and attach it to all three services. 
 | `SECRET_KEY` | Long random string; never commit |
 | `POSTGRES_*` | From Render Postgres (**internal** host) |
 | `REDIS_URL` / `CELERY_BROKER_URL` | Internal Redis URL (`rediss://` if TLS) |
-| `SLACK_WEBHOOK_URL` | Optional — [TODO.md](TODO.md) |
+| `SLACK_WEBHOOK_URL` | Optional — [plans/TODO.md](plans/TODO.md) |
 | `EMAIL_HOST`, … | Only if using SMTP instead of console backend |
 
 **Do not** use weak `DJANGO_SUPERUSER_*` on a public tester URL.
@@ -241,7 +241,7 @@ Create one **Environment Group** in Render and attach it to all three services. 
 
 3. Log in at `/account/login/`, complete 2FA setup for staff accounts.
 4. Create cohorts/groups/users via **Admin** or `/accounts/users/` (admin).
-5. **Periodic tasks:** Admin → **Periodic tasks** → register `accounts.tasks.notify_missing_reflections` (weekly cron). See [TODO.md](TODO.md).
+5. **Periodic tasks:** Admin → **Periodic tasks** → register `accounts.tasks.notify_missing_reflections` (weekly cron). See [plans/TODO.md](plans/TODO.md).
 6. Smoke-test: journal, reflection, group post with resource label, profile → export data, notifications bell.
 
 Share the URL and test accounts with testers via a **private** channel (not in the repo).

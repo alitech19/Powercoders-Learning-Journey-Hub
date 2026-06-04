@@ -38,4 +38,4 @@ New users receive a **welcome email** (when mail is configured) and staff may ge
 
 - Prefer **Management** on the admin dashboard over Django admin for day-to-day user/cohort work.
 - **Audit log** remains Django admin only.
-- Register Celery Beat periodic task `accounts.tasks.notify_missing_reflections` for weekly missing-reflection Slack digests — see [TODO.md](../../../docs/TODO.md).
+- Register Celery Beat periodic task `accounts.tasks.notify_missing_reflections` for weekly missing-reflection Slack digests — see [TODO.md](../../../docs/plans/TODO.md).

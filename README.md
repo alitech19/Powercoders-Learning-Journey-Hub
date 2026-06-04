@@ -146,8 +146,8 @@ Guides live in **`docs/`** (setup, tests, deploy, ops).
 | [docs/INCIDENT_RESPONSE.md](docs/INCIDENT_RESPONSE.md) | Incident runbook |
 | [docs/SCALING_ROADMAP.md](docs/SCALING_ROADMAP.md) | Scaling and architecture phases |
 | [docs/USABILITY_TESTING.md](docs/USABILITY_TESTING.md) | Usability test plan (≥5 participants) |
-| [docs/RESOURCE_FILE_STORAGE.md](docs/RESOURCE_FILE_STORAGE.md) | Group file storage options |
-| [docs/TODO.md](docs/TODO.md) | Beat schedules, Slack follow-ups |
+| [docs/plans/TODO.md](docs/plans/TODO.md) | Product plans index, Beat schedules, Slack follow-ups |
+| [docs/plans/](docs/plans/) | Feature implementation plans (admin, UI, Drive, Slack, …) |
 
 **Quick pointers:** run locally → [docs/SETUP.md](docs/SETUP.md) · run tests → [docs/TESTING.md](docs/TESTING.md) · deploy for testers → [docs/DEPLOY.md](docs/DEPLOY.md)
 

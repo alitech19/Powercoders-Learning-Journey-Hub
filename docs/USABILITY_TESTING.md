@@ -150,4 +150,4 @@ _(Findings table)_
 - [ ] All Critical resolved
 - [ ] All High have fix plan
 - [ ] Teaching team reviewed
-- [ ] Next steps in [TODO.md](TODO.md) or issue tracker
+- [ ] Next steps in [plans/TODO.md](plans/TODO.md) or issue tracker
