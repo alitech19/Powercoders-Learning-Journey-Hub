@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Page not found{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto text-center py-16">
+  <p class="text-6xl font-black text-[#B23149]">404</p>
+  <h1 class="mt-4 text-xl font-bold text-[#343534]">Page not found</h1>
+  <p class="mt-2 text-sm text-gray-500">
+    The page you're looking for doesn't exist or may have been moved.
+  </p>
+  <a href="{% url 'dashboard:dashboard' %}"
+     class="inline-flex items-center gap-2 mt-6 bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+    Back to dashboard
+  </a>
+</div>
+{% endblock %}
