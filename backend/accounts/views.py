@@ -16,6 +16,83 @@ from .dev_seed import (
     dev_seed_enabled,
 )
 from .forms import ProfileForm
+from .models import User
+
+
+def _build_checklist(user):
+    """Onboarding checklist for students (DB-backed progress, no extra model)."""
+    from django.urls import reverse
+
+    if user.role != User.Role.STUDENT:
+        return [], 0
+
+    from goals.models import Goal, GoalEnrollment
+    from group_space.models import Post
+    from journal.models import JournalEntry
+    from reflections.models import Reflection
+    from tasks.models import TaskEnrollment
+
+    steps = [
+        {
+            'key': 'profile_photo',
+            'label': 'Upload a profile photo',
+            'description': 'Add your photo so your teacher knows who you are',
+            'url': reverse('accounts:profile'),
+            'done': user.has_custom_avatar,
+            'emoji': '🖼️',
+            'bg_class': 'bg-blue-50',
+        },
+        {
+            'key': 'first_journal',
+            'label': 'Write your first journal entry',
+            'description': 'Capture what you learned today — takes 2 minutes',
+            'url': reverse('journal:list'),
+            'done': JournalEntry.objects.filter(author=user).exists(),
+            'emoji': '📓',
+            'bg_class': 'bg-amber-50',
+        },
+        {
+            'key': 'first_goal',
+            'label': 'Set your first learning goal',
+            'description': 'Define a Hard Skill, Soft Skill, or Language goal',
+            'url': reverse('goals:list'),
+            'done': (
+                Goal.objects.filter(author=user).exists()
+                or GoalEnrollment.objects.filter(student=user).exists()
+            ),
+            'emoji': '🎯',
+            'bg_class': 'bg-purple-50',
+        },
+        {
+            'key': 'first_task',
+            'label': 'Create or complete a task',
+            'description': 'Personal tasks and teacher assignments live in Tasks',
+            'url': reverse('tasks:task_list'),
+            'done': TaskEnrollment.objects.filter(student=user).exists(),
+            'emoji': '✅',
+            'bg_class': 'bg-blue-50',
+        },
+        {
+            'key': 'first_reflection',
+            'label': 'Submit your first reflection',
+            'description': 'Your weekly check-in helps your teacher support you',
+            'url': reverse('reflections:list'),
+            'done': Reflection.objects.filter(author=user).exists(),
+            'emoji': '🔄',
+            'bg_class': 'bg-green-50',
+        },
+        {
+            'key': 'first_group_post',
+            'label': 'Say hello in Group Space',
+            'description': 'Connect with your cohort in group chat',
+            'url': reverse('group_space:feed'),
+            'done': Post.objects.filter(author=user).exists(),
+            'emoji': '👥',
+            'bg_class': 'bg-[#B23149]/10',
+        },
+    ]
+    done_count = sum(1 for step in steps if step['done'])
+    return steps, done_count
 
 
 @login_required
@@ -32,12 +109,28 @@ def profile(request):
 
 
 @login_required
-def welcome(request):
+def onboarding(request):
+    """First-login tutorial (Ali-style 3-step flow). URL name kept as accounts:welcome."""
+    user = request.user
+    is_student = user.role == User.Role.STUDENT
     if request.method == 'POST':
-        request.user.welcome_seen = True
-        request.user.save(update_fields=['welcome_seen'])
-        return redirect(settings.LOGIN_REDIRECT_URL)
-    return render(request, 'accounts/welcome.html')
+        user.welcome_seen = True
+        user.save(update_fields=['welcome_seen'])
+        return redirect('dashboard:dashboard')
+    steps, done_count = _build_checklist(user)
+    return render(
+        request,
+        'accounts/welcome.html',
+        {
+            'checklist_steps': steps,
+            'checklist_done': done_count,
+            'show_checklist_step': is_student,
+            'onboarding_total_steps': 3 if is_student else 2,
+        },
+    )
+
+
+welcome = onboarding
 
 
 @login_required

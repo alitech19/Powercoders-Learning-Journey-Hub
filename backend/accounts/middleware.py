@@ -105,6 +105,8 @@ class Require2FAMiddleware:
 
 
 class WelcomeMiddleware:
+    """Redirect to first-login onboarding until welcome_seen is set."""
+
     def __init__(self, get_response):
         self.get_response = get_response
 

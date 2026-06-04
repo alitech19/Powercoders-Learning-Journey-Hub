@@ -86,8 +86,14 @@ def dashboard(request):
         .first()
     )
 
+    from accounts.views import _build_checklist
+
+    checklist_steps, checklist_done = _build_checklist(user)
     context.update(
         {
+            'checklist': checklist_steps,
+            'checklist_done': checklist_done,
+            'checklist_total': len(checklist_steps),
             'tasks_by_status': services.tasks_by_status_for_student(user, own_tasks),
             'journal_count': JournalEntry.objects.filter(author=user).count(),
             'recent_journal_entries': JournalEntry.objects.filter(author=user)

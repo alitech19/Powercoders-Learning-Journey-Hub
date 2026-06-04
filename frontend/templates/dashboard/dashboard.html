@@ -243,6 +243,8 @@
 </div>
 
 {% else %}
+{% include "dashboard/_onboarding_checklist.html" %}
+
 <div class="mb-8 pr-14">
   <div>
     <h1 class="text-2xl font-bold text-[#2B2B2B]">Welcome back, {{ user.display_name }}!</h1>
