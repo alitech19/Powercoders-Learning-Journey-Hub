@@ -1,11 +1,22 @@
-from .nav import integrated_nav_items
+from .nav import admin_nav_items, integrated_nav_groups, integrated_nav_items
 from config import input_limits as il
 
 
 def integrated_nav(request):
     resolver = getattr(request, 'resolver_match', None)
     current_view_name = resolver.view_name if resolver else None
-    return {'integrated_nav': integrated_nav_items(current_view_name=current_view_name)}
+    current_app = resolver.app_name if resolver else None
+    kwargs = {
+        'current_view_name': current_view_name,
+        'current_app': current_app,
+    }
+    return {
+        'integrated_nav': integrated_nav_items(**kwargs),
+        'nav_groups': integrated_nav_groups(**kwargs),
+        'admin_nav_items': admin_nav_items(user=request.user)
+        if request.user.is_authenticated
+        else [],
+    }
 
 
 def input_limits(request):

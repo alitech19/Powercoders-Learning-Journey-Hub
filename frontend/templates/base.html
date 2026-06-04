@@ -12,82 +12,264 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style type="text/tailwindcss">
     @theme {
-      --color-primary: #C0392B;
-      --color-primary-dark: #A93226;
-      --color-charcoal: #2B2B2B;
+      --color-primary: #B23149;
+      --color-primary-dark: #8E273A;
+      --color-charcoal: #343534;
       --color-cream: #F5EDE0;
       --color-cream-dark: #EDE3D5;
       --font-sans: 'Inter', system-ui, sans-serif;
     }
     body { font-family: 'Inter', system-ui, sans-serif; }
+    [x-cloak] { display: none !important; }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
-<body class="h-full flex flex-col bg-gray-50 text-[#2B2B2B]">
+<body class="h-full flex flex-col bg-gray-50 text-[#343534]">
 
-  <nav class="bg-[#2B2B2B] shadow-lg sticky top-0 z-50">
+  <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm" x-data="{ mobileOpen: false }" aria-label="Main navigation">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-14">
-        <div class="flex items-center gap-6 min-w-0">
-          <a href="{% url 'dashboard:dashboard' %}" class="font-black text-lg tracking-tight leading-none shrink-0">
-            <span class="text-[#C0392B]">{</span><span class="text-white">POWER</span><span class="text-[#C0392B]">.</span><span class="text-white">CODERS</span><span class="text-[#C0392B]">}</span>
-          </a>
-          {% if user.is_authenticated and integrated_nav %}
-          <div class="hidden md:flex items-center gap-1 text-sm">
-            {% for item in integrated_nav %}
-            <a href="{{ item.url }}"
-               class="px-3 py-2 rounded-md font-medium whitespace-nowrap transition-colors
-                      {% if item.active %}text-white bg-white/10{% else %}text-gray-300 hover:text-white hover:bg-white/10{% endif %}">
-              {{ item.label }}
+      <div class="flex items-center justify-between h-16">
+
+        <a href="{% url 'dashboard:dashboard' %}" class="flex-shrink-0 font-black text-xl tracking-tight leading-none">
+          <span class="text-[#B23149]">{</span><span class="text-[#343534]">POWER</span><span class="text-[#B23149]">.</span><span class="text-[#343534]">CODERS</span><span class="text-[#B23149]">}</span>
+        </a>
+
+        {% if user.is_authenticated and nav_groups %}
+        <div class="hidden md:flex items-center gap-0.5">
+          {% for group in nav_groups %}
+            {% if group.kind == 'dropdown' %}
+            <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+              <button type="button" @click="open = !open"
+                      class="flex items-center gap-1 px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors
+                             {% if group.active %}text-[#B23149]{% else %}text-[#343534] hover:text-[#B23149]{% endif %}"
+                      :aria-expanded="open.toString()">
+                {{ group.label }}
+                <svg class="h-3 w-3 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              <div x-show="open" x-cloak x-transition
+                   class="absolute left-0 top-full mt-1 min-w-[11rem] bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                {% if group.default_url %}
+                <a href="{{ group.default_url }}"
+                   class="block px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-[#B23149] border-b border-gray-50 mb-0.5">
+                  Overview
+                </a>
+                {% endif %}
+                {% for child in group.children %}
+                <a href="{{ child.url }}"
+                   class="block px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors
+                          {% if child.active %}text-[#B23149] bg-gray-50{% else %}text-[#343534] hover:bg-gray-50 hover:text-[#B23149]{% endif %}">
+                  {{ child.label }}
+                </a>
+                {% endfor %}
+              </div>
+            </div>
+            {% else %}
+            <a href="{{ group.url }}"
+               class="px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors
+                      {% if group.active %}text-[#B23149]{% else %}text-[#343534] hover:text-[#B23149]{% endif %}">
+              {{ group.label }}
             </a>
-            {% endfor %}
+            {% endif %}
+          {% endfor %}
+
+          {% if admin_nav_items %}
+          <div class="relative" x-data="{ adminOpen: false }" @click.outside="adminOpen = false">
+            <button type="button" @click="adminOpen = !adminOpen"
+                    class="flex items-center gap-1 px-3 py-2 text-xs font-bold uppercase tracking-wider text-[#343534] hover:text-[#B23149] transition-colors"
+                    :aria-expanded="adminOpen.toString()">
+              Адміністрування
+              <svg class="h-3 w-3 transition-transform" :class="adminOpen ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div x-show="adminOpen" x-cloak x-transition
+                 class="absolute left-0 top-full mt-1 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+              {% for item in admin_nav_items %}
+              <a href="{{ item.url }}"
+                 class="block px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[#343534] hover:bg-gray-50 hover:text-[#B23149] transition-colors">
+                {{ item.label }}
+              </a>
+              {% endfor %}
+            </div>
           </div>
           {% endif %}
         </div>
-        <div class="flex items-center gap-3 text-sm">
+        {% endif %}
+
+        <div class="hidden md:flex items-center gap-3">
           {% if user.is_authenticated %}
-            {% if user.role == 'admin' or user.is_superuser %}
-            <a href="{% url 'admin:index' %}" class="text-gray-300 hover:text-white hidden sm:inline">Admin</a>
+          <a href="{% url 'accounts:notifications' %}"
+             class="relative text-gray-400 hover:text-[#B23149] transition-colors"
+             aria-label="Notifications{% if unread_notifications_count %} ({{ unread_notifications_count }} unread){% endif %}">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            {% if unread_notifications_count %}
+            <span class="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-[#B23149] text-white text-[10px] font-bold flex items-center justify-center" aria-hidden="true">
+              {{ unread_notifications_count }}
+            </span>
             {% endif %}
-            <a href="{% url 'accounts:notifications' %}" class="relative text-gray-400 hover:text-white transition-colors" title="Notifications">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-              </svg>
-              {% if unread_notifications_count %}
-              <span class="absolute -top-1 -right-1 h-4 min-w-4 px-0.5 rounded-full bg-[#C0392B] text-white text-[10px] font-bold flex items-center justify-center">
-                {{ unread_notifications_count }}
-              </span>
+          </a>
+
+          <div class="relative" x-data="{ avatarOpen: false }" @click.outside="avatarOpen = false">
+            <button type="button" @click="avatarOpen = !avatarOpen"
+                    class="flex items-center rounded-full focus:outline-none focus:ring-2 focus:ring-[#B23149]/40"
+                    aria-label="Account menu"
+                    :aria-expanded="avatarOpen.toString()">
+              {% if user.avatar %}
+              <img src="{{ user.avatar.url }}" alt="" class="h-8 w-8 rounded-full object-cover ring-2 ring-[#B23149]">
+              {% else %}
+              <div class="h-8 w-8 rounded-full bg-[#B23149] flex items-center justify-center ring-2 ring-[#B23149]/30">
+                <span class="text-white text-sm font-bold">{{ user.display_name|first|upper }}</span>
+              </div>
               {% endif %}
-            </a>
-            {% include "includes/user_avatar.html" with user=user size=28 %}
-            <span class="text-gray-200 hidden sm:inline">{{ user.display_name }}</span>
-            <a href="{% url 'accounts:profile' %}" class="text-gray-300 hover:text-white">Profile</a>
-            <form method="post" action="{% url 'accounts:logout' %}" class="inline">
-              {% csrf_token %}
-              <button type="submit" class="text-gray-300 hover:text-white cursor-pointer">Log out</button>
-            </form>
+            </button>
+            <div x-show="avatarOpen" x-cloak x-transition
+                 class="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+              <div class="px-4 py-2.5 border-b border-gray-100">
+                <p class="text-sm font-semibold text-[#343534] truncate">{{ user.display_name }}</p>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">{{ user.get_role_display }}</p>
+              </div>
+              <a href="{% url 'accounts:profile' %}"
+                 class="block px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[#343534] hover:bg-gray-50 hover:text-[#B23149] transition-colors">
+                Profile
+              </a>
+              <form method="post" action="{% url 'accounts:logout' %}" class="border-t border-gray-100">
+                {% csrf_token %}
+                <button type="submit"
+                        class="w-full text-left px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[#B23149] hover:bg-gray-50 cursor-pointer">
+                  Log out
+                </button>
+              </form>
+            </div>
+          </div>
           {% else %}
-            <a href="{% url 'two_factor:login' %}" class="text-gray-300 hover:text-white">Log in</a>
+          <a href="{% url 'two_factor:login' %}"
+             class="text-xs font-bold uppercase tracking-wider text-[#343534] hover:text-[#B23149] transition-colors">
+            Log in
+          </a>
           {% endif %}
+        </div>
+
+        {% if user.is_authenticated %}
+        <button type="button" @click="mobileOpen = !mobileOpen"
+                class="md:hidden text-[#343534] hover:text-[#B23149] p-2 rounded-md transition-colors"
+                aria-label="Toggle navigation menu"
+                aria-controls="mobile-menu"
+                :aria-expanded="mobileOpen.toString()">
+          <svg x-show="!mobileOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <svg x-show="mobileOpen" x-cloak class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+        {% endif %}
+
+      </div>
+    </div>
+
+    {% if user.is_authenticated and nav_groups %}
+    <div x-show="mobileOpen" x-cloak id="mobile-menu" class="md:hidden border-t border-gray-200 bg-white">
+      <div class="px-4 py-3 space-y-1">
+        {% for group in nav_groups %}
+          {% if group.kind == 'dropdown' %}
+          <div class="pt-2 {% if not forloop.first %}border-t border-gray-100{% endif %}">
+            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest py-1">{{ group.label }}</p>
+            {% for child in group.children %}
+            <a href="{{ child.url }}"
+               class="block pl-2 py-2 text-xs font-bold uppercase tracking-wider
+                      {% if child.active %}text-[#B23149]{% else %}text-[#343534] hover:text-[#B23149]{% endif %}">
+              {{ child.label }}
+            </a>
+            {% endfor %}
+          </div>
+          {% else %}
+          <a href="{{ group.url }}"
+             class="block py-2 text-xs font-bold uppercase tracking-wider
+                    {% if group.active %}text-[#B23149]{% else %}text-[#343534] hover:text-[#B23149]{% endif %}">
+            {{ group.label }}
+          </a>
+          {% endif %}
+        {% endfor %}
+
+        {% if admin_nav_items %}
+        <div class="pt-2 border-t border-gray-100">
+          <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest py-1">Адміністрування</p>
+          {% for item in admin_nav_items %}
+          <a href="{{ item.url }}"
+             class="block pl-2 py-2 text-xs font-bold uppercase tracking-wider text-[#343534] hover:text-[#B23149]">
+            {{ item.label }}
+          </a>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="pt-2 border-t border-gray-100">
+          <a href="{% url 'accounts:notifications' %}"
+             class="flex items-center gap-2 py-2 text-xs font-bold uppercase tracking-wider text-[#343534] hover:text-[#B23149]">
+            Notifications
+            {% if unread_notifications_count %}
+            <span class="h-4 w-4 rounded-full bg-[#B23149] text-white text-[10px] font-bold flex items-center justify-center">{{ unread_notifications_count }}</span>
+            {% endif %}
+          </a>
+          <a href="{% url 'accounts:profile' %}"
+             class="block py-2 text-xs font-bold uppercase tracking-wider text-[#343534] hover:text-[#B23149]">
+            Profile
+          </a>
+        </div>
+        <div class="pt-3 border-t border-gray-100">
+          <p class="text-sm font-semibold text-[#343534]">{{ user.display_name }}</p>
+          <form method="post" action="{% url 'accounts:logout' %}" class="mt-2">
+            {% csrf_token %}
+            <button type="submit" class="text-[#B23149] text-xs font-bold uppercase tracking-wider cursor-pointer">Log out</button>
+          </form>
         </div>
       </div>
     </div>
+    {% endif %}
   </nav>
 
   {% if messages %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 w-full">
-      {% for message in messages %}
-        <p class="text-sm px-4 py-2 rounded-lg mb-2 {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-green-50 text-green-800{% endif %}">
-          {{ message }}
-        </p>
-      {% endfor %}
+  <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-4 space-y-2">
+    {% for message in messages %}
+    <div x-data="{ show: true }" x-show="show" x-transition
+         class="flex items-center justify-between p-4 rounded-lg text-sm font-medium
+         {% if message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200
+         {% elif message.tags == 'success' %}bg-green-50 text-green-800 border border-green-200
+         {% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+      <span>{{ message }}</span>
+      <button type="button" @click="show = false" class="ml-4 opacity-50 hover:opacity-100 transition-opacity" aria-label="Dismiss">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
+    {% endfor %}
+  </div>
   {% endif %}
 
   <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative{% if page_help.enabled %} pr-14{% endif %}">
     {% include "includes/_page_help_button.html" %}
     {% block content %}{% endblock %}
   </main>
+
+  <footer class="bg-[#343534] mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <span class="font-black text-base tracking-tight leading-none">
+          <span class="text-[#B23149]">{</span><span class="text-white">POWER</span><span class="text-[#B23149]">.</span><span class="text-white">CODERS</span><span class="text-[#B23149]">}</span>
+        </span>
+        <p class="text-gray-500 text-xs">© 2026 Powercoders. Learning Journey Hub.</p>
+        <a href="{% url 'accounts:privacy_policy' %}" class="text-gray-500 hover:text-gray-300 text-xs transition-colors">
+          Privacy Policy
+        </a>
+      </div>
+    </div>
+  </footer>
+
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
   <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
 </body>

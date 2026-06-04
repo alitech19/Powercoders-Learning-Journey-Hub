@@ -1,9 +1,16 @@
-{# Metric cells for one student row — order matches nav #}
+{# Metric cells for one student row — order matches config/nav.py NAV_REGISTRY #}
 {% with s=row.student %}
 
 <td class="px-4 py-4 whitespace-nowrap">
   <span class="text-sm text-gray-800 font-medium">{{ s.workflow_label }}</span>
   {% if s.workflow_total > 0 %}
+  <p class="text-xs text-gray-400">done</p>
+  {% endif %}
+</td>
+
+<td class="px-4 py-4 whitespace-nowrap">
+  <span class="text-sm text-gray-800 font-medium">{{ s.task_label }}</span>
+  {% if s.task_total > 0 %}
   <p class="text-xs text-gray-400">done</p>
   {% endif %}
 </td>
@@ -16,10 +23,8 @@
 </td>
 
 <td class="px-4 py-4 whitespace-nowrap">
-  <span class="text-sm text-gray-800 font-medium">{{ s.task_label }}</span>
-  {% if s.task_total > 0 %}
-  <p class="text-xs text-gray-400">done</p>
-  {% endif %}
+  <p class="text-sm text-[#2B2B2B] font-medium">{{ s.habits_active }} active</p>
+  <p class="text-xs text-gray-400">{{ s.habit_logs_week }} log{{ s.habit_logs_week|pluralize }} (wk)</p>
 </td>
 
 <td class="px-4 py-4 whitespace-nowrap">
@@ -45,11 +50,6 @@
   {% else %}
   <p class="text-xs text-gray-300">—</p>
   {% endif %}
-</td>
-
-<td class="px-4 py-4 whitespace-nowrap">
-  <p class="text-sm text-[#2B2B2B] font-medium">{{ s.habits_active }} active</p>
-  <p class="text-xs text-gray-400">{{ s.habit_logs_week }} log{{ s.habit_logs_week|pluralize }} (wk)</p>
 </td>
 
 <td class="px-4 py-4 whitespace-nowrap">
