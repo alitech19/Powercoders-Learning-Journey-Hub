@@ -13,7 +13,7 @@ Related: [TESTING.md](TESTING.md) · [DEPLOY.md](DEPLOY.md) (Render only) · [RE
 | Database | `POSTGRES_HOST=db` | `DATABASE_URL` or internal `POSTGRES_HOST` |
 | Do not use locally | `scripts/render-*.sh`, Render env template | — |
 
-Code is shared after merging `deploy` → `integration`; only **how you run** the app differs.
+Code is shared after merging `integration` → `deploy`; only **how you run** the app differs.
 
 ## Prerequisites
 
@@ -68,12 +68,18 @@ On first run, migrations run automatically.
 
 On first run: migrations; dev superuser if `CREATE_DEV_SUPERUSER=true` and `DJANGO_SUPERUSER_*` set; dev seed if `ENABLE_DEV_SEED=true`.
 
+### Frontend (`integration` branch)
+
+Templates use **CDN** Tailwind, HTMX, and Alpine (`frontend/templates/base.html`). Brand colours: `#B23149` (primary), `#343534` (charcoal). Compiled CSS and self-hosted JS are planned before production — [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md).
+
+Navbar: **Learning** / **Wellbeing** dropdowns, **Group Space**, **Resources**; **Administration** (admin only, right). Per-page help is the **ⓘ** button in content (`info` app), not in the navbar.
+
 ## 4. Login
 
 Open http://localhost:8000/account/login/ (redirect from `/accounts/login/` also works).
 
 - **Quick login panel** (when `ENABLE_DEV_SEED=true`): cohort cards with one-click buttons for admin, teachers, and students.
-- **Normal login**: email + password — full production flow (axes lockout, 2FA for staff, privacy, welcome).
+- **Normal login**: email + password — full production flow (axes lockout, 2FA for staff, privacy, welcome tutorial). First login is gated by `WelcomeMiddleware` until `welcome_seen` is set.
 - **Seed passwords**: `backend/dev/seed.yaml` or superuser credentials from `.env`.
 
 Test users are defined in `backend/dev/seed.yaml` (not in `.env`).

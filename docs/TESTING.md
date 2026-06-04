@@ -2,6 +2,7 @@
 
 PostgreSQL + `config.settings_test` (no Redis on host). Local app setup: [SETUP.md](SETUP.md).
 
+**Full suite:** 223 tests on branch `integration` (`python manage.py test`).
 
 Always use the project **venv** (`source .venv/bin/activate`) — system `python` usually has no Django or `coverage`.
 

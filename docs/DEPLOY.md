@@ -69,11 +69,7 @@ Template: [`.env.render-test.example`](../.env.render-test.example).
 
 Enables dev **quick-login** panel and loads users from `backend/dev/seed.yaml` on deploy. Emails go to **Render logs** only. **Not** for production — treat the URL as internal QA.
 
-**Release command (web):**
-
-```bash
-cd backend && python manage.py migrate --noinput && python manage.py create_dev_superuser && python manage.py seed_dev_data
-```
+**Start command (web)** — use [`scripts/render-web-start.sh`](../scripts/render-web-start.sh) (see [§3 Web service](#3-web-service)): runs `migrate` every start; `create_dev_superuser` and `seed_dev_data` only when `CREATE_DEV_SUPERUSER` / `ENABLE_DEV_SEED` are `true`.
 
 Login: `/account/login/` — quick-login cohort cards (if seed ran) or seed emails from `backend/dev/seed.yaml`.
 
@@ -87,8 +83,8 @@ No dev panel; create users manually after deploy.
 | `ENABLE_DEV_SEED` | `false` |
 | `CREATE_DEV_SUPERUSER` | `false` |
 
-**Release command:** `cd backend && python manage.py migrate --noinput`  
-Then Shell: `python manage.py createsuperuser`.
+**Start command:** same `render-web-start.sh` (migrate + gunicorn only when seed flags are `false`).  
+Then Shell if needed: `cd backend && python manage.py createsuperuser`.
 
 ---
 
@@ -155,13 +151,13 @@ pip install -r requirements.txt && cd backend && python manage.py collectstatic 
 chmod +x scripts/render-web-start.sh && ./scripts/render-web-start.sh
 ```
 
-Inline equivalent (DEBUG=True tester):
+Inline equivalent (only if not using the script — set `CREATE_DEV_SUPERUSER` / `ENABLE_DEV_SEED` in Render env when you want seed):
 
 ```bash
 cd backend && python manage.py migrate --noinput && python manage.py create_dev_superuser && python manage.py seed_dev_data && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120
 ```
 
-`migrate` / seed on every restart is normal for QA; seed is idempotent. **Do not** put `migrate` in **Build** — build has no access to the internal database.
+Prefer **`render-web-start.sh`**: same migrate/seed rules driven by env flags. `migrate` on every restart is normal for QA; seed is idempotent. **Do not** put `migrate` in **Build** — build has no access to the internal database.
 
 (Render sets `$PORT`.)
 
@@ -215,7 +211,7 @@ cd backend && python manage.py migrate --noinput && python manage.py create_dev_
 
 ## Environment variables (web + worker + beat)
 
-Create one **Environment Group** in Render and attach it to all three services. Use a [tester profile](#tester-profiles-pick-one) above or the table below.
+Create one **Environment Group** in Render and attach it to all three services. Use a [tester profile](#tester-profile--debugtrue-default-for-this-deploy) above or the table below.
 
 | Variable | Notes |
 |----------|--------|
