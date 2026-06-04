@@ -77,7 +77,7 @@ class Post(models.Model):
 
     @property
     def has_snapshot(self):
-        return bool(self.snapshot_html)
+        return bool(self.snapshot_meta) or bool(self.snapshot_html)
 
     @property
     def has_file(self):
@@ -89,12 +89,12 @@ class Post(models.Model):
         from .services import detect_urls
 
         errors = {}
-        has_content = bool(self.body.strip()) or bool(self.file) or bool(self.snapshot_html)
+        has_content = bool(self.body.strip()) or bool(self.file) or self.has_snapshot
         if not has_content:
             errors['body'] = 'Post must include a message, file, or shared snapshot.'
 
         has_link_or_file = bool(self.file) or bool(detect_urls(self.body))
-        if has_link_or_file and not self.snapshot_html and not self.resource_label.strip():
+        if has_link_or_file and not self.has_snapshot and not self.resource_label.strip():
             errors['resource_label'] = 'Resource name is required when posting a file or link.'
 
         if errors:

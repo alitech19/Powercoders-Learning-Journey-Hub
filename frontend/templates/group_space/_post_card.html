@@ -40,7 +40,11 @@
   <p class="text-sm font-semibold text-[#2B2B2B] mb-1">{{ post.resource_label }}</p>
   {% endif %}
 
-  {% if post.snapshot_html %}
+  {% if post.snapshot_meta %}
+  <div class="mb-3">
+    {% include "group_space/_snapshot_card.html" with meta=post.snapshot_meta %}
+  </div>
+  {% elif post.snapshot_html %}
   <div class="rounded-lg border border-amber-100 bg-amber-50/50 p-4 mb-3 text-sm">
     {{ post.snapshot_html|safe }}
   </div>

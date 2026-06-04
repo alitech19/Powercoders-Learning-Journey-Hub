@@ -1,0 +1,162 @@
+{% comment %}
+Renders a snapshot card from structured JSON in `meta` (snapshot_meta).
+Supports: journal, habit, goal, task.
+{% endcomment %}
+
+<div class="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-2 text-sm">
+
+  <div class="flex flex-wrap items-start gap-2">
+    <span class="text-xs px-2 py-0.5 rounded-full font-medium shrink-0
+      {% if meta.kind == 'journal' %}bg-amber-100 text-amber-800
+      {% elif meta.kind == 'habit' %}bg-green-100 text-green-800
+      {% elif meta.kind == 'goal' %}bg-purple-100 text-purple-800
+      {% elif meta.kind == 'task' %}bg-blue-100 text-blue-800
+      {% else %}bg-gray-100 text-gray-700{% endif %}">
+      {{ meta.kind_label }}
+    </span>
+    {% if meta.mood_emoji %}<span class="text-base leading-none">{{ meta.mood_emoji }}</span>{% endif %}
+    <h4 class="font-semibold text-[#343534] leading-snug min-w-0">{{ meta.title }}</h4>
+  </div>
+
+  {% if meta.kind == 'journal' %}
+    <p class="text-xs text-gray-500">
+      {{ meta.entry_date }}
+      {% if meta.word_count %} · {{ meta.word_count }} words{% endif %}
+    </p>
+    {% if meta.tags %}
+    <p class="text-xs text-gray-400">
+      {% for tag in meta.tags %}#{{ tag }} {% endfor %}
+    </p>
+    {% endif %}
+    {% if meta.content_preview %}
+    <p class="text-gray-700 leading-relaxed line-clamp-4">{{ meta.content_preview }}</p>
+    {% endif %}
+  {% endif %}
+
+  {% if meta.kind == 'habit' %}
+    <div class="flex flex-wrap gap-1.5">
+      {% if meta.status == 'completed' %}
+      <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">Completed</span>
+      {% else %}
+      <span class="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700">Active</span>
+      {% endif %}
+    </div>
+    {% if meta.description %}
+    <p class="text-xs text-gray-500 leading-relaxed">{{ meta.description }}</p>
+    {% endif %}
+    <div class="grid grid-cols-3 gap-2 text-center">
+      <div class="rounded bg-white border border-gray-100 p-1.5">
+        <p class="text-sm font-bold text-[#B23149]">{{ meta.done_this_week }}/{{ meta.target_days_per_week }}</p>
+        <p class="text-[10px] text-gray-400">Days this week</p>
+      </div>
+      <div class="rounded bg-white border border-gray-100 p-1.5">
+        <p class="text-sm font-bold text-[#B23149]">{{ meta.streak }}🔥</p>
+        <p class="text-[10px] text-gray-400">Week streak</p>
+      </div>
+      <div class="rounded bg-white border border-gray-100 p-1.5">
+        <p class="text-sm font-bold text-[#B23149]">{% if meta.target_minutes %}{{ meta.target_minutes }}m{% else %}—{% endif %}</p>
+        <p class="text-[10px] text-gray-400">Target</p>
+      </div>
+    </div>
+    {% if meta.week_table %}
+    <div class="flex gap-1 justify-between">
+      {% for day in meta.week_table %}
+      <div class="flex-1 text-center">
+        <p class="text-[10px] text-gray-400">{{ day.weekday }}</p>
+        <div class="h-5 mt-0.5 rounded text-xs flex items-center justify-center
+          {% if day.done %}bg-green-100 text-green-700
+          {% elif day.is_today %}bg-amber-50 text-amber-700
+          {% else %}bg-gray-100 text-gray-400{% endif %}">
+          {% if day.done %}✓{% else %}·{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endif %}
+
+  {% if meta.kind == 'goal' %}
+    <div class="flex flex-wrap gap-1.5">
+      {% if meta.category %}
+      <span class="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">{{ meta.category }}</span>
+      {% endif %}
+      {% if meta.status_label %}
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">{{ meta.status_label }}</span>
+      {% endif %}
+    </div>
+    {% if meta.target_date %}
+    <p class="text-xs text-gray-500">🗓 Target: {{ meta.target_date }}</p>
+    {% endif %}
+    {% if meta.description %}
+    <p class="text-xs text-gray-500 leading-relaxed line-clamp-2">{{ meta.description }}</p>
+    {% endif %}
+    {% if meta.milestones_total %}
+    <div>
+      <div class="flex justify-between text-xs text-gray-500 mb-1">
+        <span>{{ meta.milestones_done }}/{{ meta.milestones_total }} milestones</span>
+        <span class="font-semibold text-[#343534]">{{ meta.progress }}%</span>
+      </div>
+      <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden mb-2">
+        <div class="h-full bg-[#B23149] rounded-full" style="width: {{ meta.progress }}%"></div>
+      </div>
+      <ul class="space-y-1">
+        {% for m in meta.milestones %}
+        <li class="flex items-center gap-2 text-xs">
+          <span class="h-3.5 w-3.5 rounded-full border-2 flex items-center justify-center text-[9px] shrink-0
+            {% if m.completed %}border-green-500 bg-green-500 text-white{% else %}border-gray-300{% endif %}">
+            {% if m.completed %}✓{% endif %}
+          </span>
+          <span class="{% if m.completed %}line-through text-gray-400{% else %}text-gray-700{% endif %}">{{ m.title }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  {% endif %}
+
+  {% if meta.kind == 'task' %}
+    <div class="flex flex-wrap gap-1.5">
+      <span class="text-xs px-2 py-0.5 rounded-full
+        {% if meta.priority == 'high' %}bg-orange-100 text-orange-700
+        {% elif meta.priority == 'low' %}bg-gray-100 text-gray-500
+        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+        {{ meta.priority_label }}
+      </span>
+      <span class="text-xs px-2 py-0.5 rounded-full
+        {% if meta.status == 'done' %}bg-green-100 text-green-700
+        {% elif meta.status == 'doing' %}bg-blue-100 text-blue-700
+        {% elif meta.status == 'blocked' %}bg-red-100 text-red-700
+        {% else %}bg-gray-100 text-gray-600{% endif %}">
+        {% if meta.status == 'done' %}Done
+        {% elif meta.status == 'doing' %}Doing
+        {% elif meta.status == 'blocked' %}Blocked
+        {% else %}To do{% endif %}
+      </span>
+      {% if meta.due_date %}
+      <span class="text-xs text-gray-500">Due {{ meta.due_date }}</span>
+      {% endif %}
+    </div>
+    {% if meta.description %}
+    <p class="text-xs text-gray-500 leading-relaxed line-clamp-2">{{ meta.description }}</p>
+    {% endif %}
+    {% if meta.subtasks %}
+    <div>
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+        Subtasks · {{ meta.subtasks_done }}/{{ meta.subtasks_total }}
+      </p>
+      <ul class="space-y-1">
+        {% for s in meta.subtasks %}
+        <li class="flex items-center gap-2 text-xs">
+          <span class="h-3.5 w-3.5 rounded-full border-2 flex items-center justify-center text-[9px] shrink-0
+            {% if s.completed %}border-green-500 bg-green-500 text-white{% else %}border-gray-300{% endif %}">
+            {% if s.completed %}✓{% endif %}
+          </span>
+          <span class="{% if s.completed %}line-through text-gray-400{% else %}text-gray-700{% endif %}">{{ s.title }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  {% endif %}
+
+</div>

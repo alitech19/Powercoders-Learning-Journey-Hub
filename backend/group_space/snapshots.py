@@ -1,38 +1,22 @@
-import bleach
-from django.template.loader import render_to_string
+"""
+Snapshot builders — collect structured JSON into snapshot_meta.
+
+Snapshots are rendered at display time from snapshot_meta (JSONField),
+so stored posts stay stable when templates change.
+snapshot_html is left empty for new shares; legacy posts may still have HTML.
+"""
+
 from django.utils import timezone
 
 from goals.models import Goal
 from goals.permissions import get_enrollment_for_user as get_goal_enrollment
-from habits.models import Habit
-from habits.services import build_habit_row, build_week_table, get_week_start
+from habits.models import Habit, HabitLog
 from journal.models import JournalEntry
 from tasks.models import Task
 from tasks.permissions import get_enrollment_for_user as get_task_enrollment
 
 from .constants import SNAPSHOT_KINDS
 from .models import Post
-
-ALLOWED_SNAPSHOT_TAGS = [
-    'p', 'strong', 'em', 'ul', 'ol', 'li', 'h3', 'h4', 'span', 'br', 'div',
-]
-ALLOWED_SNAPSHOT_ATTRIBUTES = {
-    '*': ['class'],
-    'div': ['class', 'data-width'],
-}
-
-
-def _clean_html(html):
-    return bleach.clean(
-        html,
-        tags=ALLOWED_SNAPSHOT_TAGS,
-        attributes=ALLOWED_SNAPSHOT_ATTRIBUTES,
-        strip=True,
-    )
-
-
-def _render_snapshot(template_name, context):
-    return _clean_html(render_to_string(template_name, context))
 
 
 def _goal_milestones(enrollment):
@@ -49,62 +33,98 @@ def _task_subtasks(enrollment):
     if not enrollment:
         return []
     completed = enrollment.completed_subtask_ids()
-    items = []
-    for subtask in enrollment.task.subtasks.all().order_by('order', 'pk'):
-        items.append({'title': subtask.title, 'completed': subtask.pk in completed})
-    return items
+    return [
+        {'title': subtask.title, 'completed': subtask.pk in completed}
+        for subtask in enrollment.task.subtasks.all().order_by('order', 'pk')
+    ]
 
 
 def build_journal_snapshot(entry):
-    html = _render_snapshot('group_space/snapshots/journal.html', {'entry': entry})
     meta = {
-        'title': entry.title,
+        'kind': Post.SnapshotKind.JOURNAL,
         'kind_label': 'Journal entry',
+        'title': entry.title,
         'entry_date': entry.entry_date.isoformat(),
+        'mood': entry.mood,
+        'mood_emoji': entry.mood_emoji,
+        'word_count': entry.word_count,
+        'tags': entry.get_tags_list(),
+        'content_preview': (entry.content or '')[:300],
     }
-    return Post.SnapshotKind.JOURNAL, html, meta
+    return Post.SnapshotKind.JOURNAL, '', meta
 
 
 def build_habit_snapshot(habit, user):
+    from habits.services import build_habit_row, build_week_table, get_week_start
+
     today = timezone.localdate()
     week_start = get_week_start(today)
     row = build_habit_row(habit, today=today, week_start=week_start, can_log=False)
-    html = _render_snapshot('group_space/snapshots/habit.html', {
-        'habit': habit,
-        'row': row,
-        'week_table': build_week_table(habit, today),
-    })
-    meta = {'title': habit.title, 'kind_label': 'Habit', 'status': habit.status}
-    return Post.SnapshotKind.HABIT, html, meta
+    week = build_week_table(habit, today)
+
+    meta = {
+        'kind': Post.SnapshotKind.HABIT,
+        'kind_label': 'Habit',
+        'title': habit.title,
+        'status': habit.status,
+        'description': habit.description or '',
+        'target_days_per_week': habit.target_days_per_week,
+        'target_minutes': habit.target_minutes,
+        'done_this_week': row['done_this_week'],
+        'streak': row['streak'],
+        'week_table': [
+            {
+                'weekday': day['weekday'],
+                'done': bool(day['log'] and day['log'].status == HabitLog.Status.DONE),
+                'is_today': day['is_today'],
+            }
+            for day in week
+        ],
+    }
+    return Post.SnapshotKind.HABIT, '', meta
 
 
 def build_goal_snapshot(goal, enrollment):
-    html = _render_snapshot('group_space/snapshots/goal.html', {
-        'goal': goal,
-        'enrollment': enrollment,
-        'milestones': _goal_milestones(enrollment),
-    })
+    milestones = _goal_milestones(enrollment)
+    done = sum(1 for milestone in milestones if milestone['completed'])
+    total = len(milestones)
+    progress = enrollment.progress if enrollment else (round(done / total * 100) if total else 0)
+
     meta = {
-        'title': goal.title,
+        'kind': Post.SnapshotKind.GOAL,
         'kind_label': 'Goal',
-        'status': enrollment.status if enrollment else '',
+        'title': goal.title,
+        'category': goal.get_category_display(),
+        'status_value': enrollment.status if enrollment else '',
+        'status_label': enrollment.get_status_display() if enrollment else '',
+        'description': goal.description or '',
+        'target_date': goal.target_date.isoformat() if goal.target_date else None,
+        'milestones': milestones,
+        'milestones_done': done,
+        'milestones_total': total,
+        'progress': progress,
     }
-    return Post.SnapshotKind.GOAL, html, meta
+    return Post.SnapshotKind.GOAL, '', meta
 
 
 def build_task_snapshot(task, enrollment):
-    html = _render_snapshot('group_space/snapshots/task.html', {
-        'task': task,
-        'enrollment': enrollment,
-        'display_status': enrollment.status if enrollment else task.status,
-        'subtasks': _task_subtasks(enrollment),
-    })
+    subtasks = _task_subtasks(enrollment)
+    status = enrollment.status if enrollment else task.status
+
     meta = {
-        'title': task.title,
+        'kind': Post.SnapshotKind.TASK,
         'kind_label': 'Task',
-        'status': enrollment.status if enrollment else task.status,
+        'title': task.title,
+        'priority': task.priority,
+        'priority_label': task.get_priority_display(),
+        'status': status,
+        'due_date': task.due_date.isoformat() if task.due_date else None,
+        'description': task.description or '',
+        'subtasks': subtasks,
+        'subtasks_done': sum(1 for item in subtasks if item['completed']),
+        'subtasks_total': len(subtasks),
     }
-    return Post.SnapshotKind.TASK, html, meta
+    return Post.SnapshotKind.TASK, '', meta
 
 
 def get_shareable_journal_entries(user):

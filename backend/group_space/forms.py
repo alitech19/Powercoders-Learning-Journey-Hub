@@ -130,11 +130,11 @@ class PostForm(forms.ModelForm):
         body = cleaned.get('body', '')
         uploaded = cleaned.get('file')
         label = cleaned.get('resource_label', '')
-        snapshot_html = ''
+        has_snapshot = False
         if self.instance and self.instance.pk:
-            snapshot_html = self.instance.snapshot_html
+            has_snapshot = self.instance.has_snapshot
 
-        if not body and not uploaded and not snapshot_html:
+        if not body and not uploaded and not has_snapshot:
             raise ValidationError('Add a message, file, or share content from your work.')
 
         has_link_or_file = bool(uploaded) or bool(detect_urls(body))

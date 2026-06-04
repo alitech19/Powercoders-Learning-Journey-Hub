@@ -24,7 +24,7 @@ def post_has_link_or_file(post):
 
 def post_is_achievement_share(post):
     """Shared journal/habit/goal/task snapshot — chat only, not a Resources item."""
-    return bool(post.snapshot_html)
+    return post.has_snapshot
 
 
 def post_qualifies_for_resources(post):

@@ -18,11 +18,13 @@
       {% endif %}
 
       <div class="text-sm text-gray-800 space-y-2">
-        {% if post.resource_label and not post.snapshot_html %}
+        {% if post.resource_label and not post.has_snapshot %}
         <p class="font-medium text-[#2B2B2B]">{{ post.resource_label }}</p>
         {% endif %}
-        {% if post.snapshot_html %}
-        <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm snapshot-card">{{ post.snapshot_html|safe }}</div>
+        {% if post.snapshot_meta %}
+          {% include "group_space/_snapshot_card.html" with meta=post.snapshot_meta %}
+        {% elif post.snapshot_html %}
+          <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm">{{ post.snapshot_html|safe }}</div>
         {% endif %}
         {% if post.body %}
         <p class="whitespace-pre-wrap leading-relaxed">{{ post.body }}</p>
