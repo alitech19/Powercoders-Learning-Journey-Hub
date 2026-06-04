@@ -52,7 +52,7 @@ NAV_GROUPS: tuple[NavGroup, ...] = (
         ),
         default_url_name='reflections:list',
     ),
-    NavGroup('Чат', url_name='group_space:feed'),
+    NavGroup('Group Space', url_name='group_space:feed'),
     NavGroup('Resources', url_name='resources:index'),
 )
 
@@ -69,11 +69,17 @@ def _build_nav_registry() -> tuple[NavItem, ...]:
 # Flat registry (nav order for student metrics, share panel, etc.)
 NAV_REGISTRY: tuple[NavItem, ...] = _build_nav_registry()
 
-# [ADMIN_RESTRUCTURE_PLAN.md] — admin/superuser only
+ADMIN_NAV_MENU_LABEL = 'Administration'
+
+# Admin/superuser only — mirrors admin dashboard Management block
 ADMIN_NAV_ITEMS: tuple[NavItem, ...] = (
-    NavItem('Адмін-панель', 'admin:index'),
-    NavItem('Когорти та групи', 'accounts:cohort_list'),
-    NavItem('Масовий імпорт користувачів', 'accounts:user_import'),
+    NavItem('Cohorts & Groups', 'accounts:cohort_list'),
+    NavItem('Student Progress', 'accounts:student_progress'),
+    NavItem('Users', 'accounts:user_list'),
+    NavItem('Create User', 'accounts:user_create'),
+    NavItem('Import Users (CSV)', 'accounts:user_import'),
+    NavItem('Audit Log', 'admin:accounts_auditlog_changelist'),
+    NavItem('Django Admin', 'admin:index'),
 )
 
 

@@ -5,128 +5,128 @@
 
 {% if user.role == "admin" %}
 <div class="mb-8">
-  <h1 class="text-2xl font-bold text-[#2B2B2B]">Admin Dashboard</h1>
+  <h1 class="text-2xl font-bold text-[#343534]">Admin Dashboard</h1>
   <p class="text-gray-500 text-sm mt-1">System overview — Powercoders Learning Journey Hub</p>
 </div>
 
 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
   <a href="{% url 'accounts:student_progress' %}"
-     class="bg-white rounded-xl border border-gray-200 hover:border-[#C0392B]/40 p-4 text-center transition-colors group">
-    <p class="text-2xl font-bold text-[#2B2B2B] group-hover:text-[#C0392B] transition-colors">{{ total_students }}</p>
+     class="bg-white rounded-xl border border-gray-200 hover:border-[#B23149]/40 p-4 text-center transition-colors group">
+    <p class="text-2xl font-bold text-[#343534] group-hover:text-[#B23149] transition-colors">{{ total_students }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Students</p>
   </a>
   <a href="{% url 'accounts:user_list' %}?role=teacher"
-     class="bg-white rounded-xl border border-gray-200 hover:border-[#C0392B]/40 p-4 text-center transition-colors group">
-    <p class="text-2xl font-bold text-[#2B2B2B] group-hover:text-[#C0392B] transition-colors">{{ total_teachers }}</p>
+     class="bg-white rounded-xl border border-gray-200 hover:border-[#B23149]/40 p-4 text-center transition-colors group">
+    <p class="text-2xl font-bold text-[#343534] group-hover:text-[#B23149] transition-colors">{{ total_teachers }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Teachers</p>
   </a>
   <a href="{% url 'accounts:cohort_list' %}"
-     class="bg-white rounded-xl border border-gray-200 hover:border-[#C0392B]/40 p-4 text-center transition-colors group">
-    <p class="text-2xl font-bold text-[#2B2B2B] group-hover:text-[#C0392B] transition-colors">{{ active_cohorts }}<span class="text-sm text-gray-400 font-normal">/{{ total_cohorts }}</span></p>
+     class="bg-white rounded-xl border border-gray-200 hover:border-[#B23149]/40 p-4 text-center transition-colors group">
+    <p class="text-2xl font-bold text-[#343534] group-hover:text-[#B23149] transition-colors">{{ active_cohorts }}<span class="text-sm text-gray-400 font-normal">/{{ total_cohorts }}</span></p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Active Cohorts</p>
   </a>
   <a href="{% url 'accounts:cohort_list' %}"
-     class="bg-white rounded-xl border border-gray-200 hover:border-[#C0392B]/40 p-4 text-center transition-colors group">
-    <p class="text-2xl font-bold text-[#2B2B2B] group-hover:text-[#C0392B] transition-colors">{{ total_groups }}</p>
+     class="bg-white rounded-xl border border-gray-200 hover:border-[#B23149]/40 p-4 text-center transition-colors group">
+    <p class="text-2xl font-bold text-[#343534] group-hover:text-[#B23149] transition-colors">{{ total_groups }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Groups</p>
   </a>
   <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-[#2B2B2B]">{{ journal_week }}</p>
+    <p class="text-2xl font-bold text-[#343534]">{{ journal_week }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Journal Entries (7d)</p>
   </div>
 </div>
 
 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
   <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-[#2B2B2B]">{{ habits_active }}</p>
+    <p class="text-2xl font-bold text-[#343534]">{{ habits_active }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Active Habits</p>
   </div>
   <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-[#2B2B2B]">{{ workflows_total }}</p>
+    <p class="text-2xl font-bold text-[#343534]">{{ workflows_total }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Workflows</p>
   </div>
   <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-[#2B2B2B]">{{ group_posts_week }}</p>
+    <p class="text-2xl font-bold text-[#343534]">{{ group_posts_week }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Group Posts (7d)</p>
   </div>
   <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-[#2B2B2B]">{{ resource_items }}</p>
+    <p class="text-2xl font-bold text-[#343534]">{{ resource_items }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Resource Links</p>
   </div>
 </div>
 
 <div class="bg-white rounded-xl border border-gray-200 p-6 mb-8">
-  <h2 class="text-base font-semibold text-[#2B2B2B] mb-1">Management</h2>
+  <h2 class="text-base font-semibold text-[#343534] mb-1">Management</h2>
   <p class="text-sm text-gray-500 mb-4">Users, cohorts, and student oversight</p>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
     <a href="{% url 'accounts:cohort_list' %}"
-       class="flex items-center gap-3 rounded-xl border-2 border-[#C0392B]/20 bg-[#F5EDE0] hover:border-[#C0392B] hover:shadow-sm px-4 py-4 transition-all group">
-      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#C0392B] text-white text-lg font-bold">🎓</span>
+       class="flex items-center gap-3 rounded-xl border-2 border-[#B23149]/20 bg-[#F5EDE0] hover:border-[#B23149] hover:shadow-sm px-4 py-4 transition-all group">
+      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#B23149] text-white text-lg font-bold">🎓</span>
       <span>
-        <span class="block text-sm font-semibold text-[#2B2B2B] group-hover:text-[#C0392B]">Cohorts & Groups</span>
+        <span class="block text-sm font-semibold text-[#343534] group-hover:text-[#B23149]">Cohorts & Groups</span>
         <span class="block text-xs text-gray-500 mt-0.5">Create groups, bulk-assign students</span>
       </span>
     </a>
     <a href="{% url 'accounts:student_progress' %}"
-       class="flex items-center gap-3 rounded-xl border-2 border-[#C0392B]/20 bg-[#F5EDE0] hover:border-[#C0392B] hover:shadow-sm px-4 py-4 transition-all group">
-      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#C0392B] text-white text-lg font-bold">👥</span>
+       class="flex items-center gap-3 rounded-xl border-2 border-[#B23149]/20 bg-[#F5EDE0] hover:border-[#B23149] hover:shadow-sm px-4 py-4 transition-all group">
+      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#B23149] text-white text-lg font-bold">👥</span>
       <span>
-        <span class="block text-sm font-semibold text-[#2B2B2B] group-hover:text-[#C0392B]">Student Progress</span>
+        <span class="block text-sm font-semibold text-[#343534] group-hover:text-[#B23149]">Student Progress</span>
         <span class="block text-xs text-gray-500 mt-0.5">Workflows, goals, reflections per student</span>
       </span>
     </a>
     <a href="{% url 'accounts:user_list' %}"
-       class="flex items-center gap-3 rounded-xl border-2 border-[#C0392B]/20 bg-[#F5EDE0] hover:border-[#C0392B] hover:shadow-sm px-4 py-4 transition-all group">
-      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#C0392B] text-white text-lg font-bold">✉</span>
+       class="flex items-center gap-3 rounded-xl border-2 border-[#B23149]/20 bg-[#F5EDE0] hover:border-[#B23149] hover:shadow-sm px-4 py-4 transition-all group">
+      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#B23149] text-white text-lg font-bold">✉</span>
       <span>
-        <span class="block text-sm font-semibold text-[#2B2B2B] group-hover:text-[#C0392B]">Users</span>
+        <span class="block text-sm font-semibold text-[#343534] group-hover:text-[#B23149]">Users</span>
         <span class="block text-xs text-gray-500 mt-0.5">List, create, deactivate accounts</span>
       </span>
     </a>
     <a href="{% url 'accounts:user_create' %}"
-       class="flex items-center gap-3 rounded-xl border border-gray-200 hover:border-[#C0392B] bg-white hover:shadow-sm px-4 py-3.5 transition-all group">
-      <span class="text-sm font-semibold text-[#C0392B] group-hover:text-[#A93226]">+ Create user</span>
+       class="flex items-center gap-3 rounded-xl border border-gray-200 hover:border-[#B23149] bg-white hover:shadow-sm px-4 py-3.5 transition-all group">
+      <span class="text-sm font-semibold text-[#B23149] group-hover:text-[#8E273A]">+ Create user</span>
     </a>
     <a href="{% url 'accounts:user_import' %}"
-       class="flex items-center gap-3 rounded-xl border border-gray-200 hover:border-[#C0392B] bg-white hover:shadow-sm px-4 py-3.5 transition-all group">
-      <span class="text-sm font-semibold text-[#C0392B] group-hover:text-[#A93226]">↑ Import users (CSV)</span>
+       class="flex items-center gap-3 rounded-xl border border-gray-200 hover:border-[#B23149] bg-white hover:shadow-sm px-4 py-3.5 transition-all group">
+      <span class="text-sm font-semibold text-[#B23149] group-hover:text-[#8E273A]">↑ Import users (CSV)</span>
     </a>
     <a href="{% url 'admin:accounts_auditlog_changelist' %}"
        class="flex items-center gap-3 rounded-xl border border-gray-200 hover:border-gray-400 bg-white hover:shadow-sm px-4 py-3.5 transition-all group">
-      <span class="text-sm font-medium text-gray-600 group-hover:text-[#2B2B2B]">Audit log (admin)</span>
+      <span class="text-sm font-medium text-gray-600 group-hover:text-[#343534]">Audit log (admin)</span>
     </a>
   </div>
 </div>
 
 {% elif user.role == "teacher" %}
 <div class="mb-8">
-  <h1 class="text-2xl font-bold text-[#2B2B2B]">Welcome, {{ user.display_name }}</h1>
+  <h1 class="text-2xl font-bold text-[#343534]">Welcome, {{ user.display_name }}</h1>
   <p class="text-gray-500 text-sm mt-1">Student progress across workflows, goals, tasks, and wellbeing (nav order).</p>
 </div>
 
 <div class="flex flex-wrap gap-2 mb-6">
   <a href="{% url 'workflows:list' %}"
-     class="inline-flex items-center gap-1.5 border border-gray-200 hover:border-[#C0392B] text-gray-600 hover:text-[#C0392B] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+     class="inline-flex items-center gap-1.5 border border-gray-200 hover:border-[#B23149] text-gray-600 hover:text-[#B23149] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
     Workflows
   </a>
   <a href="{% url 'goals:list' %}"
-     class="inline-flex items-center gap-1.5 border border-gray-200 hover:border-[#C0392B] text-gray-600 hover:text-[#C0392B] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+     class="inline-flex items-center gap-1.5 border border-gray-200 hover:border-[#B23149] text-gray-600 hover:text-[#B23149] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
     Goals
   </a>
   <a href="{% url 'tasks:task_create' %}"
-     class="inline-flex items-center gap-1.5 border border-gray-200 hover:border-[#C0392B] text-gray-600 hover:text-[#C0392B] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+     class="inline-flex items-center gap-1.5 border border-gray-200 hover:border-[#B23149] text-gray-600 hover:text-[#B23149] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
     Assign task
   </a>
   <a href="{% url 'reflections:list' %}"
-     class="inline-flex items-center gap-1.5 border border-gray-200 hover:border-[#C0392B] text-gray-600 hover:text-[#C0392B] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+     class="inline-flex items-center gap-1.5 border border-gray-200 hover:border-[#B23149] text-gray-600 hover:text-[#B23149] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
     Reflections
   </a>
   <a href="{% url 'group_space:feed' %}"
-     class="inline-flex items-center gap-1.5 border border-gray-200 hover:border-[#C0392B] text-gray-600 hover:text-[#C0392B] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+     class="inline-flex items-center gap-1.5 border border-gray-200 hover:border-[#B23149] text-gray-600 hover:text-[#B23149] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
     Group chat
   </a>
   <a href="{% url 'resources:index' %}"
-     class="inline-flex items-center gap-1.5 border border-gray-200 hover:border-[#C0392B] text-gray-600 hover:text-[#C0392B] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+     class="inline-flex items-center gap-1.5 border border-gray-200 hover:border-[#B23149] text-gray-600 hover:text-[#B23149] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
     Resources
   </a>
 </div>
@@ -169,30 +169,30 @@
 
 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
   <a href="{% url 'accounts:student_progress' %}"
-     class="bg-white rounded-xl border border-gray-200 hover:border-[#C0392B]/40 p-4 text-center transition-colors group">
-    <p class="text-2xl font-bold text-[#2B2B2B] group-hover:text-[#C0392B]">{{ student_count }}</p>
+     class="bg-white rounded-xl border border-gray-200 hover:border-[#B23149]/40 p-4 text-center transition-colors group">
+    <p class="text-2xl font-bold text-[#343534] group-hover:text-[#B23149]">{{ student_count }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Students</p>
   </a>
   <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-[#2B2B2B]">{{ assigned_groups|length }}</p>
+    <p class="text-2xl font-bold text-[#343534]">{{ assigned_groups|length }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Your Groups</p>
   </div>
   <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
-    <p class="text-2xl font-bold text-[#2B2B2B]">{{ group_posts_week }}</p>
+    <p class="text-2xl font-bold text-[#343534]">{{ group_posts_week }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Group Posts (7d)</p>
   </div>
   <a href="{% url 'group_space:feed' %}"
-     class="bg-white rounded-xl border border-gray-200 hover:border-[#C0392B]/40 p-4 text-center transition-colors group">
-    <p class="text-sm font-semibold text-[#C0392B] group-hover:text-[#A93226]">Open Group Chat →</p>
+     class="bg-white rounded-xl border border-gray-200 hover:border-[#B23149]/40 p-4 text-center transition-colors group">
+    <p class="text-sm font-semibold text-[#B23149] group-hover:text-[#8E273A]">Open Group Chat →</p>
   </a>
 </div>
 
 {% if student_preview_rows %}
 <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6 overflow-x-auto">
   <div class="flex items-center justify-between mb-4">
-    <h2 class="text-base font-semibold text-[#2B2B2B]">Student overview</h2>
+    <h2 class="text-base font-semibold text-[#343534]">Student overview</h2>
     <a href="{% url 'accounts:student_progress' %}"
-       class="text-xs font-semibold text-[#C0392B] hover:text-[#A93226] transition-colors">Full progress →</a>
+       class="text-xs font-semibold text-[#B23149] hover:text-[#8E273A] transition-colors">Full progress →</a>
   </div>
   <div class="overflow-x-auto">
     <table class="min-w-full text-sm">
@@ -206,10 +206,10 @@
       <tbody class="divide-y divide-gray-50">
         {% for row in student_preview_rows %}
         <tr class="{% if row.missing_reflection %}bg-amber-50/50{% endif %}">
-          <td class="py-2 pr-3 font-medium text-[#2B2B2B] sticky left-0 bg-white {% if row.missing_reflection %}bg-amber-50/50{% endif %} whitespace-nowrap">{{ row.student.display_name }}</td>
+          <td class="py-2 pr-3 font-medium text-[#343534] sticky left-0 bg-white {% if row.missing_reflection %}bg-amber-50/50{% endif %} whitespace-nowrap">{{ row.student.display_name }}</td>
           {% include "accounts/_student_metric_cells.html" %}
           <td class="py-2 pl-2 text-right whitespace-nowrap">
-            <a href="{% url 'accounts:student_detail' row.student.pk %}" class="text-xs font-semibold text-[#C0392B]">View →</a>
+            <a href="{% url 'accounts:student_detail' row.student.pk %}" class="text-xs font-semibold text-[#B23149]">View →</a>
           </td>
         </tr>
         {% endfor %}
@@ -221,17 +221,17 @@
 
 <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
   <div class="flex items-center justify-between mb-4">
-    <h2 class="text-base font-semibold text-[#2B2B2B]">Your Groups</h2>
+    <h2 class="text-base font-semibold text-[#343534]">Your Groups</h2>
     <span class="text-xs text-gray-400">{{ assigned_groups|length }} group{% if assigned_groups|length != 1 %}s{% endif %}</span>
   </div>
   {% if assigned_groups %}
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
     {% for group in assigned_groups %}
-    <div class="border border-gray-200 rounded-lg p-4 hover:border-[#C0392B]/40 transition-colors">
-      <p class="font-semibold text-[#2B2B2B] text-sm">{{ group.name }}</p>
+    <div class="border border-gray-200 rounded-lg p-4 hover:border-[#B23149]/40 transition-colors">
+      <p class="font-semibold text-[#343534] text-sm">{{ group.name }}</p>
       <p class="text-xs text-gray-500 mt-0.5">{{ group.cohort.name }}</p>
       <a href="{% url 'group_space:feed' %}"
-         class="inline-block mt-3 text-xs font-semibold text-[#C0392B] hover:text-[#A93226] transition-colors">
+         class="inline-block mt-3 text-xs font-semibold text-[#B23149] hover:text-[#8E273A] transition-colors">
         Open group chat →
       </a>
     </div>
@@ -247,7 +247,7 @@
 
 <div class="mb-8 pr-14">
   <div>
-    <h1 class="text-2xl font-bold text-[#2B2B2B]">Welcome back, {{ user.display_name }}!</h1>
+    <h1 class="text-2xl font-bold text-[#343534]">Welcome back, {{ user.display_name }}!</h1>
     <p class="text-gray-500 text-sm mt-1">
       {% if user.cohort %}{{ user.cohort.name }}{% endif %}
       {% if user.group %} · {{ user.group.name }}{% endif %}
@@ -272,27 +272,27 @@
 
 {# Row 1 — Workflows (featured) #}
 <a href="{% url 'workflows:list' %}"
-   class="block mb-6 bg-[#F5EDE0] border-2 border-[#EDE3D5] hover:border-[#C0392B]/50 hover:shadow-md rounded-2xl p-6 sm:p-8 transition-all group">
+   class="block mb-6 bg-[#F5EDE0] border-2 border-[#EDE3D5] hover:border-[#B23149]/50 hover:shadow-md rounded-2xl p-6 sm:p-8 transition-all group">
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
       <div class="flex items-center gap-3 mb-2">
         <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/80 text-2xl shadow-sm">📋</span>
         <div>
-          <h2 class="text-xl font-bold text-[#2B2B2B] group-hover:text-[#C0392B] transition-colors">Workflows</h2>
+          <h2 class="text-xl font-bold text-[#343534] group-hover:text-[#B23149] transition-colors">Workflows</h2>
           <p class="text-sm text-gray-500">Step-by-step guides for your learning path</p>
         </div>
       </div>
     </div>
     <div class="flex gap-6 sm:gap-10">
       <div class="text-center sm:text-right">
-        <p class="text-3xl sm:text-4xl font-bold text-[#2B2B2B]">{{ workflows_enrolled }}</p>
+        <p class="text-3xl sm:text-4xl font-bold text-[#343534]">{{ workflows_enrolled }}</p>
         <p class="text-xs text-gray-500 font-medium mt-0.5">enrolled</p>
       </div>
       <div class="text-center sm:text-right">
-        <p class="text-3xl sm:text-4xl font-bold text-[#C0392B]">{{ workflows_in_progress }}</p>
+        <p class="text-3xl sm:text-4xl font-bold text-[#B23149]">{{ workflows_in_progress }}</p>
         <p class="text-xs text-gray-500 font-medium mt-0.5">in progress</p>
       </div>
-      <div class="hidden sm:flex items-center text-[#C0392B] font-semibold text-sm group-hover:translate-x-0.5 transition-transform">
+      <div class="hidden sm:flex items-center text-[#B23149] font-semibold text-sm group-hover:translate-x-0.5 transition-transform">
         Open →
       </div>
     </div>
@@ -301,30 +301,30 @@
 
 {# Row 2 — Goals · Tasks · Reflections #}
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-  <a href="{% url 'goals:list' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#C0392B]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
+  <a href="{% url 'goals:list' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
     <div class="flex items-center gap-2 mb-2">
-      <svg class="h-5 w-5 text-[#C0392B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <svg class="h-5 w-5 text-[#B23149]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
       </svg>
-      <span class="text-sm font-semibold text-[#2B2B2B]">Goals</span>
+      <span class="text-sm font-semibold text-[#343534]">Goals</span>
     </div>
-    <p class="text-2xl font-bold text-[#2B2B2B]">{{ goals_total }}</p>
+    <p class="text-2xl font-bold text-[#343534]">{{ goals_total }}</p>
     <p class="text-xs text-gray-400 mt-0.5">
       {% if last_goal_updated %}Updated {{ last_goal_updated|timesince }} ago{% else %}{{ goals_in_progress }} in progress{% endif %}
     </p>
   </a>
 
-  <a href="{% url 'tasks:task_list' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#C0392B]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
+  <a href="{% url 'tasks:task_list' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
     <div class="flex items-center gap-2 mb-2">
-      <svg class="h-5 w-5 text-[#C0392B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <svg class="h-5 w-5 text-[#B23149]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
       </svg>
-      <span class="text-sm font-semibold text-[#2B2B2B]">Tasks</span>
+      <span class="text-sm font-semibold text-[#343534]">Tasks</span>
     </div>
     {% if tasks_by_status %}
     <div class="flex flex-wrap gap-2 mt-1">
       {% for status, count in tasks_by_status.items %}
-      <span class="inline-flex items-center gap-1 text-xs font-medium text-[#2B2B2B]">
+      <span class="inline-flex items-center gap-1 text-xs font-medium text-[#343534]">
         <span class="font-bold">{{ count }}</span>
         {% if status == 'done' %}done{% elif status == 'doing' %}doing{% elif status == 'blocked' %}blocked{% else %}to do{% endif %}
       </span>
@@ -335,15 +335,15 @@
     {% endif %}
   </a>
 
-  <a href="{% url 'reflections:list' %}" class="bg-[#F5EDE0] border {% if reflection_due %}border-amber-300{% else %}border-[#EDE3D5]{% endif %} hover:border-[#C0392B]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
+  <a href="{% url 'reflections:list' %}" class="bg-[#F5EDE0] border {% if reflection_due %}border-amber-300{% else %}border-[#EDE3D5]{% endif %} hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
     <div class="flex items-center gap-2 mb-2">
-      <svg class="h-5 w-5 text-[#C0392B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <svg class="h-5 w-5 text-[#B23149]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
       </svg>
-      <span class="text-sm font-semibold text-[#2B2B2B]">Reflections</span>
+      <span class="text-sm font-semibold text-[#343534]">Reflections</span>
       {% if reflection_due %}<span class="ml-auto text-xs font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">Due</span>{% endif %}
     </div>
-    <p class="text-2xl font-bold text-[#2B2B2B]">{{ reflections_count }}</p>
+    <p class="text-2xl font-bold text-[#343534]">{{ reflections_count }}</p>
     <p class="text-xs text-gray-400 mt-0.5">
       {% if last_reflection %}Last: {{ last_reflection|date:"d M" }}{% else %}No check-ins yet{% endif %}
     </p>
@@ -352,15 +352,15 @@
 
 {# Row 3 — Journal · Habits · Group · Resources (nav order) #}
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-  <div class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#C0392B]/40 hover:shadow-sm rounded-xl p-5 transition-all">
+  <div class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all">
     <a href="{% url 'journal:list' %}" class="block">
       <div class="flex items-center gap-2 mb-2">
-        <svg class="h-5 w-5 text-[#C0392B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg class="h-5 w-5 text-[#B23149]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
         </svg>
-        <span class="text-sm font-semibold text-[#2B2B2B]">Journal</span>
+        <span class="text-sm font-semibold text-[#343534]">Journal</span>
       </div>
-      <p class="text-2xl font-bold text-[#2B2B2B]">{{ journal_count }}</p>
+      <p class="text-2xl font-bold text-[#343534]">{{ journal_count }}</p>
       <p class="text-xs text-gray-500">entr{{ journal_count|pluralize:"y,ies" }}</p>
     </a>
     {% if recent_journal_entries %}
@@ -368,7 +368,7 @@
       {% for entry in recent_journal_entries %}
       <a href="{% url 'journal:detail' entry.pk %}"
          class="flex items-center justify-between gap-2 hover:opacity-70 transition-opacity">
-        <span class="text-xs text-[#2B2B2B] font-medium truncate">{{ entry.title }}</span>
+        <span class="text-xs text-[#343534] font-medium truncate">{{ entry.title }}</span>
         <span class="text-xs text-gray-400 flex-shrink-0">{{ entry.entry_date|date:"d M" }}</span>
       </a>
       {% endfor %}
@@ -376,22 +376,22 @@
     {% endif %}
   </div>
 
-  <a href="{% url 'habits:list' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#C0392B]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
+  <a href="{% url 'habits:list' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
     <div class="flex items-center gap-2 mb-2">
       <span class="text-lg">🔄</span>
-      <span class="text-sm font-semibold text-[#2B2B2B]">Habits</span>
+      <span class="text-sm font-semibold text-[#343534]">Habits</span>
     </div>
-    <p class="text-2xl font-bold text-[#2B2B2B]">{{ habits_active }}</p>
+    <p class="text-2xl font-bold text-[#343534]">{{ habits_active }}</p>
     <p class="text-xs text-gray-400 mt-0.5">{{ habit_logs_week }} log{{ habit_logs_week|pluralize }} this week</p>
   </a>
 
   {% if has_group %}
-  <a href="{% url 'group_space:feed' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#C0392B]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
+  <a href="{% url 'group_space:feed' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
     <div class="flex items-center gap-2 mb-2">
       <span class="text-lg">💬</span>
-      <span class="text-sm font-semibold text-[#2B2B2B]">Group</span>
+      <span class="text-sm font-semibold text-[#343534]">Group</span>
     </div>
-    <p class="text-2xl font-bold text-[#2B2B2B]">{{ group_posts_week }}</p>
+    <p class="text-2xl font-bold text-[#343534]">{{ group_posts_week }}</p>
     <p class="text-xs text-gray-400 mt-0.5">posts this week</p>
   </a>
   {% else %}
@@ -404,12 +404,12 @@
   </div>
   {% endif %}
 
-  <a href="{% url 'resources:index' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#C0392B]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
+  <a href="{% url 'resources:index' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
     <div class="flex items-center gap-2 mb-2">
       <span class="text-lg">🔗</span>
-      <span class="text-sm font-semibold text-[#2B2B2B]">Resources</span>
+      <span class="text-sm font-semibold text-[#343534]">Resources</span>
     </div>
-    <p class="text-2xl font-bold text-[#2B2B2B]">{{ resource_personal_items }}</p>
+    <p class="text-2xl font-bold text-[#343534]">{{ resource_personal_items }}</p>
     <p class="text-xs text-gray-400 mt-0.5">my links{% if resource_group_items %} · {{ resource_group_items }} in group{% endif %}</p>
   </a>
 </div>

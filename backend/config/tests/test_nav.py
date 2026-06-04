@@ -22,7 +22,7 @@ class NavRegistryTests(SimpleTestCase):
                 'Habits',
                 'Reflections',
                 'Journal',
-                'Чат',
+                'Group Space',
                 'Resources',
             ],
         )
@@ -41,11 +41,11 @@ class NavRegistryTests(SimpleTestCase):
         tasks = next(c for c in learning['children'] if c['url_name'] == 'tasks:task_list')
         self.assertTrue(tasks['active'])
 
-    def test_chat_link_group(self):
+    def test_group_space_link_group(self):
         groups = integrated_nav_groups(current_app='group_space')
-        chat = next(g for g in groups if g['label'] == 'Чат')
-        self.assertEqual(chat['kind'], 'link')
-        self.assertTrue(chat['active'])
+        group_space = next(g for g in groups if g['label'] == 'Group Space')
+        self.assertEqual(group_space['kind'], 'link')
+        self.assertTrue(group_space['active'])
 
     def test_flat_items_backward_compat(self):
         items = integrated_nav_items(current_view_name='habits:list')
@@ -57,9 +57,13 @@ class NavRegistryTests(SimpleTestCase):
 
         self.assertEqual(admin_nav_items(user=AnonymousUser()), [])
 
-    def test_admin_nav_has_three_entries(self):
+    def test_admin_nav_includes_dashboard_management_links(self):
         from accounts.models import User
 
         admin = User(role=User.Role.ADMIN, email='a@test.com')
         items = admin_nav_items(user=admin)
         self.assertEqual(len(items), len(ADMIN_NAV_ITEMS))
+        labels = [i['label'] for i in items]
+        self.assertIn('Users', labels)
+        self.assertIn('Student Progress', labels)
+        self.assertIn('Cohorts & Groups', labels)

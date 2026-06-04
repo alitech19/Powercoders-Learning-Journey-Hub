@@ -6,7 +6,7 @@
 <div class="max-w-lg mx-auto">
 
   <div class="mb-6">
-    <h1 class="text-2xl font-bold text-[#2B2B2B]">Set Up Two-Factor Authentication</h1>
+    <h1 class="text-2xl font-bold text-[#343534]">Set Up Two-Factor Authentication</h1>
     <p class="text-gray-500 text-sm mt-1">Required for admin and teacher accounts. Takes less than 2 minutes.</p>
   </div>
 
@@ -18,17 +18,17 @@
 
       {% if wizard.steps.current == 'welcome' %}
       <div class="flex items-start gap-4">
-        <div class="h-10 w-10 rounded-full bg-[#C0392B]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-          <svg class="h-5 w-5 text-[#C0392B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <div class="h-10 w-10 rounded-full bg-[#B23149]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="h-5 w-5 text-[#B23149]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
           </svg>
         </div>
         <div>
-          <p class="text-sm font-semibold text-[#2B2B2B] mb-1">Why is this required?</p>
+          <p class="text-sm font-semibold text-[#343534] mb-1">Why is this required?</p>
           <p class="text-sm text-gray-500">Admin and teacher accounts must have two-factor authentication enabled.</p>
         </div>
       </div>
-      <div class="bg-[#F5EDE0] rounded-lg p-4 text-sm text-[#2B2B2B]">
+      <div class="bg-[#F5EDE0] rounded-lg p-4 text-sm text-[#343534]">
         <p class="font-semibold mb-1">You will need:</p>
         <ul class="list-disc list-inside space-y-1 text-gray-600">
           <li>Google Authenticator or Authy on your phone</li>
@@ -38,11 +38,11 @@
 
       {% elif wizard.steps.current == 'generator' %}
       <div>
-        <p class="text-sm font-semibold text-[#2B2B2B] mb-3">1. Scan this QR code with your authenticator app</p>
+        <p class="text-sm font-semibold text-[#343534] mb-3">1. Scan this QR code with your authenticator app</p>
         <div class="bg-white p-3 rounded-lg border-2 border-[#EDE3D5] inline-block mb-4">
           <img src="{% url 'two_factor:qr' %}" alt="QR Code" class="h-40 w-40">
         </div>
-        <p class="text-sm font-semibold text-[#2B2B2B] mb-2">2. Enter the 6-digit code</p>
+        <p class="text-sm font-semibold text-[#343534] mb-2">2. Enter the 6-digit code</p>
         {{ wizard.form.token }}
         {% if wizard.form.token.errors %}
         <p class="text-red-600 text-xs mt-1">{{ wizard.form.token.errors.0 }}</p>
@@ -54,7 +54,7 @@
       {% endif %}
 
       <button type="submit"
-              class="w-full bg-[#C0392B] hover:bg-[#A93226] text-white font-semibold py-2.5 rounded-lg transition-colors text-sm cursor-pointer">
+              class="w-full bg-[#B23149] hover:bg-[#8E273A] text-white font-semibold py-2.5 rounded-lg transition-colors text-sm cursor-pointer">
         {% if wizard.steps.current == 'welcome' %}Continue{% else %}Verify &amp; Enable 2FA{% endif %}
       </button>
     </form>
@@ -71,7 +71,7 @@
     letter-spacing: 0.25em;
   }
   #id_generator-token:focus, #id_token:focus, input[name="token"]:focus {
-    border-color: #C0392B;
+    border-color: #B23149;
     box-shadow: 0 0 0 2px rgba(192,57,43,0.2);
     outline: none;
   }

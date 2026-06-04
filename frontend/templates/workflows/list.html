@@ -10,22 +10,22 @@
     <div class="space-y-4">
       {% for row in rows %}
       <a href="{% url 'workflows:detail' row.workflow.pk %}"
-         class="block bg-white rounded-xl border border-gray-200 p-5 hover:border-[#C0392B]/30 transition-colors">
+         class="block bg-white rounded-xl border border-gray-200 p-5 hover:border-[#B23149]/30 transition-colors">
         <div class="flex items-start justify-between gap-4 mb-3">
           <div class="flex-1">
-            <h2 class="font-semibold text-[#2B2B2B]">{{ row.workflow.title }}</h2>
+            <h2 class="font-semibold text-[#343534]">{{ row.workflow.title }}</h2>
             <p class="text-xs text-gray-400 mt-0.5">{{ row.workflow.get_assignee_label }}</p>
             {% if row.workflow.description %}
             <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ row.workflow.description }}</p>
             {% endif %}
           </div>
           <div class="text-right flex-shrink-0">
-            <span class="text-2xl font-bold text-[#C0392B]">{{ row.progress }}%</span>
+            <span class="text-2xl font-bold text-[#B23149]">{{ row.progress }}%</span>
             <p class="text-xs text-gray-400">complete</p>
           </div>
         </div>
         <div class="w-full bg-gray-100 rounded-full h-2">
-          <div class="bg-[#C0392B] h-2 rounded-full transition-all" style="width: {{ row.progress }}%"></div>
+          <div class="bg-[#B23149] h-2 rounded-full transition-all" style="width: {{ row.progress }}%"></div>
         </div>
       </a>
       {% endfor %}
@@ -43,7 +43,7 @@
         <div class="flex items-start justify-between gap-4">
           <div class="flex-1">
             <a href="{% url 'workflows:detail' wf.pk %}"
-               class="font-semibold text-[#2B2B2B] hover:text-[#C0392B] transition-colors">
+               class="font-semibold text-[#343534] hover:text-[#B23149] transition-colors">
               {{ wf.title }}
             </a>
             <div class="flex items-center gap-3 mt-1 flex-wrap text-xs text-gray-400">
@@ -56,7 +56,7 @@
           </div>
           <div class="flex items-center gap-2 flex-shrink-0">
             <a href="{% url 'workflows:edit' wf.pk %}"
-               class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]">
+               class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#B23149] hover:text-[#B23149]">
               Edit
             </a>
           </div>
@@ -69,7 +69,7 @@
       <p class="text-gray-400 text-sm">No workflows yet.</p>
       {% if can_create %}
       <a href="{% url 'workflows:create' %}"
-         class="inline-flex items-center gap-2 mt-4 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-5 py-2.5 rounded-lg">
+         class="inline-flex items-center gap-2 mt-4 bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-5 py-2.5 rounded-lg">
         Create First Workflow
       </a>
       {% endif %}

@@ -2,13 +2,13 @@
 <div class="flex gap-2 flex-wrap mb-4">
   <a href="{{ all_students_href }}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if not student_filter %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B]{% endif %}">
+            {% if not student_filter %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
     All Students
   </a>
   {% for s in students %}
   <a href="?student={{ s.pk }}{{ student_query_extra }}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if student_filter == s.pk|stringformat:'s' %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B]{% endif %}">
+            {% if student_filter == s.pk|stringformat:'s' %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
     {{ s.display_name }}
   </a>
   {% endfor %}

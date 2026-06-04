@@ -8,7 +8,7 @@ from .models import ResourceContainer, ResourceItem
 
 _INPUT = (
     'w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm '
-    'focus:outline-none focus:ring-2 focus:ring-[#C0392B] focus:border-[#C0392B]'
+    'focus:outline-none focus:ring-2 focus:ring-[#B23149] focus:border-[#B23149]'
 )
 
 

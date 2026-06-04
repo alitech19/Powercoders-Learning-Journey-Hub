@@ -5,12 +5,12 @@
 <div class="max-w-2xl mx-auto">
 
   <a href="{% url 'reflections:list' %}"
-     class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] transition-colors mb-4">
+     class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#B23149] transition-colors mb-4">
     ← Back to reflections
   </a>
 
   {% if is_staff_view %}
-  <div class="flex items-center gap-3 mb-4 px-4 py-3 bg-[#2B2B2B] text-white rounded-xl">
+  <div class="flex items-center gap-3 mb-4 px-4 py-3 bg-[#343534] text-white rounded-xl">
     <span class="flex-shrink-0 w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-sm font-bold uppercase">
       {{ reflection.author.display_name|slice:":1" }}
     </span>
@@ -32,13 +32,13 @@
           {% endfor %}
           {% include "reflections/_visibility_badge.html" %}
         </div>
-        <h1 class="text-xl font-bold text-[#2B2B2B]">{{ reflection.title }}</h1>
+        <h1 class="text-xl font-bold text-[#343534]">{{ reflection.title }}</h1>
       </div>
       {% if can_edit or can_delete %}
       <div class="flex gap-2 flex-shrink-0">
         {% if can_edit %}
         <a href="{% url 'reflections:edit' reflection.pk %}"
-           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]">Edit</a>
+           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
         {% endif %}
         {% if can_delete %}
         <a href="{% url 'reflections:delete' reflection.pk %}"

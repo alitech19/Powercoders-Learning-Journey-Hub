@@ -10,7 +10,7 @@ from .services import detect_urls, validate_uploaded_file
 
 _INPUT_CLASS = (
     'w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm '
-    'focus:outline-none focus:ring-2 focus:ring-[#C0392B] focus:border-[#C0392B]'
+    'focus:outline-none focus:ring-2 focus:ring-[#B23149] focus:border-[#B23149]'
 )
 
 
@@ -25,14 +25,14 @@ class ChatComposerForm(forms.ModelForm):
                 'rows': 2,
                 'class': (
                     'w-full px-3 py-2 rounded-xl border border-gray-300 text-sm resize-none '
-                    'focus:outline-none focus:ring-2 focus:ring-[#C0392B] focus:border-[#C0392B]'
+                    'focus:outline-none focus:ring-2 focus:ring-[#B23149] focus:border-[#B23149]'
                 ),
                 'placeholder': 'Write a message… Paste a link? Open “Attach file” to name it for Resources.',
             }),
             'resource_label': forms.TextInput(attrs={
                 'class': (
                     'w-full px-3 py-2 rounded-lg border border-gray-300 text-sm '
-                    'focus:outline-none focus:ring-2 focus:ring-[#C0392B] focus:border-[#C0392B]'
+                    'focus:outline-none focus:ring-2 focus:ring-[#B23149] focus:border-[#B23149]'
                 ),
                 'placeholder': 'Resource name (for links or attachments)',
             }),

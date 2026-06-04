@@ -5,7 +5,7 @@
 <div class="max-w-3xl mx-auto">
 
   <a href="{% url 'tasks:task_list' %}"
-     class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] transition-colors mb-4">
+     class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#B23149] transition-colors mb-4">
     ← Back to tasks
   </a>
 
@@ -33,7 +33,7 @@
           </span>
           {% endif %}
         </div>
-        <h1 class="text-xl font-bold text-[#2B2B2B]">{{ display_title }}</h1>
+        <h1 class="text-xl font-bold text-[#343534]">{{ display_title }}</h1>
         {% if task.is_group_shared and task.assignee_group %}
         <p class="text-xs text-gray-400 mt-1">Group: {{ task.assignee_group }}</p>
         {% elif enrollment %}
@@ -45,7 +45,7 @@
       <div class="flex gap-2 flex-shrink-0">
         {% if can_edit %}
         <a href="{% url 'tasks:task_edit' task.pk %}"
-           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]">Edit</a>
+           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
         {% endif %}
         {% if can_delete %}
         <a href="{% url 'tasks:task_delete' task.pk %}"
@@ -70,7 +70,7 @@
       {% include "tasks/_subtasks_section.html" %}
     {% elif template_subtasks %}
     <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
-      <h2 class="text-sm font-semibold text-[#2B2B2B] mb-3">Checklist</h2>
+      <h2 class="text-sm font-semibold text-[#343534] mb-3">Checklist</h2>
       <ul class="space-y-1">
         {% for item in template_subtasks %}
         <li class="text-sm text-gray-600">{{ item.subtask.title }}</li>
@@ -83,9 +83,9 @@
   {% if show_updates %}
   <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
     <div class="flex items-center justify-between mb-3">
-      <h2 class="text-sm font-semibold text-[#2B2B2B]">Progress Updates</h2>
+      <h2 class="text-sm font-semibold text-[#343534]">Progress Updates</h2>
       {% if can_add_update %}
-      <a href="{% url 'tasks:update_create' task.pk %}" class="text-xs text-[#C0392B] font-medium">+ Add update</a>
+      <a href="{% url 'tasks:update_create' task.pk %}" class="text-xs text-[#B23149] font-medium">+ Add update</a>
       {% endif %}
     </div>
     {% if updates %}
@@ -114,9 +114,9 @@
   {% if show_comments %}
   <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
     <div class="flex items-center justify-between mb-3">
-      <h2 class="text-sm font-semibold text-[#2B2B2B]">Discussion</h2>
+      <h2 class="text-sm font-semibold text-[#343534]">Discussion</h2>
       {% if can_comment %}
-      <a href="{% url 'tasks:comment_create' task.pk %}" class="text-xs text-[#C0392B] font-medium">+ Comment</a>
+      <a href="{% url 'tasks:comment_create' task.pk %}" class="text-xs text-[#B23149] font-medium">+ Comment</a>
       {% endif %}
     </div>
     {% if comment_tree %}
@@ -147,7 +147,7 @@
   {% if view_as == 'staff' and enrollment_rows %}
   <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-sm font-semibold text-[#2B2B2B]">Student progress</h2>
+      <h2 class="text-sm font-semibold text-[#343534]">Student progress</h2>
       <span class="text-xs text-gray-400">{{ task.enrolled_count }} enrolled</span>
     </div>
     {% include "tasks/_staff_enrollments.html" %}
@@ -156,7 +156,7 @@
 
   {% if can_add_enrollment %}
   <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4" x-data="enrollForm()">
-    <h2 class="text-sm font-semibold text-[#2B2B2B] mb-3">Add students</h2>
+    <h2 class="text-sm font-semibold text-[#343534] mb-3">Add students</h2>
     <p class="text-xs text-gray-500 mb-4">Enroll late joiners on this existing task.</p>
     {{ cohort_students_json|json_script:"cohort-students-data" }}
     {{ group_students_json|json_script:"group-students-data" }}
@@ -164,18 +164,18 @@
       {% csrf_token %}
       <div class="flex gap-4 text-sm">
         <label class="flex items-center gap-2 cursor-pointer">
-          <input type="radio" name="assignee_type" value="cohort" x-model="assigneeType" @change="targetId = ''" class="accent-[#C0392B]">
+          <input type="radio" name="assignee_type" value="cohort" x-model="assigneeType" @change="targetId = ''" class="accent-[#B23149]">
           Cohort
         </label>
         <label class="flex items-center gap-2 cursor-pointer">
-          <input type="radio" name="assignee_type" value="group" x-model="assigneeType" @change="targetId = ''" class="accent-[#C0392B]">
+          <input type="radio" name="assignee_type" value="group" x-model="assigneeType" @change="targetId = ''" class="accent-[#B23149]">
           Group
         </label>
       </div>
       <div x-show="assigneeType === 'cohort'" class="space-y-2 max-h-40 overflow-y-auto">
         {% for cohort in cohorts %}
         <label class="flex items-center gap-2 text-sm cursor-pointer">
-          <input type="radio" name="assignee_target_id" value="{{ cohort.pk }}" x-model="targetId" class="accent-[#C0392B]">
+          <input type="radio" name="assignee_target_id" value="{{ cohort.pk }}" x-model="targetId" class="accent-[#B23149]">
           {{ cohort.name }}
         </label>
         {% endfor %}
@@ -183,26 +183,26 @@
       <div x-show="assigneeType === 'group'" class="space-y-2 max-h-40 overflow-y-auto">
         {% for group in groups %}
         <label class="flex items-center gap-2 text-sm cursor-pointer">
-          <input type="radio" name="assignee_target_id" value="{{ group.pk }}" x-model="targetId" class="accent-[#C0392B]">
+          <input type="radio" name="assignee_target_id" value="{{ group.pk }}" x-model="targetId" class="accent-[#B23149]">
           {{ group }}
         </label>
         {% endfor %}
       </div>
       <div x-show="targetId" class="pt-3 border-t border-gray-100 space-y-2">
         <label class="flex items-center gap-2 text-sm cursor-pointer">
-          <input type="checkbox" name="select_all_students" x-model="selectAll" @change="toggleSelectAll()" class="accent-[#C0392B]">
+          <input type="checkbox" name="select_all_students" x-model="selectAll" @change="toggleSelectAll()" class="accent-[#B23149]">
           All students in selected <span x-text="assigneeType"></span>
         </label>
         <div class="space-y-2 max-h-40 overflow-y-auto">
           <template x-for="student in currentStudents()" :key="student.id">
             <label class="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" name="student_ids" :value="student.id" x-model="selectedStudents" :disabled="selectAll" class="accent-[#C0392B]">
+              <input type="checkbox" name="student_ids" :value="student.id" x-model="selectedStudents" :disabled="selectAll" class="accent-[#B23149]">
               <span x-text="student.name"></span>
             </label>
           </template>
         </div>
       </div>
-      <button type="submit" class="bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer">
+      <button type="submit" class="bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer">
         Add enrollments
       </button>
     </form>

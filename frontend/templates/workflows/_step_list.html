@@ -28,7 +28,7 @@
         {% csrf_token %}
         <button type="submit"
                 class="text-xs px-3 py-1.5 rounded-lg border cursor-pointer
-                       {% if item.done %}border-green-300 text-green-700{% else %}border-gray-200 text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]{% endif %}">
+                       {% if item.done %}border-green-300 text-green-700{% else %}border-gray-200 text-gray-600 hover:border-[#B23149] hover:text-[#B23149]{% endif %}">
           {% if item.done %}Mark incomplete{% else %}Mark done{% endif %}
         </button>
       </form>

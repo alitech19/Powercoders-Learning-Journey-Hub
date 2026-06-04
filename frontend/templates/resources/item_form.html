@@ -3,8 +3,8 @@
 
 {% block content %}
 <div class="max-w-lg mx-auto">
-  <p class="text-sm text-gray-500 mb-1"><a href="{% url 'resources:container_detail' container.pk %}" class="hover:text-[#C0392B]">{{ container.title }}</a></p>
-  <h1 class="text-xl font-bold text-[#2B2B2B] mb-6">{{ form_title }}</h1>
+  <p class="text-sm text-gray-500 mb-1"><a href="{% url 'resources:container_detail' container.pk %}" class="hover:text-[#B23149]">{{ container.title }}</a></p>
+  <h1 class="text-xl font-bold text-[#343534] mb-6">{{ form_title }}</h1>
   <form method="post" class="space-y-4 bg-white border border-gray-200 rounded-xl p-6">
     {% csrf_token %}
     <div>
@@ -18,7 +18,7 @@
       {% if form.url.errors %}<p class="text-xs text-red-600 mt-1">{{ form.url.errors.0 }}</p>{% endif %}
     </div>
     <div class="flex gap-3 pt-2">
-      <button type="submit" class="bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-5 py-2 rounded-lg">Save</button>
+      <button type="submit" class="bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-5 py-2 rounded-lg">Save</button>
       <a href="{{ cancel_url }}" class="text-sm font-medium px-5 py-2 rounded-lg border border-gray-200 text-gray-600">Cancel</a>
     </div>
   </form>

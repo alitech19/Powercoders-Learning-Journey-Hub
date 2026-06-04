@@ -4,7 +4,7 @@
 {% block extra_head %}
 <style>
   .info-section:target { scroll-margin-top: 5rem; }
-  .info-section.active-section > h2 { color: #C0392B; }
+  .info-section.active-section > h2 { color: #B23149; }
 </style>
 {% endblock %}
 
@@ -12,13 +12,13 @@
 <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pr-12">
   <div>
     <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Help</p>
-    <h1 class="text-2xl font-bold text-[#2B2B2B]">{{ topic.title }}</h1>
+    <h1 class="text-2xl font-bold text-[#343534]">{{ topic.title }}</h1>
     {% if help_key %}
-    <p class="text-sm text-gray-500 mt-1">Opened from: <span class="font-medium text-[#2B2B2B]">{{ source_label }}</span></p>
+    <p class="text-sm text-gray-500 mt-1">Opened from: <span class="font-medium text-[#343534]">{{ source_label }}</span></p>
     {% endif %}
   </div>
   <a href="{{ back_url }}"
-     class="text-sm font-semibold text-[#C0392B] hover:text-[#A93226] transition-colors shrink-0">
+     class="text-sm font-semibold text-[#B23149] hover:text-[#8E273A] transition-colors shrink-0">
     ← Back
   </a>
 </div>
@@ -31,7 +31,7 @@
       <li>
         <a href="{{ item.url }}"
            class="block px-3 py-2 rounded-lg transition-colors
-                  {% if item.active %}bg-[#C0392B] text-white font-medium{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
+                  {% if item.active %}bg-[#B23149] text-white font-medium{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
           {{ item.title }}
         </a>
       </li>
@@ -43,11 +43,11 @@
     {% for section in sections %}
     <section id="{{ section.section_id }}"
              class="info-section scroll-mt-20 {% if section.section_id == active_section %}active-section{% endif %}">
-      <h2 class="text-lg font-bold text-[#2B2B2B] mb-3 pb-2 border-b border-gray-200">{{ section.title }}</h2>
+      <h2 class="text-lg font-bold text-[#343534] mb-3 pb-2 border-b border-gray-200">{{ section.title }}</h2>
       <div class="prose prose-sm max-w-none text-gray-700 leading-relaxed space-y-4
                   [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1.5
-                  [&_a]:text-[#C0392B] [&_a]:underline
-                  [&_h3]:text-base [&_h3]:font-semibold [&_h3]:text-[#2B2B2B] [&_h3]:mt-5 [&_h3]:mb-2
+                  [&_a]:text-[#B23149] [&_a]:underline
+                  [&_h3]:text-base [&_h3]:font-semibold [&_h3]:text-[#343534] [&_h3]:mt-5 [&_h3]:mb-2
                   [&_p]:my-2
                   [&_table]:w-full [&_table]:text-sm [&_table]:border-collapse [&_table]:my-3
                   [&_th]:text-left [&_th]:text-xs [&_th]:uppercase [&_th]:text-gray-500 [&_th]:pb-2 [&_th]:pr-4 [&_th]:border-b [&_th]:border-gray-200

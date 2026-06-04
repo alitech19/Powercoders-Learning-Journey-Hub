@@ -14,14 +14,14 @@
     <input type="search" name="q" value="{{ search_query }}"
            placeholder="Search by title…"
            maxlength="{{ limits.search }}"
-           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30 focus:border-[#C0392B]">
+           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149]">
   </div>
   <button type="submit"
-          class="px-4 py-2 bg-[#2B2B2B] text-white text-sm font-medium rounded-lg cursor-pointer">
+          class="px-4 py-2 bg-[#343534] text-white text-sm font-medium rounded-lg cursor-pointer">
     Search
   </button>
   {% if search_query %}
-  <a href="{% url 'habits:list' %}" class="text-sm text-gray-500 hover:text-[#C0392B]">Clear search</a>
+  <a href="{% url 'habits:list' %}" class="text-sm text-gray-500 hover:text-[#B23149]">Clear search</a>
   {% endif %}
 </form>
 
@@ -33,16 +33,16 @@
     <input type="search" name="q" value="{{ search_query }}"
            placeholder="Search by title…"
            maxlength="{{ limits.search }}"
-           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30 focus:border-[#C0392B]">
+           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149]">
   </div>
   {% if student_filter %}<input type="hidden" name="student" value="{{ student_filter }}">{% endif %}
   <button type="submit"
-          class="px-4 py-2 bg-[#2B2B2B] text-white text-sm font-medium rounded-lg cursor-pointer">
+          class="px-4 py-2 bg-[#343534] text-white text-sm font-medium rounded-lg cursor-pointer">
     Search
   </button>
   {% if search_query %}
   <a href="{% url 'habits:list' %}{% if student_filter %}?student={{ student_filter }}{% endif %}"
-     class="text-sm text-gray-500 hover:text-[#C0392B]">Clear search</a>
+     class="text-sm text-gray-500 hover:text-[#B23149]">Clear search</a>
   {% endif %}
 </form>
 
@@ -50,13 +50,13 @@
 <div class="flex gap-2 flex-wrap mb-4">
   <a href="{% url 'habits:list' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if not student_filter %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B]{% endif %}">
+            {% if not student_filter %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
     All Students
   </a>
   {% for s in students %}
   <a href="?student={{ s.pk }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if student_filter == s.pk|stringformat:'s' %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B]{% endif %}">
+            {% if student_filter == s.pk|stringformat:'s' %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
     {{ s.display_name }}
   </a>
   {% endfor %}
@@ -69,14 +69,14 @@
 {% if active_rows %}
 <div class="space-y-3 mb-8">
   {% for row in active_rows %}
-  <div class="bg-white rounded-xl border border-gray-200 hover:border-[#C0392B]/20 transition-all overflow-hidden">
+  <div class="bg-white rounded-xl border border-gray-200 hover:border-[#B23149]/20 transition-all overflow-hidden">
     {% if view_as != 'student' %}
     <div class="flex items-center justify-between gap-3 px-5 py-2.5 bg-gray-50 border-b border-gray-100">
       <div class="flex items-center gap-2.5 min-w-0">
-        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-[#2B2B2B] text-white flex items-center justify-center text-xs font-bold uppercase">
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-[#343534] text-white flex items-center justify-center text-xs font-bold uppercase">
           {{ row.habit.author.display_name|slice:":1" }}
         </span>
-        <span class="font-semibold text-sm text-[#2B2B2B] truncate">{{ row.habit.author.display_name }}</span>
+        <span class="font-semibold text-sm text-[#343534] truncate">{{ row.habit.author.display_name }}</span>
         {% if row.habit.author.group %}
         <span class="text-xs text-gray-400 truncate hidden sm:inline">· {{ row.habit.author.group.name }}</span>
         {% endif %}
@@ -88,7 +88,7 @@
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap mb-1">
             <a href="{% url 'habits:detail' row.habit.pk %}"
-               class="font-semibold text-[#2B2B2B] hover:text-[#C0392B] transition-colors">
+               class="font-semibold text-[#343534] hover:text-[#B23149] transition-colors">
               {{ row.habit.title }}
             </a>
             {% if view_as == 'student' %}
@@ -102,7 +102,7 @@
           <p class="text-sm text-gray-500 line-clamp-2 mb-2">{{ row.habit.description }}</p>
           {% endif %}
           <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400">
-            <span><span class="text-[#2B2B2B] font-semibold">{{ row.done_this_week }}</span>/{{ row.habit.target_days_per_week }} days this week</span>
+            <span><span class="text-[#343534] font-semibold">{{ row.done_this_week }}</span>/{{ row.habit.target_days_per_week }} days this week</span>
             {% if row.habit.target_minutes %}
             <span>{{ row.habit.target_minutes }} min/day</span>
             {% endif %}
@@ -113,7 +113,7 @@
           {% include "habits/_log_buttons.html" %}
           {% if row.can_log %}
           <div class="flex gap-2 text-xs">
-            <a href="{% url 'habits:edit' row.habit.pk %}" class="text-gray-400 hover:text-[#C0392B]">Edit</a>
+            <a href="{% url 'habits:edit' row.habit.pk %}" class="text-gray-400 hover:text-[#B23149]">Edit</a>
             <a href="{% url 'habits:complete' row.habit.pk %}" class="text-gray-400 hover:text-green-600">Complete</a>
           </div>
           {% endif %}
@@ -133,7 +133,7 @@
   <p class="text-gray-500 text-sm mb-4">No active habits yet. Start building a routine.</p>
   {% if can_create %}
   <a href="{% url 'habits:create' %}"
-     class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+     class="inline-flex items-center gap-2 bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
     Create first habit
   </a>
   {% endif %}
@@ -151,10 +151,10 @@
   <div class="bg-white rounded-xl border border-gray-200 overflow-hidden opacity-90">
     {% if view_as != 'student' %}
     <div class="flex items-center gap-2.5 px-5 py-2.5 bg-gray-50 border-b border-gray-100">
-      <span class="flex-shrink-0 w-7 h-7 rounded-full bg-[#2B2B2B] text-white flex items-center justify-center text-xs font-bold uppercase">
+      <span class="flex-shrink-0 w-7 h-7 rounded-full bg-[#343534] text-white flex items-center justify-center text-xs font-bold uppercase">
         {{ row.habit.author.display_name|slice:":1" }}
       </span>
-      <span class="font-semibold text-sm text-[#2B2B2B] truncate">{{ row.habit.author.display_name }}</span>
+      <span class="font-semibold text-sm text-[#343534] truncate">{{ row.habit.author.display_name }}</span>
       {% if row.habit.author.group %}
       <span class="text-xs text-gray-400 truncate hidden sm:inline">· {{ row.habit.author.group.name }}</span>
       {% endif %}
@@ -165,7 +165,7 @@
         <div class="min-w-0">
           <div class="flex items-center gap-2 flex-wrap mb-2">
             <a href="{% url 'habits:detail' row.habit.pk %}"
-               class="font-semibold text-[#2B2B2B] hover:text-[#C0392B]">{{ row.habit.title }}</a>
+               class="font-semibold text-[#343534] hover:text-[#B23149]">{{ row.habit.title }}</a>
             <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Completed</span>
             {% if view_as == 'student' %}
             {% include "habits/_visibility_badge.html" with habit=row.habit %}
@@ -175,15 +175,15 @@
           <p class="text-sm text-gray-500 mb-2 line-clamp-2">{{ row.habit.description }}</p>
           {% endif %}
           <p class="text-sm text-gray-600 leading-relaxed">
-            <span class="font-semibold text-[#2B2B2B]">{{ row.habit.target_days_per_week }}</span>
+            <span class="font-semibold text-[#343534]">{{ row.habit.target_days_per_week }}</span>
             day{{ row.habit.target_days_per_week|pluralize }} per week
             {% if row.habit.target_minutes %}
-            · <span class="font-semibold text-[#2B2B2B]">{{ row.habit.target_minutes }}</span> min/day
+            · <span class="font-semibold text-[#343534]">{{ row.habit.target_minutes }}</span> min/day
             {% else %}
             · no daily time target
             {% endif %}
             · final streak
-            <span class="font-semibold text-[#C0392B]">{{ row.habit.completed_weekly_streak }}</span>
+            <span class="font-semibold text-[#B23149]">{{ row.habit.completed_weekly_streak }}</span>
             week{{ row.habit.completed_weekly_streak|pluralize }}
           </p>
           <p class="text-xs text-gray-400 mt-1">
@@ -195,7 +195,7 @@
           {% if row.can_reactivate %}
           <form method="post" action="{% url 'habits:reactivate' row.habit.pk %}">
             {% csrf_token %}
-            <button type="submit" class="text-gray-400 hover:text-[#C0392B] cursor-pointer">Reactivate</button>
+            <button type="submit" class="text-gray-400 hover:text-[#B23149] cursor-pointer">Reactivate</button>
           </form>
           {% endif %}
           {% if row.can_delete %}

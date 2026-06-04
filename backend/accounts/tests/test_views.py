@@ -1,7 +1,10 @@
+from io import BytesIO
 from unittest.mock import patch
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
+from PIL import Image
 
 from accounts.dev_seed import DEV_AUTH_BYPASS_SESSION_KEY
 from accounts.models import User
@@ -30,6 +33,27 @@ class ProfileViewTests(TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.display_name, 'After')
         self.assertTrue(self.user.email_notifications_enabled)
+
+    def test_post_remove_avatar(self):
+        image = Image.new('RGB', (8, 8), color='red')
+        buffer = BytesIO()
+        image.save(buffer, format='PNG')
+        buffer.seek(0)
+        self.user.avatar = SimpleUploadedFile('avatar.png', buffer.read(), content_type='image/png')
+        self.user.save(update_fields=['avatar'])
+        self.assertTrue(self.user.avatar)
+
+        response = self.client.post(
+            reverse('accounts:profile'),
+            {
+                'display_name': self.user.display_name,
+                'email_notifications_enabled': 'on',
+                'remove_avatar': '1',
+            },
+        )
+        self.assertRedirects(response, reverse('accounts:profile'))
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.avatar)
 
 
 class OnboardingViewTests(TestCase):

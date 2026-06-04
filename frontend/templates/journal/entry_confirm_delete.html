@@ -10,10 +10,10 @@
       </svg>
     </div>
     {% if admin_delete %}
-    <h1 class="text-lg font-bold text-[#2B2B2B] mb-1">Remove this shared entry?</h1>
+    <h1 class="text-lg font-bold text-[#343534] mb-1">Remove this shared entry?</h1>
     <p class="text-gray-500 text-sm mb-4">As an admin, you can remove published entries to prevent harm. The student will no longer see this entry.</p>
     {% else %}
-    <h1 class="text-lg font-bold text-[#2B2B2B] mb-1">Delete this entry?</h1>
+    <h1 class="text-lg font-bold text-[#343534] mb-1">Delete this entry?</h1>
     {% endif %}
     <p class="text-gray-500 text-sm mb-1">«{{ entry.title }}»</p>
     <p class="text-gray-400 text-xs mb-6">{{ entry.entry_date|date:"d F Y" }} · {{ entry.word_count }} words · {{ entry.author.display_name }}</p>

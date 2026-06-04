@@ -5,12 +5,12 @@
 <div class="max-w-2xl mx-auto">
 
   <a href="{% url 'habits:list' %}"
-     class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] transition-colors mb-4">
+     class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#B23149] transition-colors mb-4">
     ← Back to habits
   </a>
 
   {% if is_staff_view %}
-  <div class="flex items-center gap-3 mb-4 px-4 py-3 bg-[#2B2B2B] text-white rounded-xl">
+  <div class="flex items-center gap-3 mb-4 px-4 py-3 bg-[#343534] text-white rounded-xl">
     <span class="flex-shrink-0 w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-sm font-bold uppercase">
       {{ habit.author.display_name|slice:":1" }}
     </span>
@@ -37,7 +37,7 @@
           <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700">On track this week</span>
           {% endif %}
         </div>
-        <h1 class="text-xl font-bold text-[#2B2B2B]">{{ habit.title }}</h1>
+        <h1 class="text-xl font-bold text-[#343534]">{{ habit.title }}</h1>
         {% if habit.description %}
         <p class="text-sm text-gray-500 mt-2 leading-relaxed">{{ habit.description }}</p>
         {% endif %}
@@ -46,7 +46,7 @@
       <div class="flex gap-2 flex-shrink-0 flex-wrap justify-end">
         {% if can_edit %}
         <a href="{% url 'habits:edit' habit.pk %}"
-           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]">Edit</a>
+           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
         {% endif %}
         {% if can_complete %}
         <a href="{% url 'habits:complete' habit.pk %}"
@@ -57,7 +57,7 @@
           {% csrf_token %}
           <input type="hidden" name="next" value="{{ request.path }}">
           <button type="submit"
-                  class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B] cursor-pointer">
+                  class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#B23149] hover:text-[#B23149] cursor-pointer">
             Reactivate
           </button>
         </form>
@@ -72,15 +72,15 @@
 
     <div class="grid grid-cols-3 gap-3 mb-5">
       <div class="rounded-xl bg-gray-50 border border-gray-100 p-3 text-center">
-        <p class="text-lg font-bold text-[#C0392B]">{{ row.done_this_week }}/{{ habit.target_days_per_week }}</p>
+        <p class="text-lg font-bold text-[#B23149]">{{ row.done_this_week }}/{{ habit.target_days_per_week }}</p>
         <p class="text-[11px] text-gray-400 mt-0.5">Days this week</p>
       </div>
       <div class="rounded-xl bg-gray-50 border border-gray-100 p-3 text-center">
-        <p class="text-lg font-bold text-[#C0392B]">{{ row.streak }}🔥</p>
+        <p class="text-lg font-bold text-[#B23149]">{{ row.streak }}🔥</p>
         <p class="text-[11px] text-gray-400 mt-0.5">Week streak</p>
       </div>
       <div class="rounded-xl bg-gray-50 border border-gray-100 p-3 text-center">
-        <p class="text-lg font-bold text-[#2B2B2B]">{% if habit.target_minutes %}{{ habit.target_minutes }}{% else %}—{% endif %}</p>
+        <p class="text-lg font-bold text-[#343534]">{% if habit.target_minutes %}{{ habit.target_minutes }}{% else %}—{% endif %}</p>
         <p class="text-[11px] text-gray-400 mt-0.5">Min/day</p>
       </div>
     </div>
@@ -93,15 +93,15 @@
     {% elif habit.completed_at %}
     <div class="mb-5 pb-5 border-b border-gray-100">
       <p class="text-sm text-gray-600 leading-relaxed">
-        <span class="font-semibold text-[#2B2B2B]">{{ habit.target_days_per_week }}</span>
+        <span class="font-semibold text-[#343534]">{{ habit.target_days_per_week }}</span>
         day{{ habit.target_days_per_week|pluralize }} per week
         {% if habit.target_minutes %}
-        · <span class="font-semibold text-[#2B2B2B]">{{ habit.target_minutes }}</span> min/day
+        · <span class="font-semibold text-[#343534]">{{ habit.target_minutes }}</span> min/day
         {% else %}
         · no daily time target
         {% endif %}
         · final streak
-        <span class="font-semibold text-[#C0392B]">{{ habit.completed_weekly_streak }}</span>
+        <span class="font-semibold text-[#B23149]">{{ habit.completed_weekly_streak }}</span>
         week{{ habit.completed_weekly_streak|pluralize }}
       </p>
       <p class="text-xs text-gray-400 mt-1">Completed {{ habit.completed_at|date:"d M Y" }}</p>

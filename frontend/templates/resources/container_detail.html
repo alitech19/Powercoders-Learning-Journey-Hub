@@ -3,12 +3,12 @@
 
 {% block content %}
 <div class="mb-6 pr-14">
-  <a href="{{ return_url }}" class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] transition-colors mb-3">
+  <a href="{{ return_url }}" class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#B23149] transition-colors mb-3">
     ← Back
   </a>
   <div class="flex items-start justify-between gap-4 flex-wrap">
     <div class="min-w-0">
-      <h1 class="text-2xl font-bold text-[#2B2B2B]">{{ container.title }}</h1>
+      <h1 class="text-2xl font-bold text-[#343534]">{{ container.title }}</h1>
       {% if container.group %}
       <p class="text-gray-500 text-sm mt-0.5">{{ container.group.name }} · {{ container.group.cohort.name }}</p>
       {% endif %}
@@ -17,7 +17,7 @@
     <div class="flex gap-2 flex-wrap shrink-0">
       {% if can_edit_meta %}
       <a href="{% url 'resources:container_edit' container.pk %}"
-         class="text-sm font-medium px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:border-[#C0392B] transition-colors">
+         class="text-sm font-medium px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:border-[#B23149] transition-colors">
         Rename
       </a>
       {% endif %}
@@ -34,7 +34,7 @@
   {% if can_edit %}
   <div class="flex justify-center mt-4">
     <a href="{% url 'resources:item_create' container.pk %}"
-       class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors shadow-sm">
+       class="inline-flex items-center gap-2 bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors shadow-sm">
       <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
       </svg>
@@ -50,7 +50,7 @@
   <li class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3 group">
     <div class="flex-1 min-w-0">
       <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer"
-         class="text-sm font-semibold text-[#2B2B2B] hover:text-[#C0392B] truncate block">
+         class="text-sm font-semibold text-[#343534] hover:text-[#B23149] truncate block">
         {{ item.title }}
       </a>
       <p class="text-xs text-gray-400 truncate mt-0.5">{{ item.url }}</p>
@@ -70,7 +70,7 @@
         <input type="hidden" name="direction" value="down">
         <button type="submit" class="text-xs px-2 py-1 text-gray-400 hover:text-gray-700" title="Move down">↓</button>
       </form>
-      <a href="{% url 'resources:item_edit' item.pk %}" class="text-xs px-2 py-1 text-gray-400 hover:text-[#C0392B]">Edit</a>
+      <a href="{% url 'resources:item_edit' item.pk %}" class="text-xs px-2 py-1 text-gray-400 hover:text-[#B23149]">Edit</a>
       <form method="post" action="{% url 'resources:item_delete' item.pk %}" class="inline"
             onsubmit="return confirm('Remove this resource from the list?');">
         {% csrf_token %}

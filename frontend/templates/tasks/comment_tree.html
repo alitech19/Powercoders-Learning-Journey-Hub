@@ -1,12 +1,12 @@
 <li class="border-l-2 border-gray-100 pl-4">
   <div class="flex items-start justify-between gap-2">
     <div>
-      <p class="text-sm font-semibold text-[#2B2B2B]">{{ comment.author.display_name }}</p>
+      <p class="text-sm font-semibold text-[#343534]">{{ comment.author.display_name }}</p>
       <p class="text-sm text-gray-600 mt-0.5">{{ comment.text|linebreaksbr }}</p>
       <p class="text-xs text-gray-400 mt-1">{{ comment.created_at|date:"d M Y H:i" }}</p>
     </div>
     {% if can_comment %}
-    <a href="{% url 'tasks:comment_reply_create' comment.pk %}" class="text-xs text-[#C0392B] shrink-0">Reply</a>
+    <a href="{% url 'tasks:comment_reply_create' comment.pk %}" class="text-xs text-[#B23149] shrink-0">Reply</a>
     {% endif %}
   </div>
   {% if comment.tree_replies %}

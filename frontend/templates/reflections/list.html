@@ -13,16 +13,16 @@
   <div class="flex-1 min-w-[200px] max-w-md">
     <input type="search" name="q" value="{{ search_query }}" placeholder="Search by title…"
            maxlength="{{ limits.search }}"
-           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30 focus:border-[#C0392B]">
+           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149]">
   </div>
   {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
   <button type="submit"
-          class="px-4 py-2 bg-[#2B2B2B] text-white text-sm font-medium rounded-lg cursor-pointer">
+          class="px-4 py-2 bg-[#343534] text-white text-sm font-medium rounded-lg cursor-pointer">
     Search
   </button>
   {% if search_query %}
   <a href="{% url 'reflections:list' %}{% if tag_filter %}?tag={{ tag_filter }}{% endif %}"
-     class="text-sm text-gray-500 hover:text-[#C0392B]">Clear search</a>
+     class="text-sm text-gray-500 hover:text-[#B23149]">Clear search</a>
   {% endif %}
 </form>
 
@@ -34,17 +34,17 @@
     <input type="search" name="q" value="{{ search_query }}"
            placeholder="Search by title, e.g. week 7…"
            maxlength="{{ limits.search }}"
-           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30 focus:border-[#C0392B]">
+           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149]">
   </div>
   {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
   {% if student_filter %}<input type="hidden" name="student" value="{{ student_filter }}">{% endif %}
   <button type="submit"
-          class="px-4 py-2 bg-[#2B2B2B] text-white text-sm font-medium rounded-lg cursor-pointer">
+          class="px-4 py-2 bg-[#343534] text-white text-sm font-medium rounded-lg cursor-pointer">
     Search
   </button>
   {% if search_query %}
   <a href="{% url 'reflections:list' %}{% if tag_filter %}?tag={{ tag_filter }}{% endif %}{% if student_filter %}{% if tag_filter %}&{% else %}?{% endif %}student={{ student_filter }}{% endif %}"
-     class="text-sm text-gray-500 hover:text-[#C0392B]">Clear search</a>
+     class="text-sm text-gray-500 hover:text-[#B23149]">Clear search</a>
   {% endif %}
 </form>
 
@@ -52,13 +52,13 @@
 <div class="flex gap-2 flex-wrap mb-4">
   <a href="{% url 'reflections:list' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if not student_filter %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B]{% endif %}">
+            {% if not student_filter %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
     All Students
   </a>
   {% for s in students %}
   <a href="?student={{ s.pk }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if student_filter == s.pk|stringformat:'s' %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B]{% endif %}">
+            {% if student_filter == s.pk|stringformat:'s' %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
     {{ s.display_name }}
   </a>
   {% endfor %}
@@ -71,13 +71,13 @@
   <div class="flex gap-1 bg-white border border-gray-200 rounded-lg p-1 w-fit flex-wrap">
   <a href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}{% if student_filter %}student={{ student_filter }}{% endif %}"
      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
-            {% if not tag_filter %}bg-[#2B2B2B] text-white{% else %}text-gray-500 hover:text-[#2B2B2B]{% endif %}">
+            {% if not tag_filter %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
     All tags
   </a>
   {% for value, label in tag_choices %}
   <a href="?tag={{ value }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if student_filter %}&student={{ student_filter }}{% endif %}"
      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
-            {% if tag_filter == value %}bg-[#2B2B2B] text-white{% else %}text-gray-500 hover:text-[#2B2B2B]{% endif %}">
+            {% if tag_filter == value %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
     {{ label }}
   </a>
   {% endfor %}
@@ -88,28 +88,28 @@
 <div class="space-y-3">
   {% for r in reflections %}
   <a href="{% url 'reflections:detail' r.pk %}"
-     class="block bg-white rounded-xl border border-gray-200 hover:border-[#C0392B]/30 hover:shadow-sm transition-all overflow-hidden">
+     class="block bg-white rounded-xl border border-gray-200 hover:border-[#B23149]/30 hover:shadow-sm transition-all overflow-hidden">
     {% if view_as != 'student' %}
     <div class="flex items-center justify-between gap-3 px-5 py-2.5 bg-gray-50 border-b border-gray-100">
       <div class="flex items-center gap-2.5 min-w-0">
-        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-[#2B2B2B] text-white flex items-center justify-center text-xs font-bold uppercase">
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-[#343534] text-white flex items-center justify-center text-xs font-bold uppercase">
           {{ r.author.display_name|slice:":1" }}
         </span>
-        <span class="font-semibold text-sm text-[#2B2B2B] truncate">{{ r.author.display_name }}</span>
+        <span class="font-semibold text-sm text-[#343534] truncate">{{ r.author.display_name }}</span>
         {% if r.author.group %}
         <span class="text-xs text-gray-400 truncate hidden sm:inline">· {{ r.author.group.name }}</span>
         {% endif %}
       </div>
       <div class="text-right flex-shrink-0 text-xs space-y-0.5">
         {% if r.expectations_at %}
-        <p class="text-[#2B2B2B]"><span class="text-gray-400">Start</span> {{ r.expectations_at|date:"d M Y" }}</p>
+        <p class="text-[#343534]"><span class="text-gray-400">Start</span> {{ r.expectations_at|date:"d M Y" }}</p>
         {% endif %}
         {% if r.final_reflection_at %}
-        <p class="text-[#2B2B2B]"><span class="text-gray-400">Finish</span> {{ r.final_reflection_at|date:"d M Y" }}</p>
+        <p class="text-[#343534]"><span class="text-gray-400">Finish</span> {{ r.final_reflection_at|date:"d M Y" }}</p>
         {% elif r.expectations_at %}
         <p class="text-gray-400 italic">In progress</p>
         {% else %}
-        <p class="text-[#2B2B2B]">{{ r.created_at|date:"d M Y" }}</p>
+        <p class="text-[#343534]">{{ r.created_at|date:"d M Y" }}</p>
         {% endif %}
       </div>
     </div>
@@ -129,7 +129,7 @@
             {% endif %}
             {% endif %}
           </div>
-          <h2 class="font-semibold text-[#2B2B2B]">{{ r.title }}</h2>
+          <h2 class="font-semibold text-[#343534]">{{ r.title }}</h2>
           <p class="text-sm text-gray-500 mt-1 line-clamp-2">
             {% if r.has_final_reflection %}{{ r.final_reflection|truncatewords:25 }}
             {% elif r.has_expectations %}{{ r.expectations|truncatewords:25 }}
@@ -157,16 +157,16 @@
 <div class="text-center py-20">
   <div class="text-5xl mb-4">💭</div>
   {% if view_as == 'student' %}
-  <h2 class="text-lg font-semibold text-[#2B2B2B] mb-1">Start reflecting</h2>
+  <h2 class="text-lg font-semibold text-[#343534] mb-1">Start reflecting</h2>
   <p class="text-gray-500 text-sm mb-6">Give your reflection a name and track your progress over time.</p>
   {% if can_create %}
   <a href="{% url 'reflections:create' %}"
-     class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+     class="inline-flex items-center gap-2 bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
     Write first reflection
   </a>
   {% endif %}
   {% else %}
-  <h2 class="text-lg font-semibold text-[#2B2B2B] mb-1">No reflections found</h2>
+  <h2 class="text-lg font-semibold text-[#343534] mb-1">No reflections found</h2>
   <p class="text-gray-500 text-sm">{% if search_query %}Try a different search term.{% else %}Students haven't shared reflections yet.{% endif %}</p>
   {% endif %}
 </div>

@@ -5,10 +5,10 @@
 <div class="max-w-3xl mx-auto">
 
   <div class="mb-5">
-    <a href="{% url 'workflows:list' %}" class="text-sm text-gray-400 hover:text-[#C0392B] mb-3 inline-block">← All Workflows</a>
+    <a href="{% url 'workflows:list' %}" class="text-sm text-gray-400 hover:text-[#B23149] mb-3 inline-block">← All Workflows</a>
     <div class="flex items-start justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-[#2B2B2B]">{{ workflow.title }}</h1>
+        <h1 class="text-2xl font-bold text-[#343534]">{{ workflow.title }}</h1>
         <div class="flex flex-wrap gap-3 mt-1 text-xs text-gray-400">
           <span>{{ workflow.get_progress_mode_display }}</span>
           <span>{{ workflow.get_assignee_label }}</span>
@@ -22,7 +22,7 @@
       {% if view_as == 'staff' and can_manage %}
       <div class="flex gap-2 flex-shrink-0">
         <a href="{% url 'workflows:edit' workflow.pk %}"
-           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]">Edit</a>
+           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
         <a href="{% url 'workflows:delete' workflow.pk %}"
            class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-400 hover:border-red-300 hover:text-red-500">Delete</a>
       </div>
@@ -39,10 +39,10 @@
   <div class="bg-white rounded-xl border border-gray-200 p-5 mb-5">
     <div class="flex items-center justify-between mb-2">
       <span class="text-sm font-semibold">Your Progress</span>
-      <span class="text-sm font-bold text-[#C0392B]">{{ progress }}%</span>
+      <span class="text-sm font-bold text-[#B23149]">{{ progress }}%</span>
     </div>
     <div class="w-full bg-gray-100 rounded-full h-2.5">
-      <div class="bg-[#C0392B] h-2.5 rounded-full" style="width: {{ progress }}%"></div>
+      <div class="bg-[#B23149] h-2.5 rounded-full" style="width: {{ progress }}%"></div>
     </div>
   </div>
 
@@ -55,10 +55,10 @@
       <div class="bg-white rounded-xl border border-gray-200 p-5">
         <div class="flex items-center justify-between mb-4">
           <span class="text-sm font-semibold">Shared Progress</span>
-          <span class="text-sm font-bold text-[#C0392B]">{{ shared_progress }}%</span>
+          <span class="text-sm font-bold text-[#B23149]">{{ shared_progress }}%</span>
         </div>
         <div class="w-full bg-gray-100 rounded-full h-2.5 mb-4">
-          <div class="bg-[#C0392B] h-2.5 rounded-full" style="width: {{ shared_progress }}%"></div>
+          <div class="bg-[#B23149] h-2.5 rounded-full" style="width: {{ shared_progress }}%"></div>
         </div>
         {% include "workflows/_step_list.html" with step_data=step_data can_toggle=False %}
       </div>
@@ -92,10 +92,10 @@
           <textarea name="description" rows="2" placeholder="Description (optional)" maxlength="{{ limits.step_description }}"
                     class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
           <label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
-            <input type="checkbox" name="requires_previous" checked class="accent-[#C0392B]">
+            <input type="checkbox" name="requires_previous" checked class="accent-[#B23149]">
             Requires previous step
           </label>
-          <button type="submit" class="w-full bg-[#2B2B2B] hover:bg-[#C0392B] text-white text-sm font-semibold py-2 rounded-lg cursor-pointer">
+          <button type="submit" class="w-full bg-[#343534] hover:bg-[#B23149] text-white text-sm font-semibold py-2 rounded-lg cursor-pointer">
             Add Step
           </button>
         </form>
@@ -132,7 +132,7 @@
             <option value="{{ student.pk }}">{{ student.display_name }}</option>
             {% endfor %}
           </select>
-          <button type="submit" class="w-full bg-[#C0392B] text-white text-sm font-semibold py-2 rounded-lg cursor-pointer">Enroll</button>
+          <button type="submit" class="w-full bg-[#B23149] text-white text-sm font-semibold py-2 rounded-lg cursor-pointer">Enroll</button>
         </form>
         {% endif %}
       </div>

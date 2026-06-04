@@ -5,9 +5,9 @@
 <style>
   #chat-scroll { scroll-behavior: smooth; }
   .share-kind-btn.is-active {
-    background-color: #2B2B2B;
+    background-color: #343534;
     color: #fff;
-    border-color: #2B2B2B;
+    border-color: #343534;
   }
 </style>
 {% endblock %}
@@ -17,7 +17,7 @@
 
   <div class="flex items-center justify-between mb-3 shrink-0">
     <div>
-      <h1 class="text-xl font-bold text-[#2B2B2B]">Group chat</h1>
+      <h1 class="text-xl font-bold text-[#343534]">Group chat</h1>
       {% if group %}
       <p class="text-gray-500 text-sm">{{ group.name }} · {{ group.cohort.name }}</p>
       {% else %}
@@ -31,7 +31,7 @@
     {% for g in available_groups %}
     <a href="?group={{ g.pk }}"
        class="px-3 py-1 rounded-lg text-sm font-medium transition-colors
-              {% if selected_group_pk == g.pk|stringformat:'s' %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B]{% endif %}">
+              {% if selected_group_pk == g.pk|stringformat:'s' %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
       {{ g.name }}
     </a>
     {% endfor %}

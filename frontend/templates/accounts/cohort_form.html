@@ -5,8 +5,8 @@
 
 <div class="max-w-lg mx-auto">
   <div class="mb-6">
-    <a href="{% url 'accounts:cohort_list' %}" class="text-sm text-gray-400 hover:text-[#C0392B] transition-colors">← Back to Cohorts</a>
-    <h1 class="text-2xl font-bold text-[#2B2B2B] mt-2">{{ title }}</h1>
+    <a href="{% url 'accounts:cohort_list' %}" class="text-sm text-gray-400 hover:text-[#B23149] transition-colors">← Back to Cohorts</a>
+    <h1 class="text-2xl font-bold text-[#343534] mt-2">{{ title }}</h1>
   </div>
 
   <div class="bg-white rounded-xl border border-gray-200 p-6">
@@ -15,12 +15,12 @@
 
       {% for field in form %}
       <div class="mb-5">
-        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-[#2B2B2B] mb-1.5">
-          {{ field.label }}{% if field.field.required %} <span class="text-[#C0392B]">*</span>{% endif %}
+        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-[#343534] mb-1.5">
+          {{ field.label }}{% if field.field.required %} <span class="text-[#B23149]">*</span>{% endif %}
         </label>
         {% if field.field.widget.input_type == 'select' %}
           <select name="{{ field.html_name }}" id="{{ field.id_for_label }}"
-                  class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#2B2B2B] focus:outline-none focus:border-[#C0392B] focus:ring-1 focus:ring-[#C0392B]/20 bg-white">
+                  class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20 bg-white">
             {% for val, label in field.field.choices %}
             <option value="{{ val }}" {% if field.value == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
@@ -30,7 +30,7 @@
                  name="{{ field.html_name }}"
                  id="{{ field.id_for_label }}"
                  value="{{ field.value|default_if_none:'' }}"
-                 class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#2B2B2B] focus:outline-none focus:border-[#C0392B] focus:ring-1 focus:ring-[#C0392B]/20"
+                 class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20"
                  {% if field.field.required %}required{% endif %}>
         {% endif %}
         {% if field.errors %}
@@ -41,7 +41,7 @@
 
       <div class="flex gap-3 pt-2">
         <button type="submit"
-                class="bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors">
+                class="bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors">
           Save
         </button>
         <a href="{% url 'accounts:cohort_list' %}"

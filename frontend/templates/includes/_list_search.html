@@ -3,7 +3,7 @@
     <input type="search" name="q" value="{{ search_query|default:'' }}"
            placeholder="{{ search_placeholder|default:'Search by title…' }}"
            maxlength="{{ limits.search }}"
-           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30 focus:border-[#C0392B]">
+           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149]">
   </div>
   {% if preserve_tag %}<input type="hidden" name="tag" value="{{ preserve_tag }}">{% endif %}
   {% if preserve_student %}<input type="hidden" name="student" value="{{ preserve_student }}">{% endif %}
@@ -11,10 +11,10 @@
   {% if preserve_kind %}<input type="hidden" name="kind" value="{{ preserve_kind }}">{% endif %}
   {% if preserve_sort %}<input type="hidden" name="sort" value="{{ preserve_sort }}">{% endif %}
   <button type="submit"
-          class="px-4 py-2 bg-[#2B2B2B] text-white text-sm font-medium rounded-lg cursor-pointer">
+          class="px-4 py-2 bg-[#343534] text-white text-sm font-medium rounded-lg cursor-pointer">
     Search
   </button>
   {% if search_query and clear_url %}
-  <a href="{{ clear_url }}" class="text-sm text-gray-500 hover:text-[#C0392B]">Clear search</a>
+  <a href="{{ clear_url }}" class="text-sm text-gray-500 hover:text-[#B23149]">Clear search</a>
   {% endif %}
 </form>

@@ -20,10 +20,10 @@
 
   <div class="mb-5">
     <a href="{% if action == 'edit' %}{% url 'goals:detail' goal.pk %}{% else %}{% url 'goals:list' %}{% endif %}"
-       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] transition-colors mb-3">
+       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#B23149] transition-colors mb-3">
       ← {% if action == 'edit' %}Back to goal{% else %}Back to goals{% endif %}
     </a>
-    <h1 class="text-2xl font-bold text-[#2B2B2B]">
+    <h1 class="text-2xl font-bold text-[#343534]">
       {% if action == 'edit' %}Edit Goal{% elif is_staff_create %}New Goals for Students{% else %}New Goal{% endif %}
     </h1>
     {% if is_staff_create %}
@@ -40,9 +40,9 @@
     <input type="hidden" name="visibility" :value="visibility">
 
     <div class="bg-white rounded-xl border border-gray-200 p-5">
-      <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Goal Title <span class="text-[#C0392B]">*</span></label>
+      <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Goal Title <span class="text-[#B23149]">*</span></label>
       <input type="text" name="title" value="{{ form.title.value|default:'' }}" required maxlength="{{ limits.title }}"
-             class="w-full text-lg font-semibold text-[#2B2B2B] border-0 outline-none bg-transparent">
+             class="w-full text-lg font-semibold text-[#343534] border-0 outline-none bg-transparent">
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 p-5">
@@ -82,11 +82,11 @@
       <h2 class="text-sm font-semibold">Assign to students</h2>
       <div class="flex gap-4 text-sm">
         <label class="flex items-center gap-2 cursor-pointer">
-          <input type="radio" name="assignee_type" value="cohort" x-model="assigneeType" @change="targetId = ''" class="accent-[#C0392B]">
+          <input type="radio" name="assignee_type" value="cohort" x-model="assigneeType" @change="targetId = ''" class="accent-[#B23149]">
           Cohort
         </label>
         <label class="flex items-center gap-2 cursor-pointer">
-          <input type="radio" name="assignee_type" value="group" x-model="assigneeType" @change="targetId = ''" class="accent-[#C0392B]">
+          <input type="radio" name="assignee_type" value="group" x-model="assigneeType" @change="targetId = ''" class="accent-[#B23149]">
           Group
         </label>
       </div>
@@ -94,7 +94,7 @@
         <div class="space-y-2 max-h-48 overflow-y-auto">
           {% for cohort in cohorts %}
           <label class="flex items-center gap-2 text-sm cursor-pointer">
-            <input type="radio" name="assignee_target_id" value="{{ cohort.pk }}" x-model="targetId" class="accent-[#C0392B]">
+            <input type="radio" name="assignee_target_id" value="{{ cohort.pk }}" x-model="targetId" class="accent-[#B23149]">
             {{ cohort.name }}
           </label>
           {% endfor %}
@@ -104,7 +104,7 @@
         <div class="space-y-2 max-h-48 overflow-y-auto">
           {% for group in groups %}
           <label class="flex items-center gap-2 text-sm cursor-pointer">
-            <input type="radio" name="assignee_target_id" value="{{ group.pk }}" x-model="targetId" class="accent-[#C0392B]">
+            <input type="radio" name="assignee_target_id" value="{{ group.pk }}" x-model="targetId" class="accent-[#B23149]">
             {{ group }}
           </label>
           {% endfor %}
@@ -112,16 +112,16 @@
       </div>
       <div x-show="targetId" class="pt-3 border-t border-gray-100 space-y-3">
         <label class="flex items-center gap-2 text-sm cursor-pointer">
-          <input type="checkbox" name="select_all_students" x-model="selectAll" @change="toggleSelectAll()" class="accent-[#C0392B]">
+          <input type="checkbox" name="select_all_students" x-model="selectAll" @change="toggleSelectAll()" class="accent-[#B23149]">
           All students in selected <span x-text="assigneeType"></span>
         </label>
-        <button type="button" @click="expanded = !expanded" class="text-xs text-[#C0392B] font-medium">
+        <button type="button" @click="expanded = !expanded" class="text-xs text-[#B23149] font-medium">
           <span x-text="expanded ? 'Hide student list' : 'Select individual students'"></span>
         </button>
         <div x-show="expanded || !selectAll" class="space-y-2 max-h-56 overflow-y-auto">
           <template x-for="student in currentStudents()" :key="student.id">
             <label class="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" name="student_ids" :value="student.id" x-model="selectedStudents" :disabled="selectAll" class="accent-[#C0392B]">
+              <input type="checkbox" name="student_ids" :value="student.id" x-model="selectedStudents" :disabled="selectAll" class="accent-[#B23149]">
               <span x-text="student.name"></span>
             </label>
           </template>
@@ -133,7 +133,7 @@
     <div class="bg-white rounded-xl border border-gray-200 p-5">
       <div class="flex items-center justify-between mb-3">
         <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Milestones</label>
-        <button type="button" @click="addMs()" class="text-xs text-[#C0392B] font-medium">+ Add</button>
+        <button type="button" @click="addMs()" class="text-xs text-[#B23149] font-medium">+ Add</button>
       </div>
       <div class="space-y-2 mb-3">
         <template x-for="(ms, i) in milestones" :key="i">
@@ -155,19 +155,19 @@
       <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Visibility</label>
       <div class="flex gap-3">
         <button type="button" @click="visibility = 'private'"
-                :class="visibility === 'private' ? 'border-[#2B2B2B] bg-[#2B2B2B] text-white' : 'border-gray-200 text-gray-500'"
+                :class="visibility === 'private' ? 'border-[#343534] bg-[#343534] text-white' : 'border-gray-200 text-gray-500'"
                 class="flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium cursor-pointer">
           {% if visibility_mode == 'staff' %}Draft (staff only){% else %}Only me{% endif %}
         </button>
         <button type="button" @click="visibility = 'shared'"
-                :class="visibility === 'shared' ? 'border-[#C0392B] bg-[#C0392B]/5 text-[#C0392B]' : 'border-gray-200 text-gray-500'"
+                :class="visibility === 'shared' ? 'border-[#B23149] bg-[#B23149]/5 text-[#B23149]' : 'border-gray-200 text-gray-500'"
                 class="flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium cursor-pointer">
           {% if visibility_mode == 'staff' %}Share with students{% else %}Share with staff{% endif %}
         </button>
       </div>
     </div>
 
-    <button type="submit" class="w-full bg-[#C0392B] hover:bg-[#A93226] text-white font-semibold py-2.5 rounded-lg text-sm cursor-pointer">
+    <button type="submit" class="w-full bg-[#B23149] hover:bg-[#8E273A] text-white font-semibold py-2.5 rounded-lg text-sm cursor-pointer">
       {% if action == 'edit' %}Save Changes{% elif is_staff_create %}Create goal{% else %}Create Goal{% endif %}
     </button>
   </form>

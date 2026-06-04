@@ -7,17 +7,17 @@
 <div class="flex gap-1 mb-4 bg-white border border-gray-200 rounded-lg p-1 w-fit flex-wrap">
   <a href="?tab=my"
      class="px-4 py-2 rounded-md text-sm font-medium transition-colors
-            {% if tab == 'my' %}bg-[#2B2B2B] text-white{% else %}text-gray-500 hover:text-[#2B2B2B]{% endif %}">
+            {% if tab == 'my' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
     My
   </a>
   <a href="?tab=group{% if selected_group %}&group={{ selected_group.pk }}{% endif %}"
      class="px-4 py-2 rounded-md text-sm font-medium transition-colors
-            {% if tab == 'group' %}bg-[#2B2B2B] text-white{% else %}text-gray-500 hover:text-[#2B2B2B]{% endif %}">
+            {% if tab == 'group' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
     Group
   </a>
   <a href="?tab=themes{% if selected_group %}&group={{ selected_group.pk }}{% endif %}"
      class="px-4 py-2 rounded-md text-sm font-medium transition-colors
-            {% if tab == 'themes' %}bg-[#2B2B2B] text-white{% else %}text-gray-500 hover:text-[#2B2B2B]{% endif %}">
+            {% if tab == 'themes' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
     Themes
   </a>
 </div>
@@ -27,7 +27,7 @@
   {% for g in available_groups %}
   <a href="?tab={{ tab }}&group={{ g.pk }}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if selected_group.pk == g.pk %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B]{% endif %}">
+            {% if selected_group.pk == g.pk %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
     {{ g.name }}
   </a>
   {% endfor %}
@@ -39,8 +39,8 @@
   {% for container in containers %}
   <a href="{% url 'resources:container_detail' container.pk %}"
      class="group flex items-center justify-center aspect-square rounded-2xl border-2 border-gray-200 bg-white
-            hover:border-[#C0392B] hover:shadow-md transition-all p-4 text-center">
-    <span class="text-sm font-semibold text-[#2B2B2B] leading-snug line-clamp-4 group-hover:text-[#C0392B]">
+            hover:border-[#B23149] hover:shadow-md transition-all p-4 text-center">
+    <span class="text-sm font-semibold text-[#343534] leading-snug line-clamp-4 group-hover:text-[#B23149]">
       {{ container.title }}
     </span>
   </a>

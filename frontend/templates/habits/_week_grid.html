@@ -1,7 +1,7 @@
 <div class="grid grid-cols-7 gap-2 {% if list_view %}mt-4 pt-4 border-t border-gray-100{% endif %}">
   {% for day in week_table %}
   <div class="flex flex-col items-center justify-center text-center min-w-0 rounded-xl border py-3 min-h-[4rem]
-              {% if day.is_today %}border-[#C0392B]/30 bg-red-50/40
+              {% if day.is_today %}border-[#B23149]/30 bg-red-50/40
               {% elif day.log and day.log.status == 'done' %}border-green-200 bg-green-50/60
               {% elif day.log %}border-amber-200 bg-amber-50/60
               {% else %}border-gray-100 bg-gray-50/50{% endif %}">

@@ -57,7 +57,7 @@ class ReflectionForm(forms.ModelForm):
         self.fields['title'].widget.attrs.update({
             'placeholder': 'e.g. Reflection week 7',
             'maxlength': TITLE_MAX_LENGTH,
-            'class': 'w-full text-lg font-semibold border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30',
+            'class': 'w-full text-lg font-semibold border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B23149]/30',
         })
         self.fields['custom_label'].max_length = SHORT_LABEL_MAX_LENGTH
         self.fields['custom_label'].widget.attrs['maxlength'] = SHORT_LABEL_MAX_LENGTH

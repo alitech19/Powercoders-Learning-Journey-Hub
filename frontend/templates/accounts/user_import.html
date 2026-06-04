@@ -5,27 +5,27 @@
 
 <div class="max-w-2xl mx-auto">
   <div class="mb-6">
-    <a href="{% url 'accounts:cohort_list' %}" class="text-sm text-gray-400 hover:text-[#C0392B] transition-colors">← Back to Cohorts</a>
-    <h1 class="text-2xl font-bold text-[#2B2B2B] mt-2">Bulk Import Users</h1>
+    <a href="{% url 'accounts:cohort_list' %}" class="text-sm text-gray-400 hover:text-[#B23149] transition-colors">← Back to Cohorts</a>
+    <h1 class="text-2xl font-bold text-[#343534] mt-2">Bulk Import Users</h1>
     <p class="text-gray-500 text-sm mt-0.5">Upload a CSV file to create multiple users at once.</p>
   </div>
 
   <!-- Upload form -->
   {% if not results %}
   <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-    <h2 class="text-sm font-semibold text-[#2B2B2B] mb-4">Upload CSV</h2>
+    <h2 class="text-sm font-semibold text-[#343534] mb-4">Upload CSV</h2>
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
-      <div class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center mb-4 hover:border-[#C0392B]/40 transition-colors">
+      <div class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center mb-4 hover:border-[#B23149]/40 transition-colors">
         <svg class="h-8 w-8 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
         </svg>
         <p class="text-sm text-gray-500 mb-2">Choose a CSV file to upload</p>
         <input type="file" name="csv_file" accept=".csv" required
-               class="block mx-auto text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-gray-200 file:text-sm file:font-medium file:text-[#2B2B2B] file:bg-white hover:file:border-[#C0392B] file:cursor-pointer">
+               class="block mx-auto text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-gray-200 file:text-sm file:font-medium file:text-[#343534] file:bg-white hover:file:border-[#B23149] file:cursor-pointer">
       </div>
       <button type="submit"
-              class="w-full bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold py-2.5 rounded-lg transition-colors">
+              class="w-full bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold py-2.5 rounded-lg transition-colors">
         Import Users
       </button>
     </form>
@@ -70,7 +70,7 @@
           <tbody class="divide-y divide-gray-100">
             {% for u in results.created %}
             <tr>
-              <td class="px-4 py-2.5 font-medium text-[#2B2B2B]">{{ u.display_name }}</td>
+              <td class="px-4 py-2.5 font-medium text-[#343534]">{{ u.display_name }}</td>
               <td class="px-4 py-2.5 text-gray-500">{{ u.email }}</td>
               <td class="px-4 py-2.5 font-mono text-xs bg-yellow-50 text-yellow-800">{{ u.temp_password }}</td>
             </tr>
@@ -116,14 +116,14 @@
   </div>
 
   <a href="{% url 'accounts:user_import' %}"
-     class="inline-flex items-center gap-2 border border-gray-200 hover:border-[#C0392B] text-gray-600 hover:text-[#C0392B] text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+     class="inline-flex items-center gap-2 border border-gray-200 hover:border-[#B23149] text-gray-600 hover:text-[#B23149] text-sm font-medium px-4 py-2 rounded-lg transition-colors">
     Import another file
   </a>
   {% endif %}
 
   <!-- Format guide -->
   <div class="bg-gray-50 rounded-xl border border-gray-200 p-5 mt-6">
-    <h3 class="text-sm font-semibold text-[#2B2B2B] mb-3">CSV format</h3>
+    <h3 class="text-sm font-semibold text-[#343534] mb-3">CSV format</h3>
     <p class="text-xs text-gray-500 mb-2">Required columns: <code class="bg-white px-1 py-0.5 rounded border border-gray-200 font-mono">email</code>, <code class="bg-white px-1 py-0.5 rounded border border-gray-200 font-mono">display_name</code></p>
     <p class="text-xs text-gray-500 mb-3">Optional columns: <code class="bg-white px-1 py-0.5 rounded border border-gray-200 font-mono">role</code> (student/teacher/admin), <code class="bg-white px-1 py-0.5 rounded border border-gray-200 font-mono">cohort</code>, <code class="bg-white px-1 py-0.5 rounded border border-gray-200 font-mono">group</code></p>
     <pre class="text-xs font-mono bg-white border border-gray-200 rounded-lg p-3 text-gray-600 overflow-x-auto">email,display_name,role,cohort,group

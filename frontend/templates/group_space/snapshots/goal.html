@@ -9,7 +9,7 @@
       <span class="text-xs text-amber-600">⚠ Overdue</span>
       {% endif %}
     </div>
-    <h3 class="font-semibold text-[#2B2B2B]">{{ goal.title }}</h3>
+    <h3 class="font-semibold text-[#343534]">{{ goal.title }}</h3>
     {% if goal.target_date %}
     <p class="text-xs text-gray-500 mt-1">🗓 Target: {{ goal.target_date|date:"d F Y" }}</p>
     {% endif %}
@@ -22,10 +22,10 @@
   <div>
     <div class="flex justify-between text-xs text-gray-500 mb-1">
       <span>{{ enrollment.milestones_done }}/{{ enrollment.milestones_total }} milestones</span>
-      <span class="font-semibold text-[#2B2B2B]">{{ enrollment.progress }}%</span>
+      <span class="font-semibold text-[#343534]">{{ enrollment.progress }}%</span>
     </div>
     <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden mb-2">
-      <div class="h-full bg-[#C0392B] rounded-full snapshot-progress-fill" data-width="{{ enrollment.progress }}"></div>
+      <div class="h-full bg-[#B23149] rounded-full snapshot-progress-fill" data-width="{{ enrollment.progress }}"></div>
     </div>
     <ul class="space-y-1.5">
       {% for item in milestones %}

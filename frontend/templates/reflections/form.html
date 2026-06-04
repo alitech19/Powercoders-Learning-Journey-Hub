@@ -10,10 +10,10 @@
 
   <div class="mb-5">
     <a href="{% if action == 'edit' %}{% url 'reflections:detail' reflection.pk %}{% else %}{% url 'reflections:list' %}{% endif %}"
-       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] transition-colors mb-3">
+       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#B23149] transition-colors mb-3">
       ← Back
     </a>
-    <h1 class="text-2xl font-bold text-[#2B2B2B]">
+    <h1 class="text-2xl font-bold text-[#343534]">
       {% if action == 'edit' %}Edit Reflection{% else %}New Reflection{% endif %}
     </h1>
   </div>
@@ -26,27 +26,27 @@
     {% endfor %}
 
     <div class="bg-white rounded-xl border border-gray-200 p-5">
-      <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Title <span class="text-[#C0392B]">*</span></label>
+      <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Title <span class="text-[#B23149]">*</span></label>
       <input type="text" name="title" value="{{ form.title.value|default:'' }}" required
              placeholder="e.g. Reflection week 7"
              maxlength="{{ limits.title }}"
-             class="w-full text-lg font-semibold border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30">
+             class="w-full text-lg font-semibold border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B23149]/30">
       {% if form.title.errors %}<p class="text-xs text-red-500 mt-1">{{ form.title.errors|join:", " }}</p>{% endif %}
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 p-5">
-      <h2 class="text-sm font-semibold text-[#2B2B2B] mb-3">Tags</h2>
+      <h2 class="text-sm font-semibold text-[#343534] mb-3">Tags</h2>
       <div class="flex flex-wrap gap-4 text-sm">
         <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" name="tag_weekly" {% if form.tag_weekly.value %}checked{% endif %} class="accent-[#C0392B]">
+          <input type="checkbox" name="tag_weekly" {% if form.tag_weekly.value %}checked{% endif %} class="accent-[#B23149]">
           Weekly
         </label>
         <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" name="tag_project" {% if form.tag_project.value %}checked{% endif %} class="accent-[#C0392B]">
+          <input type="checkbox" name="tag_project" {% if form.tag_project.value %}checked{% endif %} class="accent-[#B23149]">
           Project
         </label>
         <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" name="tag_custom" x-model="tagCustom" {% if form.tag_custom.value %}checked{% endif %} class="accent-[#C0392B]">
+          <input type="checkbox" name="tag_custom" x-model="tagCustom" {% if form.tag_custom.value %}checked{% endif %} class="accent-[#B23149]">
           Custom
         </label>
       </div>
@@ -61,20 +61,20 @@
 
     <div class="bg-white rounded-xl border border-gray-200 p-5">
       <div class="flex items-center justify-between gap-3 mb-1">
-        <h2 class="text-sm font-semibold text-[#2B2B2B]">Expectations & plans</h2>
+        <h2 class="text-sm font-semibold text-[#343534]">Expectations & plans</h2>
         {% if action == 'edit' and reflection.expectations_at %}
         <span class="text-xs text-gray-400 whitespace-nowrap">{{ reflection.expectations_at|date:"d M Y" }}</span>
         {% endif %}
       </div>
       <p class="text-xs text-gray-500 mb-3">Fill in at the start. You can edit anytime.</p>
       <textarea name="expectations" rows="6" maxlength="{{ limits.long_text }}"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30">{{ form.expectations.value|default:'' }}</textarea>
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#B23149]/30">{{ form.expectations.value|default:'' }}</textarea>
       {% if form.expectations.errors %}<p class="text-xs text-red-500 mt-1">{{ form.expectations.errors|join:", " }}</p>{% endif %}
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 p-5">
       <div class="flex items-center justify-between gap-3 mb-1">
-        <h2 class="text-sm font-semibold text-[#2B2B2B]">Final reflection</h2>
+        <h2 class="text-sm font-semibold text-[#343534]">Final reflection</h2>
         {% if action == 'edit' and reflection.final_reflection_at %}
         <span class="text-xs text-gray-400 whitespace-nowrap">{{ reflection.final_reflection_at|date:"d M Y" }}</span>
         {% endif %}
@@ -82,25 +82,25 @@
       <p class="text-xs text-gray-500 mb-3">Complete when you wrap up. Wellbeing check-in appears once you start writing here.</p>
       <textarea name="final_reflection" rows="8" x-model="finalReflection" @input="updateWellbeingVisibility()"
                 maxlength="{{ limits.long_text }}"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30"></textarea>
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#B23149]/30"></textarea>
       {% if form.final_reflection.errors %}<p class="text-xs text-red-500 mt-1">{{ form.final_reflection.errors|join:", " }}</p>{% endif %}
     </div>
 
     <div x-show="showWellbeing" x-cloak
          class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
       <div>
-        <h2 class="text-sm font-semibold text-[#2B2B2B] mb-1">Wellbeing check-in</h2>
+        <h2 class="text-sm font-semibold text-[#343534] mb-1">Wellbeing check-in</h2>
         <p class="text-xs text-gray-500">How are you feeling now? Tap one icon per row (optional).</p>
       </div>
       {% for field_name, label, hint in wellbeing_dimensions %}
       <div class="border-t border-gray-100 pt-3">
-        <p class="text-sm font-medium text-[#2B2B2B] mb-0.5">{{ label }}</p>
+        <p class="text-sm font-medium text-[#343534] mb-0.5">{{ label }}</p>
         <p class="text-xs text-gray-400 mb-2">{{ hint }}</p>
         <div class="grid grid-cols-5 gap-2 max-w-lg">
           <template x-for="m in moods" :key="m.value">
             <button type="button" @click="pick('{{ field_name }}', m.value)"
                     :class="wellbeing['{{ field_name }}'] === m.value
-                      ? 'border-[#C0392B] bg-red-50 ring-2 ring-[#C0392B]/30'
+                      ? 'border-[#B23149] bg-red-50 ring-2 ring-[#B23149]/30'
                       : 'border-gray-200 hover:border-gray-300'"
                     class="flex flex-col items-center justify-center gap-0.5 py-2 rounded-lg border-2 transition-colors cursor-pointer w-full min-w-0">
               <span class="text-xl" x-text="m.emoji"></span>
@@ -118,12 +118,12 @@
       <label class="block text-xs font-semibold text-gray-400 uppercase mb-3">Visibility</label>
       <div class="flex gap-3">
         <button type="button" @click="visibility = 'private'"
-                :class="visibility === 'private' ? 'border-[#2B2B2B] bg-[#2B2B2B] text-white' : 'border-gray-200 text-gray-500'"
+                :class="visibility === 'private' ? 'border-[#343534] bg-[#343534] text-white' : 'border-gray-200 text-gray-500'"
                 class="flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium cursor-pointer">
           Only me
         </button>
         <button type="button" @click="visibility = 'shared'"
-                :class="visibility === 'shared' ? 'border-[#C0392B] bg-[#C0392B]/5 text-[#C0392B]' : 'border-gray-200 text-gray-500'"
+                :class="visibility === 'shared' ? 'border-[#B23149] bg-[#B23149]/5 text-[#B23149]' : 'border-gray-200 text-gray-500'"
                 class="flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium cursor-pointer">
           Share with teachers
         </button>
@@ -131,7 +131,7 @@
     </div>
 
     <button type="submit"
-            class="w-full bg-[#C0392B] hover:bg-[#A93226] text-white font-semibold py-2.5 rounded-lg text-sm cursor-pointer">
+            class="w-full bg-[#B23149] hover:bg-[#8E273A] text-white font-semibold py-2.5 rounded-lg text-sm cursor-pointer">
       {% if action == 'edit' %}Save changes{% else %}Create reflection{% endif %}
     </button>
   </form>

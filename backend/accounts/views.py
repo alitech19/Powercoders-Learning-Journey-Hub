@@ -100,7 +100,11 @@ def profile(request):
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
-            form.save()
+            user = form.save(commit=False)
+            if request.POST.get('remove_avatar') and user.avatar:
+                user.avatar.delete(save=False)
+                user.avatar = None
+            user.save()
             messages.success(request, 'Profile updated.')
             return redirect('accounts:profile')
     else:

@@ -14,25 +14,25 @@
     <input type="search" name="q" value="{{ search_query }}"
            placeholder="Search by title…"
            maxlength="{{ limits.search }}"
-           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30 focus:border-[#C0392B]">
+           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149]">
   </div>
   {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
   <button type="submit"
-          class="px-4 py-2 bg-[#2B2B2B] text-white text-sm font-medium rounded-lg cursor-pointer">
+          class="px-4 py-2 bg-[#343534] text-white text-sm font-medium rounded-lg cursor-pointer">
     Search
   </button>
   {% if search_query %}
   <a href="{% url 'journal:list' %}{% if tag_filter %}?tag={{ tag_filter|urlencode }}{% endif %}"
-     class="text-sm text-gray-500 hover:text-[#C0392B]">Clear search</a>
+     class="text-sm text-gray-500 hover:text-[#B23149]">Clear search</a>
   {% endif %}
 </form>
 
 {% if tag_filter %}
 <div class="flex items-center gap-2 mb-4">
   <span class="text-sm text-gray-500">Filtered by tag:</span>
-  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#C0392B]/10 text-[#C0392B] text-xs font-medium rounded-full">
+  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#B23149]/10 text-[#B23149] text-xs font-medium rounded-full">
     #{{ tag_filter }}
-    <a href="{% url 'journal:list' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}" class="hover:text-[#A93226]">×</a>
+    <a href="{% url 'journal:list' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}" class="hover:text-[#8E273A]">×</a>
   </span>
 </div>
 {% endif %}
@@ -45,17 +45,17 @@
     <input type="search" name="q" value="{{ search_query }}"
            placeholder="Search by title…"
            maxlength="{{ limits.search }}"
-           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]/30 focus:border-[#C0392B]">
+           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149]">
   </div>
   {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
   {% if student_filter %}<input type="hidden" name="student" value="{{ student_filter }}">{% endif %}
   <button type="submit"
-          class="px-4 py-2 bg-[#2B2B2B] text-white text-sm font-medium rounded-lg cursor-pointer">
+          class="px-4 py-2 bg-[#343534] text-white text-sm font-medium rounded-lg cursor-pointer">
     Search
   </button>
   {% if search_query %}
   <a href="{% url 'journal:list' %}{% if tag_filter %}?tag={{ tag_filter|urlencode }}{% endif %}{% if student_filter %}{% if tag_filter %}&{% else %}?{% endif %}student={{ student_filter }}{% endif %}"
-     class="text-sm text-gray-500 hover:text-[#C0392B]">Clear search</a>
+     class="text-sm text-gray-500 hover:text-[#B23149]">Clear search</a>
   {% endif %}
 </form>
 
@@ -63,13 +63,13 @@
 <div class="flex gap-2 flex-wrap mb-4">
   <a href="{% url 'journal:list' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}{% if tag_filter %}{% if search_query %}&{% else %}?{% endif %}tag={{ tag_filter|urlencode }}{% endif %}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if not student_filter %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B]{% endif %}">
+            {% if not student_filter %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
     All Students
   </a>
   {% for s in students %}
   <a href="?student={{ s.pk }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if tag_filter %}&tag={{ tag_filter|urlencode }}{% endif %}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if student_filter == s.pk|stringformat:'s' %}bg-[#2B2B2B] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#C0392B]{% endif %}">
+            {% if student_filter == s.pk|stringformat:'s' %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
     {{ s.display_name }}
   </a>
   {% endfor %}
@@ -81,14 +81,14 @@
 <div class="space-y-3">
   {% for entry in entries %}
   <a href="{% url 'journal:detail' entry.pk %}"
-     class="block bg-white rounded-xl border border-gray-200 hover:border-[#C0392B]/30 hover:shadow-sm transition-all overflow-hidden">
+     class="block bg-white rounded-xl border border-gray-200 hover:border-[#B23149]/30 hover:shadow-sm transition-all overflow-hidden">
     {% if view_as != 'student' %}
     <div class="flex items-center justify-between gap-3 px-5 py-2.5 bg-gray-50 border-b border-gray-100">
       <div class="flex items-center gap-2.5 min-w-0">
-        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-[#2B2B2B] text-white flex items-center justify-center text-xs font-bold uppercase">
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-[#343534] text-white flex items-center justify-center text-xs font-bold uppercase">
           {{ entry.author.display_name|slice:":1" }}
         </span>
-        <span class="font-semibold text-sm text-[#2B2B2B] truncate">{{ entry.author.display_name }}</span>
+        <span class="font-semibold text-sm text-[#343534] truncate">{{ entry.author.display_name }}</span>
         {% if entry.author.group %}
         <span class="text-xs text-gray-400 truncate hidden sm:inline">· {{ entry.author.group.name }}</span>
         {% endif %}
@@ -103,7 +103,7 @@
             {% if entry.mood_emoji %}
             <span class="text-lg leading-none">{{ entry.mood_emoji }}</span>
             {% endif %}
-            <h2 class="font-semibold text-[#2B2B2B] truncate">{{ entry.title }}</h2>
+            <h2 class="font-semibold text-[#343534] truncate">{{ entry.title }}</h2>
             {% if view_as == 'student' %}
             {% include "journal/_visibility_badge.html" %}
             {% endif %}
@@ -112,7 +112,7 @@
           {% if entry.get_tags_list %}
           <div class="flex flex-wrap gap-1.5 mt-2">
             {% for tag in entry.get_tags_list %}
-            <span class="text-xs px-2 py-0.5 bg-[#F5EDE0] text-[#C0392B] rounded-full font-medium">#{{ tag }}</span>
+            <span class="text-xs px-2 py-0.5 bg-[#F5EDE0] text-[#B23149] rounded-full font-medium">#{{ tag }}</span>
             {% endfor %}
           </div>
           {% endif %}
@@ -132,16 +132,16 @@
 <div class="text-center py-20">
   <div class="text-5xl mb-4">📓</div>
   {% if view_as == 'student' %}
-  <h2 class="text-lg font-semibold text-[#2B2B2B] mb-1">Start your learning journal</h2>
+  <h2 class="text-lg font-semibold text-[#343534] mb-1">Start your learning journal</h2>
   <p class="text-gray-500 text-sm mb-6">Write your first entry to begin documenting your journey.</p>
   {% if can_create %}
   <a href="{% url 'journal:create' %}"
-     class="inline-flex items-center gap-2 bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+     class="inline-flex items-center gap-2 bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
     Write First Entry
   </a>
   {% endif %}
   {% else %}
-  <h2 class="text-lg font-semibold text-[#2B2B2B] mb-1">No shared entries found</h2>
+  <h2 class="text-lg font-semibold text-[#343534] mb-1">No shared entries found</h2>
   <p class="text-gray-500 text-sm">{% if search_query %}Try a different search term.{% else %}Students haven't shared journal entries yet.{% endif %}</p>
   {% endif %}
 </div>

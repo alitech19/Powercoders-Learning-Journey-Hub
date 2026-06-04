@@ -6,7 +6,7 @@
 
   <div class="mb-5">
     <a href="{% url 'goals:list' %}"
-       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] transition-colors mb-3">
+       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#B23149] transition-colors mb-3">
       <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
       </svg>
@@ -44,7 +44,7 @@
           {% endif %}
           {% include "goals/_visibility_badge.html" %}
         </div>
-        <h1 class="text-xl font-bold text-[#2B2B2B]">{{ goal.title }}</h1>
+        <h1 class="text-xl font-bold text-[#343534]">{{ goal.title }}</h1>
         {% if view_as == 'staff' %}
         <p class="text-xs text-gray-400 mt-0.5">{{ goal.enrolled_count }} student{{ goal.enrolled_count|pluralize }} enrolled</p>
         {% endif %}
@@ -59,7 +59,7 @@
       <div class="flex gap-2 flex-shrink-0 flex-wrap justify-end">
         {% if can_edit %}
         <a href="{% url 'goals:edit' goal.pk %}"
-           class="inline-flex items-center gap-1 text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#C0392B] hover:text-[#C0392B]">
+           class="inline-flex items-center gap-1 text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#B23149] hover:text-[#B23149]">
           Edit
         </a>
         {% endif %}

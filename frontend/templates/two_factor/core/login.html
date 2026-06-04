@@ -12,9 +12,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style type="text/tailwindcss">
     @theme {
-      --color-primary: #C0392B;
-      --color-primary-dark: #A93226;
-      --color-charcoal: #2B2B2B;
+      --color-primary: #B23149;
+      --color-primary-dark: #8E273A;
+      --color-charcoal: #343534;
       --color-cream: #F5EDE0;
       --font-sans: 'Inter', system-ui, sans-serif;
     }
@@ -29,7 +29,7 @@
     }
     input[name="token-otp_token"]:focus, input[name="otp_token"]:focus, #id_token-otp_token:focus {
       outline: none;
-      border-color: #C0392B;
+      border-color: #B23149;
       box-shadow: 0 0 0 2px rgba(192,57,43,0.2);
     }
   </style>
@@ -40,32 +40,32 @@
 
     <div class="text-center mb-8">
       <div class="font-black text-3xl tracking-tight leading-none mb-2">
-        <span class="text-[#C0392B]">{</span><span class="text-[#2B2B2B]">POWER</span><span class="text-[#C0392B]">.</span><span class="text-[#2B2B2B]">CODERS</span><span class="text-[#C0392B]">}</span>
+        <span class="text-[#B23149]">{</span><span class="text-[#343534]">POWER</span><span class="text-[#B23149]">.</span><span class="text-[#343534]">CODERS</span><span class="text-[#B23149]">}</span>
       </div>
-      <p class="text-[#2B2B2B]/50 text-sm font-medium">Learning Journey Hub</p>
+      <p class="text-[#343534]/50 text-sm font-medium">Learning Journey Hub</p>
     </div>
 
     <div class="max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-[#EDE3D5] p-8">
 
       {% if wizard.steps.current == 'auth' %}
-      <h1 class="text-2xl font-bold text-[#2B2B2B] mb-1">Welcome back</h1>
+      <h1 class="text-2xl font-bold text-[#343534] mb-1">Welcome back</h1>
       <p class="text-gray-500 text-sm mb-6">Sign in with email and password (production-like flow)</p>
 
       {% elif wizard.steps.current == 'token' %}
       <div class="flex items-center gap-3 mb-5">
-        <div class="h-10 w-10 rounded-full bg-[#C0392B]/10 flex items-center justify-center flex-shrink-0">
-          <svg class="h-5 w-5 text-[#C0392B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <div class="h-10 w-10 rounded-full bg-[#B23149]/10 flex items-center justify-center flex-shrink-0">
+          <svg class="h-5 w-5 text-[#B23149]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
           </svg>
         </div>
         <div>
-          <h1 class="text-xl font-bold text-[#2B2B2B]">Two-Factor Authentication</h1>
+          <h1 class="text-xl font-bold text-[#343534]">Two-Factor Authentication</h1>
           <p class="text-gray-500 text-sm">Enter the code from your authenticator app</p>
         </div>
       </div>
 
       {% elif wizard.steps.current == 'backup' %}
-      <h1 class="text-xl font-bold text-[#2B2B2B] mb-1">Use Backup Token</h1>
+      <h1 class="text-xl font-bold text-[#343534] mb-1">Use Backup Token</h1>
       <p class="text-gray-500 text-sm mb-6">Enter one of your saved backup tokens</p>
       {% endif %}
 
@@ -90,7 +90,7 @@
         {% if wizard.steps.current == 'auth' %}
           {% for field in wizard.form %}
           <div>
-            <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-[#2B2B2B] mb-1.5">{{ field.label }}</label>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-[#343534] mb-1.5">{{ field.label }}</label>
             {{ field }}
             {% if field.errors %}
             <p class="text-red-600 text-xs mt-1">{{ field.errors.0 }}</p>
@@ -100,19 +100,19 @@
 
         {% elif wizard.steps.current == 'token' %}
           <div>
-            <label class="block text-sm font-semibold text-[#2B2B2B] mb-1.5">Authenticator code</label>
+            <label class="block text-sm font-semibold text-[#343534] mb-1.5">Authenticator code</label>
             {{ form.otp_token }}
             <p class="text-xs text-gray-400 mt-1.5">6-digit code from your authenticator app</p>
           </div>
           <p class="text-xs text-center">
-            <button type="submit" name="wizard_goto_step" value="backup" class="text-[#C0392B] hover:text-[#A93226] cursor-pointer bg-transparent border-0 p-0">
+            <button type="submit" name="wizard_goto_step" value="backup" class="text-[#B23149] hover:text-[#8E273A] cursor-pointer bg-transparent border-0 p-0">
               Use a backup token instead
             </button>
           </p>
 
         {% elif wizard.steps.current == 'backup' %}
           <div>
-            <label class="block text-sm font-semibold text-[#2B2B2B] mb-1.5">Backup token</label>
+            <label class="block text-sm font-semibold text-[#343534] mb-1.5">Backup token</label>
             {{ form.otp_token }}
           </div>
         {% endif %}
@@ -122,15 +122,15 @@
         {% endif %}
 
         <button type="submit"
-                class="w-full bg-[#C0392B] hover:bg-[#A93226] text-white font-semibold py-2.5 px-4 rounded-lg transition-colors text-sm cursor-pointer">
+                class="w-full bg-[#B23149] hover:bg-[#8E273A] text-white font-semibold py-2.5 px-4 rounded-lg transition-colors text-sm cursor-pointer">
           {% if wizard.steps.current == 'auth' %}Sign in{% else %}Verify{% endif %}
         </button>
       </form>
     </div>
 
     {% if dev_seed_enabled %}
-    <section class="mt-8 p-5 border-2 border-dashed border-[#C0392B] rounded-xl bg-white/80">
-      <p class="font-semibold text-[#2B2B2B] mb-2">Development quick login — testers only</p>
+    <section class="mt-8 p-5 border-2 border-dashed border-[#B23149] rounded-xl bg-white/80">
+      <p class="font-semibold text-[#343534] mb-2">Development quick login — testers only</p>
       <p class="text-sm text-gray-600 mb-2">
         Buttons below sign you in <strong>directly</strong> and skip 2FA, privacy policy, and other onboarding checks.
         Seed users are pre-configured in the database for that purpose.
@@ -145,7 +145,7 @@
     </section>
     {% endif %}
 
-    <p class="text-center text-xs text-[#2B2B2B]/40 mt-8">© 2026 Powercoders</p>
+    <p class="text-center text-xs text-[#343534]/40 mt-8">© 2026 Powercoders</p>
   </div>
 </body>
 </html>

@@ -18,7 +18,7 @@
       {% for row in enrollment_rows %}
       {% with enrollment=row.enrollment %}
       <tr>
-        <td class="py-3 pr-4 font-medium text-[#2B2B2B] whitespace-nowrap">{{ enrollment.student.display_name }}</td>
+        <td class="py-3 pr-4 font-medium text-[#343534] whitespace-nowrap">{{ enrollment.student.display_name }}</td>
         <td class="py-3 pr-4">
           <span class="text-xs font-semibold px-2 py-0.5 rounded-full
             {% if enrollment.status == 'completed' %}bg-green-100 text-green-700
@@ -30,7 +30,7 @@
         </td>
         <td class="py-3 pr-4 whitespace-nowrap">
           <span class="text-xs text-gray-500">{{ enrollment.milestones_done }}/{{ enrollment.milestones_total }}</span>
-          <span class="text-xs font-semibold text-[#2B2B2B] ml-1">{{ enrollment.progress }}%</span>
+          <span class="text-xs font-semibold text-[#343534] ml-1">{{ enrollment.progress }}%</span>
         </td>
         {% for item in row.milestones %}
         <td class="py-3 px-1 text-center">
@@ -48,7 +48,7 @@
           {% if row.can_reactivate %}
           <form method="post" action="{% url 'goals:enrollment_reactivate' enrollment.pk %}">
             {% csrf_token %}
-            <button type="submit" class="text-xs text-gray-400 hover:text-[#C0392B] whitespace-nowrap cursor-pointer">
+            <button type="submit" class="text-xs text-gray-400 hover:text-[#B23149] whitespace-nowrap cursor-pointer">
               Reactivate
             </button>
           </form>

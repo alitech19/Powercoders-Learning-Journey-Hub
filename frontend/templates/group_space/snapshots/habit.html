@@ -7,22 +7,22 @@
       <span class="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700">Active</span>
       {% endif %}
     </div>
-    <h3 class="font-semibold text-[#2B2B2B]">{{ habit.title }}</h3>
+    <h3 class="font-semibold text-[#343534]">{{ habit.title }}</h3>
     {% if habit.description %}
     <p class="text-sm text-gray-600 mt-1 leading-relaxed">{{ habit.description }}</p>
     {% endif %}
   </div>
   <div class="grid grid-cols-3 gap-2 text-center">
     <div class="rounded-lg bg-white/80 border border-gray-100 p-2">
-      <p class="text-sm font-bold text-[#C0392B]">{{ row.done_this_week }}/{{ habit.target_days_per_week }}</p>
+      <p class="text-sm font-bold text-[#B23149]">{{ row.done_this_week }}/{{ habit.target_days_per_week }}</p>
       <p class="text-[10px] text-gray-400">Days this week</p>
     </div>
     <div class="rounded-lg bg-white/80 border border-gray-100 p-2">
-      <p class="text-sm font-bold text-[#C0392B]">{{ row.streak }}🔥</p>
+      <p class="text-sm font-bold text-[#B23149]">{{ row.streak }}🔥</p>
       <p class="text-[10px] text-gray-400">Week streak</p>
     </div>
     <div class="rounded-lg bg-white/80 border border-gray-100 p-2">
-      <p class="text-sm font-bold text-[#C0392B]">{% if habit.target_minutes %}{{ habit.target_minutes }}m{% else %}—{% endif %}</p>
+      <p class="text-sm font-bold text-[#B23149]">{% if habit.target_minutes %}{{ habit.target_minutes }}m{% else %}—{% endif %}</p>
       <p class="text-[10px] text-gray-400">Target</p>
     </div>
   </div>

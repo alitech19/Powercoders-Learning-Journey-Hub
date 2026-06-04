@@ -16,10 +16,10 @@
 
   <div class="mb-5">
     <a href="{% if editing %}{% url 'workflows:detail' workflow.pk %}{% else %}{% url 'workflows:list' %}{% endif %}"
-       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#C0392B] mb-3">
+       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#B23149] mb-3">
       ← Back
     </a>
-    <h1 class="text-2xl font-bold text-[#2B2B2B]">
+    <h1 class="text-2xl font-bold text-[#343534]">
       {% if editing %}Edit Workflow{% else %}New Workflow{% endif %}
     </h1>
   </div>
@@ -47,7 +47,7 @@
           <option value="private" {% if workflow.visibility == 'private' %}selected{% endif %}>Private</option>
         </select>
       </div>
-      <button type="submit" class="bg-[#2B2B2B] hover:bg-[#C0392B] text-white text-sm font-semibold px-4 py-2 rounded-lg">
+      <button type="submit" class="bg-[#343534] hover:bg-[#B23149] text-white text-sm font-semibold px-4 py-2 rounded-lg">
         Save details
       </button>
     </div>
@@ -91,11 +91,11 @@
         <p class="text-xs font-medium text-gray-500 mb-2">Progress mode</p>
         <div class="flex gap-4 text-sm">
           <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="progress_mode" value="shared" x-model="progressMode" class="accent-[#C0392B]">
+            <input type="radio" name="progress_mode" value="shared" x-model="progressMode" class="accent-[#B23149]">
             Shared (cohort/group moves together)
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="progress_mode" value="individual" x-model="progressMode" class="accent-[#C0392B]">
+            <input type="radio" name="progress_mode" value="individual" x-model="progressMode" class="accent-[#B23149]">
             Individual (per student)
           </label>
         </div>
@@ -105,11 +105,11 @@
         <p class="text-xs font-medium text-gray-500 mb-2">Target type</p>
         <div class="flex gap-4 text-sm">
           <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="assignee_type" value="cohort" x-model="assigneeType" @change="targetId = ''" class="accent-[#C0392B]">
+            <input type="radio" name="assignee_type" value="cohort" x-model="assigneeType" @change="targetId = ''" class="accent-[#B23149]">
             Cohort
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="assignee_type" value="group" x-model="assigneeType" @change="targetId = ''" class="accent-[#C0392B]">
+            <input type="radio" name="assignee_type" value="group" x-model="assigneeType" @change="targetId = ''" class="accent-[#B23149]">
             Group
           </label>
         </div>
@@ -121,7 +121,7 @@
           {% for cohort in cohorts %}
           <label class="flex items-center gap-2 text-sm cursor-pointer">
             <input type="radio" name="assignee_target_id" value="{{ cohort.pk }}"
-                   x-model="targetId" class="accent-[#C0392B]">
+                   x-model="targetId" class="accent-[#B23149]">
             {{ cohort.name }}
           </label>
           {% empty %}
@@ -136,7 +136,7 @@
           {% for group in groups %}
           <label class="flex items-center gap-2 text-sm cursor-pointer">
             <input type="radio" name="assignee_target_id" value="{{ group.pk }}"
-                   x-model="targetId" class="accent-[#C0392B]">
+                   x-model="targetId" class="accent-[#B23149]">
             {{ group }}
           </label>
           {% empty %}
@@ -148,11 +148,11 @@
       <div x-show="progressMode === 'individual' && targetId" class="pt-3 border-t border-gray-100 space-y-3">
         <label class="flex items-center gap-2 text-sm cursor-pointer">
           <input type="checkbox" name="select_all_students" x-model="selectAll" @change="toggleSelectAll()"
-                 class="accent-[#C0392B]">
+                 class="accent-[#B23149]">
           All students in selected {{ assigneeType }}
         </label>
         <button type="button" @click="expanded = !expanded"
-                class="text-xs text-[#C0392B] font-medium">
+                class="text-xs text-[#B23149] font-medium">
           <span x-text="expanded ? 'Hide student list' : 'Select individual students'"></span>
         </button>
         <div x-show="expanded || !selectAll" class="space-y-2 max-h-56 overflow-y-auto pl-1">
@@ -160,7 +160,7 @@
             <label class="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" name="student_ids" :value="student.id"
                      x-model="selectedStudents" :disabled="selectAll"
-                     class="accent-[#C0392B]">
+                     class="accent-[#B23149]">
               <span x-text="student.name"></span>
             </label>
           </template>
@@ -173,7 +173,7 @@
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-sm font-semibold">Steps</h2>
         <button type="button" @click="addStep()"
-                class="text-xs text-[#C0392B] font-medium">+ Add step</button>
+                class="text-xs text-[#B23149] font-medium">+ Add step</button>
       </div>
       <div class="space-y-3">
         <template x-for="(step, i) in steps" :key="i">
@@ -187,7 +187,7 @@
                       class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none mb-2"></textarea>
             <div class="flex items-center justify-between">
               <label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
-                <input type="checkbox" :name="'step_req_' + (i+1)" x-model="step.req" class="accent-[#C0392B]">
+                <input type="checkbox" :name="'step_req_' + (i+1)" x-model="step.req" class="accent-[#B23149]">
                 Requires previous step
               </label>
               <button type="button" @click="removeStep(i)" x-show="steps.length > 1"
@@ -200,7 +200,7 @@
     {% endif %}
 
     <button type="submit"
-            class="w-full bg-[#C0392B] hover:bg-[#A93226] text-white text-sm font-semibold py-3 rounded-lg">
+            class="w-full bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold py-3 rounded-lg">
       {% if editing %}Save assignment{% else %}Create workflow{% endif %}
     </button>
   </form>
