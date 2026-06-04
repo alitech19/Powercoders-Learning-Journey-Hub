@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.utils import timezone
 from datetime import timedelta
 
@@ -22,9 +22,7 @@ User = get_user_model()
 @login_required
 def dashboard(request):
     user = request.user
-    if not user.welcome_seen:
-        return redirect('accounts:welcome')
-
+    # Onboarding redirect: accounts.middleware.WelcomeMiddleware (single place)
     context = {'role': user.get_role_display()}
 
     if user_is_admin(user):

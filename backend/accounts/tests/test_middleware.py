@@ -1,5 +1,6 @@
 from django.http import HttpResponse
-from django.test import RequestFactory, TestCase
+from django.test import Client, RequestFactory, TestCase
+from django.urls import reverse
 
 from accounts.middleware import (
     AuditLoggingMiddleware,
@@ -60,6 +61,48 @@ class WelcomeMiddlewareTests(TestCase):
         response = WelcomeMiddleware(lambda r: HttpResponse('ok'))(request)
         self.assertEqual(response.status_code, 302)
         self.assertIn('welcome', response.url)
+
+    def test_dashboard_path_redirects_when_welcome_not_seen(self):
+        user = make_student('s@example.com', bypass_onboarding=False)
+        user.privacy_policy_accepted = True
+        user.must_change_password = False
+        user.welcome_seen = False
+        user.save(
+            update_fields=[
+                'privacy_policy_accepted',
+                'must_change_password',
+                'welcome_seen',
+            ],
+        )
+
+        request = RequestFactory().get(reverse('dashboard:dashboard'))
+        request.user = user
+        response = WelcomeMiddleware(lambda r: HttpResponse('ok'))(request)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('welcome', response.url)
+
+
+class WelcomeDashboardIntegrationTests(TestCase):
+    """Dashboard view must not duplicate WelcomeMiddleware redirect."""
+
+    def setUp(self):
+        self.client = Client()
+        self.user = make_student('ready@example.com', bypass_onboarding=False)
+        self.user.privacy_policy_accepted = True
+        self.user.must_change_password = False
+        self.user.welcome_seen = True
+        self.user.save(
+            update_fields=[
+                'privacy_policy_accepted',
+                'must_change_password',
+                'welcome_seen',
+            ],
+        )
+        self.client.force_login(self.user)
+
+    def test_dashboard_ok_when_welcome_seen(self):
+        response = self.client.get(reverse('dashboard:dashboard'))
+        self.assertEqual(response.status_code, 200)
 
 
 class AuditLoggingMiddlewareTests(TestCase):
