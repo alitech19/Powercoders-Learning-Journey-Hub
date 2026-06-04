@@ -37,7 +37,7 @@ cd ..
 **Cleanup** (repo root):
 
 ```bash
-docker compose down --remove-orphans
+docker compose down --remove-orphans -v
 ```
 
 One app: `python manage.py test cohorts --verbosity=2`  
@@ -62,7 +62,7 @@ cd ..
 **Cleanup** (repo root):
 
 ```bash
-docker compose down --remove-orphans
+docker compose down --remove-orphans -v
 ```
 
 
@@ -76,7 +76,7 @@ docker compose run --rm -e DJANGO_SETTINGS_MODULE=config.settings_test web pytho
 **Cleanup:**
 
 ```bash
-docker compose down --remove-orphans
+docker compose down --remove-orphans -v
 ```
 
 ---
@@ -108,7 +108,7 @@ cd ..
 **Cleanup:**
 
 ```powershell
-docker compose down --remove-orphans
+docker compose down --remove-orphans -v
 ```
 
 ### Coverage
@@ -127,7 +127,7 @@ cd ..
 **Cleanup:**
 
 ```powershell
-docker compose down --remove-orphans
+docker compose down --remove-orphans -v
 ```
 
 ---

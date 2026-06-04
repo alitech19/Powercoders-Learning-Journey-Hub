@@ -237,6 +237,7 @@ CSP_FRAME_ANCESTORS = ("'none'",)
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
+SECURE_REFERRER_POLICY = 'same-origin'
 
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
@@ -244,10 +245,29 @@ CSRF_TRUSTED_ORIGINS = [
     if origin.strip()
 ]
 
+# Production hardening (auto-enabled when DEBUG=False — staging/Render).
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True').lower() in (
+        'true',
+        '1',
+        'yes',
+    )
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', 31536000))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = False  # readable by JS for HTMX CSRF tokens
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    if SECRET_KEY.startswith('django-insecure-'):
+        raise RuntimeError(
+            'SECRET_KEY is still set to the insecure development default. '
+            'Set a strong, random SECRET_KEY environment variable before '
+            'running with DEBUG=False.'
+        )
 
 # --- Observability (auth Phase G) ---
 

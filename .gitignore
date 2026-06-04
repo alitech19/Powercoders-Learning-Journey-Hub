@@ -219,6 +219,9 @@ __marimo__/
 
 # --- PowerHUB / Django project ---
 
+# Local-only merge checklist (delete after main→integration work; never commit)
+docs/plans/ALI_MAIN_TO_INTEGRATION_PLAN.md
+
 .env.local
 .env.*.local
 
