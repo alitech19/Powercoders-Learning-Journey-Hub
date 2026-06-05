@@ -27,6 +27,19 @@ class GoalEditFormPrefillTests(TestCase):
         response = self.client.get(reverse('goals:edit', args=[goal.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'value="2026-07-04"')
+        self.assertContains(response, 'name="target_date"')
+
+    def test_goal_create_preserves_target_date_on_validation_error(self):
+        login_as(self.client, self.student)
+        response = self.client.post(reverse('goals:create'), {
+            'title': '',
+            'description': 'desc',
+            'category': 'technical',
+            'target_date': '2026-09-15',
+            'visibility': 'private',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="2026-09-15"')
 
     def test_goal_edit_retains_target_date_after_validation_error(self):
         goal = make_student_goal(self.student)

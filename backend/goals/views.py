@@ -16,6 +16,7 @@ from cohorts.permissions import (
     user_is_student,
 )
 
+from config.form_widgets import resolve_form_date
 from feedback.services import build_section_context
 
 from .forms import GoalForm
@@ -182,7 +183,9 @@ def goal_create(request):
     if not can_create_goals(request.user):
         return redirect('goals:list')
 
+    form = GoalForm()
     if request.method == 'POST':
+        form = GoalForm(request.POST)
         try:
             if user_is_student(request.user):
                 goal = create_student_goal(user=request.user, post=request.POST)
@@ -195,9 +198,10 @@ def goal_create(request):
             messages.error(request, exc.messages[0] if exc.messages else str(exc))
 
     context = {
-        'form': GoalForm(),
+        'form': form,
         'action': 'create',
         'milestones_data': [],
+        'target_date_display': resolve_form_date(form, 'target_date'),
         'is_staff_create': user_is_staff(request.user),
         'visibility_mode': _visibility_form_mode(request.user, creating=True),
     }
@@ -293,6 +297,7 @@ def goal_edit(request, pk):
         'form': form,
         'action': 'edit',
         'goal': goal,
+        'target_date_display': resolve_form_date(form, 'target_date', instance=goal),
         'milestones_data': [
             normalize_milestone_title(title)
             for title in goal.milestones.order_by('order', 'pk').values_list('title', flat=True)

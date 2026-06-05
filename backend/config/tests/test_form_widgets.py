@@ -4,7 +4,12 @@ from django import forms
 from django.template import Context, Template
 from django.test import SimpleTestCase
 
-from config.form_widgets import configure_html5_date_field, format_html5_date, html5_date_widget
+from config.form_widgets import (
+    configure_html5_date_field,
+    format_html5_date,
+    html5_date_widget,
+    resolve_form_date,
+)
 
 
 class FormWidgetTests(SimpleTestCase):
@@ -47,6 +52,23 @@ class FormWidgetTests(SimpleTestCase):
 
     def test_format_html5_date_parses_dmy_string(self):
         self.assertEqual(format_html5_date('04/07/2026'), '2026-07-04')
+
+    def test_resolve_form_date_uses_instance_fallback(self):
+        from goals.forms import GoalForm
+        from goals.models import Goal
+
+        goal = Goal(
+            pk=1,
+            title='G',
+            category=Goal.Category.TECHNICAL,
+            visibility=Goal.Visibility.PRIVATE,
+            target_date=date(2026, 5, 1),
+        )
+        form = GoalForm(instance=goal, show_status=False)
+        self.assertEqual(
+            resolve_form_date(form, 'target_date', instance=goal),
+            '2026-05-01',
+        )
 
     def test_bound_date_value_tag_uses_fallback(self):
         from django import forms

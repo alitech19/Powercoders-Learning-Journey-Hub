@@ -1,6 +1,7 @@
 import ast
 
 from django.core.exceptions import ValidationError
+from django.utils.dateparse import parse_date
 from django.db import transaction
 
 from accounts.models import User
@@ -120,6 +121,16 @@ def _validate_staff_target(user, *, assignee_type, cohort, group):
         raise ValidationError('You cannot assign goals to this cohort.')
 
 
+def _parse_target_date(post):
+    raw = (post.get('target_date') or '').strip()
+    if not raw:
+        return None
+    parsed = parse_date(raw)
+    if parsed is None:
+        raise ValidationError('Enter a valid target date (YYYY-MM-DD).')
+    return parsed
+
+
 def _parse_initial_status(post):
     status = post.get('status', GoalEnrollment.Status.NOT_STARTED)
     if status not in GoalEnrollment.Status.values:
@@ -143,7 +154,7 @@ def create_student_goal(*, user, post):
         title=title,
         description=post.get('description', '').strip(),
         category=post.get('category', Goal.Category.TECHNICAL),
-        target_date=post.get('target_date') or None,
+        target_date=_parse_target_date(post),
         visibility=visibility,
     )
     goal.full_clean()
@@ -193,7 +204,7 @@ def create_goals_bulk(*, user, post):
         title=title,
         description=post.get('description', '').strip(),
         category=post.get('category', Goal.Category.TECHNICAL),
-        target_date=post.get('target_date') or None,
+        target_date=_parse_target_date(post),
         visibility=visibility,
     )
 

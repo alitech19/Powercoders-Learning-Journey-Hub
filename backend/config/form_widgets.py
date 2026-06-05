@@ -26,6 +26,14 @@ def configure_html5_date_field(field: forms.DateField) -> None:
         field.widget = html5_date_widget()
 
 
+def resolve_form_date(form, field_name: str, *, instance=None) -> str:
+    """Best-effort ISO date string for a bound form field + optional model instance."""
+    value = form[field_name].value()
+    if value in (None, '') and instance is not None:
+        value = getattr(instance, field_name, None)
+    return format_html5_date(value)
+
+
 def format_html5_date(value) -> str:
     """Format a date/datetime/string for ``value`` on ``<input type=\"date\">``."""
     if value is None or value == '':

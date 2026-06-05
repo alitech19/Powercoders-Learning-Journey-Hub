@@ -1,3 +1,5 @@
+import shutil
+import tempfile
 from io import BytesIO
 from unittest.mock import patch
 
@@ -35,25 +37,34 @@ class ProfileViewTests(TestCase):
         self.assertTrue(self.user.email_notifications_enabled)
 
     def test_post_remove_avatar(self):
-        image = Image.new('RGB', (8, 8), color='red')
-        buffer = BytesIO()
-        image.save(buffer, format='PNG')
-        buffer.seek(0)
-        self.user.avatar = SimpleUploadedFile('avatar.png', buffer.read(), content_type='image/png')
-        self.user.save(update_fields=['avatar'])
-        self.assertTrue(self.user.avatar)
+        tmp_media = tempfile.mkdtemp()
+        try:
+            with self.settings(MEDIA_ROOT=tmp_media):
+                image = Image.new('RGB', (8, 8), color='red')
+                buffer = BytesIO()
+                image.save(buffer, format='PNG')
+                buffer.seek(0)
+                self.user.avatar = SimpleUploadedFile(
+                    'avatar.png',
+                    buffer.read(),
+                    content_type='image/png',
+                )
+                self.user.save(update_fields=['avatar'])
+                self.assertTrue(self.user.avatar)
 
-        response = self.client.post(
-            reverse('accounts:profile'),
-            {
-                'display_name': self.user.display_name,
-                'email_notifications_enabled': 'on',
-                'remove_avatar': '1',
-            },
-        )
-        self.assertRedirects(response, reverse('accounts:profile'))
-        self.user.refresh_from_db()
-        self.assertFalse(self.user.avatar)
+                response = self.client.post(
+                    reverse('accounts:profile'),
+                    {
+                        'display_name': self.user.display_name,
+                        'email_notifications_enabled': 'on',
+                        'remove_avatar': '1',
+                    },
+                )
+                self.assertRedirects(response, reverse('accounts:profile'))
+                self.user.refresh_from_db()
+                self.assertFalse(self.user.avatar)
+        finally:
+            shutil.rmtree(tmp_media, ignore_errors=True)
 
 
 class OnboardingViewTests(TestCase):
