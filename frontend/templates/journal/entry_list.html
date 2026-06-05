@@ -5,7 +5,7 @@
 
 {% if view_as == 'student' %}
 {% if can_create %}{% url 'journal:create' as journal_create_url %}{% endif %}
-{% include "includes/_page_header.html" with title="My Journal" subtitle="Document your learning journey, one entry at a time." cta_url=journal_create_url cta_label="+ New Entry" %}
+{% include "includes/_page_header.html" with title="My Journal" cta_url=journal_create_url cta_label="+ New Entry" %}
 
 {% include "includes/_stats_grid.html" with stat1_value=total stat1_label="Total Entries" stat2_value=this_week stat2_label="This Week" stat3_value=streak stat3_suffix="🔥" stat3_label="Day Streak" %}
 
@@ -38,7 +38,7 @@
 {% endif %}
 
 {% else %}
-{% include "includes/_page_header.html" with title="Student Journals" subtitle="Shared entries from your students · newest first" %}
+{% include "includes/_page_header.html" with title="Student Journals" %}
 
 <form method="get" class="mb-4 flex flex-wrap gap-3 items-center">
   <div class="flex-1 min-w-[200px] max-w-md">

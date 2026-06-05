@@ -4,9 +4,9 @@
 {% block content %}
 {% if can_create_personal_task or can_create %}{% url 'tasks:task_create' as tasks_create_url %}{% endif %}
 {% if view_as == 'student' %}
-{% include "includes/_page_header.html" with title="My Tasks" subtitle="Individual → group → cohort tasks, separated below." cta_url=tasks_create_url cta_label="New Task" cta_icon="plus" %}
+{% include "includes/_page_header.html" with title="My Tasks" cta_url=tasks_create_url cta_label="New Task" cta_icon="plus" %}
 {% else %}
-{% include "includes/_page_header.html" with title="Student Tasks" subtitle="Individual → group → cohort tasks, separated below." cta_url=tasks_create_url cta_label="New Task" cta_icon="plus" %}
+{% include "includes/_page_header.html" with title="Student Tasks" cta_url=tasks_create_url cta_label="New Task" cta_icon="plus" %}
 {% endif %}
 
 {% if view_as == 'student' %}

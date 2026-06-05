@@ -4,7 +4,9 @@
 {% block content %}
 <div class="max-w-2xl mx-auto">
   <a href="{% url 'tasks:task_detail' task.pk %}" class="text-sm text-gray-400 hover:text-[#B23149] mb-4 inline-block">← Back</a>
-  <h1 class="text-xl font-bold mb-1">{{ heading|default:"Add comment" }}</h1>
+  <div class="mb-1">
+    {% include "includes/_page_title.html" with title=heading|default:"Add comment" title_size="xl" %}
+  </div>
   {% if parent_comment %}
   <p class="text-sm text-gray-500 mb-4">Replying to {{ parent_comment.author.display_name }}</p>
   {% endif %}

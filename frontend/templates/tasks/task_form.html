@@ -25,11 +25,13 @@
        class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#B23149] transition-colors mb-3">
       ← Back
     </a>
-    <h1 class="text-2xl font-bold text-[#343534]">
-      {% if action == 'edit' %}Edit Task
-      {% elif is_staff_create %}New Task for Students
-      {% else %}New Task{% endif %}
-    </h1>
+    {% if action == 'edit' %}
+    {% include "includes/_page_title.html" with title="Edit Task" %}
+    {% elif is_staff_create %}
+    {% include "includes/_page_title.html" with title="New Task for Students" %}
+    {% else %}
+    {% include "includes/_page_title.html" with title="New Task" %}
+    {% endif %}
   </div>
 
   <form method="post" class="space-y-4">

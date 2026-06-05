@@ -89,6 +89,7 @@ TEMPLATES = [
                 'accounts.context_processors.dev_login_panel',
                 'accounts.context_processors.unread_notifications',
                 'config.context_processors.integrated_nav',
+                'config.context_processors.page_meta',
                 'info.context_processors.page_help',
                 'config.context_processors.input_limits',
             ],

@@ -5,7 +5,7 @@
 
 {% if view_as == 'student' %}
 {% if can_create %}{% url 'reflections:create' as reflections_create_url %}{% endif %}
-{% include "includes/_page_header.html" with title="My Reflections" subtitle="Expectations, wellbeing, and final thoughts — at your own pace." cta_url=reflections_create_url cta_label="+ New Reflection" %}
+{% include "includes/_page_header.html" with title="My Reflections" cta_url=reflections_create_url cta_label="+ New Reflection" %}
 
 {% include "includes/_stats_grid.html" with stat1_value=total stat1_label="Total" stat2_value=weekly_tag_count stat2_label="Weekly tag" stat2_color="text-blue-500" stat3_value=project_tag_count stat3_label="Project tag" stat3_color="text-purple-500" %}
 
@@ -27,7 +27,7 @@
 </form>
 
 {% else %}
-{% include "includes/_page_header.html" with title="Student Reflections" subtitle="Shared reflections from your students · newest first" %}
+{% include "includes/_page_header.html" with title="Student Reflections" %}
 
 <form method="get" class="mb-4 flex flex-wrap gap-3 items-center">
   <div class="flex-1 min-w-[200px] max-w-md">

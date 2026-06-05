@@ -5,13 +5,13 @@
 
 {% if view_as == 'student' %}
 {% url 'goals:create' as goals_create_url %}
-{% include "includes/_page_header.html" with title="My Goals" subtitle="Set targets, track milestones, measure growth." cta_url=goals_create_url cta_label="New Goal" cta_icon="plus" %}
+{% include "includes/_page_header.html" with title="My Goals" cta_url=goals_create_url cta_label="New Goal" cta_icon="plus" %}
 
 {% include "includes/_stats_grid.html" with stat1_value=total stat1_label="Total Goals" stat2_value=in_progress stat2_label="In Progress" stat2_color="text-blue-500" stat3_value=completed stat3_label="Completed" stat3_color="text-green-500" %}
 
 {% else %}
 {% if can_create %}{% url 'goals:create' as goals_create_url %}{% endif %}
-{% include "includes/_page_header.html" with title="Student Goals" subtitle="Shared goals and staff drafts from your students." cta_url=goals_create_url cta_label="New Goals" cta_icon="plus" %}
+{% include "includes/_page_header.html" with title="Student Goals" cta_url=goals_create_url cta_label="New Goals" cta_icon="plus" %}
 
 {% if students %}
 <div class="flex gap-2 flex-wrap mb-4">

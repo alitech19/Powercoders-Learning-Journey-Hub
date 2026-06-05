@@ -3,7 +3,9 @@
 
 {% block content %}
 <div class="max-w-lg mx-auto bg-white rounded-xl border border-gray-200 p-6">
-  <h1 class="text-xl font-bold mb-2">Delete workflow?</h1>
+  <div class="mb-2">
+    {% include "includes/_page_title.html" with title="Delete workflow?" title_size="xl" %}
+  </div>
   <p class="text-sm text-gray-600 mb-4">
     <strong>{{ workflow.title }}</strong> and all progress will be permanently removed.
   </p>

@@ -4,7 +4,9 @@
 {% block content %}
 <div class="max-w-3xl mx-auto">
 
-  <h1 class="text-2xl font-bold text-[#343534] mb-6">My Profile</h1>
+  <div class="mb-6">
+    {% include "includes/_page_title.html" with title="My Profile" %}
+  </div>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 

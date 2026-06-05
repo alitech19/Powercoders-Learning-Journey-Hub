@@ -5,7 +5,7 @@
 
 {% if view_as == 'student' %}
 {% if can_create %}{% url 'habits:create' as habits_create_url %}{% endif %}
-{% include "includes/_page_header.html" with title="My Habits" subtitle="Build routines, track weekly progress, and keep your streak going." cta_url=habits_create_url cta_label="+ New Habit" %}
+{% include "includes/_page_header.html" with title="My Habits" cta_url=habits_create_url cta_label="+ New Habit" %}
 
 {% include "includes/_stats_grid.html" with stat1_value=active_count stat1_label="Active" stat2_value=on_track stat2_label="On track this week" stat2_color="text-green-600" stat3_value=best_streak stat3_suffix="🔥" stat3_label="Best streak (weeks)" %}
 
@@ -26,7 +26,7 @@
 </form>
 
 {% else %}
-{% include "includes/_page_header.html" with title="Student Habits" subtitle="Shared habits from your students" %}
+{% include "includes/_page_header.html" with title="Student Habits" %}
 
 <form method="get" class="mb-4 flex flex-wrap gap-3 items-center">
   <div class="flex-1 min-w-[200px] max-w-md">

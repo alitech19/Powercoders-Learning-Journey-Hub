@@ -15,16 +15,12 @@
 {% block content %}
 <div class="flex flex-col max-w-3xl mx-auto" style="height: calc(100vh - 9rem); min-height: 420px;">
 
-  <div class="flex items-center justify-between mb-3 shrink-0">
-    <div>
-      <h1 class="text-xl font-bold text-[#343534]">Group chat</h1>
-      {% if group %}
-      <p class="text-gray-500 text-sm">{{ group.name }} · {{ group.cohort.name }}</p>
-      {% else %}
-      <p class="text-gray-500 text-sm">No group assigned</p>
-      {% endif %}
-    </div>
-  </div>
+  {% include "includes/_page_header.html" with title="Group chat" compact=1 %}
+  {% if group %}
+  <p class="text-gray-500 text-sm -mt-2 mb-3 shrink-0">{{ group.name }} · {{ group.cohort.name }}</p>
+  {% else %}
+  <p class="text-gray-500 text-sm -mt-2 mb-3 shrink-0">No group assigned</p>
+  {% endif %}
 
   {% if available_groups|length > 1 %}
   <div class="flex gap-2 flex-wrap mb-3 shrink-0">

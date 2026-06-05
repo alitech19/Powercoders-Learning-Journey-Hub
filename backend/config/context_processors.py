@@ -4,6 +4,7 @@ from .nav import (
     integrated_nav_groups,
     integrated_nav_items,
 )
+from .page_meta import resolve_page_meta
 from config import input_limits as il
 
 
@@ -23,6 +24,10 @@ def integrated_nav(request):
         if request.user.is_authenticated
         else [],
     }
+
+
+def page_meta(request):
+    return {'page_meta': resolve_page_meta(request)}
 
 
 def input_limits(request):

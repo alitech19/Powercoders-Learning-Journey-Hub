@@ -23,9 +23,13 @@
        class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-[#B23149] transition-colors mb-3">
       ← {% if action == 'edit' %}Back to goal{% else %}Back to goals{% endif %}
     </a>
-    <h1 class="text-2xl font-bold text-[#343534]">
-      {% if action == 'edit' %}Edit Goal{% elif is_staff_create %}New Goals for Students{% else %}New Goal{% endif %}
-    </h1>
+    {% if action == 'edit' %}
+    {% include "includes/_page_title.html" with title="Edit Goal" %}
+    {% elif is_staff_create %}
+    {% include "includes/_page_title.html" with title="New Goals for Students" %}
+    {% else %}
+    {% include "includes/_page_title.html" with title="New Goal" %}
+    {% endif %}
     {% if is_staff_create %}
     <p class="text-sm text-gray-500 mt-1">One shared goal template for all selected students.</p>
     {% endif %}

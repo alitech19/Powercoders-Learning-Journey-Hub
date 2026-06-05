@@ -1,9 +1,13 @@
-<div class="mb-6 pr-14">
+<div class="{% if compact %}mb-3 shrink-0{% else %}mb-6{% endif %}">
   <div class="text-center sm:text-left">
-    <h1 class="text-2xl font-bold text-[#343534]">{{ title }}</h1>
-    {% if subtitle %}
-    <p class="text-gray-500 text-sm mt-0.5 max-w-2xl {% if not cta_url %}mx-auto sm:mx-0{% else %}mx-auto sm:mx-0{% endif %}">{{ subtitle }}</p>
+    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+      {% include "includes/_page_title.html" with title=title %}
+    </div>
+    {% with display_subtitle=subtitle|default:page_meta.purpose %}
+    {% if display_subtitle %}
+    <p class="text-gray-500 text-sm mt-0.5 max-w-2xl mx-auto sm:mx-0">{{ display_subtitle }}</p>
     {% endif %}
+    {% endwith %}
   </div>
   {% if cta_url %}
   <div class="flex justify-center mt-4">

@@ -3,7 +3,9 @@
 
 {% block content %}
 <div class="max-w-lg mx-auto">
-  <h1 class="text-2xl font-bold text-[#343534] mb-2">Delete post?</h1>
+  <div class="mb-2">
+    {% include "includes/_page_title.html" with title="Delete post?" %}
+  </div>
   <p class="text-gray-600 text-sm mb-6">This cannot be undone. Comments on this post will also be removed.</p>
 
   <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6 text-sm text-gray-700">

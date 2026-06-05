@@ -4,7 +4,9 @@
 {% block content %}
 <div class="max-w-2xl mx-auto">
   <a href="{% url 'tasks:task_detail' task.pk %}" class="text-sm text-gray-400 hover:text-[#B23149] mb-4 inline-block">← Back</a>
-  <h1 class="text-xl font-bold mb-1">Add update</h1>
+  <div class="mb-1">
+    {% include "includes/_page_title.html" with title="Add update" title_size="xl" %}
+  </div>
   <p class="text-sm text-gray-500 mb-6">{{ task.title }}</p>
   <form method="post" class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
     {% csrf_token %}

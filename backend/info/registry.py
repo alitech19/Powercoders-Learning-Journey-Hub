@@ -33,6 +33,8 @@ ROUTE_MAP: dict[str, tuple[str, str]] = {
     'tasks:task_delete': ('tasks', 'form-delete'),
     'tasks:update_create': ('tasks', 'detail'),
     'tasks:comment_create': ('tasks', 'detail'),
+    'tasks:subtask_create': ('tasks', 'detail'),
+    'tasks:subtask_edit': ('tasks', 'detail'),
     'tasks:participant_subtask_create': ('tasks', 'detail'),
     # Reflections
     'reflections:list': ('reflections', 'list'),
