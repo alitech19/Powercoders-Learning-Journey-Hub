@@ -49,9 +49,11 @@ Choose one mode:
 - Pick one group — **one status** for all members (e.g. “Prepare stand-up presentation”).
 - Students in that group all see the same task row on the Group section of the list.
 
-### Subtasks (checklist on the form)
+### Subtasks (mini-tasks on the form)
 
-Lines you add before saving become template checklist items on the task detail page (when subtasks are allowed). Students tick them; they may add their own items if the task allows participant subtasks.
+Lines you add before saving become **template subtasks** on the task detail page (when subtasks are allowed). Each subtask can have **priority** and an optional **due date**. Students track **To do · Doing · Blocked · Done** per subtask (their own progress on enrolled tasks). They may add personal subtask lines if the task allows participant subtasks. **Edit** and **Delete** on a subtask row follow the same rules as the parent task: staff manage template subtasks; students manage only subtasks they added.
+
+**Tasks vs goals:** goals use simple milestone checkboxes; task subtasks behave like small work items with status and metadata.
 
 ### Sections (checkboxes)
 
@@ -67,10 +69,10 @@ Control what appears on the **task detail** page after you save:
 - **On** — threaded discussion on the detail page (good for questions to the teacher).
 - **Off** — no comment thread.
 
-**Allow subtasks / checklist**
+**Allow subtasks**
 
-- **On** — checklist from your template + optional student-added items.
-- **Off** — no checklist UI on detail.
+- **On** — template subtasks + optional student-added items with per-student status.
+- **Off** — no subtasks UI on detail.
 
 Typical combos: all on for coached assignments; all off for a simple private reminder.
 

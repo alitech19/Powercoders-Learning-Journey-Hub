@@ -1,15 +1,55 @@
 {% extends "base.html" %}
-{% block title %}Add subtask{% endblock %}
+{% block title %}{% if action == 'edit' %}Edit subtask{% else %}Add subtask{% endif %}{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-  <a href="{% url 'tasks:task_detail' task.pk %}" class="text-sm text-gray-400 hover:text-[#B23149] mb-4 inline-block">← Back</a>
-  <h1 class="text-xl font-bold mb-6">Add subtask</h1>
+  <a href="{% url 'tasks:task_detail' task.pk %}" class="text-sm text-gray-400 hover:text-[#B23149] mb-4 inline-block">← Back to task</a>
+  <h1 class="text-xl font-bold text-[#343534] mb-2">
+    {% if action == 'edit' %}Edit subtask{% else %}Add subtask{% endif %}
+  </h1>
+  <p class="text-sm text-gray-500 mb-6">
+    Task: <span class="font-medium text-[#343534]">{{ task.title }}</span>
+    {% if is_template %}
+    <span class="block text-xs text-gray-400 mt-1">Template subtask — shared with all enrolled students (mini-task, not a milestone).</span>
+    {% else %}
+    <span class="block text-xs text-gray-400 mt-1">Your personal subtask on this task.</span>
+    {% endif %}
+  </p>
+
   <form method="post" class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
     {% csrf_token %}
-    <input type="text" name="title" required placeholder="Subtask title" maxlength="{{ limits.title }}"
-           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
-    <button type="submit" class="bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer">Add</button>
+    <div>
+      <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Title <span class="text-[#B23149]">*</span></label>
+      <input type="text" name="title" value="{{ form.title.value|default:'' }}" required maxlength="{{ limits.title }}"
+             class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+    </div>
+
+    <div>
+      <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Description</label>
+      <textarea name="description" rows="3" maxlength="{{ limits.description }}"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none"
+                placeholder="Steps, links, or definition of done (optional)">{{ form.description.value|default:'' }}</textarea>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Priority</label>
+        <select name="priority" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+          {% for value, label in form.fields.priority.choices %}
+          <option value="{{ value }}" {% if form.priority.value == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Due date</label>
+        <input type="date" name="due_date" value="{{ form.due_date.value|default:'' }}"
+               class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+      </div>
+    </div>
+
+    <button type="submit" class="bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer">
+      {% if action == 'edit' %}Save changes{% else %}Add subtask{% endif %}
+    </button>
   </form>
 </div>
 {% endblock %}

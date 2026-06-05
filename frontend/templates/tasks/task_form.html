@@ -37,7 +37,10 @@
     <input type="hidden" name="assign_mode" :value="assignMode">
 
     <template x-for="(st, i) in subtasks" :key="i">
-      <input type="hidden" :name="'st_' + i" :value="st">
+      <input type="hidden" :name="'st_' + i + '_title'" :value="st.title">
+      <input type="hidden" :name="'st_' + i + '_description'" :value="st.description">
+      <input type="hidden" :name="'st_' + i + '_priority'" :value="st.priority">
+      <input type="hidden" :name="'st_' + i + '_due_date'" :value="st.due_date">
     </template>
     <input type="hidden" name="visibility" :value="visibility">
 
@@ -149,25 +152,56 @@
     </div>
     {% endif %}
 
-    {% if is_staff_create or action == 'edit' and task.is_staff_assigned %}
+    {% if is_staff_create and action != 'edit' %}
     <div class="bg-white rounded-xl border border-gray-200 p-5">
-      <div class="flex items-center justify-between mb-3">
-        <label class="text-xs font-semibold text-gray-400 uppercase">Template subtasks</label>
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <label class="text-xs font-semibold text-gray-400 uppercase">Subtasks</label>
+          <p class="text-xs text-gray-500 mt-1">Mini-tasks with title, description, priority, and due date — not milestones.</p>
+        </div>
         <button type="button" @click="addSt()" class="text-xs text-[#B23149] font-medium">+ Add</button>
       </div>
-      <div class="space-y-2 mb-3">
+      <div class="space-y-3 mb-3">
         <template x-for="(st, i) in subtasks" :key="i">
-          <div class="flex items-center gap-2">
-            <input type="text" x-model="subtasks[i]" maxlength="{{ limits.title }}" class="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2">
-            <button type="button" @click="removeSt(i)" class="text-gray-400 hover:text-red-500">×</button>
+          <div class="border border-gray-100 rounded-lg p-3 space-y-2">
+            <div class="flex items-start gap-2">
+              <input type="text" x-model="subtasks[i].title" maxlength="{{ limits.title }}"
+                     class="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 font-medium" placeholder="Title *">
+              <button type="button" @click="removeSt(i)" class="text-gray-400 hover:text-red-500 px-1">×</button>
+            </div>
+            <textarea x-model="subtasks[i].description" maxlength="{{ limits.description }}" rows="2"
+                      class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-none" placeholder="Description (optional)"></textarea>
+            <div class="flex flex-wrap gap-2">
+              <select x-model="subtasks[i].priority" class="text-sm border border-gray-200 rounded-lg px-2 py-2">
+                <option value="low">Low</option>
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+              </select>
+              <input type="date" x-model="subtasks[i].due_date" class="text-sm border border-gray-200 rounded-lg px-2 py-2">
+            </div>
           </div>
         </template>
       </div>
-      <div class="flex gap-2">
-        <input type="text" x-model="newSt" @keydown.enter.prevent="addSt()" placeholder="Add subtask…" maxlength="{{ limits.title }}"
-               class="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2">
-        <button type="button" @click="addSt()" class="px-3 py-2 bg-gray-100 rounded-lg text-sm">Add</button>
+      <div class="border border-dashed border-gray-200 rounded-lg p-3 space-y-2">
+        <p class="text-xs text-gray-400 uppercase font-semibold">New subtask</p>
+        <input type="text" x-model="newSt.title" @keydown.enter.prevent="addSt()" placeholder="Title *" maxlength="{{ limits.title }}"
+               class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2">
+        <textarea x-model="newSt.description" rows="2" maxlength="{{ limits.description }}" placeholder="Description (optional)"
+                  class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-none"></textarea>
+        <div class="flex flex-wrap gap-2">
+          <select x-model="newSt.priority" class="text-sm border border-gray-200 rounded-lg px-2 py-2">
+            <option value="low">Low</option>
+            <option value="normal">Normal</option>
+            <option value="high">High</option>
+          </select>
+          <input type="date" x-model="newSt.due_date" class="text-sm border border-gray-200 rounded-lg px-2 py-2">
+          <button type="button" @click="addSt()" class="px-3 py-2 bg-gray-100 rounded-lg text-sm">Add</button>
+        </div>
       </div>
+    </div>
+    {% elif action == 'edit' and task.is_staff_assigned %}
+    <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm text-amber-900">
+      Manage subtasks on the <a href="{% url 'tasks:task_detail' task.pk %}" class="text-[#B23149] font-medium hover:underline">task detail</a> page (+ Add / Edit / Delete).
     </div>
     {% endif %}
 
@@ -184,7 +218,7 @@
       </label>
       <label class="flex items-center gap-2 text-sm cursor-pointer">
         <input type="checkbox" name="allow_subtasks" {% if form.allow_subtasks.value|default:True %}checked{% endif %} class="accent-[#B23149]">
-        Allow subtasks / checklist
+        Allow subtasks
       </label>
     </div>
     {% endif %}
@@ -215,15 +249,34 @@
 function taskForm(config) {
   const titleMax = {{ limits.title }};
   const subtasksEl = document.getElementById('task-subtasks-data');
+  const rawSubtasks = subtasksEl ? JSON.parse(subtasksEl.textContent) : [];
+  const normalizeSt = (item) => {
+    if (typeof item === 'string') {
+      return { title: item, description: '', priority: 'normal', due_date: '' };
+    }
+    return {
+      title: item.title || '',
+      description: item.description || '',
+      priority: item.priority || 'normal',
+      due_date: item.due_date || '',
+    };
+  };
   const base = {
-    subtasks: subtasksEl ? JSON.parse(subtasksEl.textContent) : [],
-    newSt: '',
+    subtasks: rawSubtasks.map(normalizeSt),
+    newSt: { title: '', description: '', priority: 'normal', due_date: '' },
     visibility: '{{ form.visibility.value|default:"private" }}',
     assignMode: config.assignMode || 'students',
     groupId: '',
     addSt() {
-      const t = this.newSt.trim().slice(0, titleMax);
-      if (t) { this.subtasks.push(t); this.newSt = ''; }
+      const t = this.newSt.title.trim().slice(0, titleMax);
+      if (!t) return;
+      this.subtasks.push({
+        title: t,
+        description: (this.newSt.description || '').trim(),
+        priority: this.newSt.priority || 'normal',
+        due_date: this.newSt.due_date || '',
+      });
+      this.newSt = { title: '', description: '', priority: 'normal', due_date: '' };
     },
     removeSt(i) { this.subtasks.splice(i, 1); },
   };

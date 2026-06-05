@@ -195,20 +195,44 @@ def can_comment(user, task, enrollment=None):
     return enrollment.student_id == user.pk
 
 
-def can_toggle_subtasks(user, enrollment):
+def can_change_subtask_status(user, enrollment, subtask=None):
     if not task_allows_subtasks(enrollment.task):
         return False
     if not can_view_task_content(user, enrollment.task):
         return False
     if user_is_admin(user):
         return True
-    return enrollment.student_id == user.pk
-
-
-def can_toggle_subtask(user, enrollment, subtask):
-    if not can_toggle_subtasks(user, enrollment):
+    if enrollment.student_id != user.pk:
+        return False
+    if subtask is not None and subtask.added_by_id and subtask.added_by_id != user.pk:
         return False
     return True
+
+
+def can_edit_subtask(user, subtask):
+    task = subtask.task
+    if not task_allows_subtasks(task):
+        return False
+    if not can_view_task(user, task):
+        return False
+    if subtask.is_template:
+        return user_is_staff(user) and can_manage_task(user, task)
+    return subtask.added_by_id == user.pk and can_view_task_content(user, task)
+
+
+can_edit_subtask_metadata = can_edit_subtask
+
+
+def can_delete_subtask(user, subtask):
+    return can_edit_subtask(user, subtask)
+
+
+def can_add_template_subtask(user, task):
+    if not task.allow_subtasks:
+        return False
+    if not can_manage_task(user, task):
+        return False
+    return user_is_staff(user)
 
 
 def can_add_participant_subtask(user, task, enrollment=None):

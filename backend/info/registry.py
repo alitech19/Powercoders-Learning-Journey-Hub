@@ -107,7 +107,7 @@ DISABLED_URL_NAMES = frozenset(
         'share_start',
         'task_quick_status',
         'task_add_enrollment',
-        'subtask_toggle',
+        'subtask_status',
         'comment_reply_create',
         'milestone_toggle',
         'mark_achieved',

@@ -1,8 +1,11 @@
 from django.test import TestCase
 
 from tasks.models import Task
+from tasks.models import Subtask
 from tasks.permissions import (
     can_change_status,
+    can_delete_subtask,
+    can_edit_subtask,
     can_view_task,
     can_view_task_content,
     get_visible_tasks_for_user,
@@ -83,3 +86,26 @@ class TaskPermissionTests(TestCase):
         titles = set(get_visible_tasks_for_user(self.student).values_list('title', flat=True))
         self.assertIn('Assigned', titles)
         self.assertNotIn('Other', titles)
+
+    def test_student_can_edit_own_participant_subtask(self):
+        task = make_staff_individual_task(self.teacher, visibility=Task.Visibility.SHARED)
+        enroll_student(task, self.student)
+        subtask = Subtask.objects.create(
+            task=task, title='Mine', order=0, added_by=self.student,
+        )
+        self.assertTrue(can_edit_subtask(self.student, subtask))
+        self.assertTrue(can_delete_subtask(self.student, subtask))
+
+    def test_student_cannot_edit_template_subtask(self):
+        task = make_staff_individual_task(self.teacher, visibility=Task.Visibility.SHARED)
+        enroll_student(task, self.student)
+        subtask = Subtask.objects.create(task=task, title='Template', order=0)
+        self.assertFalse(can_edit_subtask(self.student, subtask))
+        self.assertFalse(can_delete_subtask(self.student, subtask))
+
+    def test_teacher_can_edit_template_subtask(self):
+        task = make_staff_individual_task(self.teacher, visibility=Task.Visibility.SHARED)
+        enroll_student(task, self.student)
+        subtask = Subtask.objects.create(task=task, title='Template', order=0)
+        self.assertTrue(can_edit_subtask(self.teacher, subtask))
+        self.assertTrue(can_delete_subtask(self.teacher, subtask))

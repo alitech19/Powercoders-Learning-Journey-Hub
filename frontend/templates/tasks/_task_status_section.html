@@ -1,36 +1,4 @@
 <div id="task-status-section">
   <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Status</p>
-  {% if can_edit_status %}
-  <div class="flex gap-2 flex-wrap">
-    {% for value, label in status_choices %}
-    <form hx-post="{% url 'tasks:task_quick_status' task.pk %}"
-          hx-target="#task-status-section"
-          hx-swap="outerHTML">
-      {% csrf_token %}
-      <input type="hidden" name="status" value="{{ value }}">
-      <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-semibold border-2 cursor-pointer transition-colors
-        {% if display_status == value %}
-          {% if value == 'done' %}border-green-500 bg-green-50 text-green-700
-          {% elif value == 'doing' %}border-blue-500 bg-blue-50 text-blue-700
-          {% elif value == 'blocked' %}border-red-400 bg-red-50 text-red-600
-          {% else %}border-gray-400 bg-gray-50 text-gray-700{% endif %}
-        {% else %}border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600
-        {% endif %}">
-        {{ label }}
-      </button>
-    </form>
-    {% endfor %}
-  </div>
-  {% else %}
-  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-    {% if display_status == 'done' %}bg-green-100 text-green-800
-    {% elif display_status == 'doing' %}bg-blue-100 text-blue-800
-    {% elif display_status == 'blocked' %}bg-red-100 text-red-800
-    {% else %}bg-gray-100 text-gray-700{% endif %}">
-    {% if display_status == 'done' %}Done
-    {% elif display_status == 'doing' %}Doing
-    {% elif display_status == 'blocked' %}Blocked
-    {% else %}To do{% endif %}
-  </span>
-  {% endif %}
+  {% include "tasks/_task_status_inline.html" %}
 </div>

@@ -2,7 +2,7 @@ from django import forms
 
 from config.input_limits import BODY_TEXT_MAX_LENGTH, DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH
 
-from .models import Task, TaskComment, TaskEnrollment, TaskUpdate
+from .models import Subtask, Task, TaskComment, TaskEnrollment, TaskUpdate
 
 
 class TaskForm(forms.ModelForm):
@@ -67,5 +67,21 @@ class TaskCommentForm(forms.ModelForm):
         self.fields['text'].widget.attrs['maxlength'] = BODY_TEXT_MAX_LENGTH
 
 
-class ParticipantSubtaskForm(forms.Form):
-    title = forms.CharField(max_length=TITLE_MAX_LENGTH)
+class SubtaskForm(forms.ModelForm):
+    class Meta:
+        model = Subtask
+        fields = ['title', 'description', 'priority', 'due_date']
+        widgets = {
+            'due_date': forms.DateInput(attrs={'type': 'date'}),
+            'description': forms.Textarea(attrs={'rows': 2}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['title'].max_length = TITLE_MAX_LENGTH
+        self.fields['title'].widget.attrs['maxlength'] = TITLE_MAX_LENGTH
+        self.fields['description'].required = False
+        self.fields['description'].widget.attrs['maxlength'] = DESCRIPTION_MAX_LENGTH
+        self.fields['due_date'].required = False
+
+

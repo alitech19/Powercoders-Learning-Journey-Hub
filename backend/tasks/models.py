@@ -223,18 +223,25 @@ class TaskEnrollment(models.Model):
     def __str__(self):
         return f'{self.student} → {self.task.title}'
 
+    def subtasks_for_student(self):
+        return self.task.subtasks.filter(
+            models.Q(added_by__isnull=True) | models.Q(added_by_id=self.student_id)
+        )
+
     def completed_subtask_ids(self):
         return set(
-            self.subtask_completions.values_list('subtask_id', flat=True)
+            self.subtask_enrollments.filter(status=Task.Status.DONE).values_list(
+                'subtask_id', flat=True
+            )
         )
 
     @property
     def subtasks_done(self):
-        return self.subtask_completions.count()
+        return self.subtask_enrollments.filter(status=Task.Status.DONE).count()
 
     @property
     def subtasks_total(self):
-        return self.task.subtasks.filter(added_by__isnull=True).count()
+        return self.subtasks_for_student().count()
 
     @property
     def progress(self):
@@ -260,6 +267,16 @@ class TaskEnrollment(models.Model):
 class Subtask(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='subtasks')
     title = models.CharField(max_length=TITLE_MAX_LENGTH)
+    description = models.TextField(
+        blank=True,
+        validators=[MaxLengthValidator(DESCRIPTION_MAX_LENGTH)],
+    )
+    priority = models.CharField(
+        max_length=20,
+        choices=Task.Priority.choices,
+        default=Task.Priority.NORMAL,
+    )
+    due_date = models.DateField(null=True, blank=True)
     order = models.PositiveSmallIntegerField(default=0)
     added_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -282,30 +299,43 @@ class Subtask(models.Model):
         return self.added_by_id is None
 
 
-class SubtaskCompletion(models.Model):
+class SubtaskEnrollment(models.Model):
     enrollment = models.ForeignKey(
         TaskEnrollment,
         on_delete=models.CASCADE,
-        related_name='subtask_completions',
+        related_name='subtask_enrollments',
     )
     subtask = models.ForeignKey(
         Subtask,
         on_delete=models.CASCADE,
-        related_name='completions',
+        related_name='enrollments',
     )
-    completed_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=20,
+        choices=Task.Status.choices,
+        default=Task.Status.TODO,
+    )
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=['enrollment', 'subtask'],
-                name='unique_subtask_completion',
+                name='unique_subtask_enrollment',
             ),
         ]
-        ordering = ['completed_at']
+        ordering = ['subtask__order', 'subtask__pk']
 
     def __str__(self):
-        return f'{self.enrollment.student} ✓ {self.subtask.title}'
+        return f'{self.enrollment.student} — {self.subtask.title} ({self.status})'
+
+    def save(self, *args, **kwargs):
+        if self.status == Task.Status.DONE:
+            if not self.completed_at:
+                self.completed_at = timezone.now()
+        else:
+            self.completed_at = None
+        super().save(*args, **kwargs)
 
 
 class TaskUpdate(models.Model):

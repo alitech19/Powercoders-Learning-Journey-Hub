@@ -1,11 +1,13 @@
 import ast
+import re
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Q
 
 from accounts.models import User
 from cohorts.models import Cohort, Group
-from config.input_limits import TITLE_MAX_LENGTH
+from config.input_limits import DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH
 from config.text_validation import clamp_text
 from cohorts.permissions import (
     get_active_students_for_cohort,
@@ -18,7 +20,7 @@ from cohorts.permissions import (
     user_is_teacher,
 )
 
-from .models import Subtask, SubtaskCompletion, Task, TaskComment, TaskEnrollment, TaskUpdate
+from .models import Subtask, SubtaskEnrollment, Task, TaskComment, TaskEnrollment, TaskUpdate
 
 
 class AssigneeType:
@@ -42,20 +44,101 @@ def normalize_subtask_title(raw):
     return title
 
 
+def _parse_subtask_due_date(raw):
+    value = (raw or '').strip()
+    return value or None
+
+
+def _parse_subtask_priority(raw):
+    priority = (raw or Task.Priority.NORMAL).strip()
+    if priority not in Task.Priority.values:
+        return Task.Priority.NORMAL
+    return priority
+
+
+def _parse_subtask_description(raw):
+    return clamp_text((raw or '').strip(), DESCRIPTION_MAX_LENGTH)
+
+
 def parse_subtasks_from_post(post):
+    """Parse template subtasks from POST (title + optional description, priority, due)."""
+    indexed = {}
+    legacy = {}
+
+    for key, raw in post.items():
+        match = re.fullmatch(r'st_(\d+)_(title|description|priority|due_date)', key)
+        if match:
+            index = int(match.group(1))
+            field = match.group(2)
+            indexed.setdefault(index, {})[field] = raw
+            continue
+        match = re.fullmatch(r'st_(\d+)', key)
+        if match:
+            legacy[int(match.group(1))] = raw
+
+    if indexed:
+        subtasks = []
+        for index in sorted(indexed.keys()):
+            item = indexed[index]
+            title = clamp_text(normalize_subtask_title(item.get('title', '')), TITLE_MAX_LENGTH)
+            if not title:
+                continue
+            subtasks.append({
+                'title': title,
+                'description': _parse_subtask_description(item.get('description')),
+                'priority': _parse_subtask_priority(item.get('priority')),
+                'due_date': _parse_subtask_due_date(item.get('due_date')),
+                'order': len(subtasks),
+            })
+        return subtasks
+
     subtasks = []
-    order = 0
-    for key in sorted(post.keys()):
-        if key.startswith('st_'):
-            title = clamp_text(normalize_subtask_title(post[key]), TITLE_MAX_LENGTH)
-            if title:
-                subtasks.append({'title': title, 'order': order})
-                order += 1
+    for index in sorted(legacy.keys()):
+        title = clamp_text(normalize_subtask_title(legacy[index]), TITLE_MAX_LENGTH)
+        if title:
+            subtasks.append({
+                'title': title,
+                'description': '',
+                'priority': Task.Priority.NORMAL,
+                'due_date': None,
+                'order': len(subtasks),
+            })
     return subtasks
 
 
+def subtasks_visible_to_enrollment(enrollment):
+    return enrollment.task.subtasks.filter(
+        Q(added_by__isnull=True) | Q(added_by_id=enrollment.student_id)
+    )
+
+
+@transaction.atomic
+def sync_subtask_enrollments(enrollment):
+    """Ensure SubtaskEnrollment rows exist for each visible subtask."""
+    for subtask in subtasks_visible_to_enrollment(enrollment).order_by('order', 'pk'):
+        SubtaskEnrollment.objects.get_or_create(
+            enrollment=enrollment,
+            subtask=subtask,
+            defaults={'status': Task.Status.TODO},
+        )
+
+
+def ensure_enrollment_for_subtasks(task, student):
+    """Lazy enrollment for group-shared subtask progress (per student)."""
+    enrollment, created = TaskEnrollment.objects.get_or_create(
+        task=task,
+        student=student,
+        defaults={'status': task.status},
+    )
+    if created:
+        sync_subtask_enrollments(enrollment)
+    else:
+        sync_subtask_enrollments(enrollment)
+    return enrollment
+
+
 def sync_subtasks(task, post_data):
-    """Update template subtasks without wiping completions."""
+    """Update template subtasks without resetting student SubtaskEnrollment status."""
     new_subtasks = parse_subtasks_from_post(post_data)
     existing = list(task.subtasks.filter(added_by__isnull=True).order_by('order', 'pk'))
 
@@ -64,19 +147,40 @@ def sync_subtasks(task, post_data):
         if index < len(existing):
             subtask = existing[index]
             updates = []
-            if subtask.title != title:
-                subtask.title = title
-                updates.append('title')
-            if subtask.order != index:
-                subtask.order = index
-                updates.append('order')
+            for field in ('title', 'description', 'priority', 'due_date', 'order'):
+                value = item[field] if field != 'order' else index
+                if getattr(subtask, field) != value:
+                    setattr(subtask, field, value)
+                    updates.append(field)
             if updates:
                 subtask.save(update_fields=updates)
         else:
-            Subtask.objects.create(task=task, title=title, order=index)
+            Subtask.objects.create(
+                task=task,
+                title=title,
+                description=item['description'],
+                priority=item['priority'],
+                due_date=item['due_date'],
+                order=index,
+            )
 
     for subtask in existing[len(new_subtasks):]:
         subtask.delete()
+
+    for enrollment in task.enrollments.all():
+        sync_subtask_enrollments(enrollment)
+
+
+def set_subtask_status(enrollment, subtask, status):
+    if status not in Task.Status.values:
+        raise ValidationError('Invalid subtask status.')
+    subtask_enrollment, _ = SubtaskEnrollment.objects.get_or_create(
+        enrollment=enrollment,
+        subtask=subtask,
+        defaults={'status': Task.Status.TODO},
+    )
+    subtask_enrollment.status = status
+    subtask_enrollment.save(update_fields=['status', 'completed_at'])
 
 
 def resolve_assignee_target(assignee_type, target_id):
@@ -147,6 +251,11 @@ def _parse_priority(post):
     return priority
 
 
+def _create_template_subtasks(task, post):
+    for item in parse_subtasks_from_post(post):
+        Subtask.objects.create(task=task, **item)
+
+
 @transaction.atomic
 def create_student_task(*, user, post):
     title = post.get('title', '').strip()
@@ -172,14 +281,13 @@ def create_student_task(*, user, post):
     task.full_clean()
     task.save()
 
-    TaskEnrollment.objects.create(
+    enrollment = TaskEnrollment.objects.create(
         task=task,
         student=user,
         status=task.status,
     )
-
-    for item in parse_subtasks_from_post(post):
-        Subtask.objects.create(task=task, **item)
+    _create_template_subtasks(task, post)
+    sync_subtask_enrollments(enrollment)
     return task
 
 
@@ -222,12 +330,16 @@ def create_tasks_bulk(*, user, post):
         allow_subtasks=_parse_bool(post, 'allow_subtasks', True),
     )
 
+    _create_template_subtasks(task, post)
+
     initial_status = _parse_initial_status(post)
     for student in students:
-        TaskEnrollment.objects.create(task=task, student=student, status=initial_status)
-
-    for item in parse_subtasks_from_post(post):
-        Subtask.objects.create(task=task, **item)
+        enrollment = TaskEnrollment.objects.create(
+            task=task,
+            student=student,
+            status=initial_status,
+        )
+        sync_subtask_enrollments(enrollment)
     return task
 
 
@@ -261,8 +373,15 @@ def create_group_task(*, user, post):
         allow_subtasks=_parse_bool(post, 'allow_subtasks', True),
     )
 
-    for item in parse_subtasks_from_post(post):
-        Subtask.objects.create(task=task, **item)
+    _create_template_subtasks(task, post)
+
+    for student in get_active_students_for_group(group):
+        enrollment = TaskEnrollment.objects.create(
+            task=task,
+            student=student,
+            status=task.status,
+        )
+        sync_subtask_enrollments(enrollment)
     return task
 
 
@@ -293,23 +412,13 @@ def add_task_enrollments(*, user, task, post):
 
     initial_status = _parse_initial_status(post)
     for student_id in new_ids:
-        TaskEnrollment.objects.create(
+        enrollment = TaskEnrollment.objects.create(
             task=task,
             student_id=student_id,
             status=initial_status,
         )
+        sync_subtask_enrollments(enrollment)
     return len(new_ids)
-
-
-def toggle_subtask_completion(enrollment, subtask):
-    completion = SubtaskCompletion.objects.filter(
-        enrollment=enrollment,
-        subtask=subtask,
-    ).first()
-    if completion:
-        completion.delete()
-    else:
-        SubtaskCompletion.objects.create(enrollment=enrollment, subtask=subtask)
 
 
 def build_comment_tree(enrollment):

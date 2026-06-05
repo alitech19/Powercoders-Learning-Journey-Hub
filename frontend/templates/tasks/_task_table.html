@@ -22,17 +22,12 @@
             <span class="text-gray-400 italic">Private task</span>
           {% endif %}
         </td>
-        <td class="px-4 py-3">
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-            {% if row.display_status == 'done' %}bg-green-100 text-green-800
-            {% elif row.display_status == 'doing' %}bg-blue-100 text-blue-800
-            {% elif row.display_status == 'blocked' %}bg-red-100 text-red-800
-            {% else %}bg-gray-100 text-gray-700{% endif %}">
-            {% if row.display_status == 'done' %}Done
-            {% elif row.display_status == 'doing' %}Doing
-            {% elif row.display_status == 'blocked' %}Blocked
-            {% else %}To do{% endif %}
-          </span>
+        <td id="task-status-{{ task.pk }}" class="px-4 py-3">
+          {% if row.can_edit_status %}
+            {% include "tasks/_task_status_inline.html" with can_edit_status=row.can_edit_status display_status=row.display_status status_choices=status_choices status_compact=True status_url_suffix="?inline=list" %}
+          {% else %}
+            {% include "tasks/_task_status_inline.html" with can_edit_status=False display_status=row.display_status %}
+          {% endif %}
         </td>
         <td class="px-4 py-3">
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium

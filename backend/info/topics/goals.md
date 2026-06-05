@@ -6,7 +6,7 @@ Your goals and staff-assigned goal templates. Progress shows completed milestone
 
 ## Goal detail {#detail}
 
-Milestones checklist, status, and optional feedback from staff. Toggle milestones to update progress.
+Milestones checklist, status, and optional feedback from staff. Toggle milestones to update progress. Milestones are **on/off only** (no Doing/Blocked) — unlike **task subtasks**, which support full execution status.
 
 ## Create goal {#form-create}
 
@@ -34,7 +34,7 @@ Optional deadline for the whole goal (not per milestone).
 
 ### Milestones
 
-Add lines before save (e.g. “Finish module 3”, “Pass mock interview”). On the detail page you tick milestones; **milestones done / total** drives progress display.
+Add lines before save (e.g. “Finish module 3”, “Pass mock interview”). On the detail page you tick milestones; **milestones done / total** drives progress display. For step-by-step work with status and due dates, use **Tasks** and their subtasks instead.
 
 ### Assign to students (staff only)
 

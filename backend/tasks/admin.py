@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import (
     Subtask,
-    SubtaskCompletion,
+    SubtaskEnrollment,
     Task,
     TaskComment,
     TaskEnrollment,
@@ -13,7 +13,15 @@ from .models import (
 class SubtaskInline(admin.TabularInline):
     model = Subtask
     extra = 0
-    fields = ('order', 'title', 'added_by')
+    fields = ('order', 'title', 'priority', 'due_date', 'added_by')
+
+
+class SubtaskEnrollmentInline(admin.TabularInline):
+    model = SubtaskEnrollment
+    extra = 0
+    fields = ('subtask', 'status', 'completed_at')
+    readonly_fields = ('completed_at',)
+    autocomplete_fields = ('subtask',)
 
 
 class TaskEnrollmentInline(admin.TabularInline):
@@ -49,18 +57,20 @@ class TaskEnrollmentAdmin(admin.ModelAdmin):
     list_filter = ('status',)
     search_fields = ('task__title', 'student__display_name', 'student__email')
     autocomplete_fields = ('task', 'student')
+    inlines = [SubtaskEnrollmentInline]
 
 
 @admin.register(Subtask)
 class SubtaskAdmin(admin.ModelAdmin):
-    list_display = ('title', 'task', 'order', 'added_by')
+    list_display = ('title', 'task', 'priority', 'due_date', 'order', 'added_by')
     search_fields = ('title', 'task__title')
     autocomplete_fields = ('task', 'added_by')
 
 
-@admin.register(SubtaskCompletion)
-class SubtaskCompletionAdmin(admin.ModelAdmin):
-    list_display = ('enrollment', 'subtask', 'completed_at')
+@admin.register(SubtaskEnrollment)
+class SubtaskEnrollmentAdmin(admin.ModelAdmin):
+    list_display = ('enrollment', 'subtask', 'status', 'completed_at')
+    list_filter = ('status',)
     autocomplete_fields = ('enrollment', 'subtask')
 
 

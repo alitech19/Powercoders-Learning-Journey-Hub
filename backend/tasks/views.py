@@ -19,27 +19,30 @@ from cohorts.permissions import (
 
 from feedback.services import build_section_context
 
-from .forms import ParticipantSubtaskForm, TaskCommentForm, TaskForm, TaskUpdateForm
-from .models import Subtask, Task, TaskComment, TaskEnrollment, TaskUpdate
+from .forms import SubtaskForm, TaskCommentForm, TaskForm, TaskUpdateForm
+from .models import Subtask, SubtaskEnrollment, Task, TaskComment, TaskEnrollment, TaskUpdate
 from .permissions import (
     can_add_enrollment,
     can_add_participant_subtask,
+    can_add_template_subtask,
     can_add_update,
     can_change_status,
+    can_change_subtask_status,
+    can_delete_subtask,
+    can_edit_subtask,
     can_comment,
     can_create_tasks,
     can_delete_task,
     can_edit_task,
     can_edit_task_fields,
     can_manage_task,
-    can_toggle_subtask,
-    can_toggle_subtasks,
     can_view_task,
     can_view_task_content,
     can_view_task_metadata,
     get_enrollment_for_user,
     get_visible_enrollments_for_user,
     get_visible_tasks_for_user,
+    is_personal_task,
     is_staff_assigned,
     task_allows_comments,
     task_allows_subtasks,
@@ -51,10 +54,11 @@ from .services import (
     create_group_task,
     create_student_task,
     create_tasks_bulk,
+    ensure_enrollment_for_subtasks,
     get_assignment_form_context,
-    normalize_subtask_title,
+    set_subtask_status,
+    sync_subtask_enrollments,
     sync_subtasks,
-    toggle_subtask_completion,
 )
 
 
@@ -101,25 +105,94 @@ def _effective_status(task, enrollment):
     return enrollment.status if enrollment else task.status
 
 
+def _task_status_context(user, task, enrollment):
+    return {
+        'task': task,
+        'enrollment': enrollment,
+        'can_edit_status': can_change_status(user, task, enrollment),
+        'status_choices': Task.Status.choices,
+        'display_status': _effective_status(task, enrollment),
+    }
+
+
+def _subtask_status_map(enrollment):
+    return {
+        row.subtask_id: row
+        for row in enrollment.subtask_enrollments.all()
+    }
+
+
+def _subtask_row(user, enrollment, subtask, status_map, *, readonly=False):
+    row = status_map.get(subtask.pk)
+    if readonly:
+        return {
+            'subtask': subtask,
+            'display_status': row.status if row else Task.Status.TODO,
+            'can_change_status': False,
+            'can_edit': False,
+            'can_delete': False,
+        }
+    return {
+        'subtask': subtask,
+        'display_status': row.status if row else Task.Status.TODO,
+        'can_change_status': can_change_subtask_status(user, enrollment, subtask),
+        'can_edit': can_edit_subtask(user, subtask),
+        'can_delete': can_delete_subtask(user, subtask),
+    }
+
+
+def _subtask_ctx_for_staff_personal(user, enrollment):
+    sync_subtask_enrollments(enrollment)
+    enrollment = TaskEnrollment.objects.prefetch_related(
+        'subtask_enrollments',
+        'task__subtasks',
+    ).get(pk=enrollment.pk)
+    status_map = _subtask_status_map(enrollment)
+    items = [
+        _subtask_row(user, enrollment, subtask, status_map, readonly=True)
+        for subtask in enrollment.subtasks_for_student().order_by('order', 'pk')
+    ]
+    return {
+        'template_subtasks': items,
+        'participant_subtasks': [],
+        'subtask_done': sum(
+            1 for item in items if item['display_status'] == Task.Status.DONE
+        ),
+        'subtask_total': len(items),
+        'can_add_template_subtask': False,
+        'can_add_participant_subtask': False,
+        'show_staff_subtasks': True,
+    }
+
+
 def _subtask_ctx(user, enrollment):
+    sync_subtask_enrollments(enrollment)
+    enrollment = TaskEnrollment.objects.prefetch_related(
+        'subtask_enrollments',
+        'task__subtasks',
+    ).get(pk=enrollment.pk)
     task = enrollment.task
-    completed_ids = enrollment.completed_subtask_ids()
+    status_map = _subtask_status_map(enrollment)
     template_subtasks = [
-        {'subtask': st, 'completed': st.pk in completed_ids}
+        _subtask_row(user, enrollment, st, status_map)
         for st in task.subtasks.filter(added_by__isnull=True).order_by('order', 'pk')
     ]
     participant_subtasks = [
-        {'subtask': st, 'completed': st.pk in completed_ids}
+        _subtask_row(user, enrollment, st, status_map)
         for st in task.subtasks.filter(added_by=enrollment.student).order_by('order', 'pk')
     ]
     all_items = template_subtasks + participant_subtasks
     return {
         'template_subtasks': template_subtasks,
         'participant_subtasks': participant_subtasks,
-        'subtask_done': sum(1 for item in all_items if item['completed']),
+        'subtask_done': sum(
+            1 for item in all_items if item['display_status'] == Task.Status.DONE
+        ),
         'subtask_total': len(all_items),
-        'can_toggle_subtasks': can_toggle_subtasks(user, enrollment),
+        'can_change_subtask_status': can_change_subtask_status(user, enrollment),
         'can_add_participant_subtask': can_add_participant_subtask(user, task, enrollment),
+        'can_add_template_subtask': can_add_template_subtask(user, task),
+        'status_choices': Task.Status.choices,
     }
 
 
@@ -412,9 +485,11 @@ def task_detail(request, pk):
 
     if task.is_group_shared:
         enrollment = None
+        if user.role == User.Role.STUDENT and task_allows_subtasks(task) and can_content:
+            enrollment = ensure_enrollment_for_subtasks(task, user)
         ctx = {
             'task': task,
-            'enrollment': None,
+            'enrollment': enrollment,
             'view_as': 'staff' if user_is_staff(user) else 'student',
             'can_view_content': can_content,
             'display_title': task.title if can_content else 'Private task',
@@ -425,19 +500,14 @@ def task_detail(request, pk):
             'can_edit_status': can_change_status(user, task),
             'can_add_update': False,
             'can_comment': False,
-            'show_subtasks': task_allows_subtasks(task) and can_content,
+            'show_subtasks': task_allows_subtasks(task) and can_content and enrollment is not None,
             'show_updates': False,
             'show_comments': False,
             'status_choices': Task.Status.choices,
             'today': timezone.localdate(),
         }
-        if task_allows_subtasks(task) and can_content:
-            ctx['template_subtasks'] = [
-                {'subtask': st, 'completed': task.status == Task.Status.DONE}
-                for st in task.subtasks.filter(added_by__isnull=True)
-            ]
-            ctx['subtask_total'] = len(ctx['template_subtasks'])
-            ctx['subtask_done'] = ctx['subtask_total'] if task.status == Task.Status.DONE else 0
+        if ctx['show_subtasks']:
+            ctx.update(_subtask_ctx(user, enrollment))
         return render(request, 'tasks/task_detail.html', ctx)
 
     if user_is_student(user):
@@ -474,19 +544,35 @@ def task_detail(request, pk):
 
     enrollments = (
         get_visible_enrollments_for_user(user, task=task)
-        .prefetch_related('subtask_completions', 'updates', 'comments')
+        .prefetch_related('subtask_enrollments', 'updates', 'comments')
         .order_by('student__display_name')
     )
-    template_subtasks = list(task.subtasks.filter(added_by__isnull=True).order_by('order', 'pk'))
+    template_subtask_models = list(
+        task.subtasks.filter(added_by__isnull=True).order_by('order', 'pk')
+    )
+    owner_enrollment = None
+    if is_personal_task(task):
+        owner_enrollment = enrollments.filter(student_id=task.assignee_user_id).first()
     enrollment_rows = []
     for enrollment in enrollments:
-        completed_ids = enrollment.completed_subtask_ids()
+        sync_subtask_enrollments(enrollment)
+        status_map = _subtask_status_map(enrollment)
+        if is_personal_task(task):
+            subtask_list = list(
+                enrollment.subtasks_for_student().order_by('order', 'pk')
+            )
+            subtask_rows = [
+                _subtask_row(user, enrollment, st, status_map, readonly=True)
+                for st in subtask_list
+            ]
+        else:
+            subtask_rows = [
+                _subtask_row(user, enrollment, st, status_map)
+                for st in template_subtask_models
+            ]
         row = {
             'enrollment': enrollment,
-            'subtasks': [
-                {'subtask': st, 'completed': st.pk in completed_ids}
-                for st in template_subtasks
-            ],
+            'subtasks': subtask_rows,
             'can_edit_status': can_change_status(user, task, enrollment),
         }
         feedback_ctx = build_section_context(target=enrollment, viewer=user)
@@ -499,7 +585,11 @@ def task_detail(request, pk):
         'view_as': 'staff',
         'enrollment': None,
         'enrollment_rows': enrollment_rows,
-        'template_subtasks': template_subtasks,
+        'template_subtask_models': (
+            list(owner_enrollment.subtasks_for_student().order_by('order', 'pk'))
+            if owner_enrollment
+            else template_subtask_models
+        ),
         'can_view_content': can_content,
         'display_title': task.title if can_content else 'Private task',
         'display_status': task.status,
@@ -518,6 +608,28 @@ def task_detail(request, pk):
     }
     if can_add_enrollment(user, task):
         ctx.update(get_assignment_form_context(user))
+    if ctx['show_subtasks'] and can_content:
+        if is_personal_task(task) and owner_enrollment:
+            ctx.update(_subtask_ctx_for_staff_personal(user, owner_enrollment))
+        else:
+            staff_items = []
+            for st in template_subtask_models:
+                staff_items.append({
+                    'subtask': st,
+                    'display_status': Task.Status.TODO,
+                    'can_change_status': False,
+                    'can_edit': can_edit_subtask(user, st),
+                    'can_delete': can_delete_subtask(user, st),
+                })
+            ctx.update({
+                'template_subtasks': staff_items,
+                'participant_subtasks': [],
+                'subtask_done': 0,
+                'subtask_total': len(staff_items),
+                'can_add_template_subtask': can_add_template_subtask(user, task),
+                'can_add_participant_subtask': False,
+                'show_staff_subtasks': True,
+            })
     return render(request, 'tasks/task_detail.html', ctx)
 
 
@@ -551,8 +663,6 @@ def task_edit(request, pk):
             )
         if form.is_valid():
             form.save()
-            if user_is_staff(request.user):
-                sync_subtasks(task, request.POST)
             if enrollment and 'status' in form.cleaned_data:
                 enrollment.status = form.cleaned_data['status']
                 enrollment.save(update_fields=['status', 'completed_at'])
@@ -579,10 +689,7 @@ def task_edit(request, pk):
         'form': form,
         'action': 'edit',
         'task': task,
-        'subtasks_data': [
-            normalize_subtask_title(title)
-            for title in task.subtasks.filter(added_by__isnull=True).order_by('order', 'pk').values_list('title', flat=True)
-        ],
+        'subtasks_data': [],
         'is_staff_create': False,
         'visibility_mode': _visibility_form_mode(request.user, task=task),
         'status_choices': Task.Status.choices,
@@ -623,28 +730,37 @@ def task_quick_status(request, pk):
         enrollment.status = status
         enrollment.save(update_fields=['status', 'completed_at'])
 
-    return render(request, 'tasks/_task_status_section.html', {
-        'task': task,
-        'enrollment': enrollment,
-        'can_edit_status': can_change_status(request.user, task, enrollment),
-        'status_choices': Task.Status.choices,
-        'display_status': _effective_status(task, enrollment),
-    })
+    ctx = _task_status_context(request.user, task, enrollment)
+    if request.GET.get('inline') == 'list':
+        ctx['status_compact'] = True
+        ctx['status_url_suffix'] = '?inline=list'
+        return render(request, 'tasks/_task_list_status_cell.html', ctx)
+    return render(request, 'tasks/_task_status_section.html', ctx)
 
 
 @login_required
 @require_POST
-def subtask_toggle(request, pk):
+def subtask_status(request, pk):
     subtask = get_object_or_404(Subtask.objects.select_related('task'), pk=pk)
     task = subtask.task
     if not can_view_task(request.user, task):
         raise Http404
-    enrollment = get_enrollment_for_user(request.user, task)
-    if not enrollment or not can_toggle_subtask(request.user, enrollment, subtask):
+
+    status = request.POST.get('status')
+    if status not in Task.Status.values:
         return HttpResponseForbidden()
-    toggle_subtask_completion(enrollment, subtask)
+
+    if task.is_group_shared and user_is_student(request.user):
+        enrollment = ensure_enrollment_for_subtasks(task, request.user)
+    else:
+        enrollment = get_enrollment_for_user(request.user, task)
+
+    if not enrollment or not can_change_subtask_status(request.user, enrollment, subtask):
+        return HttpResponseForbidden()
+
+    set_subtask_status(enrollment, subtask, status)
     enrollment = TaskEnrollment.objects.prefetch_related(
-        'subtask_completions',
+        'subtask_enrollments',
         'task__subtasks',
     ).get(pk=enrollment.pk)
     ctx = _subtask_ctx(request.user, enrollment)
@@ -737,29 +853,98 @@ def comment_reply_create(request, comment_pk):
 
 
 @login_required
-def participant_subtask_create(request, pk):
+def subtask_create(request, pk):
     task = _get_task_or_404(request.user, pk)
-    enrollment = get_enrollment_for_user(request.user, task)
-    if not enrollment or not can_add_participant_subtask(request.user, task, enrollment):
-        raise Http404
+    template_mode = can_add_template_subtask(request.user, task)
+    enrollment = None
+
+    if template_mode:
+        pass
+    else:
+        enrollment = get_enrollment_for_user(request.user, task)
+        if not enrollment or not can_add_participant_subtask(request.user, task, enrollment):
+            raise Http404
 
     if request.method == 'POST':
-        form = ParticipantSubtaskForm(request.POST)
+        form = SubtaskForm(request.POST)
         if form.is_valid():
-            max_order = task.subtasks.filter(added_by=enrollment.student).count()
-            Subtask.objects.create(
-                task=task,
-                title=form.cleaned_data['title'],
-                order=max_order,
-                added_by=enrollment.student,
-            )
+            subtask = form.save(commit=False)
+            subtask.task = task
+            if template_mode:
+                subtask.order = task.subtasks.filter(added_by__isnull=True).count()
+                subtask.added_by = None
+                subtask.save()
+                for task_enrollment in task.enrollments.all():
+                    sync_subtask_enrollments(task_enrollment)
+            else:
+                subtask.order = task.subtasks.filter(added_by=enrollment.student).count()
+                subtask.added_by = enrollment.student
+                subtask.save()
+                set_subtask_status(enrollment, subtask, Task.Status.TODO)
+            messages.success(request, 'Subtask added.')
             return redirect('tasks:task_detail', pk=task.pk)
     else:
-        form = ParticipantSubtaskForm()
+        form = SubtaskForm()
 
     return render(request, 'tasks/subtask_form.html', {
         'form': form,
         'task': task,
+        'action': 'create',
+        'is_template': template_mode,
+    })
+
+
+@login_required
+def participant_subtask_create(request, pk):
+    return subtask_create(request, pk)
+
+
+@login_required
+def subtask_edit(request, pk):
+    subtask = get_object_or_404(Subtask.objects.select_related('task'), pk=pk)
+    task = subtask.task
+    if not can_view_task(request.user, task):
+        raise Http404
+    if not can_edit_subtask(request.user, subtask):
+        raise Http404
+
+    if request.method == 'POST':
+        form = SubtaskForm(request.POST, instance=subtask)
+        if form.is_valid():
+            form.save()
+            for enrollment in task.enrollments.all():
+                sync_subtask_enrollments(enrollment)
+            messages.success(request, 'Subtask updated.')
+            return redirect('tasks:task_detail', pk=task.pk)
+    else:
+        form = SubtaskForm(instance=subtask)
+
+    return render(request, 'tasks/subtask_form.html', {
+        'form': form,
+        'task': task,
+        'subtask': subtask,
+        'action': 'edit',
+        'is_template': subtask.is_template,
+    })
+
+
+@login_required
+def subtask_delete(request, pk):
+    subtask = get_object_or_404(Subtask.objects.select_related('task'), pk=pk)
+    task = subtask.task
+    if not can_view_task(request.user, task):
+        raise Http404
+    if not can_delete_subtask(request.user, subtask):
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        subtask.delete()
+        messages.success(request, 'Subtask deleted.')
+        return redirect('tasks:task_detail', pk=task.pk)
+
+    return render(request, 'tasks/subtask_confirm_delete.html', {
+        'task': task,
+        'subtask': subtask,
     })
 
 

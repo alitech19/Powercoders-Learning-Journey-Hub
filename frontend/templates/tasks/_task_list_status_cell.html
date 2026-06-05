@@ -1,0 +1,3 @@
+<td id="task-status-{{ task.pk }}" class="px-4 py-3">
+  {% include "tasks/_task_status_inline.html" with status_compact=True status_url_suffix="?inline=list" %}
+</td>
