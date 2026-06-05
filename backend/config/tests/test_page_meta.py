@@ -99,6 +99,14 @@ class PageMetaTemplateTests(TestCase):
         self.assertContains(response, 'Help for')
         self.assertNotContains(response, 'pr-14')
 
+    def test_task_list_create_button_on_list_card(self):
+        login_as(self.client, self.student)
+        response = self.client.get(reverse('tasks:task_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="list-card-header"')
+        self.assertContains(response, 'New Task')
+        self.assertContains(response, reverse('tasks:task_create'))
+
     def test_teacher_task_list_shows_staff_purpose(self):
         login_as(self.client, self.teacher)
         response = self.client.get(reverse('tasks:task_list'))

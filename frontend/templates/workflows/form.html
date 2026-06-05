@@ -178,7 +178,7 @@
                 class="text-xs text-[#B23149] font-medium">+ Add step</button>
       </div>
       <div class="space-y-3">
-        <template x-for="(step, i) in steps" :key="i">
+        <template x-for="(step, i) in steps" :key="step.id">
           <div class="border border-gray-100 rounded-lg p-4 bg-gray-50">
             <div class="flex gap-2 mb-2">
               <span class="text-xs font-bold text-gray-400 w-5" x-text="i+1"></span>
@@ -220,7 +220,8 @@ function workflowForm(config) {
     selectAll: false,
     expanded: false,
     selectedStudents: (config.enrolledIds || []).map(String),
-    steps: [{ title: '', desc: '', req: true }],
+    nextStepId: 2,
+    steps: [{ id: 1, title: '', desc: '', req: true }],
     currentStudents() {
       if (!this.targetId) return [];
       const map = this.assigneeType === 'cohort' ? cohortStudents : groupStudents;
@@ -231,7 +232,9 @@ function workflowForm(config) {
         this.selectedStudents = this.currentStudents().map(s => String(s.id));
       }
     },
-    addStep() { this.steps.push({ title: '', desc: '', req: true }); },
+    addStep() {
+      this.steps.push({ id: this.nextStepId++, title: '', desc: '', req: true });
+    },
     removeStep(i) { if (this.steps.length > 1) this.steps.splice(i, 1); },
   };
 }

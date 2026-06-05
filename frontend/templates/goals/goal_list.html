@@ -5,13 +5,13 @@
 
 {% if view_as == 'student' %}
 {% url 'goals:create' as goals_create_url %}
-{% include "includes/_page_header.html" with title="My Goals" cta_url=goals_create_url cta_label="New Goal" cta_icon="plus" %}
+{% include "includes/_page_header.html" with title="My Goals" %}
 
 {% include "includes/_stats_grid.html" with stat1_value=total stat1_label="Total Goals" stat2_value=in_progress stat2_label="In Progress" stat2_color="text-blue-500" stat3_value=completed stat3_label="Completed" stat3_color="text-green-500" %}
 
 {% else %}
 {% if can_create %}{% url 'goals:create' as goals_create_url %}{% endif %}
-{% include "includes/_page_header.html" with title="Student Goals" cta_url=goals_create_url cta_label="New Goals" cta_icon="plus" %}
+{% include "includes/_page_header.html" with title="Student Goals" %}
 
 {% if students %}
 <div class="flex gap-2 flex-wrap mb-4">
@@ -47,7 +47,13 @@
   {% endfor %}
 </div>
 
-<!-- Goal cards -->
+<div class="bg-white rounded-xl border border-gray-200">
+  {% if view_as == 'student' or can_create %}
+  {% include "includes/_list_card_header.html" with card_title="Goals" create_url=goals_create_url create_label=view_as|yesno:"New Goal,New Goals" %}
+  {% else %}
+  {% include "includes/_list_card_header.html" with card_title="Goals" %}
+  {% endif %}
+  <div class="px-5 pb-5 pt-4">
 {% if goals %}
 <div class="space-y-3">
   {% for item in goals %}
@@ -127,16 +133,14 @@
   {% if view_as == 'student' %}
   <h2 class="text-lg font-semibold text-[#343534] mb-1">Set your first goal</h2>
   <p class="text-gray-500 text-sm mb-6">Define what you want to achieve and track your progress step by step.</p>
-  <a href="{% url 'goals:create' %}"
-     class="inline-flex items-center gap-2 bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
-    Create First Goal
-  </a>
   {% else %}
   <h2 class="text-lg font-semibold text-[#343534] mb-1">No shared goals yet</h2>
   <p class="text-gray-500 text-sm">Students haven't shared any goals with you yet.</p>
   {% endif %}
 </div>
 {% endif %}
+  </div>
+</div>
 
 {% include "_pagination.html" %}
 

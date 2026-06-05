@@ -38,20 +38,21 @@ class TaskQuickStatusViewTests(TestCase):
             url = f'{url}?inline=list'
         return self.client.post(url, {'status': status})
 
-    def test_enrolled_student_changes_status_on_list_inline(self):
+    def test_enrolled_student_changes_status_on_detail(self):
         task = make_staff_individual_task(self.teacher, visibility=Task.Visibility.SHARED)
         enrollment = enroll_student(task, self.student, status=Task.Status.TODO)
-        response = self._quick_status(self.student, task, status='doing', inline=True)
+        response = self._quick_status(self.student, task, status='doing', inline=False)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'id="task-status-')
+        self.assertContains(response, 'id="task-status-section"')
         self.assertContains(response, 'border-blue-500')
         enrollment.refresh_from_db()
         self.assertEqual(enrollment.status, Task.Status.DOING)
 
-    def test_group_shared_student_changes_task_status_inline(self):
+    def test_group_shared_student_changes_task_status_on_detail(self):
         task = make_group_shared_task(self.teacher, self.group, status=Task.Status.TODO)
-        response = self._quick_status(self.student, task, status='done', inline=True)
+        response = self._quick_status(self.student, task, status='done', inline=False)
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="task-status-section"')
         task.refresh_from_db()
         self.assertEqual(task.status, Task.Status.DONE)
 
@@ -85,14 +86,66 @@ class TaskListStatusButtonsTests(TestCase):
             group=self.group,
         )
 
-    def test_student_list_shows_status_buttons_for_enrolled_task(self):
-        task = make_staff_individual_task(self.teacher, title='Assigned', visibility=Task.Visibility.SHARED)
-        enroll_student(task, self.student)
+    def test_task_list_hides_finished_tasks_by_default(self):
+        active_task = make_staff_individual_task(
+            self.teacher, title='Still open', visibility=Task.Visibility.SHARED,
+        )
+        enroll_student(active_task, self.student, status=Task.Status.DOING)
+        done_task = make_staff_individual_task(
+            self.teacher, title='Already done', visibility=Task.Visibility.SHARED,
+        )
+        enroll_student(done_task, self.student, status=Task.Status.DONE)
         login_as(self.client, self.student)
         response = self.client.get(reverse('tasks:task_list'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, f'id="task-status-{task.pk}"')
-        self.assertContains(response, reverse('tasks:task_quick_status', args=[task.pk]) + '?inline=list')
+        self.assertContains(response, 'Still open')
+        self.assertNotContains(response, 'Already done')
+
+    def test_task_list_finished_filter_shows_done_tasks(self):
+        active_task = make_staff_individual_task(
+            self.teacher, title='Still open', visibility=Task.Visibility.SHARED,
+        )
+        enroll_student(active_task, self.student, status=Task.Status.DOING)
+        done_task = make_staff_individual_task(
+            self.teacher, title='Already done', visibility=Task.Visibility.SHARED,
+        )
+        enroll_student(done_task, self.student, status=Task.Status.DONE)
+        login_as(self.client, self.student)
+        response = self.client.get(reverse('tasks:task_list'), {'status': 'finished'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Already done')
+        self.assertNotContains(response, 'Still open')
+
+    def test_task_list_defaults_to_due_date_sort(self):
+        from datetime import date, timedelta
+
+        task_later = make_staff_individual_task(
+            self.teacher, title='Later', visibility=Task.Visibility.SHARED,
+        )
+        task_later.due_date = date.today() + timedelta(days=10)
+        task_later.save(update_fields=['due_date'])
+        task_sooner = make_staff_individual_task(
+            self.teacher, title='Sooner', visibility=Task.Visibility.SHARED,
+        )
+        task_sooner.due_date = date.today() + timedelta(days=2)
+        task_sooner.save(update_fields=['due_date'])
+        enroll_student(task_later, self.student)
+        enroll_student(task_sooner, self.student)
+        login_as(self.client, self.student)
+        response = self.client.get(reverse('tasks:task_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Sort: Due Date')
+        content = response.content.decode()
+        self.assertLess(content.index('Sooner'), content.index('Later'))
+
+    def test_student_list_shows_status_badge_not_buttons(self):
+        task = make_staff_individual_task(self.teacher, title='Assigned', visibility=Task.Visibility.SHARED)
+        enroll_student(task, self.student, status=Task.Status.DOING)
+        login_as(self.client, self.student)
+        response = self.client.get(reverse('tasks:task_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Doing')
+        self.assertNotContains(response, reverse('tasks:task_quick_status', args=[task.pk]))
 
     def test_student_list_badge_only_when_not_enrolled(self):
         task = make_staff_individual_task(self.teacher, title='Hidden', visibility=Task.Visibility.PRIVATE)
@@ -101,7 +154,7 @@ class TaskListStatusButtonsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, reverse('tasks:task_quick_status', args=[task.pk]))
 
-    def test_cohort_task_enrolled_student_has_list_buttons(self):
+    def test_cohort_task_list_shows_read_only_status_badge(self):
         task = Task.objects.create(
             author=None,
             created_by=self.teacher,
@@ -110,12 +163,12 @@ class TaskListStatusButtonsTests(TestCase):
             title='Cohort task',
             visibility=Task.Visibility.SHARED,
         )
-        enroll_student(task, self.student)
+        enroll_student(task, self.student, status=Task.Status.TODO)
         login_as(self.client, self.student)
         response = self.client.get(reverse('tasks:task_list'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, f'task-status-{task.pk}')
-        self.assertContains(response, 'inline=list')
+        self.assertContains(response, 'To do')
+        self.assertNotContains(response, 'inline=list')
 
 
 class SubtaskStatusViewTests(TestCase):

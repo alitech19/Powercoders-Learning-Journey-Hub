@@ -94,6 +94,8 @@ def can_manage_workflow(user, workflow):
         return False
     if user_is_admin(user):
         return True
+    if is_workflow_owner(user, workflow):
+        return True
     return workflow_has_student_in_teacher_groups(user, workflow) or _teacher_in_workflow_scope(
         user, workflow
     )

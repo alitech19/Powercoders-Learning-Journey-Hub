@@ -5,26 +5,9 @@
 
 {% if view_as == 'student' %}
 {% if can_create %}{% url 'reflections:create' as reflections_create_url %}{% endif %}
-{% include "includes/_page_header.html" with title="My Reflections" cta_url=reflections_create_url cta_label="+ New Reflection" %}
+{% include "includes/_page_header.html" with title="My Reflections" %}
 
 {% include "includes/_stats_grid.html" with stat1_value=total stat1_label="Total" stat2_value=weekly_tag_count stat2_label="Weekly tag" stat2_color="text-blue-500" stat3_value=project_tag_count stat3_label="Project tag" stat3_color="text-purple-500" %}
-
-<form method="get" class="mb-4 flex flex-wrap gap-3 items-center">
-  <div class="flex-1 min-w-[200px] max-w-md">
-    <input type="search" name="q" value="{{ search_query }}" placeholder="Search by title…"
-           maxlength="{{ limits.search }}"
-           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149]">
-  </div>
-  {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
-  <button type="submit"
-          class="px-4 py-2 bg-[#343534] text-white text-sm font-medium rounded-lg cursor-pointer">
-    Search
-  </button>
-  {% if search_query %}
-  <a href="{% url 'reflections:list' %}{% if tag_filter %}?tag={{ tag_filter }}{% endif %}"
-     class="text-sm text-gray-500 hover:text-[#B23149]">Clear search</a>
-  {% endif %}
-</form>
 
 {% else %}
 {% include "includes/_page_header.html" with title="Student Reflections" %}
@@ -84,6 +67,13 @@
   </div>
 </div>
 
+<div class="bg-white rounded-xl border border-gray-200">
+  {% if reflections_create_url %}
+  {% include "includes/_list_card_header.html" with card_title="Reflections" create_url=reflections_create_url create_label="New Reflection" %}
+  {% else %}
+  {% include "includes/_list_card_header.html" with card_title="Reflections" %}
+  {% endif %}
+  <div class="px-5 pb-5 pt-4">
 {% if reflections %}
 <div class="space-y-3">
   {% for r in reflections %}
@@ -159,18 +149,14 @@
   {% if view_as == 'student' %}
   <h2 class="text-lg font-semibold text-[#343534] mb-1">Start reflecting</h2>
   <p class="text-gray-500 text-sm mb-6">Give your reflection a name and track your progress over time.</p>
-  {% if can_create %}
-  <a href="{% url 'reflections:create' %}"
-     class="inline-flex items-center gap-2 bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
-    Write first reflection
-  </a>
-  {% endif %}
   {% else %}
   <h2 class="text-lg font-semibold text-[#343534] mb-1">No reflections found</h2>
   <p class="text-gray-500 text-sm">{% if search_query %}Try a different search term.{% else %}Students haven't shared reflections yet.{% endif %}</p>
   {% endif %}
 </div>
 {% endif %}
+  </div>
+</div>
 
 {% include "_pagination.html" %}
 {% endblock %}

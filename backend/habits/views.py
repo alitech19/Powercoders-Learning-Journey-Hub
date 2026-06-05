@@ -122,11 +122,16 @@ def habit_list(request):
             'can_create': False,
         }
 
+    status_filter = request.GET.get('status', 'active')
+    if status_filter not in ('active', 'finished'):
+        status_filter = 'active'
+
     context.update({
         'active_rows': active_rows,
         'completed_rows': completed_rows,
         'search_query': params['search_query'],
         'student_filter': params['student_filter'],
+        'status_filter': status_filter,
         'today': today,
     })
     return render(request, 'habits/habit_list.html', context)

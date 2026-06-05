@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db.models import Max
 from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -219,16 +220,18 @@ def workflow_delete(request, pk):
 @login_required
 @require_POST
 def step_add(request, workflow_pk):
-    workflow = _get_workflow_or_404(request.user, workflow_pk)
-    if not can_manage_workflow(request.user, workflow):
-        return HttpResponseForbidden()
+    workflow = get_object_or_404(Workflow, pk=workflow_pk)
+    if not can_view_workflow(request.user, workflow) or not can_manage_workflow(request.user, workflow):
+        raise Http404
     form = WorkflowStepForm(request.POST)
     if form.is_valid():
         step = form.save(commit=False)
         step.workflow = workflow
-        if not step.order:
-            step.order = workflow.steps.count() + 1
+        max_order = workflow.steps.aggregate(max_order=Max('order'))['max_order'] or 0
+        step.order = max_order + 1
         step.save()
+    else:
+        messages.error(request, 'Could not add step. Check the title and try again.')
     return redirect('workflows:detail', pk=workflow_pk)
 
 

@@ -12,7 +12,7 @@ from .models import Workflow, WorkflowStep
 class WorkflowStepForm(forms.ModelForm):
     class Meta:
         model = WorkflowStep
-        fields = ['title', 'description', 'order', 'requires_previous']
+        fields = ['title', 'description', 'requires_previous']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 2}),
         }

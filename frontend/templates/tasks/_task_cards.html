@@ -1,0 +1,99 @@
+{% if task_rows %}
+<div class="space-y-3">
+  {% for row in task_rows %}
+  {% with task=row.task enrollment=row.enrollment %}
+  <div class="relative rounded-xl border border-gray-200 hover:border-[#B23149]/30 hover:shadow-sm transition-all p-5
+              {% if not row.can_view_metadata %}opacity-90{% endif %}">
+    {% if row.can_view_metadata %}
+    {% url 'tasks:task_detail' task.pk as task_detail_url %}
+    {% include "includes/_list_card_overlay_link.html" with detail_url=task_detail_url aria_label=task.title %}
+    {% endif %}
+    <div class="flex items-stretch justify-between gap-4 pointer-events-none">
+      <div class="flex-1 min-w-0">
+        <h3 class="font-semibold text-[#343534] text-base leading-snug">
+          {% if row.can_view_content and row.can_view_metadata %}
+          {{ task.title }}
+          {% elif row.can_view_metadata %}
+          <span class="text-gray-400 italic">Private task</span>
+          {% else %}
+          <span class="text-gray-400 italic">Private task</span>
+          {% endif %}
+        </h3>
+        <div class="flex flex-wrap items-center gap-2 mt-1.5">
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full
+            {% if task.priority == 'high' %}bg-orange-100 text-orange-700
+            {% elif task.priority == 'low' %}bg-gray-100 text-gray-600
+            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+            {{ task.get_priority_display }}
+          </span>
+          {% if view_as == 'student' %}
+          {% include "tasks/_visibility_badge.html" %}
+          {% endif %}
+          {% if task.is_group_shared %}
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">Group</span>
+          {% elif task.assignee_cohort_id %}
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-50 text-purple-600">Cohort</span>
+          {% elif task.author_id %}
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">Personal</span>
+          {% endif %}
+        </div>
+        {% if task.description and row.can_view_content %}
+        <p class="text-sm text-gray-500 mt-2 line-clamp-2">{{ task.description }}</p>
+        {% endif %}
+        {% if view_as != 'student' or task.is_group_shared and task.assignee_group %}
+        <div class="mt-2 text-xs text-gray-400">
+          {% if view_as != 'student' %}
+          {% if enrollment %}
+            {{ enrollment.student.display_name }}
+          {% else %}
+            {{ task.scope_label }}
+          {% endif %}
+          {% elif task.is_group_shared and task.assignee_group %}
+          {{ task.assignee_group.name }}
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="flex flex-col items-end justify-between shrink-0 gap-3 min-w-[7.5rem]">
+        {% if task.due_date %}
+        <span class="text-xs whitespace-nowrap
+          {% if row.display_status != 'done' and task.due_date < today %}text-red-500 font-semibold{% else %}text-gray-500{% endif %}">
+          Due {{ task.due_date|date:"d M Y" }}
+        </span>
+        {% endif %}
+        <div class="text-right">
+          {% include "tasks/_task_status_inline.html" with can_edit_status=False display_status=row.display_status task=task %}
+        </div>
+      </div>
+    </div>
+    {% if enrollment and enrollment.subtasks_total %}
+    <div class="mt-4 pt-3 border-t border-gray-100 pointer-events-none">
+      <div class="flex items-center justify-between text-xs text-gray-400 mb-1.5">
+        <span>Subtasks</span>
+        <span>{{ enrollment.subtasks_done }}/{{ enrollment.subtasks_total }}</span>
+      </div>
+      <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+        <div class="h-full bg-[#B23149] rounded-full transition-all"
+             style="width: {% widthratio enrollment.subtasks_done enrollment.subtasks_total 100 %}%"></div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endwith %}
+  {% endfor %}
+</div>
+{% elif show_empty %}
+<div class="text-center py-16">
+  <div class="text-5xl mb-4">✅</div>
+  <h3 class="text-lg font-semibold text-[#343534] mb-1">
+    {% if status_filter == 'finished' %}No finished tasks{% else %}No active tasks{% endif %}
+  </h3>
+  <p class="text-gray-500 text-sm">
+    {% if status_filter == 'finished' %}
+    Completed tasks appear here when you mark them done.
+    {% else %}
+    Create a task to track your work, or adjust filters above.
+    {% endif %}
+  </p>
+</div>
+{% endif %}

@@ -2,7 +2,7 @@
 {% block title %}Resources{% endblock %}
 
 {% block content %}
-{% include "includes/_page_header.html" with title="Resources" cta_url=create_url cta_label=create_label cta_icon="plus" %}
+{% include "includes/_page_header.html" with title="Resources" %}
 
 <div class="flex gap-1 mb-4 bg-white border border-gray-200 rounded-lg p-1 w-fit flex-wrap">
   <a href="?tab=my"
@@ -34,6 +34,13 @@
 </div>
 {% endif %}
 
+<div class="bg-white rounded-xl border border-gray-200">
+  {% if create_url %}
+  {% include "includes/_list_card_header.html" with card_title="Resources" create_url=create_url create_label=create_label %}
+  {% else %}
+  {% include "includes/_list_card_header.html" with card_title="Resources" %}
+  {% endif %}
+  <div class="px-5 pb-5 pt-4">
 {% if containers %}
 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
   {% for container in containers %}
@@ -63,4 +70,6 @@
   {% endif %}
 </div>
 {% endif %}
+  </div>
+</div>
 {% endblock %}

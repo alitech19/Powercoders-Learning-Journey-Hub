@@ -310,8 +310,12 @@ def _sort_tasks(qs, sort_by):
 @login_required
 def task_list(request):
     user = request.user
-    status_filter = request.GET.get('status', '')
-    sort_by = request.GET.get('sort', 'updated')
+    status_filter = request.GET.get('status', 'active')
+    if status_filter == 'done':
+        status_filter = 'finished'
+    elif status_filter in ('', 'todo', 'doing', 'blocked'):
+        status_filter = 'active'
+    sort_by = request.GET.get('sort', 'due')
     kind_filter = request.GET.get('kind', '')
     qs = get_visible_tasks_for_user(user)
 
@@ -326,15 +330,16 @@ def task_list(request):
                 assignee_cohort__isnull=True,
             )
 
-    if status_filter:
+    if status_filter == 'finished':
         if user_is_student(user):
-            qs = qs.filter(
-                models_q_status_filter(user, status_filter),
-            )
+            qs = qs.filter(models_q_finished_filter(user))
         else:
-            qs = qs.filter(
-                models_q_status_filter_staff(status_filter),
-            )
+            qs = qs.filter(models_q_finished_filter_staff())
+    else:
+        if user_is_student(user):
+            qs = qs.filter(models_q_active_filter(user))
+        else:
+            qs = qs.filter(models_q_active_filter_staff())
 
     if user_is_student(user):
         visible = get_visible_tasks_for_user(user)
@@ -410,7 +415,15 @@ def task_list(request):
         context['page_obj'] = None
 
     context['kind_choices'] = TASK_LIST_SECTIONS['student' if view_as == 'student' else 'staff']
+    context['today'] = timezone.localdate()
     return render(request, 'tasks/task_list.html', context)
+
+
+TASK_ACTIVE_STATUSES = (
+    Task.Status.TODO,
+    Task.Status.DOING,
+    Task.Status.BLOCKED,
+)
 
 
 def models_q_status_filter(user, status_filter):
@@ -431,6 +444,32 @@ def models_q_status_filter_staff(status_filter):
         assignee_type=Task.AssigneeType.GROUP,
         status=status_filter,
     )
+
+
+def models_q_active_filter(user):
+    from django.db.models import Q
+
+    q = Q()
+    for status in TASK_ACTIVE_STATUSES:
+        q |= models_q_status_filter(user, status)
+    return q
+
+
+def models_q_active_filter_staff():
+    from django.db.models import Q
+
+    q = Q()
+    for status in TASK_ACTIVE_STATUSES:
+        q |= models_q_status_filter_staff(status)
+    return q
+
+
+def models_q_finished_filter(user):
+    return models_q_status_filter(user, Task.Status.DONE)
+
+
+def models_q_finished_filter_staff():
+    return models_q_status_filter_staff(Task.Status.DONE)
 
 
 def models_q_student_filter(student_pk):

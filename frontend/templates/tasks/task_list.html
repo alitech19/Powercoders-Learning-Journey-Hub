@@ -4,9 +4,9 @@
 {% block content %}
 {% if can_create_personal_task or can_create %}{% url 'tasks:task_create' as tasks_create_url %}{% endif %}
 {% if view_as == 'student' %}
-{% include "includes/_page_header.html" with title="My Tasks" cta_url=tasks_create_url cta_label="New Task" cta_icon="plus" %}
+{% include "includes/_page_header.html" with title="My Tasks" %}
 {% else %}
-{% include "includes/_page_header.html" with title="Student Tasks" cta_url=tasks_create_url cta_label="New Task" cta_icon="plus" %}
+{% include "includes/_page_header.html" with title="Student Tasks" %}
 {% endif %}
 
 {% if view_as == 'student' %}
@@ -28,7 +28,6 @@
 </div>
 {% endif %}
 
-<!-- Kind filter -->
 <div class="flex gap-1 mb-4 bg-white border border-gray-200 rounded-lg p-1 w-fit flex-wrap">
   <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}sort={{ sort_by }}{% if student_filter %}&student={{ student_filter }}{% endif %}"
      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
@@ -45,44 +44,53 @@
 </div>
 
 <div class="flex flex-wrap items-center gap-3 mb-5">
-  <div class="flex gap-1 bg-white border border-gray-200 rounded-lg p-1 w-fit">
-    <a href="?sort={{ sort_by }}{% if student_filter %}&student={{ student_filter }}{% endif %}{% if kind_filter %}&kind={{ kind_filter }}{% endif %}"
+  <div class="flex gap-1 bg-white border border-gray-200 rounded-lg p-1 w-fit flex-wrap">
+    <a href="?status=active&sort={{ sort_by }}{% if student_filter %}&student={{ student_filter }}{% endif %}{% if kind_filter %}&kind={{ kind_filter }}{% endif %}"
        class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
-              {% if not status_filter %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
-      All
+              {% if status_filter == 'active' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
+      Active
     </a>
-    {% for value, label in status_choices %}
-    <a href="?status={{ value }}&sort={{ sort_by }}{% if student_filter %}&student={{ student_filter }}{% endif %}{% if kind_filter %}&kind={{ kind_filter }}{% endif %}"
+    <a href="?status=finished&sort={{ sort_by }}{% if student_filter %}&student={{ student_filter }}{% endif %}{% if kind_filter %}&kind={{ kind_filter }}{% endif %}"
        class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
-              {% if status_filter == value %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
-      {{ label }}
+              {% if status_filter == 'finished' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
+      Finished
     </a>
-    {% endfor %}
   </div>
   <select onchange="location='?{% if status_filter %}status={{ status_filter }}&{% endif %}{% if student_filter %}student={{ student_filter }}&{% endif %}{% if kind_filter %}kind={{ kind_filter }}&{% endif %}sort='+this.value"
           class="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600 focus:outline-none cursor-pointer">
-    <option value="updated" {% if sort_by == 'updated' or not sort_by %}selected{% endif %}>Sort: Latest</option>
     <option value="due" {% if sort_by == 'due' %}selected{% endif %}>Sort: Due Date</option>
+    <option value="updated" {% if sort_by == 'updated' %}selected{% endif %}>Sort: Latest</option>
     <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>Sort: Priority</option>
   </select>
 </div>
 
-{% if kind_filter %}
-  {% include "tasks/_task_table.html" with task_rows=task_rows show_empty=True %}
-  {% if page_obj %}
-  {% include "_pagination.html" %}
-  {% endif %}
-{% else %}
-  {% if has_any_tasks %}
-  <div class="space-y-8">
-    {% for section in task_sections %}
-    {% if section.rows %}
-    {% include "tasks/_task_section.html" with section=section %}
-    {% endif %}
-    {% endfor %}
-  </div>
+<div class="bg-white rounded-xl border border-gray-200">
+  {% if tasks_create_url %}
+  {% include "includes/_list_card_header.html" with card_title="Tasks" create_url=tasks_create_url create_label="New Task" %}
   {% else %}
-  {% include "tasks/_task_table.html" with task_rows=task_rows show_empty=True %}
+  {% include "includes/_list_card_header.html" with card_title="Tasks" %}
   {% endif %}
-{% endif %}
+  <div class="px-5 pb-5 pt-4">
+    {% if kind_filter %}
+      {% include "tasks/_task_cards.html" with task_rows=task_rows show_empty=True %}
+      {% if page_obj %}
+      <div class="mt-4">
+        {% include "_pagination.html" %}
+      </div>
+      {% endif %}
+    {% else %}
+      {% if has_any_tasks %}
+      <div>
+        {% for section in task_sections %}
+        {% if section.rows %}
+        {% include "tasks/_task_section.html" with section=section %}
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% else %}
+      {% include "tasks/_task_cards.html" with task_rows=task_rows show_empty=True %}
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

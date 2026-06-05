@@ -65,6 +65,11 @@ class WorkflowPermissionTests(TestCase):
         wf = make_workflow(self.teacher, assignee_group=self.group)
         self.assertTrue(can_manage_workflow(self.admin, wf))
 
+    def test_owner_can_manage_without_group_assignment(self):
+        other_teacher = make_teacher('owner-teacher@example.com')
+        wf = make_workflow(other_teacher, assignee_group=self.group)
+        self.assertTrue(can_manage_workflow(other_teacher, wf))
+
     def test_owner_flag(self):
         wf = make_workflow(self.teacher, assignee_group=self.group)
         self.assertTrue(is_workflow_owner(self.teacher, wf))
