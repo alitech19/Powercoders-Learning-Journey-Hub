@@ -10,6 +10,8 @@ from dataclasses import dataclass
 
 from django.urls import NoReverseMatch, reverse
 
+from config.icon_map import icon_key_for_url
+
 
 @dataclass(frozen=True)
 class NavItem:
@@ -122,6 +124,7 @@ def _serialize_item(
         'label': entry.label,
         'url': url,
         'url_name': entry.url_name,
+        'icon_key': icon_key_for_url(entry.url_name),
         'active': _item_active(
             entry.url_name,
             current_view_name=current_view_name,

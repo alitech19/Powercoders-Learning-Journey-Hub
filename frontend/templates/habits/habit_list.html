@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load icon_tags %}
 {% block title %}Habits{% endblock %}
 
 {% block content %}
@@ -109,7 +110,7 @@
 </div>
 {% else %}
 <div class="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
-  <div class="text-4xl mb-3">🎯</div>
+  <div class="flex justify-center mb-3">{% volumetric_icon "habits" size="lg" variant="soft" %}</div>
   {% if view_as == 'student' %}
   <p class="text-gray-500 text-sm mb-4">No active habits yet. Start building a routine.</p>
   {% else %}

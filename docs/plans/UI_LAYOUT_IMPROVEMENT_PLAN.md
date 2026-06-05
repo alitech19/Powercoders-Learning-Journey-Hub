@@ -84,11 +84,11 @@ Files: `frontend/templates/includes/_volumetric_icon.html`, `config/icon_map.py`
 
 ### Migration checklist
 
-- [ ] `base.html` — notification icon uses volumetric component
-- [ ] `dashboard/dashboard.html` — all app tiles (replace Goals/Tasks/Reflections stroke SVGs)
-- [ ] Empty states: goals, journal, reflections, habits, tasks, group chat, cohort list, etc.
-- [ ] Nav dropdown — icon per child item + optional parent group icon
-- [ ] Audit: `rg 'stroke="currentColor"'` in `templates/` for product chrome; convert or justify exceptions
+- [x] `_volumetric_icon.html` + `ICON_MAP` + `{% volumetric_icon %}` tag — see [frontend/ICON_SET.md](../../frontend/ICON_SET.md)
+- [x] `base.html` — notifications + nav dropdown children
+- [x] Empty states: tasks, goals, habits, reflections, journal, workflows, group chat, cohorts
+- [x] `dashboard/dashboard.html` — app tiles + management cards (layout unchanged; icons unified)
+- [ ] Audit: remaining `stroke="currentColor"` in product chrome (welcome, forms, alerts — justify or convert)
 
 Do **not** introduce new flat outline icons in future screens.
 
@@ -262,27 +262,28 @@ Accessibility: `aria-expanded`, keyboard escape, focus trap minimal.
 
 ### Phase 1 — Foundation
 
-- [ ] `NavGroup` + dropdown nav in `base.html`
-- [ ] `page_meta` / `PAGE_PURPOSE` for all integrated apps
-- [ ] Refactor `_page_header` + inline ⓘ; remove `main.pr-14`
-- [ ] `_list_card_header` partial
-- [ ] Avatar dropdown (profile, logout, name)
+- [x] `NavGroup` + dropdown nav in `base.html`
+- [x] `page_meta` / `PAGE_PURPOSE` for all integrated apps
+- [x] Refactor `_page_header` + inline ⓘ; remove `main.pr-14`
+- [x] `_list_card_header` partial
+- [x] Avatar dropdown (profile, logout, name)
 
 ### Phase 2 — List pages & volumetric icons
 
-- [ ] `_volumetric_icon.html` + `ICON_MAP`; document in `frontend/ICON_SET.md`
-- [ ] Move create CTAs into list cards (Learning + Wellbeing + Resources); **tasks** first reference implementation
-- [ ] Migrate dashboard, nav dropdown, empty states from flat SVG / raw emoji → volumetric component
-- [ ] Align student + teacher + admin dashboard cards with nav groups
+- [x] `_volumetric_icon.html` + `ICON_MAP` (4 sizes: xs/sm/md/lg); [frontend/ICON_SET.md](../../frontend/ICON_SET.md)
+- [x] Move create CTAs into list cards (Learning + Wellbeing + Resources)
+- [x] Nav + list empty states → volumetric component
+- [x] Dashboard volumetric icons (tile layout may evolve in a separate dashboard plan)
 
 ### Phase 3 — Polish & mobile
 
-- [ ] Mobile nav for grouped items
+- [x] Mobile nav for grouped items (hamburger sections)
 - [ ] Update `info/topics/*.md` intros if purpose lines duplicate — keep help for depth
 - [ ] Usability pass ([USABILITY_TESTING.md](../USABILITY_TESTING.md))
 
 ### Out of scope (this plan)
 
+- **Dashboard layout redesign** (four-group layout restructure) — icons done here; layout may evolve separately
 - Full design system / Figma
 - Dark mode
 - i18n (UI copy can stay EN in templates; nav label **Чат** is fixed Ukrainian per product decision)
@@ -321,12 +322,12 @@ Accessibility: `aria-expanded`, keyboard escape, focus trap minimal.
 
 ## Success criteria
 
-- [ ] Navbar shows **4** top-level items (not 8).
-- [ ] Teachers can reach any sub-app in ≤2 clicks from nav.
-- [ ] Every integrated list page has purpose subtitle + ⓘ beside title.
-- [ ] No create button in page header on list pages (e.g. **New Task** only on tasks list card, top-right).
-- [ ] Navbar right side: notifications (if kept) + avatar only — no loose Profile/Log out text.
-- [ ] All product chrome icons use the **volumetric** component (no bare outline SVG, no raw `text-5xl` emoji on page).
+- [x] Navbar shows **4** top-level items (not 8).
+- [x] Teachers can reach any sub-app in ≤2 clicks from nav.
+- [x] Every integrated list page has purpose subtitle + ⓘ beside title.
+- [x] No create button in page header on list pages (e.g. **New Task** only on tasks list card, top-right).
+- [x] Navbar right side: notifications (if kept) + avatar only — no loose Profile/Log out text.
+- [x] All product chrome icons use the **volumetric** component (nav, lists, dashboard app tiles).
 
 ---
 

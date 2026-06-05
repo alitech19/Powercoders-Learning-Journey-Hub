@@ -1,3 +1,4 @@
+{% load icon_tags %}
 {% if task_rows %}
 <div class="space-y-3">
   {% for row in task_rows %}
@@ -84,7 +85,7 @@
 </div>
 {% elif show_empty %}
 <div class="text-center py-16">
-  <div class="text-5xl mb-4">✅</div>
+  <div class="flex justify-center mb-4">{% volumetric_icon "tasks" size="lg" variant="soft" %}</div>
   <h3 class="text-lg font-semibold text-[#343534] mb-1">
     {% if status_filter == 'finished' %}No finished tasks{% else %}No active tasks{% endif %}
   </h3>

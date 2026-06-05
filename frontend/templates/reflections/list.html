@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load icon_tags %}
 {% block title %}Reflections{% endblock %}
 
 {% block content %}
@@ -145,7 +146,7 @@
 </div>
 {% else %}
 <div class="text-center py-20">
-  <div class="text-5xl mb-4">💭</div>
+  <div class="flex justify-center mb-4">{% volumetric_icon "reflections" size="lg" variant="soft" %}</div>
   {% if view_as == 'student' %}
   <h2 class="text-lg font-semibold text-[#343534] mb-1">Start reflecting</h2>
   <p class="text-gray-500 text-sm mb-6">Give your reflection a name and track your progress over time.</p>
