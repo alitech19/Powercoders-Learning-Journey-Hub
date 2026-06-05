@@ -205,4 +205,4 @@ No new tab. Entity-linked themes appear on **Themes** tab (with optional badge â
 
 - [APP_MODULE_TOGGLES_PLAN.md](APP_MODULE_TOGGLES_PLAN.md)
 - [GROUP_SPACE_PROJECT_PLAN.md](GROUP_SPACE_PROJECT_PLAN.md)
-- [UI_LAYOUT_IMPROVEMENT_PLAN.md](UI_LAYOUT_IMPROVEMENT_PLAN.md)
+- [frontend/ICON_SET.md](../../frontend/ICON_SET.md)

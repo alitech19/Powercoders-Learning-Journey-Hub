@@ -39,8 +39,7 @@ def _build_checklist(user):
             'description': 'Add your photo so your teacher knows who you are',
             'url': reverse('accounts:profile'),
             'done': user.has_custom_avatar,
-            'emoji': '🖼️',
-            'bg_class': 'bg-blue-50',
+            'icon_key': 'profile',
         },
         {
             'key': 'first_journal',
@@ -48,8 +47,7 @@ def _build_checklist(user):
             'description': 'Capture what you learned today — takes 2 minutes',
             'url': reverse('journal:list'),
             'done': JournalEntry.objects.filter(author=user).exists(),
-            'emoji': '📓',
-            'bg_class': 'bg-amber-50',
+            'icon_key': 'journal',
         },
         {
             'key': 'first_goal',
@@ -60,8 +58,7 @@ def _build_checklist(user):
                 Goal.objects.filter(author=user).exists()
                 or GoalEnrollment.objects.filter(student=user).exists()
             ),
-            'emoji': '🎯',
-            'bg_class': 'bg-purple-50',
+            'icon_key': 'goals',
         },
         {
             'key': 'first_task',
@@ -69,8 +66,7 @@ def _build_checklist(user):
             'description': 'Personal tasks and teacher assignments live in Tasks',
             'url': reverse('tasks:task_list'),
             'done': TaskEnrollment.objects.filter(student=user).exists(),
-            'emoji': '✅',
-            'bg_class': 'bg-blue-50',
+            'icon_key': 'tasks',
         },
         {
             'key': 'first_reflection',
@@ -78,8 +74,7 @@ def _build_checklist(user):
             'description': 'Your weekly check-in helps your teacher support you',
             'url': reverse('reflections:list'),
             'done': Reflection.objects.filter(author=user).exists(),
-            'emoji': '🔄',
-            'bg_class': 'bg-green-50',
+            'icon_key': 'reflections',
         },
         {
             'key': 'first_group_post',
@@ -87,8 +82,7 @@ def _build_checklist(user):
             'description': 'Connect with your cohort in group chat',
             'url': reverse('group_space:feed'),
             'done': Post.objects.filter(author=user).exists(),
-            'emoji': '👥',
-            'bg_class': 'bg-[#B23149]/10',
+            'icon_key': 'chat',
         },
     ]
     done_count = sum(1 for step in steps if step['done'])

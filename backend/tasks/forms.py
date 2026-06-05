@@ -1,5 +1,6 @@
 from django import forms
 
+from config.form_widgets import configure_html5_date_field, html5_date_widget
 from config.input_limits import BODY_TEXT_MAX_LENGTH, DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH
 
 from .models import Subtask, Task, TaskComment, TaskEnrollment, TaskUpdate
@@ -21,7 +22,7 @@ class TaskForm(forms.ModelForm):
             'allow_subtasks',
         ]
         widgets = {
-            'due_date': forms.DateInput(attrs={'type': 'date'}),
+            'due_date': html5_date_widget(),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
 
@@ -32,6 +33,7 @@ class TaskForm(forms.ModelForm):
         self.fields['description'].required = False
         self.fields['description'].widget.attrs['maxlength'] = DESCRIPTION_MAX_LENGTH
         self.fields['due_date'].required = False
+        configure_html5_date_field(self.fields['due_date'])
         if not show_status:
             self.fields.pop('status')
         elif enrollment is not None:
@@ -72,7 +74,7 @@ class SubtaskForm(forms.ModelForm):
         model = Subtask
         fields = ['title', 'description', 'priority', 'due_date']
         widgets = {
-            'due_date': forms.DateInput(attrs={'type': 'date'}),
+            'due_date': html5_date_widget(),
             'description': forms.Textarea(attrs={'rows': 2}),
         }
 
@@ -83,5 +85,6 @@ class SubtaskForm(forms.ModelForm):
         self.fields['description'].required = False
         self.fields['description'].widget.attrs['maxlength'] = DESCRIPTION_MAX_LENGTH
         self.fields['due_date'].required = False
+        configure_html5_date_field(self.fields['due_date'])
 
 

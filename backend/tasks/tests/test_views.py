@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.test import TestCase
 from django.urls import reverse
 
@@ -286,3 +288,43 @@ class SubtaskStatusViewTests(TestCase):
         self.assertContains(response, 'id="subtasks-section"')
         self.assertContains(response, 'Student step')
         self.assertContains(response, '0/1 done')
+
+
+class TaskEditFormPrefillTests(TestCase):
+    def setUp(self):
+        self.cohort = make_cohort()
+        self.group = make_group(self.cohort, name='G1')
+        self.teacher = make_teacher('teacher@example.com')
+        assign_teacher(self.group, self.teacher)
+        self.student = make_student(
+            'student@example.com',
+            cohort=self.cohort,
+            group=self.group,
+        )
+
+    def test_task_edit_prefills_due_date(self):
+        task = make_personal_task(self.student)
+        task.due_date = date(2026, 8, 15)
+        task.save(update_fields=['due_date'])
+
+        login_as(self.client, self.student)
+        response = self.client.get(reverse('tasks:task_edit', args=[task.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="2026-08-15"')
+
+    def test_subtask_edit_prefills_due_date(self):
+        task = make_personal_task(self.student)
+        enrollment = enroll_student(task, self.student)
+        subtask = Subtask.objects.create(
+            task=task,
+            title='Step',
+            order=0,
+            due_date=date(2026, 9, 1),
+            added_by=self.student,
+        )
+        sync_subtask_enrollments(enrollment)
+
+        login_as(self.client, self.student)
+        response = self.client.get(reverse('tasks:subtask_edit', args=[subtask.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="2026-09-01"')

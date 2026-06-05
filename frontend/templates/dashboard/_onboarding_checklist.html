@@ -2,6 +2,7 @@
 Onboarding checklist card — shows on student dashboard until all items complete.
 Context variables: checklist (list of dicts), checklist_done (int), checklist_total (int)
 {% endcomment %}
+{% load icon_tags %}
 
 {% if checklist_done < checklist_total %}
 <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-8 shadow-sm"
@@ -89,10 +90,12 @@ Context variables: checklist (list of dicts), checklist_done (int), checklist_to
         </div>
 
         <!-- Icon -->
-        <div class="h-9 w-9 rounded-xl flex items-center justify-center flex-shrink-0
-                    {% if item.done %}bg-gray-100{% else %}{{ item.bg_class }} group-hover:scale-110{% endif %}
-                    transition-all">
-          <span class="text-lg">{{ item.emoji }}</span>
+        <div class="flex-shrink-0 {% if not item.done %}group-hover:scale-110 transition-transform{% endif %}">
+          {% if item.done %}
+            {% volumetric_icon item.icon_key size="sm" variant="nav" %}
+          {% else %}
+            {% volumetric_icon item.icon_key size="sm" variant="soft" %}
+          {% endif %}
         </div>
 
         <!-- Text -->
@@ -116,7 +119,7 @@ Context variables: checklist (list of dicts), checklist_done (int), checklist_to
 
     <!-- Bottom note -->
     <div class="px-6 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-      <p class="text-xs text-gray-400">This checklist disappears once you complete all steps 🎉</p>
+      <p class="text-xs text-gray-400">This checklist disappears once you complete all steps.</p>
       <a href="{% url 'accounts:welcome' %}" class="text-xs text-[#B23149] hover:underline font-medium">View tutorial again →</a>
     </div>
 

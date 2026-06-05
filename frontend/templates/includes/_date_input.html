@@ -1,0 +1,7 @@
+{% load form_tags %}
+<input type="date"
+       name="{{ name }}"
+       {% if id %}id="{{ id }}"{% endif %}
+       value="{{ value|html_date }}"
+       class="{{ class|default:'w-full text-sm border-0 outline-none bg-transparent' }}"
+       {% if required %}required{% endif %}>

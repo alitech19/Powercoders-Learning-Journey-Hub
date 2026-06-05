@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.test import TestCase
 from django.urls import reverse
 
@@ -39,3 +41,14 @@ class ManagementViewAccessTests(TestCase):
         self.assertEqual(response.status_code, 302)
         other.refresh_from_db()
         self.assertEqual(other.group_id, self.group.pk)
+
+    def test_cohort_edit_prefills_dates(self):
+        self.cohort.start_date = date(2026, 1, 10)
+        self.cohort.end_date = date(2026, 12, 20)
+        self.cohort.save(update_fields=['start_date', 'end_date'])
+
+        login_as(self.client, self.admin)
+        response = self.client.get(reverse('accounts:cohort_edit', args=[self.cohort.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="2026-01-10"')
+        self.assertContains(response, 'value="2026-12-20"')

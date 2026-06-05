@@ -1,6 +1,6 @@
 ## Journal list {#list}
 
-Learning journal entries by date. **Private** entries are only for you; **shared** entries are visible to teachers in your groups.
+Entries are grouped by date. Use visibility on each entry to keep it private or share with teachers (see [Create entry](#form-create)).
 
 ## Entry detail {#detail}
 

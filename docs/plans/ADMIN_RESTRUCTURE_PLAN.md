@@ -194,7 +194,7 @@ Filter: user must be staff; non-superuser admin sees same layout.
 |------|------|
 | [APP_MODULE_TOGGLES_PLAN.md](APP_MODULE_TOGGLES_PLAN.md) | **App modules** section in Django admin |
 | [BUG_BOUNTY_PLAN.md](BUG_BOUNTY_PLAN.md) | **Second** dropdown item (inbox); models also in Django admin |
-| [UI_LAYOUT_IMPROVEMENT_PLAN.md](UI_LAYOUT_IMPROVEMENT_PLAN.md) | Product nav + **staff nav** (users, progress); **Адміністрування ▾** = Django admin + admin-only setup pages |
+| Product nav (`config/nav.py`) | **Staff nav** (users, progress); **Адміністрування ▾** = Django admin + admin-only setup pages |
 | [GROUP_SPACE_PROJECT_PLAN.md](GROUP_SPACE_PROJECT_PLAN.md) | Future **ProjectSpace** models under Group space or new admin group |
 
 ---
@@ -206,7 +206,7 @@ Filter: user must be staff; non-superuser admin sees same layout.
 - [ ] `config/admin_menu.py` — Django admin, `cohort_list`, `user_import`, + bug inbox when ready
 - [ ] `_admin_nav_dropdown.html` in `base.html`
 - [ ] Remove old Admin link
-- [ ] Align [UI_LAYOUT_IMPROVEMENT_PLAN.md](UI_LAYOUT_IMPROVEMENT_PLAN.md) **staff nav** so admins see users/progress like teachers (cohorts stay dashboard or staff nav per layout plan)
+- [ ] Align product **staff nav** so admins see users/progress like teachers (cohorts stay dashboard or staff nav)
 
 ### Phase 2 — Custom AdminSite + ordered index
 

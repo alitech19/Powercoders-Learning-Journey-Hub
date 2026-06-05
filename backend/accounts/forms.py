@@ -4,6 +4,8 @@ import string
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
+from config.form_widgets import configure_html5_date_field, html5_date_widget
+
 from cohorts.models import Cohort, Group, GroupTeacher
 from cohorts.permissions import get_teacher_group_ids
 
@@ -109,11 +111,16 @@ class CohortForm(forms.ModelForm):
         model = Cohort
         fields = ['name', 'start_date', 'end_date', 'status']
         widgets = {
-            'start_date': forms.DateInput(attrs={'type': 'date', 'class': _INPUT_CLASS}),
-            'end_date': forms.DateInput(attrs={'type': 'date', 'class': _INPUT_CLASS}),
+            'start_date': html5_date_widget(**{'class': _INPUT_CLASS}),
+            'end_date': html5_date_widget(**{'class': _INPUT_CLASS}),
             'name': forms.TextInput(attrs={'class': _INPUT_CLASS}),
             'status': forms.Select(attrs={'class': _INPUT_CLASS}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        configure_html5_date_field(self.fields['start_date'])
+        configure_html5_date_field(self.fields['end_date'])
 
 
 class GroupForm(forms.ModelForm):

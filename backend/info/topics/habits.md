@@ -1,6 +1,6 @@
 ## Habits list {#list}
 
-Active habits with weekly logging grids. Track how many days per week you target and mark each day done or not done.
+Each habit has a weekly logging grid and streak counter. Mark individual days done or not done.
 
 ## Habit detail {#detail}
 

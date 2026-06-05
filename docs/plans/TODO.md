@@ -89,23 +89,6 @@ Plan: **[GROUP_SPACE_PROJECT_PLAN.md](GROUP_SPACE_PROJECT_PLAN.md)** — extends
 
 ---
 
-## UI & layout (teacher feedback)
-
-Plan: **[UI_LAYOUT_IMPROVEMENT_PLAN.md](UI_LAYOUT_IMPROVEMENT_PLAN.md)**
-
-**Product rules (agreed):** volumetric icons only · nav **Learning** (Workflows, Tasks, Goals, Habits) · **Wellbeing** (Reflections, Journal) · **Чат** · Resources · create (e.g. New Task) on **list card**, not page header
-
-| Feature | Status |
-|---------|--------|
-| Nav: 4 groups (Learning + Habits · Wellbeing · Чат · Resources) | Planned |
-| **Volumetric** icons only app-wide (one tile component) | Planned |
-| Help (ⓘ) smaller, inline after page title | Planned |
-| Purpose subtitle on every tool page | Planned |
-| Create CTA top-right in list card (not page header) | Planned |
-| Avatar dropdown: name, Profile, Log out | Planned |
-
----
-
 ## App module toggles (admin)
 
 Plan: **[APP_MODULE_TOGGLES_PLAN.md](APP_MODULE_TOGGLES_PLAN.md)**
@@ -136,20 +119,6 @@ Plan: **[ENTITY_RESOURCE_CONTAINER_PLAN.md](ENTITY_RESOURCE_CONTAINER_PLAN.md)**
 | Create/edit: pick or create thematic on entity forms | Planned |
 | Detail: **Open materials** for assignees | Planned |
 | Student personal task/goal → Personal container | Planned |
-
----
-
-## Tasks — list status bug & full subtasks
-
-Plan: **[TASKS_STATUS_AND_SUBTASKS_PLAN.md](TASKS_STATUS_AND_SUBTASKS_PLAN.md)**
-
-| Feature | Status |
-|---------|--------|
-| **Bug:** student status buttons on Tasks list (To do / Doing / Done / Blocked) | Planned |
-| Subtasks: task-like fields (status, priority, due, description) | Planned |
-| `SubtaskEnrollment` replaces boolean completion | Planned |
-| UI: subtask status pills, not milestone checkboxes | Planned |
-| Goals milestones unchanged | — |
 
 ---
 
@@ -189,17 +158,14 @@ Plan: **[BUG_BOUNTY_PLAN.md](BUG_BOUNTY_PLAN.md)** — toggleable app `bug_repor
 
 ## Suggested priority (product)
 
-1. **Tasks list status bug** ([TASKS_STATUS_AND_SUBTASKS_PLAN.md](TASKS_STATUS_AND_SUBTASKS_PLAN.md) Phase 1) — small fix, first  
-2. Finish Beat + env for existing Slack digest  
-3. Scheduling MVP (publish + entity reminders) on one entity (Task)  
-4. Google Drive chat upload (Phase 0–1)  
-5. **UI & layout** ([UI_LAYOUT_IMPROVEMENT_PLAN.md](UI_LAYOUT_IMPROVEMENT_PLAN.md)) — quick win; aligns with bug button next to ⓘ  
-5b. **Admin restructure** ([ADMIN_RESTRUCTURE_PLAN.md](ADMIN_RESTRUCTURE_PLAN.md)) — can ship with UI nav (dropdown + Django admin grouping)  
-6. **Bug reports app** ([BUG_BOUNTY_PLAN.md](BUG_BOUNTY_PLAN.md)) — after UI header row or in parallel  
-7. **App module toggles** ([APP_MODULE_TOGGLES_PLAN.md](APP_MODULE_TOGGLES_PLAN.md)) — include `bug_reports` slug  
-8. **Full subtasks** (Phase 2–3 in [TASKS_STATUS_AND_SUBTASKS_PLAN.md](TASKS_STATUS_AND_SUBTASKS_PLAN.md))  
-9. **Project spaces** (Phases 0–2 in [GROUP_SPACE_PROJECT_PLAN.md](GROUP_SPACE_PROJECT_PLAN.md))  
-10. Personal Slack OAuth + dispatcher  
-11. Group chat ↔ Slack sync  
+1. Finish Beat + env for existing Slack digest  
+2. Scheduling MVP (publish + entity reminders) on one entity (Task)  
+3. Google Drive chat upload (Phase 0–1)  
+4. **Admin restructure** ([ADMIN_RESTRUCTURE_PLAN.md](ADMIN_RESTRUCTURE_PLAN.md)) — dropdown + Django admin grouping  
+5. **Bug reports app** ([BUG_BOUNTY_PLAN.md](BUG_BOUNTY_PLAN.md))  
+6. **App module toggles** ([APP_MODULE_TOGGLES_PLAN.md](APP_MODULE_TOGGLES_PLAN.md)) — include `bug_reports` slug  
+7. **Project spaces** (Phases 0–2 in [GROUP_SPACE_PROJECT_PLAN.md](GROUP_SPACE_PROJECT_PLAN.md))  
+8. Personal Slack OAuth + dispatcher  
+9. Group chat ↔ Slack sync  
 
 Adjust order with team/IT (Workspace sharing policy blocks Drive link sharing if misconfigured).

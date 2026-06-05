@@ -15,7 +15,7 @@ Integrates with [APP_MODULE_TOGGLES_PLAN.md](APP_MODULE_TOGGLES_PLAN.md) — slu
 | **Separate app** | `bug_reports` — own models, urls, templates, admin |
 | **Toggle** | Admin enables/disables via `IntegratedModule` (`bug_reports`); when off: no bug button, `/bugs/` → module stub |
 | **Who can report** | Any **authenticated** user (student, teacher, admin) |
-| **Bug button placement** | Next to **ⓘ** after page title ([UI_LAYOUT_IMPROVEMENT_PLAN.md](UI_LAYOUT_IMPROVEMENT_PLAN.md) header row) — crosshair / sniper-scope icon |
+| **Bug button placement** | Next to **ⓘ** after page title (inline header row) — crosshair / sniper-scope icon |
 | **Report form** | Auto-filled **page URL** (absolute, from referring page); user enters **description**; **Submit** |
 | **Storage** | PostgreSQL — reports + admin replies |
 | **Admin inbox** | PowerHUB page (list + detail), plus **Django admin** (reporter email visible) |
@@ -39,7 +39,7 @@ Short purpose subtitle…
 - `aria-label`: “Report a bug on this page”
 - Hidden if: not authenticated, module `bug_reports` disabled.
 
-Icon: inline SVG crosshair / scope (volumetric tile style per [UI_LAYOUT_IMPROVEMENT_PLAN.md](UI_LAYOUT_IMPROVEMENT_PLAN.md) when icons unified).
+Icon: volumetric tile style per [frontend/ICON_SET.md](../../frontend/ICON_SET.md).
 
 ### Create report page
 
@@ -275,5 +275,5 @@ Register in `settings.py` next to `page_help`.
 ## Related docs
 
 - [APP_MODULE_TOGGLES_PLAN.md](APP_MODULE_TOGGLES_PLAN.md)
-- [UI_LAYOUT_IMPROVEMENT_PLAN.md](UI_LAYOUT_IMPROVEMENT_PLAN.md) — ⓘ + bug button row
+- [frontend/ICON_SET.md](../../frontend/ICON_SET.md) — volumetric icons + header row pattern
 - [TASKS_STATUS_AND_SUBTASKS_PLAN.md](TASKS_STATUS_AND_SUBTASKS_PLAN.md)

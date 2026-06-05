@@ -1,6 +1,6 @@
 ## Reflections list {#list}
 
-Structured check-ins: **weekly**, **project**, or **custom** tags. Wellbeing questions appear when you complete the final reflection section.
+**Weekly**, **project**, or **custom** tags. Wellbeing questions appear when you complete the final section.
 
 ## Reflection detail {#detail}
 

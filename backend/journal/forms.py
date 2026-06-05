@@ -2,6 +2,7 @@ from datetime import date
 
 from django import forms
 
+from config.form_widgets import configure_html5_date_field, html5_date_widget
 from config.input_limits import LONG_TEXT_MAX_LENGTH, TITLE_MAX_LENGTH
 
 from .constants import (
@@ -27,10 +28,7 @@ class JournalEntryForm(forms.ModelForm):
         model = JournalEntry
         fields = ['title', 'entry_date', 'mood', 'visibility', 'tags', 'content']
         widgets = {
-            'entry_date': forms.DateInput(
-                attrs={'type': 'date'},
-                format='%Y-%m-%d',
-            ),
+            'entry_date': html5_date_widget(),
             'mood': forms.HiddenInput(),
             'tags': forms.HiddenInput(),
             'content': forms.Textarea(attrs={'rows': 12}),
@@ -47,7 +45,7 @@ class JournalEntryForm(forms.ModelForm):
         self.fields['mood'].required = False
         self.fields['tags'].required = False
         self.fields['mood'].choices = MOOD_CHOICES
-        self.fields['entry_date'].input_formats = ['%Y-%m-%d']
+        configure_html5_date_field(self.fields['entry_date'])
 
         if creating and not self.data:
             if not self.initial.get('entry_date'):

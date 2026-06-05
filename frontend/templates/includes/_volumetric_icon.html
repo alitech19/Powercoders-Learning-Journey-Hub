@@ -1,11 +1,11 @@
-<span class="inline-flex shrink-0 items-center justify-center font-bold leading-none select-none
-  {% if size == 'xs' %}h-6 w-6 rounded-lg text-xs
-  {% elif size == 'sm' %}h-8 w-8 rounded-lg text-sm
-  {% elif size == 'lg' %}h-12 w-12 rounded-xl text-xl
-  {% else %}h-10 w-10 rounded-xl text-lg{% endif %}
+<span class="inline-flex shrink-0 items-center justify-center leading-none select-none
+  {% if size == 'xs' %}h-6 w-6 rounded-lg
+  {% elif size == 'sm' %}h-8 w-8 rounded-lg
+  {% elif size == 'lg' %}h-12 w-12 rounded-xl
+  {% else %}h-10 w-10 rounded-xl{% endif %}
   {% if variant == 'cream' %}bg-white/80 text-[#343534] shadow-sm
   {% elif variant == 'soft' %}bg-[#F5EDE0] text-[#343534] shadow-sm
   {% elif variant == 'nav' %}bg-gray-100 text-gray-500 shadow-sm
   {% else %}bg-[#B23149] text-white shadow-sm{% endif %}
   {% if extra_class %} {{ extra_class }}{% endif %}"
-      aria-hidden="true">{{ glyph }}</span>
+      aria-hidden="true">{% include "includes/icons/_glyph.html" with icon=icon_key only %}</span>

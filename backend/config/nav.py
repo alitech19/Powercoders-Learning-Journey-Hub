@@ -34,7 +34,7 @@ class NavGroup:
         return bool(self.children)
 
 
-# Product nav — [UI_LAYOUT_IMPROVEMENT_PLAN.md]
+# Product nav — Learning / Wellbeing dropdowns + Group Space + Resources
 NAV_GROUPS: tuple[NavGroup, ...] = (
     NavGroup(
         'Learning',

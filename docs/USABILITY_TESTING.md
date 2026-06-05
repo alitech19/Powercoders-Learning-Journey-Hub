@@ -1,9 +1,23 @@
 # Usability Testing Plan — Powercoders Learning Journey Hub
 
-**Version:** 1.1 · May 2026  
+**Version:** 1.2 · June 2026  
 **Required by:** Project brief — basic usability testing with **at least 5 participants**
 
 **Environment:** use the shared **tester** URL (Render `deploy` branch) or local Docker with seed users — see [DEPLOY.md](DEPLOY.md) and [SETUP.md](SETUP.md).
+
+**Pre-flight (automated):** after nav/UI changes, run  
+`docker compose exec web python manage.py test config.tests.test_usability_smoke config.tests.test_nav config.tests.test_page_meta`
+
+---
+
+## UI context (June 2026)
+
+Facilitators should know the current chrome before sessions:
+
+- **Nav:** four groups — **Learning** dropdown (Workflows, Tasks, Goals, Habits), **Wellbeing** dropdown (Reflections, Journal), **Group Space** link, **Resources** link.
+- **List pages:** page title + inline **ⓘ** help + grey **purpose** subtitle; primary **create** action is top-right inside the list card (not the page header).
+- **Dashboard:** student onboarding checklist (6 steps) until complete; volumetric app tiles.
+- **Icons:** product chrome uses volumetric duotone tiles — not flat outline app icons.
 
 ---
 
@@ -55,7 +69,7 @@ Provide test credentials privately (not in this repo).
 | T3 | Create goal e.g. "Learn to write a REST API"; Hard Skill; **two milestones**; target date | Goal saved with 2 milestones |
 | T4 | Mark one milestone complete | Progress updates |
 | T5 | Submit **weekly reflection** (Reflections app) | Reflection saved |
-| T6 | Open **Group** feed; read a teacher announcement | Finds post in group space |
+| T6 | Open **Group Space** (nav); read a teacher announcement | Finds post in group feed |
 | T7 | Profile → download personal data (**Markdown export**) | File downloads |
 | T8 | (Optional) Post a file in group chat with **Resource** label; open **Resources** app | Resource appears on group tile |
 
@@ -68,7 +82,7 @@ Provide test credentials privately (not in this repo).
 | T3 | Open student progress → student detail → latest shared journal | Entry visible |
 | T4 | Leave feedback on a journal entry | Feedback visible on entry |
 | T5 | Create a goal for a student (from student detail or goals UI) | Goal on student view |
-| T6 | Post announcement in **Group** | Appears in group feed |
+| T6 | Post announcement in **Group Space** | Appears in group feed |
 | T7 | (Optional) `/accounts/cohorts/` — open cohort/group | Admin/teacher cohort UI loads |
 
 ### Tasks — admin (optional 6th session)

@@ -1,28 +1,30 @@
 """
 App-wide volumetric icon glyphs — single source for `_volumetric_icon.html`.
 
-Phase 2a: emoji glyphs inside styled tiles. Swap ICON_MAP values later for asset pack.
+Phase 2b: duotone SVG glyphs inside styled tiles (`includes/icons/_glyph.html`).
 """
 
 from __future__ import annotations
 
-ICON_MAP: dict[str, str] = {
-    'workflows': '📋',
-    'tasks': '✅',
-    'goals': '🎯',
-    'reflections': '💭',
-    'journal': '📓',
-    'habits': '🔄',
-    'chat': '💬',
-    'resources': '📚',
-    'learning': '📖',
-    'wellbeing': '🌿',
-    'notifications': '🔔',
-    'cohorts': '🎓',
-    'users': '👥',
-    'mail': '✉️',
-    'alert': '⚠️',
-}
+ICON_KEYS: frozenset[str] = frozenset({
+    'workflows',
+    'tasks',
+    'goals',
+    'reflections',
+    'journal',
+    'habits',
+    'chat',
+    'resources',
+    'learning',
+    'wellbeing',
+    'notifications',
+    'cohorts',
+    'users',
+    'mail',
+    'alert',
+    'profile',
+    'lock',
+})
 
 URL_ICON_KEYS: dict[str, str] = {
     'workflows:list': 'workflows',
@@ -42,8 +44,8 @@ DEFAULT_SIZE = 'md'
 DEFAULT_VARIANT = 'brand'
 
 
-def get_glyph(icon_key: str) -> str:
-    return ICON_MAP.get(icon_key, '•')
+def is_valid_icon_key(icon_key: str) -> bool:
+    return icon_key in ICON_KEYS
 
 
 def icon_key_for_url(url_name: str) -> str:

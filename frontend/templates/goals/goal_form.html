@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load form_tags %}
 {% block title %}{% if action == 'edit' %}Edit Goal{% else %}New Goal{% endif %}{% endblock %}
 
 {% block content %}
@@ -75,9 +76,15 @@
       </div>
       {% endif %}
       <div class="bg-white rounded-xl border border-gray-200 p-4">
-        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Target date</label>
-        <input type="date" name="target_date" value="{{ form.target_date.value|default:'' }}"
+        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2" for="{{ form.target_date.id_for_label }}">Target date</label>
+        {% if action == 'edit' %}
+        {% bound_date_value form.target_date goal.target_date as target_date_value %}
+        <input type="date" name="target_date" id="{{ form.target_date.id_for_label }}"
+               value="{{ target_date_value }}"
                class="w-full text-sm border-0 outline-none bg-transparent">
+        {% else %}
+        {{ form.target_date }}
+        {% endif %}
       </div>
     </div>
 

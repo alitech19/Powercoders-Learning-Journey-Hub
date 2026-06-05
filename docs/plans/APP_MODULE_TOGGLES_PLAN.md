@@ -243,6 +243,6 @@ No auto-cascade disable in v1; document combos in `IntegratedModule` admin help 
 
 ## Related docs
 
-- [UI_LAYOUT_IMPROVEMENT_PLAN.md](UI_LAYOUT_IMPROVEMENT_PLAN.md) — nav groups
+- `backend/config/nav.py` — nav groups (Learning, Wellbeing, Group Space, Resources)
 - [GROUP_SPACE_PROJECT_PLAN.md](GROUP_SPACE_PROJECT_PLAN.md) — Чат label
 - [SCHEDULING_AND_REMINDERS_PLAN.md](SCHEDULING_AND_REMINDERS_PLAN.md) — skip jobs when module off (follow-up)
