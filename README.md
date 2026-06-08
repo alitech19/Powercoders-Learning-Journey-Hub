@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="frontend/static/img/logo-full.svg" alt="POWER.CODERS" width="560">
+<img src="frontend/static/img/powercoders-wordmark.svg" alt="POWER.CODERS" width="420">
 
 # Learning Journey Hub
 
