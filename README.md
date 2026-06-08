@@ -1,6 +1,8 @@
 <div align="center">
 
-# {POWER.CODERS} Hub
+<img src="frontend/static/img/logo-full.svg" alt="POWER.CODERS" width="480">
+
+# Learning Journey Hub
 
 **The Learning Journey Platform for Powercoders Bootcamp Participants**
 
