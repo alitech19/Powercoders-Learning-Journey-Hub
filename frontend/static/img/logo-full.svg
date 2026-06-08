@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 220" role="img" aria-label="POWER.CODERS">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 240" role="img" aria-label="POWER.CODERS">
   <title>POWER.CODERS</title>
-  <style>
-    .brand-text { font-family: 'Arial Black', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 900; }
-  </style>
-  <text class="brand-text" x="512" y="155" font-size="150" text-anchor="middle">
+  <text x="800" y="165"
+        font-family="'Arial Black', 'Helvetica Neue', Helvetica, Arial, sans-serif"
+        font-weight="900" font-size="150" text-anchor="middle"
+        letter-spacing="-2">
     <tspan fill="#B23149">{ </tspan><tspan fill="#3A322E">POWER</tspan><tspan fill="#B23149">.</tspan><tspan fill="#3A322E">CODERS</tspan><tspan fill="#B23149"> }</tspan>
   </text>
 </svg>
