@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import date, datetime, time, timedelta
 
 from django.contrib.auth import get_user_model
-from django.db.models import Count
+from django.db.models import Count, Max
 from django.utils import timezone
 
 from goals.models import GoalEnrollment
@@ -187,9 +187,15 @@ def at_risk_students(days: int = 7) -> list[dict]:
 
     Returns list of dicts: {student, last_seen (date|None), days_inactive (int|None)}
     Sorted most-inactive first; capped at 20 rows.
+
+    Query count: 5 fixed queries regardless of student count (was N×4 + 4).
+      1. Fetch all students
+      2. Max habit date per student   (HabitLog)
+      3. Max journal date per student (JournalEntry)
+      4. Max reflection date per student (Reflection)
+      5. Max post date per student    (Post)
     """
     cutoff = date.today() - timedelta(days=days)
-    cutoff_dt = _aware(cutoff)
 
     students = list(
         User.objects.filter(role=User.Role.STUDENT)
@@ -199,76 +205,74 @@ def at_risk_students(days: int = 7) -> list[dict]:
     if not students:
         return []
 
-    student_map = {s.pk: s for s in students}
-    student_ids = list(student_map.keys())
+    student_ids = [s.pk for s in students]
 
-    # Collect who was recently active
+    # ── 4 bulk queries: last activity date per student across all time ────────
+    # HabitLog.date is a DateField — Max() returns a date directly.
+    habit_lasts: dict[int, date] = dict(
+        HabitLog.objects
+        .filter(habit__author_id__in=student_ids)
+        .values('habit__author_id')
+        .annotate(last=Max('date'))
+        .values_list('habit__author_id', 'last')
+    )
+
+    # created_at is a DateTimeField — Max() returns a datetime; convert to date.
+    journal_lasts: dict[int, date] = {
+        pk: dt.date()
+        for pk, dt in JournalEntry.objects
+        .filter(author_id__in=student_ids)
+        .values('author_id')
+        .annotate(last=Max('created_at'))
+        .values_list('author_id', 'last')
+        if dt is not None
+    }
+
+    reflection_lasts: dict[int, date] = {
+        pk: dt.date()
+        for pk, dt in Reflection.objects
+        .filter(author_id__in=student_ids)
+        .values('author_id')
+        .annotate(last=Max('created_at'))
+        .values_list('author_id', 'last')
+        if dt is not None
+    }
+
+    post_lasts: dict[int, date] = {
+        pk: dt.date()
+        for pk, dt in Post.objects
+        .filter(author_id__in=student_ids)
+        .values('author_id')
+        .annotate(last=Max('created_at'))
+        .values_list('author_id', 'last')
+        if dt is not None
+    }
+
+    # ── determine who is recently active (no DB queries) ─────────────────────
     recently_active: set[int] = set()
-    recently_active |= set(
-        HabitLog.objects.filter(
-            habit__author_id__in=student_ids,
-            date__gte=cutoff,
-        ).values_list('habit__author_id', flat=True)
-    )
-    recently_active |= set(
-        JournalEntry.objects.filter(
-            author_id__in=student_ids,
-            created_at__gte=cutoff_dt,
-        ).values_list('author_id', flat=True)
-    )
-    recently_active |= set(
-        Reflection.objects.filter(
-            author_id__in=student_ids,
-            created_at__gte=cutoff_dt,
-        ).values_list('author_id', flat=True)
-    )
-    recently_active |= set(
-        Post.objects.filter(
-            author_id__in=student_ids,
-            created_at__gte=cutoff_dt,
-        ).values_list('author_id', flat=True)
-    )
+    for source in (habit_lasts, journal_lasts, reflection_lasts, post_lasts):
+        for pk, last_date in source.items():
+            if last_date >= cutoff:
+                recently_active.add(pk)
 
-    at_risk = []
+    # ── build at-risk list using dict lookups — zero extra DB queries ─────────
     today = date.today()
+    at_risk = []
 
-    for pk, student in student_map.items():
+    for student in students:
+        pk = student.pk
         if pk in recently_active:
             continue
 
-        # Find their most recent activity across all sources
-        candidate_dates: list[date] = []
-
-        last_habit = (
-            HabitLog.objects.filter(habit__author_id=pk)
-            .order_by('-date')
-            .values_list('date', flat=True)
-            .first()
-        )
-        if last_habit:
-            candidate_dates.append(last_habit)
-
-        for Model, field in [
-            (JournalEntry, 'created_at'),
-            (Reflection, 'created_at'),
-        ]:
-            val = (
-                Model.objects.filter(author_id=pk)
-                .order_by(f'-{field}')
-                .values_list(field, flat=True)
-                .first()
+        candidate_dates: list[date] = [
+            d for d in (
+                habit_lasts.get(pk),
+                journal_lasts.get(pk),
+                reflection_lasts.get(pk),
+                post_lasts.get(pk),
             )
-            if val:
-                candidate_dates.append(val.date() if hasattr(val, 'date') else val)
-
-        last_post = (
-            Post.objects.filter(author_id=pk)
-            .order_by('-created_at')
-            .values_list('created_at', flat=True)
-            .first()
-        )
-        if last_post:
-            candidate_dates.append(last_post.date())
+            if d is not None
+        ]
 
         if candidate_dates:
             last_seen = max(candidate_dates)
