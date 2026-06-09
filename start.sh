@@ -88,10 +88,33 @@ name = os.environ.get('SUPERUSER_NAME', 'Admin').strip()
 if not email or not password:
     print('Skipping superuser creation: SUPERUSER_EMAIL / SUPERUSER_PASSWORD not set.')
 elif User.objects.filter(email=email).exists():
-    print(f'Superuser {email} already exists — skipping.')
+    # Ensure existing user has correct role/flags even if role was wrong
+    user = User.objects.get(email=email)
+    changed = False
+    if user.role != User.Role.ADMIN:
+        user.role = User.Role.ADMIN
+        changed = True
+    if not user.is_staff:
+        user.is_staff = True
+        changed = True
+    if not user.is_superuser:
+        user.is_superuser = True
+        changed = True
+    if changed:
+        user.save()
+        print(f'Superuser {email} role/flags corrected to admin.')
+    else:
+        print(f'Superuser {email} already exists — skipping.')
 else:
-    User.objects.create_superuser(email=email, password=password, display_name=name)
-    print(f'Superuser {email} created.')
+    User.objects.create_superuser(
+        email=email,
+        password=password,
+        display_name=name,
+        role=User.Role.ADMIN,
+        privacy_policy_accepted=True,
+        welcome_seen=True,
+    )
+    print(f'Superuser {email} created with role=admin.')
 " || true
 
 echo "==> Starting Gunicorn on port ${PORT:-10000}..."
