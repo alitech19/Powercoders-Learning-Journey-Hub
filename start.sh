@@ -78,7 +78,21 @@ echo "==> Collecting static files..."
 python manage.py collectstatic --noinput
 
 echo "==> Creating initial admin user (if not already present)..."
-python manage.py create_dev_superuser || true
+python manage.py shell -c "
+import os
+from django.contrib.auth import get_user_model
+User = get_user_model()
+email = os.environ.get('SUPERUSER_EMAIL', '').strip()
+password = os.environ.get('SUPERUSER_PASSWORD', '').strip()
+name = os.environ.get('SUPERUSER_NAME', 'Admin').strip()
+if not email or not password:
+    print('Skipping superuser creation: SUPERUSER_EMAIL / SUPERUSER_PASSWORD not set.')
+elif User.objects.filter(email=email).exists():
+    print(f'Superuser {email} already exists — skipping.')
+else:
+    User.objects.create_superuser(email=email, password=password, display_name=name)
+    print(f'Superuser {email} created.')
+" || true
 
 echo "==> Starting Gunicorn on port ${PORT:-10000}..."
 exec gunicorn config.wsgi:application \
