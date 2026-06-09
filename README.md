@@ -78,6 +78,8 @@ Home at `/` is a **role-based dashboard**. Contextual **ⓘ help** is in the pag
 | 🔐 **Two-Factor Auth** | TOTP for staff (django-two-factor-auth) |
 | 🛡️ **Security** | django-axes (brute force), CSP, Redis sessions, secure cookies when `DEBUG=False` |
 | 🔔 **Notifications** | In-app centre with unread badge; optional email per user |
+| 📧 **Email delivery** | SMTP via SendGrid or Postmark; console fallback in dev |
+| 🐛 **Error monitoring** | Sentry — real-time production errors with full stack traces |
 | 💬 **Slack** | Optional webhook for key events (new users, missing reflections) |
 | 📤 **Data Export** | JSON, CSV, Markdown — full data portability |
 | ❌ **Account Deletion** | GDPR right-to-erasure flow |
@@ -144,6 +146,8 @@ Home at `/` is a **role-based dashboard**. Contextual **ⓘ help** is in the pag
 | Frontend JS | HTMX · Alpine.js | Self-hosted or CDN |
 | Auth | django-two-factor-auth · django-axes | TOTP 2FA + brute-force protection |
 | CSP | django-csp | Content Security Policy |
+| Email | Django SMTP backend | SendGrid / Postmark in production |
+| Error monitoring | Sentry (sentry-sdk) | Enabled via `SENTRY_DSN` env var |
 | Production server | Gunicorn + WhiteNoise | Native Python runtime on Render |
 | Local development | Docker Compose | Auto-reload `runserver` |
 | CI | GitHub Actions | Per-app tests on push |
