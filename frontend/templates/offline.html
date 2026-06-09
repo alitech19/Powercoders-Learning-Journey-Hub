@@ -11,6 +11,16 @@
       --font-sans: 'Inter', system-ui, sans-serif;
     }
   </style>
+  {# This page may be served from the SW cache without Django headers/JS.
+     Use CSS prefers-color-scheme for dark mode — no JavaScript required. #}
+  <style>
+    @media (prefers-color-scheme: dark) {
+      html { background: #030712; }
+      body { background: #030712; color: #f3f4f6; }
+      h1   { color: #f9fafb; }
+      p    { color: #9ca3af; }
+    }
+  </style>
 </head>
 <body class="h-full flex items-center justify-center bg-gray-50 px-4">
   <div class="text-center max-w-sm">
