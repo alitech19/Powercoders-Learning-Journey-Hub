@@ -5,6 +5,11 @@
 set -e
 
 echo "==> Applying database migrations..."
+# One-time fix: production DB has resources.0001_initial recorded as applied
+# but group_space.0003_chat_ordering (its dependency) is missing from the
+# django_migrations table. Fake it so migrate --noinput can run cleanly.
+# Safe to leave in permanently — faking an already-applied migration is a no-op.
+python manage.py migrate group_space 0003_chat_ordering --fake 2>/dev/null || true
 python manage.py migrate --noinput
 
 echo "==> Collecting static files..."
