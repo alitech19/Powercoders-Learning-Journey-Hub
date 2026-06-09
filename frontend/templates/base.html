@@ -15,23 +15,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
   {# Sync (no defer) — must run before first paint to prevent flash of wrong theme #}
   <script src="{% static 'js/dark-mode-init.js' %}"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style type="text/tailwindcss">
-    @theme {
-      --color-primary: #B23149;
-      --color-primary-dark: #8E273A;
-      --color-charcoal: #343534;
-      --color-cream: #F5EDE0;
-      --color-cream-dark: #EDE3D5;
-      --font-sans: 'Inter', system-ui, sans-serif;
-    }
-    /* Enable class-based dark mode (Tailwind v4 CDN) */
-    @custom-variant dark (&:where(.dark, .dark *));
-    body { font-family: 'Inter', system-ui, sans-serif; }
-    [x-cloak] { display: none !important; }
-  </style>
   {% block extra_head %}{% endblock %}
 </head>
 <body class="h-full flex flex-col bg-gray-50 dark:bg-gray-950 text-[#343534] dark:text-gray-100 transition-colors duration-200">

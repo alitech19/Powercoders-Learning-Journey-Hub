@@ -1,7 +1,8 @@
-const CACHE = 'powerhub-v1';
+const CACHE = 'powerhub-v2';
 const OFFLINE_URL = '/offline/';
 const PRECACHE = [
   OFFLINE_URL,
+  '/static/css/tailwind.css',
   '/static/img/favicon.svg',
   '/static/img/icon-192.png',
 ];

@@ -251,8 +251,8 @@ AXES_LOCKOUT_PARAMETERS = ['username', 'ip_address']
 CSP_DEFAULT_SRC = ("'self'",)
 CSP_SCRIPT_SRC = (
     "'self'",
-    "https://cdn.tailwindcss.com",
     "'unsafe-eval'",  # Alpine.js evaluates x-* directive expressions at runtime
+    # cdn.tailwindcss.com removed — Tailwind is now compiled to static/css/tailwind.css
 )
 CSP_STYLE_SRC = (
     "'self'",

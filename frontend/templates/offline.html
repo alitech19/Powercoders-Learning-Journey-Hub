@@ -4,13 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>You&#x27;re offline — PowerHUB</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style type="text/tailwindcss">
-    @theme {
-      --color-primary: #B23149;
-      --font-sans: 'Inter', system-ui, sans-serif;
-    }
-  </style>
+  {# Use absolute /static/ path — this page is served from the SW cache without Django template tags #}
+  <link rel="stylesheet" href="/static/css/tailwind.css">
   {# This page may be served from the SW cache without Django headers/JS.
      Use CSS prefers-color-scheme for dark mode — no JavaScript required. #}
   <style>
