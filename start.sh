@@ -5,11 +5,25 @@
 set -e
 
 echo "==> Applying database migrations..."
-# One-time fix: production DB has resources.0001_initial recorded as applied
-# but group_space.0003_chat_ordering (its dependency) is missing from the
-# django_migrations table. Fake it so migrate --noinput can run cleanly.
-# Safe to leave in permanently — faking an already-applied migration is a no-op.
-python manage.py migrate group_space 0003_chat_ordering --fake 2>/dev/null || true
+# One-time fix: production DB is missing group_space.0003_chat_ordering from
+# django_migrations even though resources.0001_initial (which depends on it)
+# is already recorded. Django's migrate command calls check_consistent_history
+# before doing anything — including before --fake — so we must insert the row
+# directly via the shell (which has no migration checks). The INSERT is
+# idempotent: it does nothing if the row already exists.
+python manage.py shell -c "
+from django.db import connection
+with connection.cursor() as c:
+    c.execute(\"\"\"
+        INSERT INTO django_migrations (app, name, applied)
+        SELECT 'group_space', '0003_chat_ordering', NOW()
+        WHERE NOT EXISTS (
+            SELECT 1 FROM django_migrations
+            WHERE app = 'group_space' AND name = '0003_chat_ordering'
+        )
+    \"\"\")
+print('Migration history fix: group_space.0003_chat_ordering ensured.')
+" || true
 python manage.py migrate --noinput
 
 echo "==> Collecting static files..."
