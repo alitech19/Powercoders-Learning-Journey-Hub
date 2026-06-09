@@ -25,6 +25,9 @@ django-csp>=3.8
 python-json-logger>=2.0
 sentry-sdk[django]>=2.0
 
+# Database backups
+boto3>=1.34
+
 # Production / Render (Gunicorn + static files)
 gunicorn>=22.0
 whitenoise>=6.6

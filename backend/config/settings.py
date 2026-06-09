@@ -198,6 +198,26 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 # Render free/small instances OOM with default prefork (~CPU count). Override via env.
 CELERY_WORKER_CONCURRENCY = int(os.environ.get('CELERY_WORKER_CONCURRENCY', '4'))
 
+from celery.schedules import crontab  # noqa: E402
+
+CELERY_BEAT_SCHEDULE = {
+    'weekly-db-backup': {
+        'task': 'config.tasks.backup_database',
+        # Every Sunday at 02:00 Europe/Zurich
+        'schedule': crontab(hour=2, minute=0, day_of_week='sunday'),
+    },
+}
+
+# --- Database backups ---
+# S3-compatible storage (AWS S3 or Backblaze B2).
+# Leave all blank to disable — the task will log a warning and skip safely.
+BACKUP_S3_BUCKET = os.environ.get('BACKUP_S3_BUCKET', '')
+BACKUP_S3_ACCESS_KEY = os.environ.get('BACKUP_S3_ACCESS_KEY', '')
+BACKUP_S3_SECRET_KEY = os.environ.get('BACKUP_S3_SECRET_KEY', '')
+BACKUP_S3_ENDPOINT_URL = os.environ.get('BACKUP_S3_ENDPOINT_URL', '')  # Backblaze B2: https://s3.us-west-004.backblazeb2.com
+BACKUP_S3_REGION = os.environ.get('BACKUP_S3_REGION', 'us-east-1')
+BACKUP_RETENTION_DAYS = int(os.environ.get('BACKUP_RETENTION_DAYS', '30'))
+
 EMAIL_BACKEND = os.environ.get(
     'EMAIL_BACKEND',
     'django.core.mail.backends.console.EmailBackend',
