@@ -252,6 +252,7 @@ CSP_DEFAULT_SRC = ("'self'",)
 CSP_SCRIPT_SRC = (
     "'self'",
     "https://cdn.tailwindcss.com",
+    "'unsafe-eval'",  # Alpine.js evaluates x-* directive expressions at runtime
 )
 CSP_STYLE_SRC = (
     "'self'",

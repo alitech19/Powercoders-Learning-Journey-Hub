@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
 from django.http import JsonResponse
+from django.shortcuts import render
 from django.urls import include, path
 from django.views.generic import RedirectView
 from two_factor import urls as two_factor_urls
@@ -22,6 +23,20 @@ def _two_factor_urlpatterns():
 tf_urlpatterns = _two_factor_urlpatterns()
 
 
+def offline(request):
+    return render(request, 'offline.html', status=200)
+
+
+def service_worker(request):
+    import os
+    from django.http import FileResponse
+    path_ = settings.PROJECT_ROOT / 'frontend' / 'static' / 'js' / 'sw.js'
+    response = FileResponse(open(path_, 'rb'), content_type='application/javascript')
+    response['Service-Worker-Allowed'] = '/'
+    response['Cache-Control'] = 'no-cache'
+    return response
+
+
 def health_check(request):
     payload = {'status': 'ok'}
     if request.GET.get('db'):
@@ -41,6 +56,8 @@ def health_check(request):
 
 
 urlpatterns = [
+    path('sw.js', service_worker, name='service_worker'),
+    path('offline/', offline, name='offline'),
     path('admin/', admin.site.urls),
     path('', include(tf_urlpatterns)),
     path('accounts/', include('accounts.urls')),
