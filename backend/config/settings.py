@@ -203,8 +203,16 @@ EMAIL_BACKEND = os.environ.get(
     'django.core.mail.backends.console.EmailBackend',
 )
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@powercoders.org')
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8000').rstrip('/')
 SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL', '').strip()
+
+# SMTP credentials — used when EMAIL_BACKEND is set to smtp (production)
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.sendgrid.net')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
 
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -297,6 +305,18 @@ LOGGING = {
         'axes': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
     },
 }
+
+# --- Error monitoring ---
+
+_SENTRY_DSN = os.environ.get('SENTRY_DSN', '').strip()
+if _SENTRY_DSN:
+    import sentry_sdk
+    sentry_sdk.init(
+        dsn=_SENTRY_DSN,
+        environment='development' if DEBUG else 'production',
+        traces_sample_rate=0.2,
+        send_default_pii=False,
+    )
 
 # --- Development seed (local only) ---
 # WARNING: Remove this entire block from the codebase before production deploy.
