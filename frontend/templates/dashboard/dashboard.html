@@ -84,6 +84,14 @@
         <span class="block text-xs text-gray-500 mt-0.5">List, create, deactivate accounts</span>
       </span>
     </a>
+    <a href="{% url 'dashboard:analytics' %}"
+       class="flex items-center gap-3 rounded-xl border-2 border-[#B23149]/20 bg-[#F5EDE0] hover:border-[#B23149] hover:shadow-sm px-4 py-4 transition-all group">
+      {% volumetric_icon "goals" size="md" variant="brand" %}
+      <span>
+        <span class="block text-sm font-semibold text-[#343534] group-hover:text-[#B23149]">Analytics Dashboard</span>
+        <span class="block text-xs text-gray-500 mt-0.5">Engagement, at-risk students, cohort stats</span>
+      </span>
+    </a>
     <a href="{% url 'accounts:user_create' %}"
        class="flex items-center gap-3 rounded-xl border border-gray-200 hover:border-[#B23149] bg-white hover:shadow-sm px-4 py-3.5 transition-all group">
       <span class="text-sm font-semibold text-[#B23149] group-hover:text-[#8E273A]">+ Create user</span>
