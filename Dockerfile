@@ -15,6 +15,9 @@ COPY . .
 
 WORKDIR /app/backend
 
-EXPOSE 8000
+# PORT is set by Render (default 10000). start.sh binds Gunicorn to $PORT.
+EXPOSE 10000
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+RUN chmod +x /app/start.sh
+
+CMD ["/app/start.sh"]
