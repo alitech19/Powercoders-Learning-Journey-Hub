@@ -51,15 +51,18 @@ Timezone: **Europe/Zurich** (all schedules).
 
 ## Google Drive & resources storage
 
-Plan: **[GOOGLE_DRIVE_INTEGRATION_PLAN.md](GOOGLE_DRIVE_INTEGRATION_PLAN.md)** (per-user Drive; local `MEDIA_ROOT` until then)
+Plan: **[GOOGLE_DRIVE_INTEGRATION_PLAN.md](GOOGLE_DRIVE_INTEGRATION_PLAN.md)** (hybrid Drive; local `MEDIA_ROOT` until then)
 
 | Feature | Status |
 |---------|--------|
-| Chat file uploads → uploader’s Drive (not `MEDIA_ROOT`) | Planned |
-| Auto folder `PowerHUB/Groups/{group}/` per user | Planned |
-| Auto share **anyone with the link** on upload | Planned |
-| Google OAuth (org email must match `User.email`) | Planned |
-| Resources tiles use `webViewLink`; open in browser Google session | Planned |
+| **Staff** uploads → org **Shared drive** (`PowerHUB/Groups/…`, service account) | Planned |
+| **Student** uploads → uploader’s **My Drive** (OAuth) | Planned |
+| Staff **Contributor** / admin **Content manager**; delete org files **admin only** | Planned |
+| Admin **storage settings** (web + Django admin) — all Google creds in DB, not `.env` | Planned |
+| Staff turnover: files stay in Shared drive; new teachers via drive membership | Planned |
+| Auto share **anyone with the link** (students open staff files without Shared drive ACL) | Planned |
+| Student Google OAuth (email must match `User.email`) | Planned |
+| Resources tiles use `webViewLink` | Planned |
 | Legacy local `media/group_files/` (read-only / migration) | Current → sunset |
 
 ---
