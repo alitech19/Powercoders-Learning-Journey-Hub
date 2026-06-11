@@ -223,6 +223,7 @@ __marimo__/
 .env.*.local
 
 frontend/staticfiles/
+frontend/node_modules/
 backend/media/*
 !backend/media/.gitkeep
 

@@ -15,6 +15,9 @@ venv
 .vscode
 .cursor
 docs/_build
+frontend/node_modules
 frontend/staticfiles
+staticfiles
+backend/staticfiles
 backend/media/*
 !backend/media/.gitkeep

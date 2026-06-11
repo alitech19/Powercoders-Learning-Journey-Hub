@@ -1,0 +1,57 @@
+/*
+  PowerHUB — Tailwind CSS v4 source file.
+  Build:  cd frontend && npm run build:css
+  Watch:  cd frontend && npm run watch:css
+
+  The compiled output lands at frontend/static/css/tailwind.css and is
+  committed so Docker (Python-only) doesn't need Node at runtime.
+*/
+
+@import "tailwindcss";
+
+/* ── Tell Tailwind where to scan for class names ─────────────────────── */
+@source "./templates/**/*.html";
+@source "./static/js/**/*.js";
+
+/* ── Design tokens (replaces @theme in the CDN <style> blocks) ───────── */
+@theme {
+  --color-primary:      #B23149;
+  --color-primary-dark: #8E273A;
+  --color-charcoal:     #343534;
+  --color-cream:        #F5EDE0;
+  --color-cream-dark:   #EDE3D5;
+  --font-sans:          'Inter', system-ui, sans-serif;
+}
+
+/* ── Class-based dark mode (requires .dark on <html>) ────────────────── */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Global base styles ─────────────────────────────────────────────── */
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Alpine.js: hide elements marked x-cloak until Alpine initialises */
+[x-cloak] {
+  display: none !important;
+}
+
+/* ── 2FA login: OTP input field styling ─────────────────────────────── */
+input[name="token-otp_token"],
+input[name="otp_token"],
+#id_token-otp_token {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #D1D5DB;
+  font-size: 0.875rem;
+  letter-spacing: 0.15em;
+}
+
+input[name="token-otp_token"]:focus,
+input[name="otp_token"]:focus,
+#id_token-otp_token:focus {
+  outline: none;
+  border-color: #B23149;
+  box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.2);
+}

@@ -1,5 +1,9 @@
+import json
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
 from django.utils import timezone
 from datetime import timedelta
@@ -14,7 +18,7 @@ from tasks.models import Task
 
 from accounts.student_oversight import build_student_progress_rows
 
-from . import services
+from . import analytics_services, services
 
 User = get_user_model()
 
@@ -108,3 +112,69 @@ def dashboard(request):
         }
     )
     return render(request, 'dashboard/dashboard.html', context)
+
+
+@login_required
+def analytics_dashboard(request):
+    """
+    Admin-only analytics dashboard with charts and at-risk student table.
+
+    All expensive aggregation queries are cached in Redis for 10 minutes.
+    Admins can force a fresh computation by appending ?refresh=1 to the URL.
+    Cache key: 'analytics_dashboard_data'
+    """
+    if not user_is_admin(request.user):
+        raise PermissionDenied
+
+    CACHE_KEY = 'analytics_dashboard_data'
+    CACHE_TTL = 60 * 10  # 10 minutes
+
+    force_refresh = request.GET.get('refresh') == '1'
+    cached = None if force_refresh else cache.get(CACHE_KEY)
+
+    if cached is not None:
+        context = cached
+    else:
+        weekly_eng = analytics_services.weekly_engagement(weeks=8)
+        refl_rates = analytics_services.reflection_submission_rates(weeks=8)
+        goal_stats = analytics_services.goal_completion_stats()
+        at_risk = analytics_services.at_risk_students(days=7)
+        cohorts = analytics_services.cohort_comparison()
+
+        context = {
+            # Raw data for the template tables
+            'goal_stats': goal_stats,
+            'at_risk': at_risk,
+            'cohorts': cohorts,
+            'total_students': User.objects.filter(role=User.Role.STUDENT).count(),
+            'total_at_risk': len(at_risk),
+            # JSON blobs read by analytics.js via <script type="application/json">
+            # (application/json is not executed by the browser — CSP script-src safe)
+            'chart_engagement_json': json.dumps({
+                'labels': [w['week'] for w in weekly_eng],
+                'active': [w['active'] for w in weekly_eng],
+                'total': [w['total'] for w in weekly_eng],
+            }),
+            'chart_reflection_json': json.dumps({
+                'labels': [r['week'] for r in refl_rates],
+                'pct': [r['pct'] for r in refl_rates],
+            }),
+            'chart_goal_json': json.dumps({
+                'labels': ['Completed', 'In Progress', 'Not Started', 'Abandoned'],
+                'data': [
+                    goal_stats['completed'],
+                    goal_stats['in_progress'],
+                    goal_stats['not_started'],
+                    goal_stats['abandoned'],
+                ],
+            }),
+            'chart_cohort_json': json.dumps({
+                'labels': [c['name'] for c in cohorts],
+                'reflection_rate': [c['reflection_rate'] for c in cohorts],
+                'habit_rate': [c['habit_rate'] for c in cohorts],
+                'goal_rate': [c['goal_completion_rate'] for c in cohorts],
+            }),
+        }
+        cache.set(CACHE_KEY, context, timeout=CACHE_TTL)
+
+    return render(request, 'dashboard/analytics.html', context)

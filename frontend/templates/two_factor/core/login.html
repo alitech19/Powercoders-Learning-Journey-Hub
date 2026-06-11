@@ -9,30 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style type="text/tailwindcss">
-    @theme {
-      --color-primary: #B23149;
-      --color-primary-dark: #8E273A;
-      --color-charcoal: #343534;
-      --color-cream: #F5EDE0;
-      --font-sans: 'Inter', system-ui, sans-serif;
-    }
-    body { font-family: 'Inter', system-ui, sans-serif; }
-    input[name="token-otp_token"], input[name="otp_token"], #id_token-otp_token {
-      width: 100%;
-      padding: 0.625rem 1rem;
-      border-radius: 0.5rem;
-      border: 1px solid #D1D5DB;
-      font-size: 0.875rem;
-      letter-spacing: 0.15em;
-    }
-    input[name="token-otp_token"]:focus, input[name="otp_token"]:focus, #id_token-otp_token:focus {
-      outline: none;
-      border-color: #B23149;
-      box-shadow: 0 0 0 2px rgba(192,57,43,0.2);
-    }
-  </style>
+  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
 </head>
 
 <body class="min-h-full bg-[#F5EDE0] py-8 px-4">

@@ -1,6 +1,8 @@
 <div align="center">
 
-# {POWER.CODERS} Hub
+<img src="frontend/static/img/powercoders-wordmark.svg" alt="POWER.CODERS" width="420">
+
+# Learning Journey Hub
 
 **The Learning Journey Platform for Powercoders Bootcamp Participants**
 
@@ -67,7 +69,7 @@ Home at `/` is a **role-based dashboard**. Contextual **ⓘ help** is in the pag
 | 🗂️ **Cohort Management** | Django admin + management UI — cohorts, groups, `GroupTeacher` |
 | 📥 **Bulk User Import** | CSV import for students and teachers |
 | 🔍 **Audit Log** | Security-sensitive actions |
-| 📈 **Platform Analytics** | Admin dashboard with user counts, active cohorts, weekly activity stats |
+| 📈 **Platform Analytics** | Dedicated analytics dashboard — weekly engagement charts, reflection submission rate, goal completion doughnut, cohort comparison, at-risk student table (7-day inactivity) |
 
 ### Platform-wide
 
@@ -76,10 +78,14 @@ Home at `/` is a **role-based dashboard**. Contextual **ⓘ help** is in the pag
 | 🔐 **Two-Factor Auth** | TOTP for staff (django-two-factor-auth) |
 | 🛡️ **Security** | django-axes (brute force), CSP, Redis sessions, secure cookies when `DEBUG=False` |
 | 🔔 **Notifications** | In-app centre with unread badge; optional email per user |
+| 📧 **Email delivery** | SMTP via SendGrid or Postmark; console fallback in dev |
+| 🐛 **Error monitoring** | Sentry — real-time production errors with full stack traces |
 | 💬 **Slack** | Optional webhook for key events (new users, missing reflections) |
 | 📤 **Data Export** | JSON, CSV, Markdown — full data portability |
 | ❌ **Account Deletion** | GDPR right-to-erasure flow |
 | ♿ **Accessible** | Skip link to `#main-content`, ARIA on nav, keyboard-friendly dropdowns |
+| 📱 **Progressive Web App** | Installable on mobile; service worker with offline fallback page; Web App Manifest with 3 icon sizes |
+| 🌙 **Dark mode** | System preference auto-detected; user toggle (sun/moon) persisted to `localStorage`; zero flash-of-wrong-theme |
 
 **Navbar (English):** Learning ▾ · Wellbeing ▾ · Group Space · Resources · Administration ▾ (admin, right) · notifications · profile.
 
@@ -138,10 +144,14 @@ Home at `/` is a **role-based dashboard**. Contextual **ⓘ help** is in the pag
 | Database | PostgreSQL | 17 |
 | Cache & queue | Redis | 7 |
 | Tasks | Celery + django-celery-beat | DB scheduler |
-| Frontend CSS | Tailwind CSS | CDN in dev; compiled before production |
-| Frontend JS | HTMX · Alpine.js | Self-hosted or CDN |
+| Frontend CSS | Tailwind CSS | CDN (v4) with `@custom-variant dark` for class-based dark mode |
+| Frontend JS | HTMX · Alpine.js | Self-hosted (`frontend/static/js/`) — CDN domains removed from CSP |
+| Charts | Chart.js | v4.4.4, self-hosted — analytics dashboard |
+| PWA | Web App Manifest + Service Worker | Network-first nav, cache-first static assets, offline fallback |
 | Auth | django-two-factor-auth · django-axes | TOTP 2FA + brute-force protection |
 | CSP | django-csp | Content Security Policy |
+| Email | Django SMTP backend | SendGrid / Postmark in production |
+| Error monitoring | Sentry (sentry-sdk) | Enabled via `SENTRY_DSN` env var |
 | Production server | Gunicorn + WhiteNoise | Native Python runtime on Render |
 | Local development | Docker Compose | Auto-reload `runserver` |
 | CI | GitHub Actions | Per-app tests on push |
