@@ -33,13 +33,32 @@ with connection.cursor() as c:
         c.execute('ALTER TABLE reflections_reflection ADD COLUMN final_reflection_at TIMESTAMPTZ NULL')
         print('+ reflections_reflection.final_reflection_at')
 
+    # columns that may have been added to 0001_initial in-place after initial deploy
+    if not col(c, 'reflections_reflection', 'tags'):
+        c.execute(\"\"\"ALTER TABLE reflections_reflection ADD COLUMN tags JSONB NOT NULL DEFAULT '[]'::jsonb\"\"\")
+        print('+ reflections_reflection.tags')
+
+    if not col(c, 'reflections_reflection', 'custom_label'):
+        c.execute(\"\"\"ALTER TABLE reflections_reflection ADD COLUMN custom_label VARCHAR(100) NOT NULL DEFAULT ''\"\"\")
+        print('+ reflections_reflection.custom_label')
+
     # 0003_add_expectations_at
     if not col(c, 'reflections_reflection', 'expectations_at'):
         c.execute('ALTER TABLE reflections_reflection ADD COLUMN expectations_at TIMESTAMPTZ NULL')
         print('+ reflections_reflection.expectations_at')
 
     # ── workflows ────────────────────────────────────────────────────────────
-    # 0001_initial may have been created without assignee_* columns
+    # 0001_initial may have been created without several columns
+    if not col(c, 'workflows_workflow', 'visibility'):
+        c.execute(\"\"\"ALTER TABLE workflows_workflow
+                       ADD COLUMN visibility VARCHAR(20) NOT NULL DEFAULT 'public'\"\"\")
+        print('+ workflows_workflow.visibility')
+
+    if not col(c, 'workflows_workflow', 'progress_mode'):
+        c.execute(\"\"\"ALTER TABLE workflows_workflow
+                       ADD COLUMN progress_mode VARCHAR(20) NOT NULL DEFAULT 'shared'\"\"\")
+        print('+ workflows_workflow.progress_mode')
+
     if not col(c, 'workflows_workflow', 'assignee_type'):
         c.execute(\"\"\"ALTER TABLE workflows_workflow
                        ADD COLUMN assignee_type VARCHAR(20) NOT NULL DEFAULT 'cohort'\"\"\")
