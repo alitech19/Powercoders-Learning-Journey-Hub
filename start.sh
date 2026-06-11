@@ -10,7 +10,9 @@ echo "==> Repairing schema: adding any missing columns/tables..."
 # than trying to run those migrations against a DB that already has *some* of the
 # tables, we apply the missing DDL directly with IF NOT EXISTS guards, then fake
 # the migration records so Django's migrate --noinput sees a clean history.
-python manage.py shell -c "
+#
+# Using a heredoc (<<) avoids ALL bash-escaping issues with quotes inside -c "...".
+python manage.py shell << 'PYEOF' || true
 from django.db import connection
 
 def col(c, tbl, col):
@@ -33,13 +35,13 @@ with connection.cursor() as c:
         c.execute('ALTER TABLE reflections_reflection ADD COLUMN final_reflection_at TIMESTAMPTZ NULL')
         print('+ reflections_reflection.final_reflection_at')
 
-    # columns that may have been added to 0001_initial in-place after initial deploy
+    # columns added to 0001_initial in-place after the initial production deploy
     if not col(c, 'reflections_reflection', 'tags'):
-        c.execute(\"\"\"ALTER TABLE reflections_reflection ADD COLUMN tags JSONB NOT NULL DEFAULT '[]'::jsonb\"\"\")
+        c.execute("ALTER TABLE reflections_reflection ADD COLUMN tags JSONB NOT NULL DEFAULT '[]'::jsonb")
         print('+ reflections_reflection.tags')
 
     if not col(c, 'reflections_reflection', 'custom_label'):
-        c.execute(\"\"\"ALTER TABLE reflections_reflection ADD COLUMN custom_label VARCHAR(100) NOT NULL DEFAULT ''\"\"\")
+        c.execute("ALTER TABLE reflections_reflection ADD COLUMN custom_label VARCHAR(100) NOT NULL DEFAULT ''")
         print('+ reflections_reflection.custom_label')
 
     # 0003_add_expectations_at
@@ -48,20 +50,17 @@ with connection.cursor() as c:
         print('+ reflections_reflection.expectations_at')
 
     # ── workflows ────────────────────────────────────────────────────────────
-    # 0001_initial may have been created without several columns
+    # columns added to 0001_initial in-place after the initial production deploy
     if not col(c, 'workflows_workflow', 'visibility'):
-        c.execute(\"\"\"ALTER TABLE workflows_workflow
-                       ADD COLUMN visibility VARCHAR(20) NOT NULL DEFAULT 'public'\"\"\")
+        c.execute("ALTER TABLE workflows_workflow ADD COLUMN visibility VARCHAR(20) NOT NULL DEFAULT 'public'")
         print('+ workflows_workflow.visibility')
 
     if not col(c, 'workflows_workflow', 'progress_mode'):
-        c.execute(\"\"\"ALTER TABLE workflows_workflow
-                       ADD COLUMN progress_mode VARCHAR(20) NOT NULL DEFAULT 'shared'\"\"\")
+        c.execute("ALTER TABLE workflows_workflow ADD COLUMN progress_mode VARCHAR(20) NOT NULL DEFAULT 'shared'")
         print('+ workflows_workflow.progress_mode')
 
     if not col(c, 'workflows_workflow', 'assignee_type'):
-        c.execute(\"\"\"ALTER TABLE workflows_workflow
-                       ADD COLUMN assignee_type VARCHAR(20) NOT NULL DEFAULT 'cohort'\"\"\")
+        c.execute("ALTER TABLE workflows_workflow ADD COLUMN assignee_type VARCHAR(20) NOT NULL DEFAULT 'cohort'")
         c.execute('ALTER TABLE workflows_workflow ALTER COLUMN assignee_type DROP DEFAULT')
         print('+ workflows_workflow.assignee_type')
 
@@ -102,7 +101,7 @@ with connection.cursor() as c:
 
     # 0004_subtask_enrollment — new columns on tasks_subtask
     if not col(c, 'tasks_subtask', 'description'):
-        c.execute(\"\"\"ALTER TABLE tasks_subtask ADD COLUMN description TEXT NOT NULL DEFAULT ''\"\"\")
+        c.execute("ALTER TABLE tasks_subtask ADD COLUMN description TEXT NOT NULL DEFAULT ''")
         c.execute('ALTER TABLE tasks_subtask ALTER COLUMN description DROP DEFAULT')
         print('+ tasks_subtask.description')
 
@@ -111,7 +110,7 @@ with connection.cursor() as c:
         print('+ tasks_subtask.due_date')
 
     if not col(c, 'tasks_subtask', 'priority'):
-        c.execute(\"\"\"ALTER TABLE tasks_subtask ADD COLUMN priority VARCHAR(20) NOT NULL DEFAULT 'normal'\"\"\")
+        c.execute("ALTER TABLE tasks_subtask ADD COLUMN priority VARCHAR(20) NOT NULL DEFAULT 'normal'")
         print('+ tasks_subtask.priority')
 
     # 0004 — create SubtaskEnrollment table
@@ -184,14 +183,14 @@ with connection.cursor() as c:
         print('+ accounts_notification table')
 
     print('Schema repair complete.')
-" || true
+PYEOF
 
 echo "==> Faking migration history records for custom apps..."
 # After the schema repair above every custom-app migration is either already
 # applied (original schema) or we just applied the missing DDL above.  We now
 # insert the migration records so Django's check_consistent_history passes and
 # migrate --noinput becomes a no-op.
-python manage.py shell -c "
+python manage.py shell << 'PYEOF' || true
 from django.db import connection
 rows = [
     # accounts
@@ -249,14 +248,15 @@ with connection.cursor() as c:
                 SELECT 1 FROM django_migrations WHERE app = %s AND name = %s
             )
         ''', [app, name, app, name])
-" || true
+PYEOF
+
 python manage.py migrate --noinput
 
 echo "==> Collecting static files..."
 python manage.py collectstatic --noinput
 
 echo "==> Creating initial admin user (if not already present)..."
-python manage.py shell -c "
+python manage.py shell << 'PYEOF' || true
 import os
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -281,7 +281,7 @@ elif User.objects.filter(email=email).exists():
         user.save()
         print(f'Superuser {email} role/flags corrected to admin.')
     else:
-        print(f'Superuser {email} already exists — skipping.')
+        print(f'Superuser {email} already exists -- skipping.')
 else:
     User.objects.create_superuser(
         email=email,
@@ -292,7 +292,7 @@ else:
         welcome_seen=True,
     )
     print(f'Superuser {email} created with role=admin.')
-" || true
+PYEOF
 
 echo "==> Starting Gunicorn on port ${PORT:-10000}..."
 exec gunicorn config.wsgi:application \
