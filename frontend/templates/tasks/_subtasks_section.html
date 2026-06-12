@@ -1,6 +1,6 @@
-<div id="subtasks-section" class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+<div id="subtasks-section" class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-4">
   <div class="flex items-center justify-between mb-3">
-    <h2 class="text-sm font-semibold text-[#343534]">Subtasks</h2>
+    <h2 class="text-sm font-semibold text-[#343534] dark:text-gray-100">Subtasks</h2>
     <div class="flex items-center gap-3">
       <span class="text-xs text-gray-400">{{ subtask_done }}/{{ subtask_total }} done</span>
       {% if can_add_template_subtask or can_add_participant_subtask %}
@@ -10,7 +10,7 @@
     </div>
   </div>
   {% if subtask_total > 0 %}
-  <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-4">
+  <div class="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-4">
     <div class="h-full bg-[#B23149] rounded-full transition-all"
          style="width: {% widthratio subtask_done subtask_total 100 %}%"></div>
   </div>
@@ -19,7 +19,7 @@
     <div class="border border-gray-100 rounded-lg p-3">
       <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-medium text-[#343534]">{{ item.subtask.title }}</p>
+          <p class="text-sm font-medium text-[#343534] dark:text-gray-100">{{ item.subtask.title }}</p>
           {% if item.subtask.description %}
           <p class="text-xs text-gray-500 mt-1">{{ item.subtask.description }}</p>
           {% endif %}
@@ -55,7 +55,7 @@
     <div class="border border-gray-100 rounded-lg p-3 bg-gray-50/50">
       <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-medium text-[#343534]">{{ item.subtask.title }}</p>
+          <p class="text-sm font-medium text-[#343534] dark:text-gray-100">{{ item.subtask.title }}</p>
           {% if item.subtask.description %}
           <p class="text-xs text-gray-500 mt-1">{{ item.subtask.description }}</p>
           {% endif %}

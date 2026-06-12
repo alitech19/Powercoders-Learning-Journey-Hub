@@ -7,21 +7,21 @@
 <div class="max-w-lg mx-auto">
   <div class="mb-6">
     <a href="{% url 'accounts:cohort_list' %}" class="text-sm text-gray-400 hover:text-[#B23149] transition-colors">← Back to Cohorts</a>
-    <h1 class="text-2xl font-bold text-[#343534] mt-2">{{ title }}</h1>
+    <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100 mt-2">{{ title }}</h1>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-6">
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
     <form method="post" novalidate>
       {% csrf_token %}
 
       {% for field in form %}
       <div class="mb-5">
-        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-[#343534] mb-1.5">
+        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-[#343534] dark:text-gray-100 mb-1.5">
           {{ field.label }}{% if field.field.required %} <span class="text-[#B23149]">*</span>{% endif %}
         </label>
         {% if field.field.widget.input_type == 'select' %}
           <select name="{{ field.html_name }}" id="{{ field.id_for_label }}"
-                  class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20 bg-white">
+                  class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20 bg-white">
             {% for val, label in field.field.choices %}
             <option value="{{ val }}" {% if field.value == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
@@ -31,14 +31,14 @@
                  name="{{ field.html_name }}"
                  id="{{ field.id_for_label }}"
                  value="{{ field.value|html_date }}"
-                 class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20"
+                 class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20"
                  {% if field.field.required %}required{% endif %}>
         {% else %}
           <input type="{{ field.field.widget.input_type }}"
                  name="{{ field.html_name }}"
                  id="{{ field.id_for_label }}"
                  value="{{ field.value|default_if_none:'' }}"
-                 class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20"
+                 class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20"
                  {% if field.field.required %}required{% endif %}>
         {% endif %}
         {% if field.errors %}

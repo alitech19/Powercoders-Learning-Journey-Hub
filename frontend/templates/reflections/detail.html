@@ -23,7 +23,7 @@
   </div>
   {% endif %}
 
-  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-4">
     <div class="flex items-start justify-between gap-4 mb-5">
       <div>
         <div class="flex flex-wrap items-center gap-2 mb-2">
@@ -32,7 +32,7 @@
           {% endfor %}
           {% include "reflections/_visibility_badge.html" %}
         </div>
-        <h1 class="text-xl font-bold text-[#343534]">{{ reflection.title }}</h1>
+        <h1 class="text-xl font-bold text-[#343534] dark:text-gray-100">{{ reflection.title }}</h1>
       </div>
       {% if can_edit or can_delete %}
       <div class="flex gap-2 flex-shrink-0">
@@ -102,7 +102,7 @@
   </div>
 
   {% if show_feedback %}
-  <div class="bg-white rounded-xl border border-gray-200 p-6">
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
     {% include "feedback/_section.html" %}
   </div>
   {% endif %}

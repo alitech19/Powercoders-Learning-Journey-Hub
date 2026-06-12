@@ -12,7 +12,7 @@
       </svg>
       Back to profile
     </a>
-    <h1 class="text-2xl font-bold text-[#343534]">Delete my account</h1>
+    <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100">Delete my account</h1>
   </div>
 
   <div class="bg-red-50 border border-red-200 rounded-xl p-5 mb-5">
@@ -28,11 +28,11 @@
     </p>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-5">
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
     <form method="post" class="space-y-4">
       {% csrf_token %}
       <div>
-        <label class="block text-sm font-semibold text-[#343534] mb-1.5">
+        <label class="block text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1.5">
           Confirm your password to delete your account
         </label>
         <input type="password" name="password" required autofocus
@@ -47,7 +47,7 @@
         Permanently delete my account
       </button>
       <a href="{% url 'accounts:profile' %}"
-         class="block text-center text-sm text-gray-500 hover:text-[#343534] transition-colors">
+         class="block text-center text-sm text-gray-500 hover:text-[#343534] dark:text-gray-100 transition-colors">
         Cancel — keep my account
       </a>
     </form>

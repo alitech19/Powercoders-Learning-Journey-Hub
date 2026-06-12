@@ -1,7 +1,7 @@
 <div id="goal-progress-panel">
   {% include "goals/_milestones.html" with can_toggle_milestone=can_toggle_milestone %}
 
-  <div id="goal-actions" class="{% if can_mark_achieved or can_reactivate %}flex gap-2 mt-4 pt-4 border-t border-gray-100{% else %}hidden{% endif %}">
+  <div id="goal-actions" class="{% if can_mark_achieved or can_reactivate %}flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800{% else %}hidden{% endif %}">
     {% if can_mark_achieved %}
     <form method="post" action="{% url 'goals:mark_achieved' goal.pk %}">
       {% csrf_token %}

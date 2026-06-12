@@ -6,7 +6,7 @@
 {% if can_create %}{% url 'workflows:create' as workflows_create_url %}{% endif %}
 {% include "includes/_page_header.html" with title="Workflows" %}
 
-<div class="bg-white rounded-xl border border-gray-200">
+<div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
   {% if workflows_create_url %}
   {% include "includes/_list_card_header.html" with card_title="Workflows" create_url=workflows_create_url create_label="New Workflow" %}
   {% else %}
@@ -18,10 +18,10 @@
     <div class="space-y-4">
       {% for row in rows %}
       <a href="{% url 'workflows:detail' row.workflow.pk %}"
-         class="block bg-white rounded-xl border border-gray-200 p-5 hover:border-[#B23149]/30 transition-colors">
+         class="block bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:border-[#B23149]/30 transition-colors">
         <div class="flex items-start justify-between gap-4 mb-3">
           <div class="flex-1">
-            <h2 class="font-semibold text-[#343534]">{{ row.workflow.title }}</h2>
+            <h2 class="font-semibold text-[#343534] dark:text-gray-100">{{ row.workflow.title }}</h2>
             <p class="text-xs text-gray-400 mt-0.5">{{ row.workflow.get_assignee_label }}</p>
             {% if row.workflow.description %}
             <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ row.workflow.description }}</p>
@@ -32,14 +32,14 @@
             <p class="text-xs text-gray-400">complete</p>
           </div>
         </div>
-        <div class="w-full bg-gray-100 rounded-full h-2">
+        <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
           <div class="bg-[#B23149] h-2 rounded-full transition-all" style="width: {{ row.progress }}%"></div>
         </div>
       </a>
       {% endfor %}
     </div>
     {% else %}
-    <div class="text-center py-20 bg-white rounded-xl border border-gray-200">
+    <div class="text-center py-20 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
       <div class="flex justify-center mb-4">{% volumetric_icon "workflows" size="lg" variant="soft" %}</div>
       <p class="text-gray-400 text-sm">You have not been assigned to any workflows yet.</p>
     </div>
@@ -48,11 +48,11 @@
     {% if workflows %}
     <div class="space-y-3">
       {% for wf in workflows %}
-      <div class="relative bg-white rounded-xl border border-gray-200 p-5 hover:border-[#B23149]/30 transition-colors">
+      <div class="relative bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:border-[#B23149]/30 transition-colors">
         {% url 'workflows:detail' wf.pk as workflow_detail_url %}
         {% include "includes/_list_card_overlay_link.html" with detail_url=workflow_detail_url aria_label=wf.title %}
         <div class="pointer-events-none">
-          <h2 class="font-semibold text-[#343534]">{{ wf.title }}</h2>
+          <h2 class="font-semibold text-[#343534] dark:text-gray-100">{{ wf.title }}</h2>
           <div class="flex items-center gap-3 mt-1 flex-wrap text-xs text-gray-400">
             <span>{{ wf.get_progress_mode_display }}</span>
             <span>{{ wf.get_assignee_label }}</span>
@@ -65,7 +65,7 @@
       {% endfor %}
     </div>
     {% else %}
-    <div class="text-center py-20 bg-white rounded-xl border border-gray-200">
+    <div class="text-center py-20 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
       <div class="flex justify-center mb-4">{% volumetric_icon "workflows" size="lg" variant="soft" %}</div>
       <p class="text-gray-400 text-sm">No workflows yet.</p>
     </div>

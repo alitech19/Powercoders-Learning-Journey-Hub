@@ -4,15 +4,15 @@
 {% block content %}
 <div class="max-w-lg mx-auto">
   <div class="mb-6">
-    <h1 class="text-2xl font-bold text-[#343534]">Backup Tokens</h1>
+    <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100">Backup Tokens</h1>
     <p class="text-gray-500 text-sm mt-1">Save these tokens somewhere safe. Each can be used once.</p>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4 shadow-sm">
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-4 shadow-sm">
     {% if device.token_set.all %}
     <div class="grid grid-cols-2 gap-2 mb-5">
       {% for token in device.token_set.all %}
-      <code class="bg-[#F5EDE0] text-[#343534] text-sm font-mono px-3 py-2 rounded-lg text-center tracking-wider">
+      <code class="bg-[#F5EDE0] text-[#343534] dark:text-gray-100 text-sm font-mono px-3 py-2 rounded-lg text-center tracking-wider">
         {{ token.token }}
       </code>
       {% endfor %}
@@ -30,7 +30,7 @@
     </form>
   </div>
 
-  <a href="{% url 'dashboard:dashboard' %}" class="block text-center text-sm text-gray-500 hover:text-[#343534]">
+  <a href="{% url 'dashboard:dashboard' %}" class="block text-center text-sm text-gray-500 hover:text-[#343534] dark:text-gray-100">
     ← Back to Home
   </a>
 </div>

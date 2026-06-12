@@ -3,5 +3,5 @@
        name="{{ name }}"
        {% if id %}id="{{ id }}"{% endif %}
        value="{{ value|html_date }}"
-       class="{{ class|default:'w-full text-sm text-[#343534] border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20' }}"
+       class="{{ class|default:'w-full text-sm text-[#343534] dark:text-gray-100 border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20' }}"
        {% if required %}required{% endif %}>

@@ -1,4 +1,4 @@
-<div class="grid grid-cols-7 gap-2 {% if list_view %}mt-4 pt-4 border-t border-gray-100{% endif %}">
+<div class="grid grid-cols-7 gap-2 {% if list_view %}mt-4 pt-4 border-t border-gray-100 dark:border-gray-800{% endif %}">
   {% for day in week_table %}
   <div class="flex flex-col items-center justify-center text-center min-w-0 rounded-xl border py-3 min-h-[4rem]
               {% if day.is_today %}border-[#B23149]/30 bg-red-50/40

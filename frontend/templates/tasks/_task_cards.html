@@ -11,7 +11,7 @@
     {% endif %}
     <div class="flex items-stretch justify-between gap-4 pointer-events-none">
       <div class="flex-1 min-w-0">
-        <h3 class="font-semibold text-[#343534] text-base leading-snug">
+        <h3 class="font-semibold text-[#343534] dark:text-gray-100 text-base leading-snug">
           {% if row.can_view_content and row.can_view_metadata %}
           {{ task.title }}
           {% elif row.can_view_metadata %}
@@ -68,12 +68,12 @@
       </div>
     </div>
     {% if enrollment and enrollment.subtasks_total %}
-    <div class="mt-4 pt-3 border-t border-gray-100 pointer-events-none">
+    <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 pointer-events-none">
       <div class="flex items-center justify-between text-xs text-gray-400 mb-1.5">
         <span>Subtasks</span>
         <span>{{ enrollment.subtasks_done }}/{{ enrollment.subtasks_total }}</span>
       </div>
-      <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div class="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
         <div class="h-full bg-[#B23149] rounded-full transition-all"
              style="width: {% widthratio enrollment.subtasks_done enrollment.subtasks_total 100 %}%"></div>
       </div>
@@ -86,7 +86,7 @@
 {% elif show_empty %}
 <div class="text-center py-16">
   <div class="flex justify-center mb-4">{% volumetric_icon "tasks" size="lg" variant="soft" %}</div>
-  <h3 class="text-lg font-semibold text-[#343534] mb-1">
+  <h3 class="text-lg font-semibold text-[#343534] dark:text-gray-100 mb-1">
     {% if status_filter == 'finished' %}No finished tasks{% else %}No active tasks{% endif %}
   </h3>
   <p class="text-gray-500 text-sm">

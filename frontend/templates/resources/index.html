@@ -4,20 +4,20 @@
 {% block content %}
 {% include "includes/_page_header.html" with title="Resources" %}
 
-<div class="flex gap-1 mb-4 bg-white border border-gray-200 rounded-lg p-1 w-fit flex-wrap">
+<div class="flex gap-1 mb-4 bg-white dark:bg-gray-900 border border-gray-200 rounded-lg dark:border-gray-700 p-1 w-fit flex-wrap">
   <a href="?tab=my"
      class="px-4 py-2 rounded-md text-sm font-medium transition-colors
-            {% if tab == 'my' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
+            {% if tab == 'my' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534] dark:text-gray-100{% endif %}">
     My
   </a>
   <a href="?tab=group{% if selected_group %}&group={{ selected_group.pk }}{% endif %}"
      class="px-4 py-2 rounded-md text-sm font-medium transition-colors
-            {% if tab == 'group' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
+            {% if tab == 'group' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534] dark:text-gray-100{% endif %}">
     Group
   </a>
   <a href="?tab=themes{% if selected_group %}&group={{ selected_group.pk }}{% endif %}"
      class="px-4 py-2 rounded-md text-sm font-medium transition-colors
-            {% if tab == 'themes' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
+            {% if tab == 'themes' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534] dark:text-gray-100{% endif %}">
     Themes
   </a>
 </div>
@@ -34,7 +34,7 @@
 </div>
 {% endif %}
 
-<div class="bg-white rounded-xl border border-gray-200">
+<div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
   {% if create_url %}
   {% include "includes/_list_card_header.html" with card_title="Resources" create_url=create_url create_label=create_label %}
   {% else %}
@@ -47,7 +47,7 @@
   <a href="{% url 'resources:container_detail' container.pk %}"
      class="group flex items-center justify-center aspect-square rounded-2xl border-2 border-gray-200 bg-white
             hover:border-[#B23149] hover:shadow-md transition-all p-4 text-center">
-    <span class="text-sm font-semibold text-[#343534] leading-snug line-clamp-4 group-hover:text-[#B23149]">
+    <span class="text-sm font-semibold text-[#343534] dark:text-gray-100 leading-snug line-clamp-4 group-hover:text-[#B23149]">
       {{ container.title }}
     </span>
   </a>

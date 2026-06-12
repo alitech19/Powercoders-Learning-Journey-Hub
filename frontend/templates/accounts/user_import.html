@@ -6,14 +6,14 @@
 <div class="max-w-2xl mx-auto">
   <div class="mb-6">
     <a href="{% url 'accounts:cohort_list' %}" class="text-sm text-gray-400 hover:text-[#B23149] transition-colors">← Back to Cohorts</a>
-    <h1 class="text-2xl font-bold text-[#343534] mt-2">Bulk Import Users</h1>
+    <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100 mt-2">Bulk Import Users</h1>
     <p class="text-gray-500 text-sm mt-0.5">Upload a CSV file to create multiple users at once.</p>
   </div>
 
   <!-- Upload form -->
   {% if not results %}
-  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-    <h2 class="text-sm font-semibold text-[#343534] mb-4">Upload CSV</h2>
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+    <h2 class="text-sm font-semibold text-[#343534] dark:text-gray-100 mb-4">Upload CSV</h2>
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center mb-4 hover:border-[#B23149]/40 transition-colors">
@@ -22,7 +22,7 @@
         </svg>
         <p class="text-sm text-gray-500 mb-2">Choose a CSV file to upload</p>
         <input type="file" name="csv_file" accept=".csv" required
-               class="block mx-auto text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-gray-200 file:text-sm file:font-medium file:text-[#343534] file:bg-white hover:file:border-[#B23149] file:cursor-pointer">
+               class="block mx-auto text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-gray-200 file:text-sm file:font-medium file:text-[#343534] dark:text-gray-100 file:bg-white hover:file:border-[#B23149] file:cursor-pointer">
       </div>
       <button type="submit"
               class="w-full bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold py-2.5 rounded-lg transition-colors">
@@ -54,8 +54,8 @@
 
     <!-- Created -->
     {% if results.created %}
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div class="px-5 py-3 border-b border-gray-100 bg-green-50">
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-800 bg-green-50">
         <h3 class="text-sm font-semibold text-green-800">Created Users — save these temporary passwords</h3>
       </div>
       <div class="overflow-x-auto">
@@ -67,10 +67,10 @@
               <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Temp Password</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
             {% for u in results.created %}
             <tr>
-              <td class="px-4 py-2.5 font-medium text-[#343534]">{{ u.display_name }}</td>
+              <td class="px-4 py-2.5 font-medium text-[#343534] dark:text-gray-100">{{ u.display_name }}</td>
               <td class="px-4 py-2.5 text-gray-500">{{ u.email }}</td>
               <td class="px-4 py-2.5 font-mono text-xs bg-yellow-50 text-yellow-800">{{ u.temp_password }}</td>
             </tr>
@@ -83,11 +83,11 @@
 
     <!-- Skipped -->
     {% if results.skipped %}
-    <div class="bg-white rounded-xl border border-yellow-200 overflow-hidden">
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-yellow-200 dark:border-yellow-800/60 overflow-hidden">
       <div class="px-5 py-3 border-b border-yellow-100 bg-yellow-50">
         <h3 class="text-sm font-semibold text-yellow-800">Skipped (already exist)</h3>
       </div>
-      <ul class="divide-y divide-gray-100">
+      <ul class="divide-y divide-gray-100 dark:divide-gray-800">
         {% for s in results.skipped %}
         <li class="px-5 py-2.5 text-sm text-gray-600">
           Row {{ s.row }}: <span class="font-medium">{{ s.email }}</span> — {{ s.reason }}
@@ -99,11 +99,11 @@
 
     <!-- Errors -->
     {% if results.errors %}
-    <div class="bg-white rounded-xl border border-red-200 overflow-hidden">
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-red-200 dark:border-red-900/60 overflow-hidden">
       <div class="px-5 py-3 border-b border-red-100 bg-red-50">
         <h3 class="text-sm font-semibold text-red-800">Errors</h3>
       </div>
-      <ul class="divide-y divide-gray-100">
+      <ul class="divide-y divide-gray-100 dark:divide-gray-800">
         {% for e in results.errors %}
         <li class="px-5 py-2.5 text-sm text-gray-600">
           Row {{ e.row }}: <span class="font-medium">{{ e.email|default:"—" }}</span> — {{ e.reason }}
@@ -123,10 +123,10 @@
 
   <!-- Format guide -->
   <div class="bg-gray-50 rounded-xl border border-gray-200 p-5 mt-6">
-    <h3 class="text-sm font-semibold text-[#343534] mb-3">CSV format</h3>
+    <h3 class="text-sm font-semibold text-[#343534] dark:text-gray-100 mb-3">CSV format</h3>
     <p class="text-xs text-gray-500 mb-2">Required columns: <code class="bg-white px-1 py-0.5 rounded border border-gray-200 font-mono">email</code>, <code class="bg-white px-1 py-0.5 rounded border border-gray-200 font-mono">display_name</code></p>
     <p class="text-xs text-gray-500 mb-3">Optional columns: <code class="bg-white px-1 py-0.5 rounded border border-gray-200 font-mono">role</code> (student/teacher/admin), <code class="bg-white px-1 py-0.5 rounded border border-gray-200 font-mono">cohort</code>, <code class="bg-white px-1 py-0.5 rounded border border-gray-200 font-mono">group</code></p>
-    <pre class="text-xs font-mono bg-white border border-gray-200 rounded-lg p-3 text-gray-600 overflow-x-auto">email,display_name,role,cohort,group
+    <pre class="text-xs font-mono bg-white dark:bg-gray-900 border border-gray-200 rounded-lg dark:border-gray-700 p-3 text-gray-600 overflow-x-auto">email,display_name,role,cohort,group
 alice@example.com,Alice Smith,student,Cohort 2026,Group A
 bob@example.com,Bob Jones,student,Cohort 2026,Group B</pre>
   </div>

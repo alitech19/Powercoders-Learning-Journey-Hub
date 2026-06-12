@@ -8,7 +8,7 @@
   </a>
   <div class="flex items-start justify-between gap-4 flex-wrap">
     <div class="min-w-0">
-      <h1 class="text-2xl font-bold text-[#343534]">{{ container.title }}</h1>
+      <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100">{{ container.title }}</h1>
       {% if container.group %}
       <p class="text-gray-500 text-sm mt-0.5">{{ container.group.name }} · {{ container.group.cohort.name }}</p>
       {% endif %}
@@ -50,7 +50,7 @@
   <li class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3 group">
     <div class="flex-1 min-w-0">
       <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer"
-         class="text-sm font-semibold text-[#343534] hover:text-[#B23149] truncate block">
+         class="text-sm font-semibold text-[#343534] dark:text-gray-100 hover:text-[#B23149] truncate block">
         {{ item.title }}
       </a>
       <p class="text-xs text-gray-400 truncate mt-0.5">{{ item.url }}</p>

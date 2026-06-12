@@ -1,9 +1,9 @@
 <div class="space-y-3">
   {% for item in step_data %}
-  <div class="bg-white rounded-xl border p-5
-              {% if item.done %}border-green-200 bg-green-50/30
-              {% elif item.locked %}border-gray-100 opacity-60
-              {% else %}border-gray-200{% endif %}">
+  <div class="bg-white dark:bg-gray-900 rounded-xl border p-5
+              {% if item.done %}border-green-200 dark:border-green-900/60 bg-green-50/30 dark:bg-green-900/10
+              {% elif item.locked %}border-gray-100 dark:border-gray-800 opacity-60
+              {% else %}border-gray-200 dark:border-gray-700{% endif %}">
     <div class="flex items-start gap-4">
       <div class="flex-shrink-0 mt-0.5">
         {% if item.done %}

@@ -28,43 +28,43 @@
 </div>
 {% endif %}
 
-<div class="flex gap-1 mb-4 bg-white border border-gray-200 rounded-lg p-1 w-fit flex-wrap">
+<div class="flex gap-1 mb-4 bg-white dark:bg-gray-900 border border-gray-200 rounded-lg dark:border-gray-700 p-1 w-fit flex-wrap">
   <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}sort={{ sort_by }}{% if student_filter %}&student={{ student_filter }}{% endif %}"
      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
-            {% if not kind_filter %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
+            {% if not kind_filter %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534] dark:text-gray-100{% endif %}">
     All types
   </a>
   {% for section in kind_choices %}
   <a href="?kind={{ section.kind }}&sort={{ sort_by }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if student_filter %}&student={{ student_filter }}{% endif %}"
      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
-            {% if kind_filter == section.kind %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
+            {% if kind_filter == section.kind %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534] dark:text-gray-100{% endif %}">
     {{ section.label }}
   </a>
   {% endfor %}
 </div>
 
 <div class="flex flex-wrap items-center gap-3 mb-5">
-  <div class="flex gap-1 bg-white border border-gray-200 rounded-lg p-1 w-fit flex-wrap">
+  <div class="flex gap-1 bg-white dark:bg-gray-900 border border-gray-200 rounded-lg dark:border-gray-700 p-1 w-fit flex-wrap">
     <a href="?status=active&sort={{ sort_by }}{% if student_filter %}&student={{ student_filter }}{% endif %}{% if kind_filter %}&kind={{ kind_filter }}{% endif %}"
        class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
-              {% if status_filter == 'active' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
+              {% if status_filter == 'active' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534] dark:text-gray-100{% endif %}">
       Active
     </a>
     <a href="?status=finished&sort={{ sort_by }}{% if student_filter %}&student={{ student_filter }}{% endif %}{% if kind_filter %}&kind={{ kind_filter }}{% endif %}"
        class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
-              {% if status_filter == 'finished' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534]{% endif %}">
+              {% if status_filter == 'finished' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534] dark:text-gray-100{% endif %}">
       Finished
     </a>
   </div>
   <select onchange="location='?{% if status_filter %}status={{ status_filter }}&{% endif %}{% if student_filter %}student={{ student_filter }}&{% endif %}{% if kind_filter %}kind={{ kind_filter }}&{% endif %}sort='+this.value"
-          class="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600 focus:outline-none cursor-pointer">
+          class="bg-white dark:bg-gray-900 border border-gray-200 rounded-lg dark:border-gray-700 px-3 py-2 text-sm text-gray-600 focus:outline-none cursor-pointer">
     <option value="due" {% if sort_by == 'due' %}selected{% endif %}>Sort: Due Date</option>
     <option value="updated" {% if sort_by == 'updated' %}selected{% endif %}>Sort: Latest</option>
     <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>Sort: Priority</option>
   </select>
 </div>
 
-<div class="bg-white rounded-xl border border-gray-200">
+<div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
   {% if tasks_create_url %}
   {% include "includes/_list_card_header.html" with card_title="Tasks" create_url=tasks_create_url create_label="New Task" %}
   {% else %}

@@ -6,21 +6,21 @@
 <div class="max-w-lg mx-auto">
   <div class="mb-6">
     <a href="{% url 'accounts:cohort_list' %}" class="text-sm text-gray-400 hover:text-[#B23149] transition-colors">← Back to Cohorts</a>
-    <h1 class="text-2xl font-bold text-[#343534] mt-2">{{ title }}</h1>
+    <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100 mt-2">{{ title }}</h1>
     {% if cohort %}<p class="text-gray-500 text-sm mt-0.5">Cohort: {{ cohort.name }}</p>{% endif %}
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-6">
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
     <form method="post" novalidate>
       {% csrf_token %}
 
       <!-- Cohort -->
       <div class="mb-5">
-        <label for="{{ form.cohort.id_for_label }}" class="block text-sm font-medium text-[#343534] mb-1.5">
+        <label for="{{ form.cohort.id_for_label }}" class="block text-sm font-medium text-[#343534] dark:text-gray-100 mb-1.5">
           Cohort <span class="text-[#B23149]">*</span>
         </label>
         <select name="cohort" id="{{ form.cohort.id_for_label }}"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20 bg-white">
+                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20 bg-white">
           {% for val, label in form.cohort.field.choices %}
           <option value="{{ val }}" {% if form.cohort.value|stringformat:"s" == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
@@ -30,18 +30,18 @@
 
       <!-- Group name -->
       <div class="mb-5">
-        <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-[#343534] mb-1.5">
+        <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-[#343534] dark:text-gray-100 mb-1.5">
           Group name <span class="text-[#B23149]">*</span>
         </label>
         <input type="text" name="name" id="{{ form.name.id_for_label }}"
                value="{{ form.name.value|default_if_none:'' }}" required
-               class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20">
+               class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20">
         {% if form.name.errors %}<p class="mt-1 text-xs text-red-500">{{ form.name.errors|join:", " }}</p>{% endif %}
       </div>
 
       <!-- Teachers -->
       <div class="mb-5">
-        <label class="block text-sm font-medium text-[#343534] mb-2">Assigned teachers</label>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-100 mb-2">Assigned teachers</label>
         {% if form.teachers.field.queryset %}
         <div class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
           {% for teacher in form.teachers.field.queryset %}
@@ -49,7 +49,7 @@
             <input type="checkbox" name="teachers" value="{{ teacher.pk }}"
                    {% if teacher.pk in form.fields.teachers.initial %}checked{% endif %}
                    class="h-4 w-4 rounded border-gray-300 text-[#B23149] focus:ring-[#B23149]">
-            <span class="text-sm text-[#343534]">{{ teacher.display_name }}</span>
+            <span class="text-sm text-[#343534] dark:text-gray-100">{{ teacher.display_name }}</span>
             <span class="text-xs text-gray-400">{{ teacher.email }}</span>
           </label>
           {% endfor %}

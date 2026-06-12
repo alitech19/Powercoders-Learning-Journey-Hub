@@ -15,7 +15,7 @@
   </div>
 
   <!-- Header -->
-  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-4">
     <div class="flex items-start justify-between gap-4 mb-4">
       <div class="flex-1">
         <div class="flex flex-wrap items-center gap-2 mb-2">
@@ -44,7 +44,7 @@
           {% endif %}
           {% include "goals/_visibility_badge.html" %}
         </div>
-        <h1 class="text-xl font-bold text-[#343534]">{{ goal.title }}</h1>
+        <h1 class="text-xl font-bold text-[#343534] dark:text-gray-100">{{ goal.title }}</h1>
         {% if view_as == 'staff' %}
         <p class="text-xs text-gray-400 mt-0.5">{{ goal.enrolled_count }} student{{ goal.enrolled_count|pluralize }} enrolled</p>
         {% endif %}
@@ -74,7 +74,7 @@
     </div>
 
     {% if goal.description %}
-    <p class="text-sm text-gray-600 leading-relaxed mb-4 pb-4 border-b border-gray-100">{{ goal.description }}</p>
+    <p class="text-sm text-gray-600 leading-relaxed mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">{{ goal.description }}</p>
     {% endif %}
 
     {% if view_as == 'student' %}
@@ -90,7 +90,7 @@
   </p>
 
   {% if view_as == 'student' and show_feedback %}
-  <div class="bg-white rounded-xl border border-gray-200 p-6">
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
     {% include "feedback/_section.html" %}
   </div>
   {% endif %}

@@ -33,11 +33,11 @@
 
 {% if dev_login_name_legend %}
 <div class="mb-4 rounded-lg border border-[#EDE3D5] bg-white p-3">
-  <p class="text-xs font-semibold text-[#343534] mb-2">Name abbreviations</p>
+  <p class="text-xs font-semibold text-[#343534] dark:text-gray-100 mb-2">Name abbreviations</p>
   <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-gray-600">
     {% for item in dev_login_name_legend %}
     <div class="flex gap-2">
-      <dt class="font-mono font-semibold text-[#343534] shrink-0">{{ item.abbr }}</dt>
+      <dt class="font-mono font-semibold text-[#343534] dark:text-gray-100 shrink-0">{{ item.abbr }}</dt>
       <dd>{{ item.meaning }}</dd>
     </div>
     {% endfor %}
@@ -65,12 +65,12 @@
         <span class="inline-flex items-center justify-center h-7 min-w-7 px-2 rounded-md text-xs font-bold
           {% if section.slug == 'bootcamp-2026-i' %}bg-[#B23149] text-white{% else %}bg-[#343534] text-white{% endif %}
         ">{{ section.code }}</span>
-        <h3 class="font-semibold text-sm text-[#343534]">{{ section.name }}</h3>
+        <h3 class="font-semibold text-sm text-[#343534] dark:text-gray-100">{{ section.name }}</h3>
       </div>
       <p class="text-xs text-gray-500 mt-1">
         Groups:
         {% for group_name in section.group_names %}
-          <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-white/80 border border-[#EDE3D5] text-[#343534] font-medium ml-0.5">{{ group_name }}</span>
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-white/80 border border-[#EDE3D5] text-[#343534] dark:text-gray-100 font-medium ml-0.5">{{ group_name }}</span>
         {% endfor %}
       </p>
     </header>
@@ -78,7 +78,7 @@
     <div class="p-3 grid grid-cols-1 sm:grid-cols-2 {% if section.columns|length > 1 %}lg:grid-cols-3{% endif %} gap-3">
       {% for column in section.columns %}
       <div class="border border-[#EDE3D5] rounded-lg p-3 bg-white/90">
-        <p class="font-semibold text-sm text-[#343534] mb-0.5">{{ column.title }}</p>
+        <p class="font-semibold text-sm text-[#343534] dark:text-gray-100 mb-0.5">{{ column.title }}</p>
         <p class="text-[10px] uppercase tracking-wide text-gray-400 mb-2">{{ section.code }} · {{ column.title }}</p>
         <div class="flex flex-col gap-1.5">
           {% if column.teacher %}

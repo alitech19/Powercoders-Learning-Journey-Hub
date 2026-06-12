@@ -1,7 +1,7 @@
 <div class="space-y-2">
   <div class="flex flex-wrap items-center gap-2">
     {% if entry.mood_emoji %}<span class="text-lg">{{ entry.mood_emoji }}</span>{% endif %}
-    <h3 class="font-semibold text-[#343534]">{{ entry.title }}</h3>
+    <h3 class="font-semibold text-[#343534] dark:text-gray-100">{{ entry.title }}</h3>
   </div>
   <p class="text-xs text-gray-500">{{ entry.entry_date|date:"l, d F Y" }} · {{ entry.word_count }} words</p>
   {% if entry.get_tags_list %}

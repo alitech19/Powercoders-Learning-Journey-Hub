@@ -23,12 +23,12 @@
 </td>
 
 <td class="px-4 py-4 whitespace-nowrap">
-  <p class="text-sm text-[#343534] font-medium">{{ s.habits_active }} active</p>
+  <p class="text-sm text-[#343534] dark:text-gray-100 font-medium">{{ s.habits_active }} active</p>
   <p class="text-xs text-gray-400">{{ s.habit_logs_week }} log{{ s.habit_logs_week|pluralize }} (wk)</p>
 </td>
 
 <td class="px-4 py-4 whitespace-nowrap">
-  <p class="text-sm text-[#343534] font-medium">
+  <p class="text-sm text-[#343534] dark:text-gray-100 font-medium">
     {{ s.reflection_total }}
     {% if row.missing_reflection %}
     <span class="text-amber-600" title="Missing weekly reflection">⚠</span>
@@ -42,7 +42,7 @@
 </td>
 
 <td class="px-4 py-4 whitespace-nowrap">
-  <p class="text-sm text-[#343534] font-medium">{{ s.journal_total }}</p>
+  <p class="text-sm text-[#343534] dark:text-gray-100 font-medium">{{ s.journal_total }}</p>
   {% if row.streak > 0 %}
   <p class="text-xs text-amber-600 font-medium">🔥 {{ row.streak }}d</p>
   {% elif s.last_journal %}
@@ -53,12 +53,12 @@
 </td>
 
 <td class="px-4 py-4 whitespace-nowrap">
-  <p class="text-sm text-[#343534] font-medium">{{ s.group_posts_week }}</p>
+  <p class="text-sm text-[#343534] dark:text-gray-100 font-medium">{{ s.group_posts_week }}</p>
   <p class="text-xs text-gray-400">posts (7d)</p>
 </td>
 
 <td class="px-4 py-4 whitespace-nowrap">
-  <p class="text-sm text-[#343534] font-medium">{{ s.resources_count }}</p>
+  <p class="text-sm text-[#343534] dark:text-gray-100 font-medium">{{ s.resources_count }}</p>
   <p class="text-xs text-gray-400">links</p>
 </td>
 

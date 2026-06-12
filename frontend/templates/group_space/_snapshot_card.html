@@ -15,7 +15,7 @@ Supports: journal, habit, goal, task.
       {{ meta.kind_label }}
     </span>
     {% if meta.mood_emoji %}<span class="text-base leading-none">{{ meta.mood_emoji }}</span>{% endif %}
-    <h4 class="font-semibold text-[#343534] leading-snug min-w-0">{{ meta.title }}</h4>
+    <h4 class="font-semibold text-[#343534] dark:text-gray-100 leading-snug min-w-0">{{ meta.title }}</h4>
   </div>
 
   {% if meta.kind == 'journal' %}
@@ -94,7 +94,7 @@ Supports: journal, habit, goal, task.
     <div>
       <div class="flex justify-between text-xs text-gray-500 mb-1">
         <span>{{ meta.milestones_done }}/{{ meta.milestones_total }} milestones</span>
-        <span class="font-semibold text-[#343534]">{{ meta.progress }}%</span>
+        <span class="font-semibold text-[#343534] dark:text-gray-100">{{ meta.progress }}%</span>
       </div>
       <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden mb-2">
         <div class="h-full bg-[#B23149] rounded-full" style="width: {{ meta.progress }}%"></div>

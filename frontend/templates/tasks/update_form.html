@@ -8,7 +8,7 @@
     {% include "includes/_page_title.html" with title="Add update" title_size="xl" %}
   </div>
   <p class="text-sm text-gray-500 mb-6">{{ task.title }}</p>
-  <form method="post" class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+  <form method="post" class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-4">
     {% csrf_token %}
     <div>
       <label class="block text-xs font-medium text-gray-500 mb-1">Update type</label>

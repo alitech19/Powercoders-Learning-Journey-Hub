@@ -14,7 +14,7 @@
     </a>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
     <div class="flex items-center gap-4">
       {% if student.avatar %}
       <img src="{{ student.avatar.url }}" alt="" class="h-16 w-16 rounded-full object-cover flex-shrink-0">
@@ -24,7 +24,7 @@
       </div>
       {% endif %}
       <div>
-        <h1 class="text-xl font-bold text-[#343534]">{{ student.display_name }}</h1>
+        <h1 class="text-xl font-bold text-[#343534] dark:text-gray-100">{{ student.display_name }}</h1>
         <p class="text-sm text-gray-400">{{ student.email }}</p>
         {% if student.group %}
         <p class="text-xs text-gray-400 mt-0.5">{{ student.group.name }}{% if student.cohort %} · {{ student.cohort.name }}{% endif %}</p>
@@ -48,9 +48,9 @@
       <div class="space-y-3">
         {% for enrollment in workflow_enrollments %}
         <a href="{% url 'workflows:detail' enrollment.workflow.pk %}"
-           class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-[#B23149]/30">
+           class="block bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#B23149]/30">
           <div class="flex justify-between gap-2">
-            <span class="font-semibold text-sm text-[#343534]">{{ enrollment.workflow.title }}</span>
+            <span class="font-semibold text-sm text-[#343534] dark:text-gray-100">{{ enrollment.workflow.title }}</span>
             <span class="text-xs font-semibold text-[#B23149]">{{ enrollment.progress_pct }}%</span>
           </div>
           <p class="text-xs text-gray-400 mt-1">{{ enrollment.workflow.get_assignee_label }}</p>
@@ -58,7 +58,7 @@
         {% endfor %}
       </div>
       {% else %}
-      <p class="text-center py-12 text-gray-400 text-sm bg-white rounded-xl border border-gray-200">No workflow enrollments.</p>
+      <p class="text-center py-12 text-gray-400 text-sm bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">No workflow enrollments.</p>
       {% endif %}
     </div>
 
@@ -66,7 +66,7 @@
       {% if goal_enrollments %}
       <div class="space-y-3">
         {% for enrollment in goal_enrollments %}
-        <a href="{% url 'goals:detail' enrollment.goal.pk %}" class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-[#B23149]/30">
+        <a href="{% url 'goals:detail' enrollment.goal.pk %}" class="block bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#B23149]/30">
           <div class="flex justify-between gap-2">
             <span class="font-semibold text-sm">{{ enrollment.goal.title }}</span>
             <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100">{{ enrollment.get_status_display }}</span>
@@ -75,7 +75,7 @@
         {% endfor %}
       </div>
       {% else %}
-      <p class="text-center py-12 text-gray-400 text-sm bg-white rounded-xl border border-gray-200">No shared goals.</p>
+      <p class="text-center py-12 text-gray-400 text-sm bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">No shared goals.</p>
       {% endif %}
     </div>
 
@@ -83,7 +83,7 @@
       {% if task_enrollments %}
       <div class="space-y-3">
         {% for enrollment in task_enrollments %}
-        <a href="{% url 'tasks:task_detail' enrollment.task.pk %}" class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-[#B23149]/30">
+        <a href="{% url 'tasks:task_detail' enrollment.task.pk %}" class="block bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#B23149]/30">
           <div class="flex justify-between gap-2">
             <span class="font-semibold text-sm">{{ enrollment.task.title }}</span>
             <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100">{{ enrollment.get_status_display }}</span>
@@ -92,7 +92,7 @@
         {% endfor %}
       </div>
       {% else %}
-      <p class="text-center py-12 text-gray-400 text-sm bg-white rounded-xl border border-gray-200">No task enrollments.</p>
+      <p class="text-center py-12 text-gray-400 text-sm bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">No task enrollments.</p>
       {% endif %}
     </div>
 
@@ -100,14 +100,14 @@
       {% if reflections %}
       <div class="space-y-3">
         {% for r in reflections %}
-        <a href="{% url 'reflections:detail' r.pk %}" class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-[#B23149]/30">
+        <a href="{% url 'reflections:detail' r.pk %}" class="block bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#B23149]/30">
           <p class="font-semibold text-sm">{{ r.title }}</p>
           <p class="text-xs text-gray-400 mt-1">{% if r.final_reflection_at %}{{ r.final_reflection_at|date:"d M Y" }}{% else %}{{ r.created_at|date:"d M Y" }}{% endif %}</p>
         </a>
         {% endfor %}
       </div>
       {% else %}
-      <p class="text-center py-12 text-gray-400 text-sm bg-white rounded-xl border border-gray-200">No shared reflections.</p>
+      <p class="text-center py-12 text-gray-400 text-sm bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">No shared reflections.</p>
       {% endif %}
     </div>
 
@@ -115,14 +115,14 @@
       {% if journal_entries %}
       <div class="space-y-3">
         {% for entry in journal_entries %}
-        <a href="{% url 'journal:detail' entry.pk %}" class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-[#B23149]/30">
+        <a href="{% url 'journal:detail' entry.pk %}" class="block bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#B23149]/30">
           <p class="font-semibold text-sm">{{ entry.title }}</p>
           <p class="text-xs text-gray-400">{{ entry.entry_date|date:"d M Y" }} · {{ entry.word_count }} words</p>
         </a>
         {% endfor %}
       </div>
       {% else %}
-      <p class="text-center py-12 text-gray-400 text-sm bg-white rounded-xl border border-gray-200">No shared journal entries.</p>
+      <p class="text-center py-12 text-gray-400 text-sm bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">No shared journal entries.</p>
       {% endif %}
     </div>
 
@@ -130,14 +130,14 @@
       {% if habits %}
       <div class="space-y-3">
         {% for habit in habits %}
-        <a href="{% url 'habits:detail' habit.pk %}" class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-[#B23149]/30">
+        <a href="{% url 'habits:detail' habit.pk %}" class="block bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#B23149]/30">
           <p class="font-semibold text-sm">{{ habit.title }}</p>
           <p class="text-xs text-gray-400">{{ habit.get_status_display }}</p>
         </a>
         {% endfor %}
       </div>
       {% else %}
-      <p class="text-center py-12 text-gray-400 text-sm bg-white rounded-xl border border-gray-200">No shared habits.</p>
+      <p class="text-center py-12 text-gray-400 text-sm bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">No shared habits.</p>
       {% endif %}
     </div>
   </div>

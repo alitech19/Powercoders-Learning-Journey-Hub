@@ -13,7 +13,7 @@
     {% endif %}
   </div>
   <p class="text-sm text-gray-500 mb-6">
-    Task: <span class="font-medium text-[#343534]">{{ task.title }}</span>
+    Task: <span class="font-medium text-[#343534] dark:text-gray-100">{{ task.title }}</span>
     {% if is_template %}
     <span class="block text-xs text-gray-400 mt-1">Template subtask — shared with all enrolled students (mini-task, not a milestone).</span>
     {% else %}
@@ -21,7 +21,7 @@
     {% endif %}
   </p>
 
-  <form method="post" class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+  <form method="post" class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-4">
     {% csrf_token %}
     <div>
       <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Title <span class="text-[#B23149]">*</span></label>

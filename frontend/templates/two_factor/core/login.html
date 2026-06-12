@@ -17,28 +17,28 @@
 
     <div class="text-center mb-8">
       <div class="font-black text-3xl tracking-tight leading-none mb-2">
-        <span class="text-[#B23149]">{</span><span class="text-[#343534]">POWER</span><span class="text-[#B23149]">.</span><span class="text-[#343534]">CODERS</span><span class="text-[#B23149]">}</span>
+        <span class="text-[#B23149]">{</span><span class="text-[#343534] dark:text-gray-100">POWER</span><span class="text-[#B23149]">.</span><span class="text-[#343534] dark:text-gray-100">CODERS</span><span class="text-[#B23149]">}</span>
       </div>
-      <p class="text-[#343534]/50 text-sm font-medium">Learning Journey Hub</p>
+      <p class="text-[#343534] dark:text-gray-100/50 text-sm font-medium">Learning Journey Hub</p>
     </div>
 
-    <div class="max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-[#EDE3D5] p-8">
+    <div class="max-w-md mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-[#EDE3D5] dark:border-gray-700 p-8">
 
       {% if wizard.steps.current == 'auth' %}
-      <h1 class="text-2xl font-bold text-[#343534] mb-1">Welcome back</h1>
+      <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100 mb-1">Welcome back</h1>
       <p class="text-gray-500 text-sm mb-6">Sign in with email and password (production-like flow)</p>
 
       {% elif wizard.steps.current == 'token' %}
       <div class="flex items-center gap-3 mb-5">
         <div class="flex-shrink-0">{% volumetric_icon "lock" size="sm" variant="brand" %}</div>
         <div>
-          <h1 class="text-xl font-bold text-[#343534]">Two-Factor Authentication</h1>
+          <h1 class="text-xl font-bold text-[#343534] dark:text-gray-100">Two-Factor Authentication</h1>
           <p class="text-gray-500 text-sm">Enter the code from your authenticator app</p>
         </div>
       </div>
 
       {% elif wizard.steps.current == 'backup' %}
-      <h1 class="text-xl font-bold text-[#343534] mb-1">Use Backup Token</h1>
+      <h1 class="text-xl font-bold text-[#343534] dark:text-gray-100 mb-1">Use Backup Token</h1>
       <p class="text-gray-500 text-sm mb-6">Enter one of your saved backup tokens</p>
       {% endif %}
 
@@ -63,7 +63,7 @@
         {% if wizard.steps.current == 'auth' %}
           {% for field in wizard.form %}
           <div>
-            <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-[#343534] mb-1.5">{{ field.label }}</label>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1.5">{{ field.label }}</label>
             {{ field }}
             {% if field.errors %}
             <p class="text-red-600 text-xs mt-1">{{ field.errors.0 }}</p>
@@ -73,7 +73,7 @@
 
         {% elif wizard.steps.current == 'token' %}
           <div>
-            <label class="block text-sm font-semibold text-[#343534] mb-1.5">Authenticator code</label>
+            <label class="block text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1.5">Authenticator code</label>
             {{ form.otp_token }}
             <p class="text-xs text-gray-400 mt-1.5">6-digit code from your authenticator app</p>
           </div>
@@ -85,7 +85,7 @@
 
         {% elif wizard.steps.current == 'backup' %}
           <div>
-            <label class="block text-sm font-semibold text-[#343534] mb-1.5">Backup token</label>
+            <label class="block text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1.5">Backup token</label>
             {{ form.otp_token }}
           </div>
         {% endif %}
@@ -103,7 +103,7 @@
 
     {% if dev_seed_enabled %}
     <section class="mt-8 p-5 border-2 border-dashed border-[#B23149] rounded-xl bg-white/80">
-      <p class="font-semibold text-[#343534] mb-2">Development quick login — testers only</p>
+      <p class="font-semibold text-[#343534] dark:text-gray-100 mb-2">Development quick login — testers only</p>
       <p class="text-sm text-gray-600 mb-2">
         Buttons below sign you in <strong>directly</strong> and skip 2FA, privacy policy, and other onboarding checks.
         Seed users are pre-configured in the database for that purpose.
@@ -118,7 +118,7 @@
     </section>
     {% endif %}
 
-    <p class="text-center text-xs text-[#343534]/40 mt-8">© 2026 Powercoders</p>
+    <p class="text-center text-xs text-[#343534] dark:text-gray-100/40 mt-8">© 2026 Powercoders</p>
   </div>
 </body>
 </html>
