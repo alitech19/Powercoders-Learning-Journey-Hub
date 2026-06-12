@@ -27,7 +27,7 @@
              maxlength="{{ limits.title }}"
              class="w-full text-lg font-semibold text-[#343534] dark:text-gray-100 placeholder-gray-300 border-0 outline-none bg-transparent">
       {% if form.title.errors %}
-      <p class="text-red-600 text-xs mt-1">{{ form.title.errors.0 }}</p>
+      <p class="text-red-600 dark:text-red-400 text-xs mt-1">{{ form.title.errors.0 }}</p>
       {% endif %}
     </div>
 
@@ -46,7 +46,7 @@
                min="1" max="7" required
                class="w-full text-sm text-[#343534] dark:text-gray-100 border-0 outline-none bg-transparent">
         {% if form.target_days_per_week.errors %}
-        <p class="text-red-600 text-xs mt-1">{{ form.target_days_per_week.errors.0 }}</p>
+        <p class="text-red-600 dark:text-red-400 text-xs mt-1">{{ form.target_days_per_week.errors.0 }}</p>
         {% endif %}
       </div>
       <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
@@ -57,7 +57,7 @@
                placeholder="e.g. 30"
                class="w-full text-sm text-[#343534] dark:text-gray-100 placeholder-gray-300 border-0 outline-none bg-transparent">
         {% if form.target_minutes.errors %}
-        <p class="text-red-600 text-xs mt-1">{{ form.target_minutes.errors.0 }}</p>
+        <p class="text-red-600 dark:text-red-400 text-xs mt-1">{{ form.target_minutes.errors.0 }}</p>
         {% endif %}
       </div>
     </div>
@@ -66,12 +66,12 @@
       <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Visibility</label>
       <div class="flex gap-3">
         <button type="button" @click="visibility = 'private'"
-                :class="visibility === 'private' ? 'border-[#343534] bg-[#343534] text-white' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
+                :class="visibility === 'private' ? 'border-[#343534] bg-[#343534] text-white' : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600'"
                 class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors cursor-pointer">
           Only me
         </button>
         <button type="button" @click="visibility = 'shared'"
-                :class="visibility === 'shared' ? 'border-[#B23149] bg-[#B23149]/5 text-[#B23149]' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
+                :class="visibility === 'shared' ? 'border-[#B23149] bg-[#B23149]/5 text-[#B23149]' : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600'"
                 class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors cursor-pointer">
           Share with teacher
         </button>
@@ -84,7 +84,7 @@
         {% if action == 'edit' %}Save Changes{% else %}Create Habit{% endif %}
       </button>
       <a href="{% if action == 'edit' %}{% url 'habits:detail' habit.pk %}{% else %}{% url 'habits:list' %}{% endif %}"
-         class="px-5 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+         class="px-5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
         Cancel
       </a>
     </div>

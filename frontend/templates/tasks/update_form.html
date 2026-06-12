@@ -12,7 +12,7 @@
     {% csrf_token %}
     <div>
       <label class="block text-xs font-medium text-gray-500 mb-1">Update type</label>
-      <select name="update_type" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149]">
+      <select name="update_type" class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149]">
         {% for val, label in form.fields.update_type.choices %}
         <option value="{{ val }}" {% if form.update_type.value|default:'note' == val %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
@@ -21,7 +21,7 @@
     <div>
       <label class="block text-xs font-medium text-gray-500 mb-1">Update <span class="text-red-500">*</span></label>
       <textarea name="text" rows="5" required placeholder="What changed? Any blockers?" maxlength="{{ limits.body }}"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149] resize-y">{{ form.text.value|default:'' }}</textarea>
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149] resize-y">{{ form.text.value|default:'' }}</textarea>
       {% if form.text.errors %}
       <p class="text-xs text-red-500 mt-1">{{ form.text.errors|join:", " }}</p>
       {% endif %}

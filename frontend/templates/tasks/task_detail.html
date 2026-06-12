@@ -14,18 +14,18 @@
       <div class="flex-1">
         <div class="flex flex-wrap items-center gap-2 mb-2">
           <span class="text-xs font-semibold px-2 py-0.5 rounded-full
-            {% if task.priority == 'high' %}bg-orange-100 text-orange-700
-            {% elif task.priority == 'low' %}bg-gray-100 text-gray-500
-            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+            {% if task.priority == 'high' %}bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300
+            {% elif task.priority == 'low' %}bg-gray-100 dark:bg-gray-700 text-gray-500
+            {% else %}bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300{% endif %}">
             {{ task.get_priority_display }}
           </span>
           {% include "tasks/_visibility_badge.html" %}
           {% if task.is_group_shared %}
-          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">Group task</span>
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400">Group task</span>
           {% elif task.assignee_cohort_id %}
-          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-50 text-purple-600">Cohort · {{ task.assignee_cohort.name }}</span>
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400">Cohort · {{ task.assignee_cohort.name }}</span>
           {% elif task.author_id %}
-          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">Personal</span>
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">Personal</span>
           {% endif %}
           {% if task.due_date %}
           <span class="text-xs font-medium {% if display_status != 'done' and task.due_date < today %}text-red-500{% else %}text-gray-400{% endif %}">
@@ -45,17 +45,17 @@
       <div class="flex gap-2 flex-shrink-0">
         {% if can_edit %}
         <a href="{% url 'tasks:task_edit' task.pk %}"
-           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
+           class="text-xs px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-400 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
         {% endif %}
         {% if can_delete %}
         <a href="{% url 'tasks:task_delete' task.pk %}"
-           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-400 hover:text-red-500">Delete</a>
+           class="text-xs px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 hover:text-red-500">Delete</a>
         {% endif %}
       </div>
     </div>
 
     {% if can_view_content and task.description %}
-    <p class="text-sm text-gray-600 leading-relaxed mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">{{ task.description|linebreaksbr }}</p>
+    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">{{ task.description|linebreaksbr }}</p>
     {% endif %}
 
     {% if view_as == 'student' or task.is_group_shared %}
@@ -84,13 +84,13 @@
       {% for update in updates %}
       <div class="flex gap-3">
         <span class="text-xs font-semibold px-2 py-0.5 rounded-full h-fit
-          {% if update.update_type == 'blocker' %}bg-red-100 text-red-700
-          {% elif update.update_type == 'progress' %}bg-green-100 text-green-700
-          {% else %}bg-gray-100 text-gray-600{% endif %}">
+          {% if update.update_type == 'blocker' %}bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300
+          {% elif update.update_type == 'progress' %}bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300
+          {% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400{% endif %}">
           {{ update.get_update_type_display }}
         </span>
         <div>
-          <p class="text-sm text-gray-700">{{ update.text }}</p>
+          <p class="text-sm text-gray-700 dark:text-gray-300">{{ update.text }}</p>
           <p class="text-xs text-gray-400 mt-0.5">{{ update.author.display_name }} · {{ update.created_at|date:"d M Y" }}</p>
         </div>
       </div>

@@ -16,7 +16,7 @@
   </div>
   <div class="space-y-3">
     {% for item in template_subtasks %}
-    <div class="border border-gray-100 rounded-lg p-3">
+    <div class="border border-gray-100 dark:border-gray-800 rounded-lg p-3">
       <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
         <div class="min-w-0 flex-1">
           <p class="text-sm font-medium text-[#343534] dark:text-gray-100">{{ item.subtask.title }}</p>
@@ -25,9 +25,9 @@
           {% endif %}
           <div class="flex flex-wrap items-center gap-2 mt-1">
             <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full
-              {% if item.subtask.priority == 'high' %}bg-orange-100 text-orange-700
-              {% elif item.subtask.priority == 'low' %}bg-gray-100 text-gray-600
-              {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+              {% if item.subtask.priority == 'high' %}bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300
+              {% elif item.subtask.priority == 'low' %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400
+              {% else %}bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300{% endif %}">
               {{ item.subtask.get_priority_display }}
             </span>
             {% if item.subtask.due_date %}
@@ -39,11 +39,11 @@
         <div class="flex gap-2 flex-shrink-0">
           {% if item.can_edit %}
           <a href="{% url 'tasks:subtask_edit' item.subtask.pk %}"
-             class="text-xs px-2 py-1 border border-gray-200 rounded-lg text-gray-600 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
+             class="text-xs px-2 py-1 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-400 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
           {% endif %}
           {% if item.can_delete %}
           <a href="{% url 'tasks:subtask_delete' item.subtask.pk %}"
-             class="text-xs px-2 py-1 border border-gray-200 rounded-lg text-gray-400 hover:text-red-500">Delete</a>
+             class="text-xs px-2 py-1 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 hover:text-red-500">Delete</a>
           {% endif %}
         </div>
         {% endif %}
@@ -52,7 +52,7 @@
     </div>
     {% endfor %}
     {% for item in participant_subtasks %}
-    <div class="border border-gray-100 rounded-lg p-3 bg-gray-50/50">
+    <div class="border border-gray-100 dark:border-gray-800 rounded-lg p-3 bg-gray-50/50 dark:bg-gray-800">
       <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
         <div class="min-w-0 flex-1">
           <p class="text-sm font-medium text-[#343534] dark:text-gray-100">{{ item.subtask.title }}</p>
@@ -65,11 +65,11 @@
         <div class="flex gap-2 flex-shrink-0">
           {% if item.can_edit %}
           <a href="{% url 'tasks:subtask_edit' item.subtask.pk %}"
-             class="text-xs px-2 py-1 border border-gray-200 rounded-lg text-gray-600 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
+             class="text-xs px-2 py-1 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-400 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
           {% endif %}
           {% if item.can_delete %}
           <a href="{% url 'tasks:subtask_delete' item.subtask.pk %}"
-             class="text-xs px-2 py-1 border border-gray-200 rounded-lg text-gray-400 hover:text-red-500">Delete</a>
+             class="text-xs px-2 py-1 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 hover:text-red-500">Delete</a>
           {% endif %}
         </div>
         {% endif %}

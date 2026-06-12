@@ -34,7 +34,7 @@
   </div>
 
   <div x-data="{ tab: '{{ tab }}' }">
-    <div class="flex flex-wrap gap-1 bg-white border border-gray-200 rounded-xl p-1 mb-6">
+    <div class="flex flex-wrap gap-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-1 mb-6">
       <button @click="tab = 'workflows'" :class="tab === 'workflows' ? 'bg-[#343534] text-white' : 'text-gray-500'" class="px-3 py-2 rounded-lg text-sm font-medium">Workflows ({{ workflow_enrollments|length }})</button>
       <button @click="tab = 'goals'" :class="tab === 'goals' ? 'bg-[#343534] text-white' : 'text-gray-500'" class="px-3 py-2 rounded-lg text-sm font-medium">Goals ({{ goal_enrollments|length }})</button>
       <button @click="tab = 'tasks'" :class="tab === 'tasks' ? 'bg-[#343534] text-white' : 'text-gray-500'" class="px-3 py-2 rounded-lg text-sm font-medium">Tasks ({{ task_enrollments|length }})</button>
@@ -69,7 +69,7 @@
         <a href="{% url 'goals:detail' enrollment.goal.pk %}" class="block bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#B23149]/30">
           <div class="flex justify-between gap-2">
             <span class="font-semibold text-sm">{{ enrollment.goal.title }}</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100">{{ enrollment.get_status_display }}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700">{{ enrollment.get_status_display }}</span>
           </div>
         </a>
         {% endfor %}
@@ -86,7 +86,7 @@
         <a href="{% url 'tasks:task_detail' enrollment.task.pk %}" class="block bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-[#B23149]/30">
           <div class="flex justify-between gap-2">
             <span class="font-semibold text-sm">{{ enrollment.task.title }}</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100">{{ enrollment.get_status_display }}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700">{{ enrollment.get_status_display }}</span>
           </div>
         </a>
         {% endfor %}

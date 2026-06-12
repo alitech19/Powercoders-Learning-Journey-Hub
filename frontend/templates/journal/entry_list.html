@@ -27,13 +27,13 @@
 <div class="flex gap-2 flex-wrap mb-4">
   <a href="{% url 'journal:list' %}{% if tag_filter %}?tag={{ tag_filter|urlencode }}{% endif %}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if not student_filter %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
+            {% if not student_filter %}bg-[#343534] text-white{% else %}bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-[#B23149]{% endif %}">
     All Students
   </a>
   {% for s in students %}
   <a href="?student={{ s.pk }}{% if tag_filter %}&tag={{ tag_filter|urlencode }}{% endif %}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if student_filter == s.pk|stringformat:'s' %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
+            {% if student_filter == s.pk|stringformat:'s' %}bg-[#343534] text-white{% else %}bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-[#B23149]{% endif %}">
     {{ s.display_name }}
   </a>
   {% endfor %}
@@ -54,7 +54,7 @@
   <a href="{% url 'journal:detail' entry.pk %}"
      class="block bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#B23149]/30 hover:shadow-sm transition-all overflow-hidden">
     {% if view_as != 'student' %}
-    <div class="flex items-center justify-between gap-3 px-5 py-2.5 bg-gray-50 border-b border-gray-100 dark:border-gray-800">
+    <div class="flex items-center justify-between gap-3 px-5 py-2.5 bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800">
       <div class="flex items-center gap-2.5 min-w-0">
         <span class="flex-shrink-0 w-7 h-7 rounded-full bg-[#343534] text-white flex items-center justify-center text-xs font-bold uppercase">
           {{ entry.author.display_name|slice:":1" }}

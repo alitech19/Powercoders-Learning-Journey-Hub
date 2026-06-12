@@ -17,13 +17,13 @@
 <div class="flex gap-2 flex-wrap mb-4">
   <a href="{% url 'habits:list' %}?status={{ status_filter }}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if not student_filter %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
+            {% if not student_filter %}bg-[#343534] text-white{% else %}bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-[#B23149]{% endif %}">
     All Students
   </a>
   {% for s in students %}
   <a href="?status={{ status_filter }}&student={{ s.pk }}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if student_filter == s.pk|stringformat:'s' %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
+            {% if student_filter == s.pk|stringformat:'s' %}bg-[#343534] text-white{% else %}bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-[#B23149]{% endif %}">
     {{ s.display_name }}
   </a>
   {% endfor %}
@@ -31,7 +31,7 @@
 {% endif %}
 {% endif %}
 
-<div class="flex gap-1 mb-4 bg-white dark:bg-gray-900 border border-gray-200 rounded-lg dark:border-gray-700 p-1 w-fit flex-wrap">
+<div class="flex gap-1 mb-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-1 w-fit flex-wrap">
   <a href="?status=active{% if student_filter %}&student={{ student_filter }}{% endif %}"
      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
             {% if status_filter == 'active' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534] dark:text-gray-100{% endif %}">
@@ -62,7 +62,7 @@
     {% url 'habits:detail' row.habit.pk as habit_detail_url %}
     {% include "includes/_list_card_overlay_link.html" with detail_url=habit_detail_url aria_label=row.habit.title %}
     {% if view_as != 'student' %}
-    <div class="relative flex items-center justify-between gap-3 px-5 py-2.5 bg-gray-50 border-b border-gray-100 dark:border-gray-800 pointer-events-none">
+    <div class="relative flex items-center justify-between gap-3 px-5 py-2.5 bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800 pointer-events-none">
       <div class="flex items-center gap-2.5 min-w-0">
         <span class="flex-shrink-0 w-7 h-7 rounded-full bg-[#343534] text-white flex items-center justify-center text-xs font-bold uppercase">
           {{ row.habit.author.display_name|slice:":1" }}
@@ -83,7 +83,7 @@
             {% include "habits/_visibility_badge.html" with habit=row.habit %}
             {% endif %}
             {% if row.on_track %}
-            <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700">On track</span>
+            <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300">On track</span>
             {% endif %}
           </div>
           {% if row.habit.description %}
@@ -129,7 +129,7 @@
     {% url 'habits:detail' row.habit.pk as habit_detail_url %}
     {% include "includes/_list_card_overlay_link.html" with detail_url=habit_detail_url aria_label=row.habit.title %}
     {% if view_as != 'student' %}
-    <div class="relative flex items-center gap-2.5 px-5 py-2.5 bg-gray-50 border-b border-gray-100 dark:border-gray-800 pointer-events-none">
+    <div class="relative flex items-center gap-2.5 px-5 py-2.5 bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800 pointer-events-none">
       <span class="flex-shrink-0 w-7 h-7 rounded-full bg-[#343534] text-white flex items-center justify-center text-xs font-bold uppercase">
         {{ row.habit.author.display_name|slice:":1" }}
       </span>
@@ -143,7 +143,7 @@
       <div class="min-w-0">
         <div class="flex items-center gap-2 flex-wrap mb-2">
           <h3 class="font-semibold text-[#343534] dark:text-gray-100">{{ row.habit.title }}</h3>
-          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Completed</span>
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500">Completed</span>
           {% if view_as == 'student' %}
           {% include "habits/_visibility_badge.html" with habit=row.habit %}
           {% endif %}
@@ -151,7 +151,7 @@
         {% if row.habit.description %}
         <p class="text-sm text-gray-500 mb-2 line-clamp-2">{{ row.habit.description }}</p>
         {% endif %}
-        <p class="text-sm text-gray-600 leading-relaxed">
+        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
           <span class="font-semibold text-[#343534] dark:text-gray-100">{{ row.habit.target_days_per_week }}</span>
           day{{ row.habit.target_days_per_week|pluralize }} per week
           {% if row.habit.target_minutes %}

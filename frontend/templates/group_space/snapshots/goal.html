@@ -1,12 +1,12 @@
 <div class="space-y-3">
   <div>
     <div class="flex flex-wrap gap-2 mb-1">
-      <span class="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">{{ goal.get_category_display }}</span>
+      <span class="text-xs px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">{{ goal.get_category_display }}</span>
       {% if enrollment %}
-      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">{{ enrollment.get_status_display }}</span>
+      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">{{ enrollment.get_status_display }}</span>
       {% endif %}
       {% if enrollment and enrollment.is_overdue %}
-      <span class="text-xs text-amber-600">⚠ Overdue</span>
+      <span class="text-xs text-amber-600 dark:text-amber-400">⚠ Overdue</span>
       {% endif %}
     </div>
     <h3 class="font-semibold text-[#343534] dark:text-gray-100">{{ goal.title }}</h3>
@@ -14,7 +14,7 @@
     <p class="text-xs text-gray-500 mt-1">🗓 Target: {{ goal.target_date|date:"d F Y" }}</p>
     {% endif %}
     {% if goal.description %}
-    <p class="text-sm text-gray-600 mt-2 leading-relaxed">{{ goal.description }}</p>
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">{{ goal.description }}</p>
     {% endif %}
   </div>
 
@@ -31,10 +31,10 @@
       {% for item in milestones %}
       <li class="flex items-center gap-2 text-sm">
         <span class="h-4 w-4 rounded-full border-2 flex items-center justify-center text-[10px] shrink-0
-          {% if item.completed %}border-green-500 bg-green-500 text-white{% else %}border-gray-300{% endif %}">
+          {% if item.completed %}border-green-500 bg-green-500 text-white{% else %}border-gray-300 dark:border-gray-600{% endif %}">
           {% if item.completed %}✓{% endif %}
         </span>
-        <span class="{% if item.completed %}line-through text-gray-400{% else %}text-gray-700{% endif %}">{{ item.title }}</span>
+        <span class="{% if item.completed %}line-through text-gray-400{% else %}text-gray-700 dark:text-gray-300{% endif %}">{{ item.title }}</span>
       </li>
       {% endfor %}
     </ul>

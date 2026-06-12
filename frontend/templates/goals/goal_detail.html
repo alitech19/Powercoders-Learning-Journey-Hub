@@ -20,27 +20,27 @@
       <div class="flex-1">
         <div class="flex flex-wrap items-center gap-2 mb-2">
           <span class="text-xs font-semibold px-2 py-0.5 rounded-full
-            {% if goal.category == 'technical' %}bg-purple-100 text-purple-700
-            {% elif goal.category == 'soft_skill' %}bg-yellow-100 text-yellow-700
-            {% elif goal.category == 'project' %}bg-blue-100 text-blue-700
-            {% elif goal.category == 'career' %}bg-orange-100 text-orange-700
-            {% else %}bg-gray-100 text-gray-600{% endif %}">
+            {% if goal.category == 'technical' %}bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300
+            {% elif goal.category == 'soft_skill' %}bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300
+            {% elif goal.category == 'project' %}bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300
+            {% elif goal.category == 'career' %}bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300
+            {% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400{% endif %}">
             {{ goal.get_category_display }}
           </span>
           {% if view_as == 'student' %}
           <span class="text-xs font-semibold px-2 py-0.5 rounded-full
-            {% if enrollment.status == 'completed' %}bg-green-100 text-green-700
-            {% elif enrollment.status == 'in_progress' %}bg-blue-100 text-blue-700
-            {% elif enrollment.status == 'abandoned' %}bg-red-100 text-red-600
-            {% else %}bg-gray-100 text-gray-500{% endif %}">
+            {% if enrollment.status == 'completed' %}bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300
+            {% elif enrollment.status == 'in_progress' %}bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300
+            {% elif enrollment.status == 'abandoned' %}bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400
+            {% else %}bg-gray-100 dark:bg-gray-700 text-gray-500{% endif %}">
             {{ enrollment.get_status_display }}
           </span>
           {% if enrollment.is_overdue %}
-          <span class="text-xs text-amber-600 font-medium">⚠ Overdue</span>
+          <span class="text-xs text-amber-600 dark:text-amber-400 font-medium">⚠ Overdue</span>
           {% endif %}
           {% endif %}
           {% if goal.created_by %}
-          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">set by {{ goal.created_by.display_name }}</span>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">set by {{ goal.created_by.display_name }}</span>
           {% endif %}
           {% include "goals/_visibility_badge.html" %}
         </div>
@@ -52,20 +52,20 @@
         <p class="text-xs text-gray-400 mt-1">🗓 Target: {{ goal.target_date|date:"d F Y" }}</p>
         {% endif %}
         {% if view_as == 'student' and enrollment.achieved_at %}
-        <p class="text-xs text-green-600 mt-1">✓ Achieved {{ enrollment.achieved_at|date:"d F Y" }}</p>
+        <p class="text-xs text-green-600 dark:text-green-400 mt-1">✓ Achieved {{ enrollment.achieved_at|date:"d F Y" }}</p>
         {% endif %}
       </div>
       {% if can_edit or can_delete %}
       <div class="flex gap-2 flex-shrink-0 flex-wrap justify-end">
         {% if can_edit %}
         <a href="{% url 'goals:edit' goal.pk %}"
-           class="inline-flex items-center gap-1 text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#B23149] hover:text-[#B23149]">
+           class="inline-flex items-center gap-1 text-xs px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-400 hover:border-[#B23149] hover:text-[#B23149]">
           Edit
         </a>
         {% endif %}
         {% if can_delete %}
         <a href="{% url 'goals:delete' goal.pk %}"
-           class="inline-flex items-center gap-1 text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-400 hover:border-red-300 hover:text-red-500">
+           class="inline-flex items-center gap-1 text-xs px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 hover:border-red-300 hover:text-red-500">
           Delete
         </a>
         {% endif %}
@@ -74,7 +74,7 @@
     </div>
 
     {% if goal.description %}
-    <p class="text-sm text-gray-600 leading-relaxed mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">{{ goal.description }}</p>
+    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">{{ goal.description }}</p>
     {% endif %}
 
     {% if view_as == 'student' %}

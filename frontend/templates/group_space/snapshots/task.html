@@ -2,16 +2,16 @@
   <div>
     <div class="flex flex-wrap gap-2 mb-1">
       <span class="text-xs px-2 py-0.5 rounded-full
-        {% if task.priority == 'high' %}bg-orange-100 text-orange-700
-        {% elif task.priority == 'low' %}bg-gray-100 text-gray-500
-        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+        {% if task.priority == 'high' %}bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300
+        {% elif task.priority == 'low' %}bg-gray-100 dark:bg-gray-700 text-gray-500
+        {% else %}bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300{% endif %}">
         {{ task.get_priority_display }}
       </span>
       <span class="text-xs px-2 py-0.5 rounded-full
-        {% if display_status == 'done' %}bg-green-100 text-green-700
-        {% elif display_status == 'doing' %}bg-blue-100 text-blue-700
-        {% elif display_status == 'blocked' %}bg-red-100 text-red-700
-        {% else %}bg-gray-100 text-gray-600{% endif %}">
+        {% if display_status == 'done' %}bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300
+        {% elif display_status == 'doing' %}bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300
+        {% elif display_status == 'blocked' %}bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300
+        {% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400{% endif %}">
         {% if display_status == 'done' %}Done{% elif display_status == 'doing' %}Doing{% elif display_status == 'blocked' %}Blocked{% else %}To do{% endif %}
       </span>
       {% if task.due_date %}
@@ -20,7 +20,7 @@
     </div>
     <h3 class="font-semibold text-[#343534] dark:text-gray-100">{{ task.title }}</h3>
     {% if task.description %}
-    <p class="text-sm text-gray-600 mt-2 leading-relaxed">{{ task.description|linebreaksbr }}</p>
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">{{ task.description|linebreaksbr }}</p>
     {% endif %}
   </div>
 
@@ -31,10 +31,10 @@
       {% for item in subtasks %}
       <li class="flex items-center gap-2 text-sm">
         <span class="h-4 w-4 rounded-full border-2 flex items-center justify-center text-[10px] shrink-0
-          {% if item.completed %}border-green-500 bg-green-500 text-white{% else %}border-gray-300{% endif %}">
+          {% if item.completed %}border-green-500 bg-green-500 text-white{% else %}border-gray-300 dark:border-gray-600{% endif %}">
           {% if item.completed %}✓{% endif %}
         </span>
-        <span class="{% if item.completed %}line-through text-gray-400{% else %}text-gray-700{% endif %}">{{ item.title }}</span>
+        <span class="{% if item.completed %}line-through text-gray-400{% else %}text-gray-700 dark:text-gray-300{% endif %}">{{ item.title }}</span>
       </li>
       {% endfor %}
     </ul>

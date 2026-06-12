@@ -50,7 +50,7 @@
     <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">Total Students</p>
   </div>
   <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center">
-    <p class="text-2xl font-bold {% if total_at_risk > 0 %}text-amber-600{% else %}text-[#343534] dark:text-gray-100{% endif %}">{{ total_at_risk }}</p>
+    <p class="text-2xl font-bold {% if total_at_risk > 0 %}text-amber-600 dark:text-amber-400{% else %}text-[#343534] dark:text-gray-100{% endif %}">{{ total_at_risk }}</p>
     <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">At-Risk (7d inactive)</p>
   </div>
   <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center">
@@ -92,9 +92,9 @@
     <p class="text-xs text-gray-400 dark:text-gray-500 mb-1">Status breakdown — all students, all cohorts</p>
     <div class="flex items-center gap-4 flex-wrap mb-3">
       <span class="text-xs text-gray-500 dark:text-gray-400">Total: <strong class="text-[#343534] dark:text-gray-100">{{ goal_stats.total }}</strong></span>
-      <span class="text-xs text-green-600 font-medium">{{ goal_stats.completed }} completed</span>
-      <span class="text-xs text-blue-600 font-medium">{{ goal_stats.in_progress }} in progress</span>
-      <span class="text-xs text-amber-600 font-medium">{{ goal_stats.not_started }} not started</span>
+      <span class="text-xs text-green-600 dark:text-green-400 font-medium">{{ goal_stats.completed }} completed</span>
+      <span class="text-xs text-blue-600 dark:text-blue-400 font-medium">{{ goal_stats.in_progress }} in progress</span>
+      <span class="text-xs text-amber-600 dark:text-amber-400 font-medium">{{ goal_stats.not_started }} not started</span>
       <span class="text-xs text-red-500 font-medium">{{ goal_stats.abandoned }} abandoned</span>
     </div>
     <div class="relative h-52">

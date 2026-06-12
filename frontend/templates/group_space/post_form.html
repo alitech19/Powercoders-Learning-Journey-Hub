@@ -16,21 +16,21 @@
     <input type="hidden" name="group_pk" value="{{ group.pk }}">
 
     {% if form.non_field_errors %}
-    <div class="text-sm text-red-600">{{ form.non_field_errors }}</div>
+    <div class="text-sm text-red-600 dark:text-red-400">{{ form.non_field_errors }}</div>
     {% endif %}
 
     {% for field in form %}
     <div>
-      <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+      <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ field.label }}</label>
       {{ field }}
-      {% if field.errors %}<p class="text-sm text-red-600 mt-1">{{ field.errors.0 }}</p>{% endif %}
+      {% if field.errors %}<p class="text-sm text-red-600 dark:text-red-400 mt-1">{{ field.errors.0 }}</p>{% endif %}
       {% if field.name == "resource_label" %}
       <p class="text-xs text-gray-500 mt-1">Required when you attach a file or paste a link — used as the name on group Resources.</p>
       {% endif %}
       {% if field.name == "file" %}
       <p class="text-xs text-gray-500 mt-1">PDF, Word, text, or images up to 10 MB.</p>
       {% if post and post.file %}
-      <p class="text-xs text-gray-600 mt-1">Current: <a href="{{ post.file.url }}" class="text-[#B23149] hover:underline" target="_blank" rel="noopener">attachment</a></p>
+      <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Current: <a href="{{ post.file.url }}" class="text-[#B23149] hover:underline" target="_blank" rel="noopener">attachment</a></p>
       {% endif %}
       {% endif %}
     </div>
@@ -40,7 +40,7 @@
       <button type="submit" class="bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
         Save
       </button>
-      <a href="{% url 'group_space:feed' %}?group={{ group.pk }}" class="text-sm text-gray-600 hover:text-[#343534] dark:text-gray-100 px-4 py-2.5">Cancel</a>
+      <a href="{% url 'group_space:feed' %}?group={{ group.pk }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-[#343534] dark:text-gray-100 px-4 py-2.5">Cancel</a>
     </div>
   </form>
 </div>

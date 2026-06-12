@@ -18,7 +18,7 @@
     <input type="search" name="q" value="{{ search_query }}"
            placeholder="Search by title, e.g. week 7…"
            maxlength="{{ limits.search }}"
-           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149]">
+           class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149]/30 focus:border-[#B23149]">
   </div>
   {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
   {% if student_filter %}<input type="hidden" name="student" value="{{ student_filter }}">{% endif %}
@@ -36,13 +36,13 @@
 <div class="flex gap-2 flex-wrap mb-4">
   <a href="{% url 'reflections:list' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if not student_filter %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
+            {% if not student_filter %}bg-[#343534] text-white{% else %}bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-[#B23149]{% endif %}">
     All Students
   </a>
   {% for s in students %}
   <a href="?student={{ s.pk }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}"
      class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            {% if student_filter == s.pk|stringformat:'s' %}bg-[#343534] text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-[#B23149]{% endif %}">
+            {% if student_filter == s.pk|stringformat:'s' %}bg-[#343534] text-white{% else %}bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-[#B23149]{% endif %}">
     {{ s.display_name }}
   </a>
   {% endfor %}
@@ -52,7 +52,7 @@
 
 <!-- Tag filter -->
 <div class="mb-5">
-  <div class="flex gap-1 bg-white dark:bg-gray-900 border border-gray-200 rounded-lg dark:border-gray-700 p-1 w-fit flex-wrap">
+  <div class="flex gap-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-1 w-fit flex-wrap">
   <a href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}{% if student_filter %}student={{ student_filter }}{% endif %}"
      class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
             {% if not tag_filter %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534] dark:text-gray-100{% endif %}">
@@ -81,7 +81,7 @@
   <a href="{% url 'reflections:detail' r.pk %}"
      class="block bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#B23149]/30 hover:shadow-sm transition-all overflow-hidden">
     {% if view_as != 'student' %}
-    <div class="flex items-center justify-between gap-3 px-5 py-2.5 bg-gray-50 border-b border-gray-100 dark:border-gray-800">
+    <div class="flex items-center justify-between gap-3 px-5 py-2.5 bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800">
       <div class="flex items-center gap-2.5 min-w-0">
         <span class="flex-shrink-0 w-7 h-7 rounded-full bg-[#343534] text-white flex items-center justify-center text-xs font-bold uppercase">
           {{ r.author.display_name|slice:":1" }}
@@ -110,7 +110,7 @@
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap mb-1">
             {% for label in r.tag_labels %}
-            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{{ label }}</span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">{{ label }}</span>
             {% endfor %}
             {% if view_as == 'student' %}
             {% if r.visibility == 'shared' %}

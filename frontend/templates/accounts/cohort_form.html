@@ -21,7 +21,7 @@
         </label>
         {% if field.field.widget.input_type == 'select' %}
           <select name="{{ field.html_name }}" id="{{ field.id_for_label }}"
-                  class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20 bg-white">
+                  class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20 bg-white dark:bg-gray-900">
             {% for val, label in field.field.choices %}
             <option value="{{ val }}" {% if field.value == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
@@ -31,14 +31,14 @@
                  name="{{ field.html_name }}"
                  id="{{ field.id_for_label }}"
                  value="{{ field.value|html_date }}"
-                 class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20"
+                 class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20"
                  {% if field.field.required %}required{% endif %}>
         {% else %}
           <input type="{{ field.field.widget.input_type }}"
                  name="{{ field.html_name }}"
                  id="{{ field.id_for_label }}"
                  value="{{ field.value|default_if_none:'' }}"
-                 class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20"
+                 class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20"
                  {% if field.field.required %}required{% endif %}>
         {% endif %}
         {% if field.errors %}
@@ -53,7 +53,7 @@
           Save
         </button>
         <a href="{% url 'accounts:cohort_list' %}"
-           class="border border-gray-200 hover:border-gray-300 text-gray-600 text-sm font-medium px-6 py-2.5 rounded-lg transition-colors">
+           class="border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-600 dark:text-gray-400 text-sm font-medium px-6 py-2.5 rounded-lg transition-colors">
           Cancel
         </a>
       </div>

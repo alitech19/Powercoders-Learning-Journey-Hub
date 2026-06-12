@@ -13,7 +13,7 @@
       Completed {{ habit.completed_at|date:"d M Y" }}
       · streak {{ habit.completed_weekly_streak }} week{{ habit.completed_weekly_streak|pluralize }}
     </p>
-    <p class="text-sm text-red-600 bg-red-50 rounded-lg px-4 py-2 mb-6">This action cannot be undone.</p>
+    <p class="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 rounded-lg px-4 py-2 mb-6">This action cannot be undone.</p>
     <div class="flex gap-3">
       <form method="post" class="flex-1">
         {% csrf_token %}
@@ -23,7 +23,7 @@
         </button>
       </form>
       <a href="{% url 'habits:detail' habit.pk %}"
-         class="flex-1 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors text-center">
+         class="flex-1 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-center">
         Cancel
       </a>
     </div>

@@ -8,11 +8,11 @@
     <input type="hidden" name="status" value="{{ value }}">
     <button type="submit" class="px-2 py-1 rounded-lg text-[10px] font-semibold border-2 cursor-pointer transition-colors
       {% if item.display_status == value %}
-        {% if value == 'done' %}border-green-500 bg-green-50 text-green-700
-        {% elif value == 'doing' %}border-blue-500 bg-blue-50 text-blue-700
-        {% elif value == 'blocked' %}border-red-400 bg-red-50 text-red-600
-        {% else %}border-gray-400 bg-gray-50 text-gray-700{% endif %}
-      {% else %}border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600
+        {% if value == 'done' %}border-green-500 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300
+        {% elif value == 'doing' %}border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300
+        {% elif value == 'blocked' %}border-red-400 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400
+        {% else %}border-gray-400 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300{% endif %}
+      {% else %}border-gray-200 dark:border-gray-700 text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-600 dark:hover:text-gray-400
       {% endif %}">
       {{ label }}
     </button>
@@ -21,10 +21,10 @@
 </div>
 {% else %}
 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium
-  {% if item.display_status == 'done' %}bg-green-100 text-green-800
-  {% elif item.display_status == 'doing' %}bg-blue-100 text-blue-800
-  {% elif item.display_status == 'blocked' %}bg-red-100 text-red-800
-  {% else %}bg-gray-100 text-gray-700{% endif %}">
+  {% if item.display_status == 'done' %}bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300
+  {% elif item.display_status == 'doing' %}bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300
+  {% elif item.display_status == 'blocked' %}bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300
+  {% else %}bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300{% endif %}">
   {% if item.display_status == 'done' %}Done
   {% elif item.display_status == 'doing' %}Doing
   {% elif item.display_status == 'blocked' %}Blocked

@@ -16,8 +16,8 @@
   <div class="space-y-2">
     {% for notif in notifications %}
     <a href="{% if notif.url %}{{ notif.url }}{% else %}#{% endif %}"
-       class="flex items-start gap-4 bg-white border rounded-xl p-4 hover:border-[#B23149]/30 transition-colors
-              {% if not notif.is_read %}border-[#B23149]/30 bg-[#FEF9F9]{% else %}border-gray-200{% endif %}">
+       class="flex items-start gap-4 bg-white dark:bg-gray-900 border rounded-xl p-4 hover:border-[#B23149]/30 transition-colors
+              {% if not notif.is_read %}border-[#B23149]/30 bg-[#FEF9F9] dark:bg-[#B23149]/10!{% else %}border-gray-200 dark:border-gray-700{% endif %}">
       <div class="flex-shrink-0 mt-0.5">
         {% if not notif.is_read %}
         <span class="h-2.5 w-2.5 rounded-full bg-[#B23149] block mt-1"></span>

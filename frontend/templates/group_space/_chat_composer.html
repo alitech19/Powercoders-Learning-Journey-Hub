@@ -2,17 +2,17 @@
      {% if composer_form.file.errors or composer_form.resource_label.errors %}data-initial-attach="1"{% endif %}>
 
   {% if user.role == "student" %}
-  <div id="share-panel" class="hidden p-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 space-y-2">
+  <div id="share-panel" class="hidden p-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 space-y-2">
     <div class="flex items-center justify-between">
       <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Share to group</p>
       <button type="button" id="share-panel-close"
-              class="text-xs font-medium text-gray-500 hover:text-red-600 px-2 py-1 rounded-lg hover:bg-white">
+              class="text-xs font-medium text-gray-500 hover:text-red-600 dark:hover:text-red-400 px-2 py-1 rounded-lg hover:bg-white dark:hover:bg-gray-900">
         ✕ Cancel
       </button>
     </div>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
       {% for kind, label in share_kind_panel %}
-      <button type="button" data-share-kind="{{ kind }}" class="share-kind-btn text-xs font-medium px-3 py-2 rounded-lg border bg-white border-gray-200 text-gray-700 hover:border-[#B23149]">{{ label }}</button>
+      <button type="button" data-share-kind="{{ kind }}" class="share-kind-btn text-xs font-medium px-3 py-2 rounded-lg border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-[#B23149]">{{ label }}</button>
       {% endfor %}
     </div>
     {% if share_menu %}
@@ -36,17 +36,17 @@
     <input type="hidden" name="group_pk" value="{{ group.pk }}">
 
     {% if composer_form.non_field_errors %}
-    <p class="text-sm text-red-600">{{ composer_form.non_field_errors.0 }}</p>
+    <p class="text-sm text-red-600 dark:text-red-400">{{ composer_form.non_field_errors.0 }}</p>
     {% endif %}
 
     <div id="compose-text-mode">
       <div class="flex gap-2 items-end">
         <div class="flex-1 min-w-0">
           <textarea name="body" id="chat-body" rows="2"
-                    class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#B23149] focus:border-[#B23149]"
+                    class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#B23149] focus:border-[#B23149]"
                     placeholder="Write a message…">{% if composer_form.body.value %}{{ composer_form.body.value }}{% endif %}</textarea>
           {% if composer_form.body.errors %}
-          <p class="text-xs text-red-600 mt-1">{{ composer_form.body.errors.0 }}</p>
+          <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ composer_form.body.errors.0 }}</p>
           {% endif %}
         </div>
         <button type="submit" id="chat-send-btn"
@@ -56,17 +56,17 @@
       </div>
     </div>
 
-    <div id="attach-panel" class="hidden rounded-xl border border-gray-200 bg-gray-50 p-3 space-y-3">
+    <div id="attach-panel" class="hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 space-y-3">
       <div class="flex items-center justify-between gap-2">
-        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Attach file</p>
+        <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Attach file</p>
         <button type="button" id="attach-cancel"
-                class="text-xs font-medium text-gray-500 hover:text-red-600 px-2 py-1 rounded-lg hover:bg-white">
+                class="text-xs font-medium text-gray-500 hover:text-red-600 dark:hover:text-red-400 px-2 py-1 rounded-lg hover:bg-white dark:hover:bg-gray-900">
           ✕ Cancel
         </button>
       </div>
       <input type="file" id="chat-file" name="file" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.gif,.webp"
-             class="text-xs text-gray-600 w-full file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-white file:text-gray-700 hover:file:bg-gray-100">
-      {% if composer_form.file.errors %}<p class="text-xs text-red-600">{{ composer_form.file.errors.0 }}</p>{% endif %}
+             class="text-xs text-gray-600 dark:text-gray-400 w-full file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-white dark:file:bg-gray-900 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-100 dark:hover:file:bg-gray-700">
+      {% if composer_form.file.errors %}<p class="text-xs text-red-600 dark:text-red-400">{{ composer_form.file.errors.0 }}</p>{% endif %}
       <button type="submit" id="attach-send-btn"
               class="w-full bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
         Send file
@@ -77,10 +77,10 @@
       <label for="chat-resource-label" id="resource-label-caption" class="text-xs font-medium text-gray-500">Resource name</label>
       <input type="text" name="resource_label" id="chat-resource-label" maxlength="100"
              value="{{ composer_form.resource_label.value|default:'' }}"
-             class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149] focus:border-[#B23149]"
+             class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-[#B23149] focus:border-[#B23149]"
              placeholder="Name for the group Resources list">
       {% if composer_form.resource_label.errors %}
-      <p class="text-xs text-red-600">{{ composer_form.resource_label.errors.0 }}</p>
+      <p class="text-xs text-red-600 dark:text-red-400">{{ composer_form.resource_label.errors.0 }}</p>
       {% endif %}
     </div>
 

@@ -10,7 +10,7 @@
   {% if entries %}
   <div class="space-y-3 mb-4">
     {% for entry in entries %}
-    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+    <div class="bg-blue-50 dark:bg-blue-950/40 border border-blue-100 rounded-xl p-4">
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center gap-2">
           <div class="h-6 w-6 rounded-full bg-[#B23149] flex items-center justify-center flex-shrink-0">
@@ -48,7 +48,7 @@
         hx-on::after-request="this.reset()">
     {% csrf_token %}
     <textarea name="body" rows="3" required placeholder="{{ feedback_placeholder|default:'Leave feedback…' }}" maxlength="{{ limits.body }}"
-              class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20 resize-none mb-2"></textarea>
+              class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20 resize-none mb-2"></textarea>
     <button type="submit"
             class="bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
       Send Feedback

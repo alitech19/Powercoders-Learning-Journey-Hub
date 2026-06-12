@@ -3,7 +3,7 @@
 <div class="space-y-3">
   {% for row in task_rows %}
   {% with task=row.task enrollment=row.enrollment %}
-  <div class="relative rounded-xl border border-gray-200 hover:border-[#B23149]/30 hover:shadow-sm transition-all p-5
+  <div class="relative rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#B23149]/30 hover:shadow-sm transition-all p-5
               {% if not row.can_view_metadata %}opacity-90{% endif %}">
     {% if row.can_view_metadata %}
     {% url 'tasks:task_detail' task.pk as task_detail_url %}
@@ -22,20 +22,20 @@
         </h3>
         <div class="flex flex-wrap items-center gap-2 mt-1.5">
           <span class="text-xs font-semibold px-2 py-0.5 rounded-full
-            {% if task.priority == 'high' %}bg-orange-100 text-orange-700
-            {% elif task.priority == 'low' %}bg-gray-100 text-gray-600
-            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+            {% if task.priority == 'high' %}bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300
+            {% elif task.priority == 'low' %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400
+            {% else %}bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300{% endif %}">
             {{ task.get_priority_display }}
           </span>
           {% if view_as == 'student' %}
           {% include "tasks/_visibility_badge.html" %}
           {% endif %}
           {% if task.is_group_shared %}
-          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">Group</span>
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400">Group</span>
           {% elif task.assignee_cohort_id %}
-          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-50 text-purple-600">Cohort</span>
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400">Cohort</span>
           {% elif task.author_id %}
-          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">Personal</span>
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">Personal</span>
           {% endif %}
         </div>
         {% if task.description and row.can_view_content %}

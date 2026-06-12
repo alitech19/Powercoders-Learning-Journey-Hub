@@ -11,7 +11,7 @@
         {% elif item.locked %}
         <div class="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">🔒</div>
         {% else %}
-        <div class="h-7 w-7 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs font-bold text-gray-400">{{ forloop.counter }}</div>
+        <div class="h-7 w-7 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs font-bold text-gray-400">{{ forloop.counter }}</div>
         {% endif %}
       </div>
       <div class="flex-1 min-w-0">
@@ -20,7 +20,7 @@
         <p class="text-xs text-gray-500 mt-0.5">{{ item.step.description }}</p>
         {% endif %}
         {% if item.locked %}
-        <p class="text-xs text-amber-600 mt-1">Complete the previous step first.</p>
+        <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">Complete the previous step first.</p>
         {% endif %}
       </div>
       {% if can_toggle and not item.locked %}
@@ -28,7 +28,7 @@
         {% csrf_token %}
         <button type="submit"
                 class="text-xs px-3 py-1.5 rounded-lg border cursor-pointer
-                       {% if item.done %}border-green-300 text-green-700{% else %}border-gray-200 text-gray-600 hover:border-[#B23149] hover:text-[#B23149]{% endif %}">
+                       {% if item.done %}border-green-300 text-green-700 dark:text-green-300{% else %}border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-[#B23149] hover:text-[#B23149]{% endif %}">
           {% if item.done %}Mark incomplete{% else %}Mark done{% endif %}
         </button>
       </form>

@@ -7,5 +7,5 @@
   {% if entry.get_tags_list %}
   <p class="text-xs text-gray-500">{% for tag in entry.get_tags_list %}#{{ tag }} {% endfor %}</p>
   {% endif %}
-  <div class="text-gray-700 whitespace-pre-wrap leading-relaxed">{{ entry.content }}</div>
+  <div class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{{ entry.content }}</div>
 </div>

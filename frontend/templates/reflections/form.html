@@ -32,7 +32,7 @@
       <input type="text" name="title" value="{{ form.title.value|default:'' }}" required
              placeholder="e.g. Reflection week 7"
              maxlength="{{ limits.title }}"
-             class="w-full text-lg font-semibold border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B23149]/30">
+             class="w-full text-lg font-semibold border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B23149]/30">
       {% if form.title.errors %}<p class="text-xs text-red-500 mt-1">{{ form.title.errors|join:", " }}</p>{% endif %}
     </div>
 
@@ -56,7 +56,7 @@
         <input type="text" name="custom_label" value="{{ form.custom_label.value|default:'' }}"
                placeholder="Custom tag label"
                maxlength="{{ limits.short_label }}"
-               class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+               class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
         {% if form.custom_label.errors %}<p class="text-xs text-red-500 mt-1">{{ form.custom_label.errors|join:", " }}</p>{% endif %}
       </div>
     </div>
@@ -70,7 +70,7 @@
       </div>
       <p class="text-xs text-gray-500 mb-3">Fill in at the start. You can edit anytime.</p>
       <textarea name="expectations" rows="6" maxlength="{{ limits.long_text }}"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#B23149]/30">{{ form.expectations.value|default:'' }}</textarea>
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#B23149]/30">{{ form.expectations.value|default:'' }}</textarea>
       {% if form.expectations.errors %}<p class="text-xs text-red-500 mt-1">{{ form.expectations.errors|join:", " }}</p>{% endif %}
     </div>
 
@@ -84,7 +84,7 @@
       <p class="text-xs text-gray-500 mb-3">Complete when you wrap up. Wellbeing check-in appears once you start writing here.</p>
       <textarea name="final_reflection" rows="8" x-model="finalReflection" @input="updateWellbeingVisibility()"
                 maxlength="{{ limits.long_text }}"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#B23149]/30"></textarea>
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#B23149]/30"></textarea>
       {% if form.final_reflection.errors %}<p class="text-xs text-red-500 mt-1">{{ form.final_reflection.errors|join:", " }}</p>{% endif %}
     </div>
 
@@ -102,8 +102,8 @@
           <template x-for="m in moods" :key="m.value">
             <button type="button" @click="pick('{{ field_name }}', m.value)"
                     :class="wellbeing['{{ field_name }}'] === m.value
-                      ? 'border-[#B23149] bg-red-50 ring-2 ring-[#B23149]/30'
-                      : 'border-gray-200 hover:border-gray-300'"
+                      ? 'border-[#B23149] bg-red-50 dark:bg-red-950/40 ring-2 ring-[#B23149]/30'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
                     class="flex flex-col items-center justify-center gap-0.5 py-2 rounded-lg border-2 transition-colors cursor-pointer w-full min-w-0">
               <span class="text-xl" x-text="m.emoji"></span>
               <span class="text-[10px] text-gray-500 truncate w-full text-center px-0.5" x-text="m.label"></span>
@@ -111,7 +111,7 @@
           </template>
         </div>
         <button type="button" @click="pick('{{ field_name }}', '')"
-                class="text-xs text-gray-400 mt-2 hover:text-gray-600 cursor-pointer">Clear</button>
+                class="text-xs text-gray-400 mt-2 hover:text-gray-600 dark:hover:text-gray-400 cursor-pointer">Clear</button>
       </div>
       {% endfor %}
     </div>
@@ -120,12 +120,12 @@
       <label class="block text-xs font-semibold text-gray-400 uppercase mb-3">Visibility</label>
       <div class="flex gap-3">
         <button type="button" @click="visibility = 'private'"
-                :class="visibility === 'private' ? 'border-[#343534] bg-[#343534] text-white' : 'border-gray-200 text-gray-500'"
+                :class="visibility === 'private' ? 'border-[#343534] bg-[#343534] text-white' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
                 class="flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium cursor-pointer">
           Only me
         </button>
         <button type="button" @click="visibility = 'shared'"
-                :class="visibility === 'shared' ? 'border-[#B23149] bg-[#B23149]/5 text-[#B23149]' : 'border-gray-200 text-gray-500'"
+                :class="visibility === 'shared' ? 'border-[#B23149] bg-[#B23149]/5 text-[#B23149]' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
                 class="flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium cursor-pointer">
           Share with teachers
         </button>

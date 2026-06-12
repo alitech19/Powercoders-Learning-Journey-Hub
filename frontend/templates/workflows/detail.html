@@ -16,23 +16,23 @@
           {% if workflow.created_by %}<span>by {{ workflow.created_by.display_name }}</span>{% endif %}
         </div>
         {% if workflow.description %}
-        <p class="text-sm text-gray-600 mt-2">{{ workflow.description }}</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">{{ workflow.description }}</p>
         {% endif %}
       </div>
       {% if view_as == 'staff' and can_manage %}
       <div class="flex gap-2 flex-shrink-0">
         <a href="{% url 'workflows:edit' workflow.pk %}"
-           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
+           class="text-xs px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-400 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
         <a href="{% url 'workflows:delete' workflow.pk %}"
-           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-400 hover:border-red-300 hover:text-red-500">Delete</a>
+           class="text-xs px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 hover:border-red-300 hover:text-red-500">Delete</a>
       </div>
       {% endif %}
     </div>
   </div>
 
   {% if not_assigned %}
-  <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
-    <p class="text-amber-800 text-sm font-medium">You are not assigned to this workflow.</p>
+  <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 rounded-xl p-6 text-center">
+    <p class="text-amber-800 dark:text-amber-300 text-sm font-medium">You are not assigned to this workflow.</p>
   </div>
 
   {% elif view_as == 'student' %}
@@ -67,7 +67,7 @@
       <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
         <h2 class="text-sm font-semibold mb-4">{% if can_manage %}Manage steps{% else %}Steps{% endif %}</h2>
         {% for step in workflow.steps.all %}
-        <div class="flex items-start gap-3 p-3 border border-gray-100 rounded-lg mb-2">
+        <div class="flex items-start gap-3 p-3 border border-gray-100 dark:border-gray-800 rounded-lg mb-2">
           <span class="text-xs font-bold text-gray-400 w-5">{{ forloop.counter }}</span>
           <div class="flex-1">
             <p class="text-sm font-medium">{{ step.title }}</p>
@@ -88,9 +88,9 @@
         <form method="post" action="{% url 'workflows:step_add' workflow.pk %}" class="space-y-2 pt-4 border-t border-gray-100 dark:border-gray-800 mt-4">
           {% csrf_token %}
           <input type="text" name="title" required placeholder="Step title" maxlength="{{ limits.title }}"
-                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                 class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
           <textarea name="description" rows="2" placeholder="Description (optional)" maxlength="{{ limits.step_description }}"
-                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                    class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
           <label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
             <input type="checkbox" name="requires_previous" checked class="accent-[#B23149]">
             Requires previous step
@@ -126,7 +126,7 @@
         {% if can_manage and available_students %}
         <form method="post" action="{% url 'workflows:enroll' workflow.pk %}" class="pt-3 border-t border-gray-100 dark:border-gray-800 space-y-2">
           {% csrf_token %}
-          <select name="student_id" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+          <select name="student_id" class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
             <option value="">— Add student —</option>
             {% for student in available_students %}
             <option value="{{ student.pk }}">{{ student.display_name }}</option>
@@ -139,7 +139,7 @@
       {% else %}
       <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
         <h2 class="text-sm font-semibold mb-2">Assigned</h2>
-        <p class="text-sm text-gray-600">{{ assigned_count }} active students</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400">{{ assigned_count }} active students</p>
         <p class="text-xs text-gray-400 mt-1">Shared progress for entire {{ workflow.get_assignee_type_display|lower }}.</p>
       </div>
       {% endif %}

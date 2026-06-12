@@ -35,16 +35,16 @@
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1">Title</label>
         <input type="text" name="title" required value="{{ workflow.title }}" maxlength="{{ limits.title }}"
-               class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+               class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1">Description</label>
         <textarea name="description" rows="3" maxlength="{{ limits.description }}"
-                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none">{{ workflow.description }}</textarea>
+                  class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm resize-none">{{ workflow.description }}</textarea>
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1">Visibility</label>
-        <select name="visibility" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+        <select name="visibility" class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
           <option value="public" {% if workflow.visibility == 'public' %}selected{% endif %}>Public</option>
           <option value="private" {% if workflow.visibility == 'private' %}selected{% endif %}>Private</option>
         </select>
@@ -69,16 +69,16 @@
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1">Title</label>
         <input type="text" name="title" required maxlength="{{ limits.title }}"
-               class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+               class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1">Description</label>
         <textarea name="description" rows="3" maxlength="{{ limits.description }}"
-                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+                  class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-500 mb-1">Visibility</label>
-        <select name="visibility" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+        <select name="visibility" class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
           <option value="public">Public</option>
           <option value="private">Private</option>
         </select>
@@ -179,14 +179,14 @@
       </div>
       <div class="space-y-3">
         <template x-for="(step, i) in steps" :key="step.id">
-          <div class="border border-gray-100 rounded-lg p-4 bg-gray-50">
+          <div class="border border-gray-100 dark:border-gray-800 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
             <div class="flex gap-2 mb-2">
               <span class="text-xs font-bold text-gray-400 w-5" x-text="i+1"></span>
               <input type="text" :name="'step_title_' + (i+1)" x-model="step.title" required placeholder="Step title" maxlength="{{ limits.title }}"
-                     class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm">
+                     class="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
             </div>
             <textarea :name="'step_desc_' + (i+1)" x-model="step.desc" rows="2" placeholder="Description (optional)" maxlength="{{ limits.step_description }}"
-                      class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none mb-2"></textarea>
+                      class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm resize-none mb-2"></textarea>
             <div class="flex items-center justify-between">
               <label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
                 <input type="checkbox" :name="'step_req_' + (i+1)" x-model="step.req" class="accent-[#B23149]">

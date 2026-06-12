@@ -43,15 +43,15 @@
       {% endif %}
 
       {% if form.non_field_errors %}
-      <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+      <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-lg text-red-700 dark:text-red-300 text-sm">
         <span>{{ form.non_field_errors.0 }}</span>
       </div>
       {% elif form.errors and wizard.steps.current == 'auth' %}
-      <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+      <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-lg text-red-700 dark:text-red-300 text-sm">
         <span>Invalid email or password.</span>
       </div>
       {% elif form.errors %}
-      <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+      <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-lg text-red-700 dark:text-red-300 text-sm">
         <span>Invalid code. Please try again.</span>
       </div>
       {% endif %}
@@ -66,7 +66,7 @@
             <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1.5">{{ field.label }}</label>
             {{ field }}
             {% if field.errors %}
-            <p class="text-red-600 text-xs mt-1">{{ field.errors.0 }}</p>
+            <p class="text-red-600 dark:text-red-400 text-xs mt-1">{{ field.errors.0 }}</p>
             {% endif %}
           </div>
           {% endfor %}
@@ -102,13 +102,13 @@
     </div>
 
     {% if dev_seed_enabled %}
-    <section class="mt-8 p-5 border-2 border-dashed border-[#B23149] rounded-xl bg-white/80">
+    <section class="mt-8 p-5 border-2 border-dashed border-[#B23149] rounded-xl bg-white/80 dark:bg-gray-900">
       <p class="font-semibold text-[#343534] dark:text-gray-100 mb-2">Development quick login — testers only</p>
-      <p class="text-sm text-gray-600 mb-2">
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
         Buttons below sign you in <strong>directly</strong> and skip 2FA, privacy policy, and other onboarding checks.
         Seed users are pre-configured in the database for that purpose.
       </p>
-      <p class="text-sm text-gray-600 mb-4">
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
         The <strong>email + password form above</strong> uses the real login path — lockout, 2FA when enabled, etc.
       </p>
       <p class="text-xs text-[#922b21] mb-4">

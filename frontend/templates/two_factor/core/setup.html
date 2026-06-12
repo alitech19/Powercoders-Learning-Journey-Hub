@@ -26,7 +26,7 @@
       </div>
       <div class="bg-[#F5EDE0] dark:bg-gray-800 rounded-lg p-4 text-sm text-[#343534] dark:text-gray-100">
         <p class="font-semibold mb-1">You will need:</p>
-        <ul class="list-disc list-inside space-y-1 text-gray-600">
+        <ul class="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-400">
           <li>Google Authenticator or Authy on your phone</li>
           <li>About 2 minutes</li>
         </ul>
@@ -35,13 +35,13 @@
       {% elif wizard.steps.current == 'generator' %}
       <div>
         <p class="text-sm font-semibold text-[#343534] dark:text-gray-100 mb-3">1. Scan this QR code with your authenticator app</p>
-        <div class="bg-white p-3 rounded-lg border-2 border-[#EDE3D5] dark:border-gray-700 inline-block mb-4">
+        <div class="bg-white dark:bg-gray-900 p-3 rounded-lg border-2 border-[#EDE3D5] dark:border-gray-700 inline-block mb-4">
           <img src="{% url 'two_factor:qr' %}" alt="QR Code" class="h-40 w-40">
         </div>
         <p class="text-sm font-semibold text-[#343534] dark:text-gray-100 mb-2">2. Enter the 6-digit code</p>
         {{ wizard.form.token }}
         {% if wizard.form.token.errors %}
-        <p class="text-red-600 text-xs mt-1">{{ wizard.form.token.errors.0 }}</p>
+        <p class="text-red-600 dark:text-red-400 text-xs mt-1">{{ wizard.form.token.errors.0 }}</p>
         {% endif %}
       </div>
 

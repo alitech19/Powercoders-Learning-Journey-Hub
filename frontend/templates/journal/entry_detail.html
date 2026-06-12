@@ -11,7 +11,7 @@
 
   {% if is_staff_view %}
   <div class="flex items-center gap-3 mb-4 px-4 py-3 bg-[#343534] text-white rounded-xl">
-    <span class="flex-shrink-0 w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-sm font-bold uppercase">
+    <span class="flex-shrink-0 w-9 h-9 rounded-full bg-white/15 dark:bg-gray-900 flex items-center justify-center text-sm font-bold uppercase">
       {{ entry.author.display_name|slice:":1" }}
     </span>
     <div class="min-w-0">
@@ -43,11 +43,11 @@
       <div class="flex gap-2 flex-shrink-0 flex-wrap">
         {% if can_edit %}
         <a href="{% url 'journal:edit' entry.pk %}"
-           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
+           class="text-xs px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-400 hover:border-[#B23149] hover:text-[#B23149]">Edit</a>
         {% endif %}
         {% if can_delete %}
         <a href="{% url 'journal:delete' entry.pk %}"
-           class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-400 hover:text-red-500">
+           class="text-xs px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 hover:text-red-500">
           {% if admin_delete %}Remove{% else %}Delete{% endif %}
         </a>
         {% endif %}

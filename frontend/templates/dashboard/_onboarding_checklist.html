@@ -67,10 +67,10 @@ Context variables: checklist (list of dicts), checklist_done (int), checklist_to
        x-transition:enter-start="opacity-0 -translate-y-2"
        x-transition:enter-end="opacity-100 translate-y-0">
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-gray-100">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-gray-100 dark:bg-gray-700">
       {% for item in checklist %}
       <a href="{{ item.url }}"
-         class="flex items-center gap-4 bg-white px-5 py-4
+         class="flex items-center gap-4 bg-white dark:bg-gray-900 px-5 py-4
                 {% if item.done %}opacity-60{% else %}hover:bg-[#B23149]/2{% endif %}
                 transition-colors group">
 
@@ -83,7 +83,7 @@ Context variables: checklist (list of dicts), checklist_done (int), checklist_to
             </svg>
           </div>
           {% else %}
-          <div class="h-7 w-7 rounded-full border-2 border-gray-200 group-hover:border-[#B23149] transition-colors flex items-center justify-center">
+          <div class="h-7 w-7 rounded-full border-2 border-gray-200 dark:border-gray-700 group-hover:border-[#B23149] transition-colors flex items-center justify-center">
             <div class="h-2 w-2 rounded-full bg-transparent group-hover:bg-[#B23149] transition-colors"></div>
           </div>
           {% endif %}
@@ -118,7 +118,7 @@ Context variables: checklist (list of dicts), checklist_done (int), checklist_to
     </div>
 
     <!-- Bottom note -->
-    <div class="px-6 py-3 bg-gray-50 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+    <div class="px-6 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
       <p class="text-xs text-gray-400">This checklist disappears once you complete all steps.</p>
       <a href="{% url 'accounts:welcome' %}" class="text-xs text-[#B23149] hover:underline font-medium">View tutorial again →</a>
     </div>

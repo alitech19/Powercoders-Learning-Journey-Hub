@@ -9,13 +9,13 @@
     <p class="text-sm text-gray-500 mb-1">
       <span class="font-semibold text-[#343534] dark:text-gray-100">{{ target.display_name }}</span> ({{ target.email }})
     </p>
-    <p class="text-sm text-red-600 font-medium mb-2">This action cannot be undone.</p>
+    <p class="text-sm text-red-600 dark:text-red-400 font-medium mb-2">This action cannot be undone.</p>
     <p class="text-sm text-gray-500 mb-6">
       All of this user's data — journal entries, goals, reflections, tasks, and group posts — will be permanently deleted in compliance with GDPR.
     </p>
     <div class="flex gap-3 justify-center">
       <a href="{% url 'accounts:user_list' %}"
-         class="px-5 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:border-gray-300 transition-colors">
+         class="px-5 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 transition-colors">
         Cancel
       </a>
       <form method="post">

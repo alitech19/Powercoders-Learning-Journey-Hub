@@ -45,7 +45,7 @@
              placeholder="What did you learn or experience today?"
              class="w-full text-xl font-semibold text-[#343534] dark:text-gray-100 placeholder-gray-300 border-0 outline-none bg-transparent">
       {% if form.title.errors %}
-      <p class="text-red-600 text-xs mt-1">{{ form.title.errors.0 }}</p>
+      <p class="text-red-600 dark:text-red-400 text-xs mt-1">{{ form.title.errors.0 }}</p>
       {% endif %}
     </div>
 
@@ -62,7 +62,7 @@
           {% for value, emoji, label in mood_options %}
           <button type="button"
                   @click="mood = '{{ value }}'"
-                  :class="mood === '{{ value }}' ? 'ring-2 ring-[#B23149] bg-[#B23149]/10 scale-110' : 'bg-gray-50 hover:bg-gray-100'"
+                  :class="mood === '{{ value }}' ? 'ring-2 ring-[#B23149] bg-[#B23149]/10 scale-110' : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'"
                   class="text-lg rounded-lg p-1.5 transition-all cursor-pointer"
                   title="{{ label }}">
             {{ emoji }}
@@ -80,7 +80,7 @@
                 placeholder="Write about what you learned, challenges you faced, questions you have, or anything you want to remember..."
                 class="w-full text-sm text-[#343534] dark:text-gray-100 placeholder-gray-300 border-0 outline-none bg-transparent resize-none leading-relaxed">{{ form.content.value|default:'' }}</textarea>
       {% if form.content.errors %}
-      <p class="text-red-600 text-xs mt-1">{{ form.content.errors.0 }}</p>
+      <p class="text-red-600 dark:text-red-400 text-xs mt-1">{{ form.content.errors.0 }}</p>
       {% endif %}
       <div class="flex justify-end mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
         <span class="text-xs text-gray-300" x-text="wordCount + ' words'"></span>
@@ -109,12 +109,12 @@
       <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Visibility</label>
       <div class="flex gap-3">
         <button type="button" @click="visibility = 'private'"
-                :class="visibility === 'private' ? 'border-[#343534] bg-[#343534] text-white' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
+                :class="visibility === 'private' ? 'border-[#343534] bg-[#343534] text-white' : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600'"
                 class="flex-1 flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors cursor-pointer">
           Only me
         </button>
         <button type="button" @click="visibility = 'shared'"
-                :class="visibility === 'shared' ? 'border-[#B23149] bg-[#B23149]/5 text-[#B23149]' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
+                :class="visibility === 'shared' ? 'border-[#B23149] bg-[#B23149]/5 text-[#B23149]' : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600'"
                 class="flex-1 flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors cursor-pointer">
           Share with teacher
         </button>
@@ -127,7 +127,7 @@
         {% if action == 'edit' %}Save Changes{% else %}Save Entry{% endif %}
       </button>
       <a href="{% if action == 'edit' %}{% url 'journal:detail' entry.pk %}{% else %}{% url 'journal:list' %}{% endif %}"
-         class="px-5 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+         class="px-5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
         Cancel
       </a>
     </div>
