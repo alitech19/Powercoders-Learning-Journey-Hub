@@ -12,7 +12,7 @@
     {% if device.token_set.all %}
     <div class="grid grid-cols-2 gap-2 mb-5">
       {% for token in device.token_set.all %}
-      <code class="bg-[#F5EDE0] text-[#343534] dark:text-gray-100 text-sm font-mono px-3 py-2 rounded-lg text-center tracking-wider">
+      <code class="bg-[#F5EDE0] dark:bg-gray-800 text-[#343534] dark:text-gray-100 text-sm font-mono px-3 py-2 rounded-lg text-center tracking-wider">
         {{ token.token }}
       </code>
       {% endfor %}

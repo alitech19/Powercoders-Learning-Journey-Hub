@@ -83,7 +83,7 @@
           {% if entry.get_tags_list %}
           <div class="flex flex-wrap gap-1.5 mt-2">
             {% for tag in entry.get_tags_list %}
-            <span class="text-xs px-2 py-0.5 bg-[#F5EDE0] text-[#B23149] rounded-full font-medium">#{{ tag }}</span>
+            <span class="text-xs px-2 py-0.5 bg-[#F5EDE0] dark:bg-gray-800 text-[#B23149] rounded-full font-medium">#{{ tag }}</span>
             {% endfor %}
           </div>
           {% endif %}

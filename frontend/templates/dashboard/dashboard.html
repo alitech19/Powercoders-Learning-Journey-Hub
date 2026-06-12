@@ -61,7 +61,7 @@
   <p class="text-sm text-gray-500 mb-4">Users, cohorts, and student oversight</p>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
     <a href="{% url 'accounts:cohort_list' %}"
-       class="flex items-center gap-3 rounded-xl border-2 border-[#B23149]/20 bg-[#F5EDE0] hover:border-[#B23149] hover:shadow-sm px-4 py-4 transition-all group">
+       class="flex items-center gap-3 rounded-xl border-2 border-[#B23149]/20 bg-[#F5EDE0] dark:bg-gray-800 hover:border-[#B23149] hover:shadow-sm px-4 py-4 transition-all group">
       {% volumetric_icon "cohorts" size="md" variant="brand" %}
       <span>
         <span class="block text-sm font-semibold text-[#343534] dark:text-gray-100 group-hover:text-[#B23149]">Cohorts & Groups</span>
@@ -69,7 +69,7 @@
       </span>
     </a>
     <a href="{% url 'accounts:student_progress' %}"
-       class="flex items-center gap-3 rounded-xl border-2 border-[#B23149]/20 bg-[#F5EDE0] hover:border-[#B23149] hover:shadow-sm px-4 py-4 transition-all group">
+       class="flex items-center gap-3 rounded-xl border-2 border-[#B23149]/20 bg-[#F5EDE0] dark:bg-gray-800 hover:border-[#B23149] hover:shadow-sm px-4 py-4 transition-all group">
       {% volumetric_icon "users" size="md" variant="brand" %}
       <span>
         <span class="block text-sm font-semibold text-[#343534] dark:text-gray-100 group-hover:text-[#B23149]">Student Progress</span>
@@ -77,7 +77,7 @@
       </span>
     </a>
     <a href="{% url 'accounts:user_list' %}"
-       class="flex items-center gap-3 rounded-xl border-2 border-[#B23149]/20 bg-[#F5EDE0] hover:border-[#B23149] hover:shadow-sm px-4 py-4 transition-all group">
+       class="flex items-center gap-3 rounded-xl border-2 border-[#B23149]/20 bg-[#F5EDE0] dark:bg-gray-800 hover:border-[#B23149] hover:shadow-sm px-4 py-4 transition-all group">
       {% volumetric_icon "mail" size="md" variant="brand" %}
       <span>
         <span class="block text-sm font-semibold text-[#343534] dark:text-gray-100 group-hover:text-[#B23149]">Users</span>
@@ -85,7 +85,7 @@
       </span>
     </a>
     <a href="{% url 'dashboard:analytics' %}"
-       class="flex items-center gap-3 rounded-xl border-2 border-[#B23149]/20 bg-[#F5EDE0] hover:border-[#B23149] hover:shadow-sm px-4 py-4 transition-all group">
+       class="flex items-center gap-3 rounded-xl border-2 border-[#B23149]/20 bg-[#F5EDE0] dark:bg-gray-800 hover:border-[#B23149] hover:shadow-sm px-4 py-4 transition-all group">
       {% volumetric_icon "goals" size="md" variant="brand" %}
       <span>
         <span class="block text-sm font-semibold text-[#343534] dark:text-gray-100 group-hover:text-[#B23149]">Analytics Dashboard</span>
@@ -277,7 +277,7 @@
 
 {# Row 1 — Workflows (featured) #}
 <a href="{% url 'workflows:list' %}"
-   class="block mb-6 bg-[#F5EDE0] border-2 border-[#EDE3D5] hover:border-[#B23149]/50 hover:shadow-md rounded-2xl p-6 sm:p-8 transition-all group">
+   class="block mb-6 bg-[#F5EDE0] dark:bg-gray-800 border-2 border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/50 hover:shadow-md rounded-2xl p-6 sm:p-8 transition-all group">
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
       <div class="flex items-center gap-3 mb-2">
@@ -306,7 +306,7 @@
 
 {# Row 2 — Goals · Tasks · Reflections #}
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-  <a href="{% url 'goals:list' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
+  <a href="{% url 'goals:list' %}" class="bg-[#F5EDE0] dark:bg-gray-800 border border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
     <div class="flex items-center gap-2 mb-2">
       {% volumetric_icon "goals" size="sm" variant="cream" %}
       <span class="text-sm font-semibold text-[#343534] dark:text-gray-100">Goals</span>
@@ -317,7 +317,7 @@
     </p>
   </a>
 
-  <a href="{% url 'tasks:task_list' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
+  <a href="{% url 'tasks:task_list' %}" class="bg-[#F5EDE0] dark:bg-gray-800 border border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
     <div class="flex items-center gap-2 mb-2">
       {% volumetric_icon "tasks" size="sm" variant="cream" %}
       <span class="text-sm font-semibold text-[#343534] dark:text-gray-100">Tasks</span>
@@ -336,7 +336,7 @@
     {% endif %}
   </a>
 
-  <a href="{% url 'reflections:list' %}" class="bg-[#F5EDE0] border {% if reflection_due %}border-amber-300{% else %}border-[#EDE3D5]{% endif %} hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
+  <a href="{% url 'reflections:list' %}" class="bg-[#F5EDE0] dark:bg-gray-800 border {% if reflection_due %}border-amber-300{% else %}border-[#EDE3D5] dark:border-gray-700{% endif %} hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
     <div class="flex items-center gap-2 mb-2">
       {% volumetric_icon "reflections" size="sm" variant="cream" %}
       <span class="text-sm font-semibold text-[#343534] dark:text-gray-100">Reflections</span>
@@ -351,7 +351,7 @@
 
 {# Row 3 — Journal · Habits · Group · Resources (nav order) #}
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-  <div class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all">
+  <div class="bg-[#F5EDE0] dark:bg-gray-800 border border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all">
     <a href="{% url 'journal:list' %}" class="block">
       <div class="flex items-center gap-2 mb-2">
         {% volumetric_icon "journal" size="sm" variant="cream" %}
@@ -361,7 +361,7 @@
       <p class="text-xs text-gray-500">entr{{ journal_count|pluralize:"y,ies" }}</p>
     </a>
     {% if recent_journal_entries %}
-    <div class="space-y-1.5 border-t border-[#EDE3D5] pt-3 mt-3">
+    <div class="space-y-1.5 border-t border-[#EDE3D5] dark:border-gray-700 pt-3 mt-3">
       {% for entry in recent_journal_entries %}
       <a href="{% url 'journal:detail' entry.pk %}"
          class="flex items-center justify-between gap-2 hover:opacity-70 transition-opacity">
@@ -373,7 +373,7 @@
     {% endif %}
   </div>
 
-  <a href="{% url 'habits:list' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
+  <a href="{% url 'habits:list' %}" class="bg-[#F5EDE0] dark:bg-gray-800 border border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
     <div class="flex items-center gap-2 mb-2">
       {% volumetric_icon "habits" size="sm" variant="cream" %}
       <span class="text-sm font-semibold text-[#343534] dark:text-gray-100">Habits</span>
@@ -383,7 +383,7 @@
   </a>
 
   {% if has_group %}
-  <a href="{% url 'group_space:feed' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
+  <a href="{% url 'group_space:feed' %}" class="bg-[#F5EDE0] dark:bg-gray-800 border border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
     <div class="flex items-center gap-2 mb-2">
       {% volumetric_icon "chat" size="sm" variant="cream" %}
       <span class="text-sm font-semibold text-[#343534] dark:text-gray-100">Group</span>
@@ -401,7 +401,7 @@
   </div>
   {% endif %}
 
-  <a href="{% url 'resources:index' %}" class="bg-[#F5EDE0] border border-[#EDE3D5] hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
+  <a href="{% url 'resources:index' %}" class="bg-[#F5EDE0] dark:bg-gray-800 border border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
     <div class="flex items-center gap-2 mb-2">
       {% volumetric_icon "resources" size="sm" variant="cream" %}
       <span class="text-sm font-semibold text-[#343534] dark:text-gray-100">Resources</span>

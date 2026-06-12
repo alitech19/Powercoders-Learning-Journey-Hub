@@ -4,7 +4,7 @@
   {% elif size == 'lg' %}h-12 w-12 rounded-xl
   {% else %}h-10 w-10 rounded-xl{% endif %}
   {% if variant == 'cream' %}bg-white/80 text-[#343534] dark:text-gray-100 shadow-sm
-  {% elif variant == 'soft' %}bg-[#F5EDE0] text-[#343534] dark:text-gray-100 shadow-sm
+  {% elif variant == 'soft' %}bg-[#F5EDE0] dark:bg-gray-800 text-[#343534] dark:text-gray-100 shadow-sm
   {% elif variant == 'nav' %}bg-gray-100 text-gray-500 shadow-sm
   {% else %}bg-[#B23149] text-white shadow-sm{% endif %}
   {% if extra_class %} {{ extra_class }}{% endif %}"
