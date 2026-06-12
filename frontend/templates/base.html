@@ -116,7 +116,7 @@
           <a href="{% url 'accounts:notifications' %}"
              class="relative group transition-colors"
              aria-label="Notifications{% if unread_notifications_count %} ({{ unread_notifications_count }} unread){% endif %}">
-            {% volumetric_icon "notifications" size="sm" variant="nav" extra_class="group-hover:bg-[#B23149]/10 group-hover:text-[#B23149]" %}
+            {% volumetric_icon "notifications" size="sm" variant="nav-ghost" %}
             {% if unread_notifications_count %}
             <span class="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-[#B23149] text-white text-[10px] font-bold flex items-center justify-center" aria-hidden="true">
               {{ unread_notifications_count }}
