@@ -26,26 +26,23 @@
 /* ── Class-based dark mode (requires .dark on <html>) ────────────────── */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Dark mode warm color overrides ─────────────────────────────────── */
+/* ── Dark mode: Pure Zinc Neutral ────────────────────────────────────── */
 /* Tailwind v4 generates utilities via var(--color-gray-*), so overriding  */
 /* these variables inside .dark cascades to every element automatically — */
 /* no template changes needed.                                             */
-/* Problem: default gray-950/900 have a cold blue tint (#030712 / #111827) */
-/* and near-pure-white text (gray-100 = #f3f4f6) causing ~19:1 contrast   */
-/* ratio (WCAG max is 7:1 AAA). Fix: warm neutrals + slightly dimmer text  */
-/* reduce eye strain while remaining fully accessible.                     */
+/* Zinc is a perfectly neutral gray with zero warm/cool tint.             */
 .dark {
-  --color-gray-950: #141414;   /* was #030712 — warm near-black, no blue tint */
-  --color-gray-900: #1e1e1e;   /* was #111827 — nav/card surface               */
-  --color-gray-800: #272727;   /* was #1f2937 — elevated surfaces (dropdowns)  */
-  --color-gray-700: #333333;   /* was #374151 — borders, dividers               */
-  --color-gray-600: #3d3d3d;   /* was #4b5563 — subtle borders                  */
-  --color-gray-500: #6b6b6b;   /* was #6b7280 — muted icons/placeholders        */
-  --color-gray-400: #909090;   /* was #9ca3af — secondary text                  */
-  --color-gray-300: #b0b0b0;   /* was #d1d5db — dimmed text                     */
-  --color-gray-200: #d4d4d4;   /* was #e5e7eb — light text on dark              */
-  --color-gray-100: #e8e8e8;   /* was #f3f4f6 — primary text (~11:1 vs #141414) */
-  --color-gray-50:  #f2f2f2;   /* was #f9fafb — near-white text                 */
+  --color-gray-950: #09090b;   /* zinc-950 — deepest background               */
+  --color-gray-900: #18181b;   /* zinc-900 — page background                  */
+  --color-gray-800: #27272a;   /* zinc-800 — nav / card surfaces              */
+  --color-gray-700: #3f3f46;   /* zinc-700 — elevated elements, borders       */
+  --color-gray-600: #52525b;   /* zinc-600 — subtle borders                   */
+  --color-gray-500: #71717a;   /* zinc-500 — muted icons / placeholders       */
+  --color-gray-400: #a1a1aa;   /* zinc-400 — secondary text                   */
+  --color-gray-300: #d4d4d8;   /* zinc-300 — dimmed text                      */
+  --color-gray-200: #e4e4e7;   /* zinc-200 — light text on dark               */
+  --color-gray-100: #f4f4f5;   /* zinc-100 — primary text                     */
+  --color-gray-50:  #fafafa;   /* zinc-50  — near-white text                  */
 }
 
 /* ── Global base styles ─────────────────────────────────────────────── */
