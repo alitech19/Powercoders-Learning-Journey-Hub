@@ -86,7 +86,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'accounts.context_processors.dev_login_panel',
                 'accounts.context_processors.unread_notifications',
                 'config.context_processors.integrated_nav',
                 'config.context_processors.page_meta',
@@ -346,14 +345,3 @@ if _SENTRY_DSN:
         traces_sample_rate=0.2,
         send_default_pii=False,
     )
-
-# --- Development seed (local only) ---
-# WARNING: Remove this entire block from the codebase before production deploy.
-# See docs/PRODUCTION_CHECKLIST.md
-ENABLE_DEV_SEED = DEBUG and os.environ.get('ENABLE_DEV_SEED', 'False').lower() in (
-    'true',
-    '1',
-    'yes',
-)
-DEV_SEED_FILE = BASE_DIR / 'dev' / 'seed.yaml'
-DEV_SUPERUSER_EMAIL = os.environ.get('DJANGO_SUPERUSER_EMAIL', '').strip()

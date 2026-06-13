@@ -1,20 +1,11 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import get_user_model, login, update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
-from django.http import Http404
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.utils import timezone
-from django.views.decorators.http import require_POST
-from django_otp import login as otp_login
-from django_otp.plugins.otp_totp.models import TOTPDevice
 
-from .dev_seed import (
-    DEV_AUTH_BYPASS_SESSION_KEY,
-    allowed_dev_login_emails,
-    dev_seed_enabled,
-)
 from .forms import ProfileForm
 from .models import User
 
@@ -153,21 +144,3 @@ def password_change_required(request):
             update_session_auth_hash(request, user)
             return redirect(settings.LOGIN_REDIRECT_URL)
     return render(request, 'accounts/password_change_required.html', {'form': form})
-
-
-@require_POST
-def dev_quick_login(request, email):
-    if not dev_seed_enabled():
-        raise Http404
-
-    email_normalized = email.lower()
-    if email_normalized not in allowed_dev_login_emails():
-        raise Http404
-
-    user = get_object_or_404(get_user_model(), email__iexact=email)
-    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-    device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
-    if device is not None:
-        otp_login(request, device)
-    request.session[DEV_AUTH_BYPASS_SESSION_KEY] = True
-    return redirect(settings.LOGIN_REDIRECT_URL)

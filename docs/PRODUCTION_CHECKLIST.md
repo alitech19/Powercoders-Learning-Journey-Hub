@@ -44,34 +44,15 @@ On the **`integration`** branch we **intentionally keep** the CDN-based frontend
 
 ## Dev users — remove from the codebase
 
-**Do not ship dev-only auth to production.** Disabling `ENABLE_DEV_SEED` is not enough for go-live — **delete the dev-user mechanism from the repository** before the production deploy (or in a dedicated pre-release commit/PR).
+> **✅ Completed** (on the `Ali` branch). The dev-user mechanism has been deleted from the repository, not just disabled:
+> `backend/dev/`, `accounts/dev_seed.py`, the `seed_dev_data` and `create_dev_superuser` management commands, `_dev_login_panel.html`, the `dev_quick_login` view + `dev-login/` route, the `dev_login_panel` context processor, the 2FA dev-bypass in `middleware.py`, the dev-seed settings (`ENABLE_DEV_SEED` / `DEV_SEED_FILE` / `DEV_SUPERUSER_EMAIL`), the login-page panel, the Docker/Render seed commands, the `ENABLE_DEV_SEED` / `DJANGO_SUPERUSER_*` env blocks, and `PyYAML` (no longer used).
+>
+> Verified: `python manage.py check` clean; full test suite (251 tests) passes; `/account/login/` renders the email/password form only (no dev panel); no `dev_quick_login` reference remains.
 
-### Remove these files and folders
+Still required at deploy time:
 
-- [ ] `backend/dev/` (entire folder — `seed.yaml`, README)
-- [ ] `backend/accounts/dev_seed.py`
-- [ ] `backend/accounts/management/commands/seed_dev_data.py`
-- [ ] `backend/accounts/management/commands/create_dev_superuser.py`
-- [ ] `frontend/templates/registration/_dev_login_panel.html`
-
-### Remove or revert code references
-
-- [ ] `accounts/views.py` — `dev_quick_login` view
-- [ ] `accounts/urls.py` — `dev-login/<email>/` route
-- [ ] `accounts/context_processors.py` — `dev_login_panel` (delete file if nothing else remains)
-- [ ] `config/settings.py` — `ENABLE_DEV_SEED`, `DEV_SEED_FILE`, `DEV_SUPERUSER_EMAIL`, and `accounts.context_processors.dev_login_panel` from `TEMPLATES`
-- [ ] `frontend/templates/two_factor/core/login.html` — dev quick-login section
-- [ ] `docker-compose.yml` — `create_dev_superuser` and `seed_dev_data` from the web `command`
-- [ ] `.env.example` — `ENABLE_DEV_SEED` and `DJANGO_SUPERUSER_*` blocks
-- [ ] `requirements.txt` — `PyYAML` if no longer used elsewhere
-
-### Verify after removal
-
-- [ ] `DEBUG=False` in production `.env`
-- [ ] Production start command runs only: `migrate`, `collectstatic`, app server (no seed commands)
-- [ ] `/account/login/` — normal email/password form only (no dev panel include)
-- [ ] No `dev-login` URL in the project (`grep -r dev.login` / search for `dev_quick_login`)
-- [ ] Create production admin manually: `python manage.py createsuperuser`
+- [ ] `DEBUG=False` in production env, with a strong `SECRET_KEY`
+- [ ] Create the production admin manually: `python manage.py createsuperuser`
 
 ## Secrets & infrastructure
 

@@ -43,14 +43,9 @@ Run **`collectstatic`** on every web deploy (build command below). Local Docker 
 
 Uploaded files (avatars, group chat attachments) use `MEDIA_ROOT` on disk. Render web disks are **ephemeral** — uploads can disappear on redeploy. For tester QA this is often acceptable; for stable files use S3 later ([SCALING_ROADMAP.md](SCALING_ROADMAP.md)).
 
-### Dev seed on Render
+### Creating users on Render
 
-`ENABLE_DEV_SEED` only applies when `DEBUG=True` in settings. For a tester host you can either:
-
-- **`DEBUG=True`** only on Render (simplest for seed + quick login; **not** for real production), or  
-- **`DEBUG=False`**: create users via Django admin or CSV import; no dev quick-login panel.
-
-Do **not** treat a `DEBUG=True` Render URL as production.
+The dev-seed / quick-login mechanism has been **removed from the codebase**. Create the admin via the Render **Shell** (`python manage.py createsuperuser`), then add users from **Administration → Users** or CSV import. New users get a temporary password (emailed when SMTP is configured — otherwise it appears in the create-user UI) and set their own on first login.
 
 ---
 
@@ -61,17 +56,15 @@ Template: [`.env.render-test.example`](../.env.render-test.example).
 | Variable | Value |
 |----------|--------|
 | `DEBUG` | `True` |
-| `ENABLE_DEV_SEED` | `true` |
-| `CREATE_DEV_SUPERUSER` | `true` (set strong `DJANGO_SUPERUSER_*` in Render — not the local dev default) |
 | `ALLOWED_HOSTS` | `your-app.onrender.com` (no `https://`) |
 | `CSRF_TRUSTED_ORIGINS` | `https://your-app.onrender.com` |
 | `SITE_URL` | `https://your-app.onrender.com` |
 
-Enables dev **quick-login** panel and loads users from `backend/dev/seed.yaml` on deploy. Emails go to **Render logs** only. **Not** for production — treat the URL as internal QA.
+Emails go to **Render logs** only unless SMTP is configured. **Not** for production — treat the URL as internal QA.
 
-**Start command (web)** — use [`scripts/render-web-start.sh`](../scripts/render-web-start.sh) (see [§3 Web service](#3-web-service)): runs `migrate` every start; `create_dev_superuser` and `seed_dev_data` only when `CREATE_DEV_SUPERUSER` / `ENABLE_DEV_SEED` are `true`.
+**Start command (web)** — use [`scripts/render-web-start.sh`](../scripts/render-web-start.sh) (see [§3 Web service](#3-web-service)): runs `migrate`, then Gunicorn.
 
-Login: `/account/login/` — quick-login cohort cards (if seed ran) or seed emails from `backend/dev/seed.yaml`.
+Login: `/account/login/` — create the admin first via the Render **Shell** (`python manage.py createsuperuser`).
 
 ### Alternative — `DEBUG=False` (stricter staging)
 
@@ -83,8 +76,8 @@ No dev panel; create users manually after deploy.
 | `ENABLE_DEV_SEED` | `false` |
 | `CREATE_DEV_SUPERUSER` | `false` |
 
-**Start command:** same `render-web-start.sh` (migrate + gunicorn only when seed flags are `false`).  
-Then Shell if needed: `cd backend && python manage.py createsuperuser`.
+**Start command:** same `render-web-start.sh` (migrate + Gunicorn).  
+Then Shell: `cd backend && python manage.py createsuperuser`.
 
 ---
 
@@ -151,13 +144,13 @@ pip install -r requirements.txt && cd backend && python manage.py collectstatic 
 chmod +x scripts/render-web-start.sh && ./scripts/render-web-start.sh
 ```
 
-Inline equivalent (only if not using the script — set `CREATE_DEV_SUPERUSER` / `ENABLE_DEV_SEED` in Render env when you want seed):
+Inline equivalent (only if not using the script):
 
 ```bash
-cd backend && python manage.py migrate --noinput && python manage.py create_dev_superuser && python manage.py seed_dev_data && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+cd backend && python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120
 ```
 
-Prefer **`render-web-start.sh`**: same migrate/seed rules driven by env flags. `migrate` on every restart is normal for QA; seed is idempotent. **Do not** put `migrate` in **Build** — build has no access to the internal database.
+Prefer **`render-web-start.sh`**: runs `migrate` then Gunicorn. `migrate` on every restart is normal for QA. **Do not** put `migrate` in **Build** — build has no access to the internal database.
 
 (Render sets `$PORT`.)
 
@@ -204,7 +197,7 @@ cd backend && python manage.py migrate --noinput && celery -A config beat --logl
 Paid Render can use **Pre-deploy** for migrate only. On **free** plans use **Start command** (section 3) or **Shell** once:
 
 ```bash
-cd backend && python manage.py migrate --noinput && python manage.py create_dev_superuser && python manage.py seed_dev_data
+cd backend && python manage.py migrate --noinput && python manage.py createsuperuser
 ```
 
 ---
@@ -279,7 +272,7 @@ More incidents: [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md).
 | | Tester (this doc) | Production |
 |--|-------------------|------------|
 | Branch | `deploy` | `main` or release tag |
-| Dev quick-login / seed in repo | Optional with `DEBUG=True` | **Remove code** — [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) |
+| Dev quick-login / seed | Removed from codebase | Removed from codebase |
 | `DEBUG` | May be `True` briefly | `False` |
 | Email | Real SMTP recommended | Real SMTP required |
 | Scaling detail | [SCALING_ROADMAP.md](SCALING_ROADMAP.md) | Same + backups, monitoring |

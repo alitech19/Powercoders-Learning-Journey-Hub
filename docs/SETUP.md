@@ -42,11 +42,8 @@ Edit `.env` if needed. Defaults work for local Docker development.
 | `REDIS_URL` | Cache and Celery broker |
 | `SECRET_KEY` | Django secret (change in production) |
 | `DEBUG` | `True` for local dev |
-| `ENABLE_DEV_SEED` | `true` to load test users from `backend/dev/seed.yaml` (default **False** in code) |
-| `CREATE_DEV_SUPERUSER` | `true` to run `create_dev_superuser` on Docker web start (default **false**; set in `.env.example` for local dev) |
-| `DJANGO_SUPERUSER_*` | Credentials for dev superuser when `CREATE_DEV_SUPERUSER=true` |
 
-> **Production:** before go-live, **remove dev-user code from the repository** (not just disable env flags). See [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md).
+> **Note:** dev-user seeding and the quick-login panel have been **removed from the codebase**. Create accounts with `createsuperuser` and the in-app **Administration → Users**. See [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md).
 
 ## 3. Start services
 
@@ -60,13 +57,11 @@ This starts five services:
 |---------|------|
 | `db` | PostgreSQL 17 |
 | `redis` | Cache + Celery message broker |
-| `web` | Django (`migrate`, `collectstatic`, optional dev superuser/seed, `runserver`) |
+| `web` | Django (`migrate`, `collectstatic`, `runserver`) |
 | `worker` | Celery worker (runs tasks) |
 | `beat` | Celery beat (`django-celery-beat` — schedules in Django admin) |
 
 On first run, migrations run automatically.
-
-On first run: migrations; dev superuser if `CREATE_DEV_SUPERUSER=true` and `DJANGO_SUPERUSER_*` set; dev seed if `ENABLE_DEV_SEED=true`.
 
 ### Frontend (`integration` branch)
 
@@ -78,11 +73,13 @@ Navbar: **Learning** / **Wellbeing** dropdowns, **Group Space**, **Resources**; 
 
 Open http://localhost:8000/account/login/ (redirect from `/accounts/login/` also works).
 
-- **Quick login panel** (when `ENABLE_DEV_SEED=true`): cohort cards with one-click buttons for admin, teachers, and students.
-- **Normal login**: email + password — full production flow (axes lockout, 2FA for staff, privacy, welcome tutorial). First login is gated by `WelcomeMiddleware` until `welcome_seen` is set.
-- **Seed passwords**: `backend/dev/seed.yaml` or superuser credentials from `.env`.
+Create an admin first:
 
-Test users are defined in `backend/dev/seed.yaml` (not in `.env`).
+```bash
+docker compose exec web python manage.py createsuperuser
+```
+
+Then log in with email + password — the full production flow (axes lockout, 2FA for staff, privacy, welcome tutorial). First login is gated by `WelcomeMiddleware` until `welcome_seen` is set. Create further users from **Administration → Users** (or CSV import); each new user gets a temporary password and is forced to change it on first login.
 
 ### Cohorts and groups (admin)
 
@@ -100,7 +97,7 @@ Teachers are linked to groups via **Group teachers**, not via fields on the user
 |-----|----------|
 | http://localhost:8000/ | Home page |
 | http://localhost:8000/health/ | `{"status": "ok"}` |
-| http://localhost:8000/account/login/ | 2FA login + dev quick-login panel (if enabled) |
+| http://localhost:8000/account/login/ | Email + password login (2FA for staff) |
 | http://localhost:8000/accounts/profile/ | Profile (after login) |
 | http://localhost:8000/admin/ | Django admin |
 
@@ -217,13 +214,11 @@ Shared environment for QA and usability testing — **not** production.
 
 ## Production deploy
 
-**Before go-live**, **remove dev-user functionality from the codebase** and complete [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md):
+Complete [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md). The dev-user mechanism (seed, quick-login, `create_dev_superuser`) has already been **removed from the codebase**. For go-live:
 
-- Delete `backend/dev/`, seed commands, quick-login views/templates, and related settings
 - Production Docker command: `migrate` + `collectstatic` + app server only
-- Create admin manually: `docker compose exec web python manage.py createsuperuser` (on the production host)
-
-Setting `ENABLE_DEV_SEED=false` alone is **not** sufficient for production.
+- Set `DEBUG=False` with a strong `SECRET_KEY`, and configure SMTP so real users receive email
+- Create the admin manually: `docker compose exec web python manage.py createsuperuser` (on the production host)
 
 ## Tests
 

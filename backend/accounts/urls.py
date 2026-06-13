@@ -29,7 +29,6 @@ urlpatterns = [
     path('welcome/', views.welcome, name='welcome'),
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
     path('password-change/', views.password_change_required, name='password_change_required'),
-    path('dev-login/<str:email>/', views.dev_quick_login, name='dev_quick_login'),
     path('users/', management_views.user_list, name='user_list'),
     path('users/create/', management_views.user_create, name='user_create'),
     path('users/import/', management_views.user_import, name='user_import'),

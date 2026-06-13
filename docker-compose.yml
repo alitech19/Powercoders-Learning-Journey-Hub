@@ -36,13 +36,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    # DEV ONLY: set CREATE_DEV_SUPERUSER=true in .env to auto-create the dev admin account.
-    # Leave unset (or false) in staging/production. seed_dev_data respects ENABLE_DEV_SEED.
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
-             if [ \"$$CREATE_DEV_SUPERUSER\" = 'true' ]; then python manage.py create_dev_superuser; fi &&
-             python manage.py seed_dev_data &&
              python manage.py runserver 0.0.0.0:8000"
 
   worker:

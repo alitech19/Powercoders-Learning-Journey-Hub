@@ -101,23 +101,6 @@
       </form>
     </div>
 
-    {% if dev_seed_enabled %}
-    <section class="mt-8 p-5 border-2 border-dashed border-[#B23149] rounded-xl bg-white/80 dark:bg-gray-900">
-      <p class="font-semibold text-[#343534] dark:text-gray-100 mb-2">Development quick login — testers only</p>
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-        Buttons below sign you in <strong>directly</strong> and skip 2FA, privacy policy, and other onboarding checks.
-        Seed users are pre-configured in the database for that purpose.
-      </p>
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        The <strong>email + password form above</strong> uses the real login path — lockout, 2FA when enabled, etc.
-      </p>
-      <p class="text-xs text-[#922b21] mb-4">
-        Remove this panel and all dev-seed code before production. See <code>{{ dev_production_checklist_path }}</code>.
-      </p>
-      {% include "registration/_dev_login_panel.html" %}
-    </section>
-    {% endif %}
-
     <p class="text-center text-xs text-[#343534] dark:text-gray-100/40 mt-8">© 2026 Powercoders</p>
   </div>
 </body>

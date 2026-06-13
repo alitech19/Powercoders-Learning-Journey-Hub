@@ -1,16 +1,14 @@
 import shutil
 import tempfile
 from io import BytesIO
-from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase, override_settings
+from django.test import Client, TestCase
 from django.urls import reverse
 from PIL import Image
 
-from accounts.dev_seed import DEV_AUTH_BYPASS_SESSION_KEY
 from accounts.models import User
-from test_utils.users import DEFAULT_PASSWORD, login_as, make_student, make_teacher
+from test_utils.users import DEFAULT_PASSWORD, login_as, make_student
 
 
 class ProfileViewTests(TestCase):
@@ -129,33 +127,6 @@ class PasswordChangeRequiredViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.user.refresh_from_db()
         self.assertFalse(self.user.must_change_password)
-
-
-class DevQuickLoginTests(TestCase):
-    def test_disabled_returns_404(self):
-        client = Client()
-        response = client.post(reverse('accounts:dev_quick_login', args=['any@example.com']))
-        self.assertEqual(response.status_code, 404)
-
-    @override_settings(ENABLE_DEV_SEED=True, DEBUG=True)
-    @patch('accounts.views.allowed_dev_login_emails', return_value=frozenset({'dev@example.com'}))
-    def test_enabled_logs_in_allowed_email(self, _mock_emails):
-        user = make_teacher('dev@example.com')
-        client = Client()
-        response = client.post(reverse('accounts:dev_quick_login', args=[user.email]))
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(client.session.get(DEV_AUTH_BYPASS_SESSION_KEY))
-        self.assertEqual(int(client.session['_auth_user_id']), user.pk)
-
-    @override_settings(ENABLE_DEV_SEED=True, DEBUG=True)
-    @patch('accounts.views.allowed_dev_login_emails', return_value=frozenset({'other@example.com'}))
-    def test_unknown_email_returns_404(self, _mock_emails):
-        make_teacher('dev@example.com')
-        client = Client()
-        response = client.post(
-            reverse('accounts:dev_quick_login', args=['dev@example.com']),
-        )
-        self.assertEqual(response.status_code, 404)
 
 
 class LoginRequiredTests(TestCase):

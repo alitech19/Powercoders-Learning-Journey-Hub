@@ -50,8 +50,6 @@ jobs:
       CELERY_BROKER_URL: redis://localhost:6379/0
       EMAIL_BACKEND: django.core.mail.backends.console.EmailBackend
       SLACK_WEBHOOK_URL: ''
-      CREATE_DEV_SUPERUSER: 'false'
-      ENABLE_DEV_SEED: 'false'
 
     steps:
       - name: Checkout code

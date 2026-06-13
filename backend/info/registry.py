@@ -86,7 +86,6 @@ DISABLED_VIEW_NAMES = frozenset(
         'accounts:privacy_policy',
         'accounts:password_change_required',
         'accounts:logout',
-        'accounts:dev_quick_login',
         'info:topic',
         'health:health',
         'health',

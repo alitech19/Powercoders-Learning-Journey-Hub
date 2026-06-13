@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from django_otp.plugins.otp_totp.models import TOTPDevice
-
-from accounts.dev_seed import apply_dev_user_security_bypass
 
 User = get_user_model()
 
@@ -28,7 +27,11 @@ def make_user(
         **extra,
     )
     if bypass_onboarding:
-        apply_dev_user_security_bypass(user)
+        # Test users skip onboarding gates (privacy policy, welcome, forced password change).
+        user.privacy_policy_accepted = True
+        user.privacy_policy_accepted_at = timezone.now()
+        user.welcome_seen = True
+        user.must_change_password = False
         user.save(
             update_fields=[
                 'privacy_policy_accepted',

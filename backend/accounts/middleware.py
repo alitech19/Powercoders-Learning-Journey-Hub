@@ -95,8 +95,7 @@ class Require2FAMiddleware:
         if request.user.is_authenticated:
             if request.user.role in (User.Role.ADMIN, User.Role.TEACHER):
                 exempt = any(request.path.startswith(p) for p in TWO_FA_EXEMPT)
-                dev_bypass = _dev_auth_bypass(request)
-                if not exempt and not dev_bypass:
+                if not exempt:
                     from django_otp import user_has_device
 
                     if not user_has_device(request.user):
@@ -146,9 +145,3 @@ class AuditLoggingMiddleware:
             except Exception:
                 pass
         return response
-
-
-def _dev_auth_bypass(request) -> bool:
-    from .dev_seed import DEV_AUTH_BYPASS_SESSION_KEY, dev_seed_enabled
-
-    return dev_seed_enabled() and bool(request.session.get(DEV_AUTH_BYPASS_SESSION_KEY))

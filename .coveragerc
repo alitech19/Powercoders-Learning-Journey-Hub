@@ -8,8 +8,6 @@ omit =
     **/test_*.py
     **/test_utils/**
     **/management/**
-    **/dev/**
-    **/dev_seed.py
     **/apps.py
     **/admin.py
     **/urls.py

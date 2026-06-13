@@ -235,11 +235,13 @@ docker compose up --build
 # http://localhost:8000/account/login/
 ```
 
-| First-login | How |
-|---|---|
-| Dev quick-login panel | `ENABLE_DEV_SEED=true` in `.env` (default) — shows test accounts |
-| Email + password | `admin@dev.powerhub.local` / `admin-dev-powerhub-local` (auto-created when `CREATE_DEV_SUPERUSER=true`) |
-| Seeded users | See `backend/dev/seed.yaml` |
+Create your first admin, then log in with email + password (you set up 2FA on first login):
+
+```bash
+docker compose exec web python manage.py createsuperuser
+```
+
+Add further users from **Administration → Users** (or CSV import) — each gets a temporary password and is forced to change it on first login.
 
 > Migrations run **automatically** on container startup. First build takes ~2 minutes.
 

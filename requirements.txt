@@ -9,7 +9,6 @@ celery[redis]>=5.4
 django-celery-beat>=2.7
 django-redis>=5.4
 redis>=5.2
-PyYAML>=6.0
 
 # Security — authentication (see docs auth phases)
 argon2-cffi>=23.1

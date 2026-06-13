@@ -1,7 +1,11 @@
+import logging
+
 from django.conf import settings
 from django.core.mail import send_mail
 
 from .slack import send_slack_message
+
+logger = logging.getLogger(__name__)
 
 
 def _send(subject, body, recipient_email):
@@ -14,7 +18,12 @@ def _send(subject, body, recipient_email):
             fail_silently=False,
         )
     except Exception:
-        pass
+        logger.warning(
+            'Failed to send email %r to %s — check EMAIL_BACKEND / SMTP settings.',
+            subject,
+            recipient_email,
+            exc_info=True,
+        )
 
 
 def create_notification(recipient, title, body='', url=''):
