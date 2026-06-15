@@ -27,6 +27,7 @@ ALLOWED_HOSTS = [
 
 INSTALLED_APPS = [
     'config.apps.PowerhubConfigConfig',
+    'anymail',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -230,23 +231,22 @@ BACKUP_S3_ENDPOINT_URL = os.environ.get('BACKUP_S3_ENDPOINT_URL', '')  # Backbla
 BACKUP_S3_REGION = os.environ.get('BACKUP_S3_REGION', 'us-east-1')
 BACKUP_RETENTION_DAYS = int(os.environ.get('BACKUP_RETENTION_DAYS', '30'))
 
-EMAIL_BACKEND = os.environ.get(
-    'EMAIL_BACKEND',
-    'django.core.mail.backends.console.EmailBackend',
-)
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@powercoders.org')
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8000').rstrip('/')
 SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL', '').strip()
 
-# SMTP credentials — used when EMAIL_BACKEND is set to smtp (production)
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.sendgrid.net')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False').lower() in ('true', '1', 'yes')
-EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'True').lower() in ('true', '1', 'yes')
-EMAIL_TIMEOUT = 10  # seconds — prevents SMTP from hanging the request indefinitely
+# Email — SendGrid HTTP API (works on Render free tier; SMTP ports are blocked there)
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
+if SENDGRID_API_KEY:
+    EMAIL_BACKEND = 'anymail.backends.sendgrid.EmailBackend'
+    ANYMAIL = {'SENDGRID_API_KEY': SENDGRID_API_KEY}
+else:
+    EMAIL_BACKEND = os.environ.get(
+        'EMAIL_BACKEND',
+        'django.core.mail.backends.console.EmailBackend',
+    )
+EMAIL_TIMEOUT = 10
 
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
