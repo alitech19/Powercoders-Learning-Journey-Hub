@@ -91,7 +91,7 @@ Folder IDs are cached in `GoogleDriveFolder` (visible under “Cached Drive fold
 docker compose up --build
 ```
 
-Requires **web**, **worker**, **redis**, and **migrate** services. Configure storage in the UI after `createsuperuser`.
+Requires **web**, **worker**, and **redis**. Configure storage in the UI after `createsuperuser`.
 
 See [SETUP.md](SETUP.md) for full local stack.
 

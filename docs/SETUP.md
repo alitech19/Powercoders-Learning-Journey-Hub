@@ -51,18 +51,21 @@ Edit `.env` if needed. Defaults work for local Docker development.
 docker compose up --build
 ```
 
-This starts six services:
+This starts five services:
 
 | Service | Role |
 |---------|------|
 | `db` | PostgreSQL 17 |
 | `redis` | Cache + Celery message broker |
-| `migrate` | One-shot `locked_migrate` (runs once per `up`, then exits) |
-| `web` | Django (`collectstatic`, `runserver`) — starts **after** migrate |
-| `worker` | Celery worker (runs tasks) |
-| `beat` | Celery beat (`django-celery-beat` — schedules in Django admin) |
+| `web` | `locked_migrate`, `collectstatic`, `runserver` |
+| `worker` | `locked_migrate`, Celery worker |
+| `beat` | `locked_migrate`, Celery beat (`django-celery-beat`) |
 
-On first run, the **`migrate`** service applies migrations automatically. Do **not** run `manage.py migrate` at the same time as `docker compose up` — use `locked_migrate` if you need to migrate manually later.
+`web`, `worker`, and `beat` each run **`locked_migrate`** on start (PostgreSQL advisory lock — safe if they start together). Prefer `locked_migrate` over plain `migrate` for manual runs too:
+
+```bash
+docker compose exec web python manage.py locked_migrate --noinput
+```
 
 ### Frontend (`integration` branch)
 
@@ -141,8 +144,8 @@ docker compose down -v --remove-orphans
 docker compose stop db
 docker compose rm -f db
 
-# Run migrations manually
-docker compose exec web python manage.py migrate
+# Run migrations manually (parallel-safe)
+docker compose exec web python manage.py locked_migrate --noinput
 
 # Django shell
 docker compose exec web python manage.py shell
