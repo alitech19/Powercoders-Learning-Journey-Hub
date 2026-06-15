@@ -155,11 +155,13 @@ Plan: **[BUG_BOUNTY_PLAN.md](BUG_BOUNTY_PLAN.md)** — toggleable app `bug_repor
 
 | Feature | Status |
 |---------|--------|
-| Crosshair button next to ⓘ (per-page URL) | Planned |
-| Submit form + DB storage | Planned |
-| Admin inbox: take / close / reject / reopen + assignee visible | Planned |
-| Admin reply + emails (reporter ack, admins new, reply) | Planned |
-| Django admin + `IntegratedModule` toggle | Planned |
+| Crosshair button next to ⓘ (per-page URL) | Done |
+| Submit form + DB storage | Done |
+| Admin inbox: take / close / reject / reopen + assignee visible | Done |
+| Admin reply + emails (reporter ack, admins new, reply) | Done |
+| Django admin + `IntegratedModule` toggle (`bug_reports` slug) | Done |
+| Dashboard tile “Open bug reports (n)” | Planned |
+| Help topic `info/topics/bug_reports.md` | Planned |
 
 ---
 

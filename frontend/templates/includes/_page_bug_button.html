@@ -1,0 +1,6 @@
+{% if bug_report_button.enabled %}
+<a href="{{ bug_report_button.url }}"
+   class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-900 text-[11px] leading-none text-gray-600 dark:text-gray-300 hover:border-[#B23149] hover:text-[#B23149] transition-colors shrink-0"
+   aria-label="{{ bug_report_button.aria_label }}"
+   title="{{ bug_report_button.aria_label }}">⊕</a>
+{% endif %}

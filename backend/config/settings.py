@@ -26,6 +26,7 @@ ALLOWED_HOSTS = [
 ]
 
 INSTALLED_APPS = [
+    'config.apps.PowerhubConfigConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     'dashboard.apps.DashboardConfig',
     'info.apps.InfoConfig',
     'google_storage.apps.GoogleStorageConfig',
+    'bug_reports.apps.BugReportsConfig',
 ]
 
 MIDDLEWARE = [
@@ -73,6 +75,7 @@ MIDDLEWARE = [
     'accounts.middleware.ForcePasswordChangeMiddleware',
     'accounts.middleware.Require2FAMiddleware',
     'accounts.middleware.WelcomeMiddleware',
+    'config.middleware.ModuleGateMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -91,6 +94,7 @@ TEMPLATES = [
                 'config.context_processors.integrated_nav',
                 'config.context_processors.page_meta',
                 'info.context_processors.page_help',
+                'bug_reports.context_processors.bug_report_button',
                 'config.context_processors.input_limits',
             ],
         },

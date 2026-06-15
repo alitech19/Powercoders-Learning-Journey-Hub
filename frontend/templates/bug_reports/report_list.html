@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Bug reports{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+  {% include "includes/_page_header.html" with title="Bug reports inbox" subtitle="Triage user-submitted issues." %}
+
+  <div class="flex flex-wrap gap-2 mb-4 text-xs">
+    <a href="{% url 'bug_reports:report_list' %}"
+       class="px-3 py-1.5 rounded-lg border {% if not status_filter and not assigned_filter %}border-[#B23149] text-[#B23149]{% else %}border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400{% endif %}">All</a>
+    <a href="?assigned=open"
+       class="px-3 py-1.5 rounded-lg border {% if assigned_filter == 'open' %}border-[#B23149] text-[#B23149]{% else %}border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400{% endif %}">Open</a>
+    <a href="?assigned=me"
+       class="px-3 py-1.5 rounded-lg border {% if assigned_filter == 'me' %}border-[#B23149] text-[#B23149]{% else %}border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400{% endif %}">Assigned to me</a>
+    <a href="?assigned=unassigned"
+       class="px-3 py-1.5 rounded-lg border {% if assigned_filter == 'unassigned' %}border-[#B23149] text-[#B23149]{% else %}border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400{% endif %}">Unassigned</a>
+    {% for value, label in status_choices %}
+    <a href="?status={{ value }}"
+       class="px-3 py-1.5 rounded-lg border {% if status_filter == value %}border-[#B23149] text-[#B23149]{% else %}border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+  {% if reports %}
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 dark:bg-gray-800 text-left text-xs uppercase tracking-wide text-gray-500">
+        <tr>
+          <th class="px-4 py-3">ID</th>
+          <th class="px-4 py-3">Status</th>
+          <th class="px-4 py-3">Page</th>
+          <th class="px-4 py-3">Reporter</th>
+          <th class="px-4 py-3">Assigned</th>
+          <th class="px-4 py-3">Created</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+        {% for report in reports %}
+        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+          <td class="px-4 py-3 font-medium">
+            <a href="{% url 'bug_reports:report_detail' report.pk %}" class="text-[#B23149] hover:underline">#{{ report.pk }}</a>
+          </td>
+          <td class="px-4 py-3">
+            <span class="text-xs font-medium px-2 py-0.5 rounded-full
+              {% if report.status == 'in_progress' %}bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200
+              {% elif report.status == 'closed' %}bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300
+              {% elif report.status == 'rejected' %}bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200
+              {% else %}bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200{% endif %}">
+              {{ report.get_status_display }}
+            </span>
+            {% if report.status == 'in_progress' and report.assigned_to %}
+            <span class="block text-xs text-gray-500 mt-0.5">Handled by {{ report.assigned_to.display_name }}</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3 max-w-[12rem] truncate text-gray-600 dark:text-gray-400" title="{{ report.page_url }}">{{ report.page_path|default:report.page_url }}</td>
+          <td class="px-4 py-3">
+            <div>{{ report.reporter.display_name }}</div>
+            <div class="text-xs text-gray-500">{{ report.reporter.email }}</div>
+          </td>
+          <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ report.assigned_to.display_name|default:"—" }}</td>
+          <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{{ report.created_at|date:"d M Y, H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="px-4 py-10 text-center text-gray-500 text-sm">No bug reports match these filters.</p>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}

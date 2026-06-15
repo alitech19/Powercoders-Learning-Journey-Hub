@@ -67,11 +67,17 @@ class NavRegistryTests(SimpleTestCase):
         self.assertIn('Users', labels)
         self.assertIn('Student Progress', labels)
         self.assertIn('Cohorts & Groups', labels)
+        self.assertIn('File storage', labels)
+        self.assertIn('Bug Reports', labels)
         self.assertEqual(
             labels.index('File storage'),
             labels.index('Student Progress') + 1,
         )
         self.assertEqual(
-            labels.index('Users'),
+            labels.index('Bug Reports'),
             labels.index('File storage') + 1,
+        )
+        self.assertEqual(
+            labels.index('Users'),
+            labels.index('Bug Reports') + 1,
         )

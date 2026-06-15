@@ -78,6 +78,7 @@ ADMIN_NAV_ITEMS: tuple[NavItem, ...] = (
     NavItem('Cohorts & Groups', 'accounts:cohort_list'),
     NavItem('Student Progress', 'accounts:student_progress'),
     NavItem('File storage', 'accounts:storage_settings'),
+    NavItem('Bug Reports', 'bug_reports:report_list'),
     NavItem('Users', 'accounts:user_list'),
     NavItem('Create User', 'accounts:user_create'),
     NavItem('Import Users (CSV)', 'accounts:user_import'),
@@ -204,11 +205,14 @@ def integrated_nav_groups(
 
 def admin_nav_items(*, user) -> list[dict[str, str | bool]]:
     from cohorts.permissions import user_is_admin
+    from config.module_access import is_module_enabled
 
     if not user_is_admin(user):
         return []
     items: list[dict[str, str | bool]] = []
     for entry in ADMIN_NAV_ITEMS:
+        if entry.url_name == 'bug_reports:report_list' and not is_module_enabled('bug_reports'):
+            continue
         url = _resolve_url(entry.url_name)
         if url is None:
             continue
