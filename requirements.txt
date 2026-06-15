@@ -39,4 +39,4 @@ gunicorn>=22.0
 whitenoise>=6.6
 
 # Transactional email via HTTP API (avoids SMTP port blocks on Render free tier)
-django-anymail[sendgrid]>=10.0
+django-anymail[brevo]>=10.0
