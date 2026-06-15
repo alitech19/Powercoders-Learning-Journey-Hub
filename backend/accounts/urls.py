@@ -2,6 +2,8 @@ from django.contrib.auth import views as auth_views
 from django.urls import path
 from django.views.generic import RedirectView
 
+from google_storage import views as google_storage_views
+
 from . import management_views, privacy_views, views
 
 app_name = 'accounts'
@@ -17,6 +19,25 @@ urlpatterns = [
         name='logout',
     ),
     path('profile/', views.profile, name='profile'),
+    path('storage/', google_storage_views.storage_settings, name='storage_settings'),
+    path(
+        'storage/test-connection/',
+        google_storage_views.storage_test_connection,
+        name='storage_test_connection',
+    ),
+    path(
+        'storage/test-oauth/',
+        google_storage_views.storage_test_oauth,
+        name='storage_test_oauth',
+    ),
+    path(
+        'storage/ensure-root/',
+        google_storage_views.storage_ensure_root,
+        name='storage_ensure_root',
+    ),
+    path('google/connect/', google_storage_views.google_connect, name='google_connect'),
+    path('google/callback/', google_storage_views.google_callback, name='google_callback'),
+    path('google/disconnect/', google_storage_views.google_disconnect, name='google_disconnect'),
     path('profile/export/', privacy_views.data_export, name='data_export'),
     path('profile/delete/', privacy_views.delete_own_account, name='delete_own_account'),
     path('profile/deleted/', privacy_views.account_deleted, name='account_deleted'),

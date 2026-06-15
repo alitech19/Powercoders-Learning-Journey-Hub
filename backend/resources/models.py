@@ -58,6 +58,12 @@ class ResourceContainer(models.Model):
 
 
 class ResourceItem(models.Model):
+    class StorageBackend(models.TextChoices):
+        GOOGLE_DRIVE_SHARED = 'google_drive_shared', 'Org drive'
+        GOOGLE_DRIVE_PERSONAL = 'google_drive_personal', 'My Drive'
+        EXTERNAL_URL = 'external_url', 'Link'
+        LEGACY_LOCAL = 'legacy_local', 'Legacy local file'
+
     container = models.ForeignKey(
         ResourceContainer,
         on_delete=models.CASCADE,
@@ -65,6 +71,12 @@ class ResourceItem(models.Model):
     )
     title = models.CharField(max_length=RESOURCE_LABEL_MAX_LENGTH)
     url = models.CharField(max_length=2048)
+    storage_backend = models.CharField(
+        max_length=32,
+        choices=StorageBackend.choices,
+        blank=True,
+    )
+    drive_file_id = models.CharField(max_length=128, blank=True)
     source_post = models.OneToOneField(
         'group_space.Post',
         on_delete=models.CASCADE,

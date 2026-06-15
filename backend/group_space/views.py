@@ -19,7 +19,12 @@ from .permissions import (
     get_post_or_404,
 )
 from .constants import SHARE_KIND_PANEL
-from .services import after_post_saved, get_group_space_for_group, resolve_group
+from google_storage.integration import composer_upload_context
+from google_storage.integration import should_upload_file_to_drive
+from google_storage.orchestrator import prepare_drive_upload
+from google_storage.permissions import delete_drive_file_for_post
+
+from .services import after_post_saved, get_group_space_for_group, load_post, resolve_group
 from . import snapshots
 
 
@@ -77,7 +82,8 @@ def feed(request):
         'pinned_posts': pinned_posts,
         'chat_items': chat_items,
         'share_menu': share_menu,
-        'composer_form': ChatComposerForm(),
+        'composer_form': ChatComposerForm(user=user),
+        **composer_upload_context(user),
     })
 
 
@@ -96,12 +102,19 @@ def message_create(request):
     if not can_post_in_group_space(user, group_space):
         raise Http404
 
-    form = ChatComposerForm(request.POST, request.FILES)
+    form = ChatComposerForm(request.POST, request.FILES, user=user)
     if form.is_valid():
+        uploaded = form.cleaned_data.get('file')
         post = form.save(commit=False)
         post.author = user
         post.group_space = group_space
+        use_drive = bool(uploaded) and should_upload_file_to_drive(user)
+        if use_drive:
+            post.file = None
         post.save()
+        if use_drive:
+            prepare_drive_upload(post, user, uploaded)
+            post.refresh_from_db()
         after_post_saved(post)
         return _bubble_response(request, post, group)
 
@@ -112,6 +125,7 @@ def message_create(request):
             **_group_context(user, group),
             'share_menu': _share_menu_for(user),
             'composer_form': form,
+            **composer_upload_context(user),
         },
         status=422,
     )
@@ -154,6 +168,22 @@ def share_create(request):
     post.save()
     after_post_saved(post)
     return _bubble_response(request, post, group)
+
+
+@login_required
+def post_upload_poll(request, pk):
+    """HTMX poll while a Drive upload is pending."""
+    user = request.user
+    post = get_post_or_404(user, pk)
+    group = post.group
+    if post.drive_upload_status != Post.DriveUploadStatus.PENDING:
+        return _bubble_response(request, post, group)
+    item = ChatItem(kind='post', created_at=post.created_at, post=post)
+    return render(request, 'group_space/_chat_bubble.html', {
+        'item': item,
+        'user': user,
+        'group': group,
+    })
 
 
 @login_required
@@ -211,6 +241,11 @@ def post_delete(request, pk):
     group = post.group
 
     if request.method == 'POST':
+        if post.drive_file_id and can_delete_post(request.user, post):
+            try:
+                delete_drive_file_for_post(post)
+            except Exception:
+                messages.warning(request, 'Post removed; Drive file may still exist.')
         post.delete()
         messages.success(request, 'Message removed.')
         return _feed_redirect(group)

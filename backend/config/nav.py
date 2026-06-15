@@ -75,6 +75,7 @@ ADMIN_NAV_MENU_LABEL = 'Administration'
 
 # Admin/superuser only — mirrors admin dashboard Management block
 ADMIN_NAV_ITEMS: tuple[NavItem, ...] = (
+    NavItem('File storage', 'accounts:storage_settings'),
     NavItem('Cohorts & Groups', 'accounts:cohort_list'),
     NavItem('Student Progress', 'accounts:student_progress'),
     NavItem('Users', 'accounts:user_list'),

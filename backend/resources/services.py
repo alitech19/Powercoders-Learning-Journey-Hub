@@ -29,7 +29,24 @@ def ensure_system_group_container(group, *, created_by=None):
     return container
 
 
+def _storage_backend_for_post(post) -> str:
+    from group_space.models import Post
+    from resources.models import ResourceItem
+
+    if post.drive_storage_backend == Post.DriveStorageBackend.SHARED_ORG:
+        return ResourceItem.StorageBackend.GOOGLE_DRIVE_SHARED
+    if post.drive_storage_backend == Post.DriveStorageBackend.PERSONAL:
+        return ResourceItem.StorageBackend.GOOGLE_DRIVE_PERSONAL
+    if post.file:
+        return ResourceItem.StorageBackend.LEGACY_LOCAL
+    return ResourceItem.StorageBackend.EXTERNAL_URL
+
+
 def resource_url_for_post(post, request=None):
+    if post.drive_web_view_link:
+        return post.drive_web_view_link
+    if post.drive_upload_status == post.DriveUploadStatus.PENDING:
+        return ''
     urls = detect_urls(post.body)
     if urls:
         return urls[0]
@@ -47,6 +64,10 @@ def sync_from_group_post(post, *, request=None):
         ResourceItem.objects.filter(source_post=post).delete()
         return None
 
+    if post.drive_upload_status == post.DriveUploadStatus.PENDING:
+        ResourceItem.objects.filter(source_post=post).delete()
+        return None
+
     group = post.group_space.group
     container = ensure_system_group_container(group, created_by=post.author)
     url = resource_url_for_post(post, request=request)
@@ -60,6 +81,8 @@ def sync_from_group_post(post, *, request=None):
             'container': container,
             'title': post.resource_label.strip(),
             'url': url,
+            'storage_backend': _storage_backend_for_post(post),
+            'drive_file_id': post.drive_file_id or '',
             'created_by': post.author,
         },
     )

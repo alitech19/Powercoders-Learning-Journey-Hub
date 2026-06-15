@@ -1,6 +1,12 @@
+{% load group_space_tags %}
 {% if item.kind == "post" %}
   {% with post=item.post %}
-  <article id="chat-msg-{{ post.pk }}" class="group/msg hover:bg-gray-50/80 dark:hover:bg-gray-800 -mx-2 px-2 py-2 rounded-lg">
+  <article id="chat-msg-{{ post.pk }}" class="group/msg hover:bg-gray-50/80 dark:hover:bg-gray-800 -mx-2 px-2 py-2 rounded-lg"
+           {% if post.drive_upload_status == "pending" %}
+           hx-get="{% url 'group_space:post_upload_poll' post.pk %}"
+           hx-trigger="every 3s"
+           hx-swap="outerHTML"
+           {% endif %}>
     <header class="flex items-center gap-2 mb-1.5">
       {% include "includes/user_avatar.html" with user=post.author size=36 %}
       <span class="text-sm font-semibold text-[#343534] dark:text-gray-100 truncate min-w-0">{{ post.author.display_name }}</span>
@@ -8,6 +14,11 @@
       <span class="text-xs px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 shrink-0 whitespace-nowrap">Shared · {{ post.get_snapshot_kind_display }}</span>
       {% elif post.resource_label %}
       <span class="text-xs px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 shrink-0 whitespace-nowrap">Resource</span>
+      {% endif %}
+      {% if post.drive_storage_backend == "shared_org" %}
+      <span class="text-xs px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 shrink-0">Org drive</span>
+      {% elif post.drive_storage_backend == "personal" %}
+      <span class="text-xs px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-300 shrink-0">My Drive</span>
       {% endif %}
       <time class="text-xs text-gray-400 ml-auto shrink-0 whitespace-nowrap" datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|date:"d M Y, H:i" }}</time>
     </header>
@@ -29,20 +40,29 @@
         {% if post.body %}
         <p class="whitespace-pre-wrap leading-relaxed">{{ post.body }}</p>
         {% endif %}
-        {% if post.file %}
+        {% if post.drive_upload_status == "pending" %}
+        <p class="text-xs text-amber-700 dark:text-amber-400 font-medium">Uploading to Google Drive…</p>
+        {% elif post.drive_upload_status == "failed" %}
+        <p class="text-xs text-red-600 dark:text-red-400">Drive upload failed. {{ post.drive_upload_error|truncatechars:120 }}</p>
+        {% elif post.drive_web_view_link %}
+        <a href="{{ post.drive_web_view_link }}" target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center gap-1.5 text-xs text-green-700 dark:text-green-300 hover:text-green-900 dark:hover:text-green-200 font-medium">
+          Open in Google Drive
+        </a>
+        {% elif post.file %}
         <a href="{{ post.file.url }}" target="_blank" rel="noopener noreferrer"
-           class="inline-flex items-center gap-1.5 text-xs text-green-700 dark:text-green-300 hover:text-green-900 font-medium">
-          📎 Download attachment
+           class="inline-flex items-center gap-1.5 text-xs text-green-700 dark:text-green-300 hover:text-green-900 dark:hover:text-green-200 font-medium">
+          Download attachment (legacy)
         </a>
         {% endif %}
       </div>
 
       {% if user == post.author or user.role == "teacher" or user.role == "admin" %}
       <div class="flex gap-2 opacity-0 group-hover/msg:opacity-100 transition-opacity">
-        {% if user == post.author %}
+        {% if user == post.author and not post.drive_file_id %}
         <a href="{% url 'group_space:post_edit' post.pk %}" class="text-xs text-gray-400 hover:text-[#B23149]">Edit</a>
         {% endif %}
-        {% if user == post.author or user.role == "teacher" or user.role == "admin" %}
+        {% if post|can_delete_chat_post:user %}
         <a href="{% url 'group_space:post_delete' post.pk %}" class="text-xs text-gray-400 hover:text-red-600 dark:hover:text-red-400">Delete</a>
         {% endif %}
       </div>

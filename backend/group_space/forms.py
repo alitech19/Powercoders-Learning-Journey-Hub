@@ -42,7 +42,8 @@ class ChatComposerForm(forms.ModelForm):
             }),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
+        self.user = user
         super().__init__(*args, **kwargs)
         self.fields['body'].required = False
         self.fields['resource_label'].required = False
@@ -58,6 +59,25 @@ class ChatComposerForm(forms.ModelForm):
         uploaded = self.cleaned_data.get('file')
         if uploaded:
             validate_uploaded_file(uploaded)
+            if self.user:
+                from google_storage.integration import student_must_connect_google_for_upload
+
+                if student_must_connect_google_for_upload(self.user):
+                    raise ValidationError(
+                        'Connect Google Drive on your profile before attaching files.',
+                    )
+                from google_storage.integration import (
+                    should_upload_file_to_drive,
+                    staff_drive_uploads_enabled,
+                )
+                from accounts.models import User
+
+                if self.user.role in (User.Role.TEACHER, User.Role.ADMIN) and not staff_drive_uploads_enabled():
+                    raise ValidationError(
+                        'Org file storage is not configured. Contact an admin.',
+                    )
+                if should_upload_file_to_drive(self.user):
+                    pass
         return uploaded
 
     def clean(self):

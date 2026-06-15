@@ -94,7 +94,17 @@ def profile(request):
             return redirect('accounts:profile')
     else:
         form = ProfileForm(instance=request.user)
-    return render(request, 'accounts/profile.html', {'form': form})
+
+    from google_storage.views import profile_google_context
+
+    return render(
+        request,
+        'accounts/profile.html',
+        {
+            'form': form,
+            **profile_google_context(request.user),
+        },
+    )
 
 
 @login_required

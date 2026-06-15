@@ -49,6 +49,10 @@ def can_edit_post(user, post):
 def can_delete_post(user, post):
     if not user.is_authenticated or not can_access_group_space(user, post.group_space):
         return False
+    if post.drive_storage_backend or post.drive_file_id:
+        from google_storage.permissions import can_delete_drive_post
+
+        return can_delete_drive_post(user, post)
     if post.author_id == user.pk:
         return True
     return user.role in (User.Role.TEACHER, User.Role.ADMIN)

@@ -19,7 +19,15 @@ def detect_urls(text):
 
 
 def post_has_link_or_file(post):
-    return bool(post.file) or bool(detect_urls(post.body))
+    if bool(post.file) or bool(post.drive_file_id):
+        return True
+    if post.drive_upload_status in {
+        post.DriveUploadStatus.PENDING,
+        post.DriveUploadStatus.READY,
+        post.DriveUploadStatus.FAILED,
+    }:
+        return True
+    return bool(detect_urls(post.body))
 
 
 def post_is_achievement_share(post):
