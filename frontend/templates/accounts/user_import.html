@@ -6,7 +6,7 @@
 <div class="max-w-2xl mx-auto">
   <div class="mb-6">
     <a href="{% url 'accounts:cohort_list' %}" class="text-sm text-gray-400 hover:text-[#B23149] transition-colors">← Back to Cohorts</a>
-    <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100 mt-2">Bulk Import Users</h1>
+    {% include "includes/_page_title.html" with title="Bulk Import Users" %}
     <p class="text-gray-500 text-sm mt-0.5">Upload a CSV file to create multiple users at once.</p>
   </div>
 

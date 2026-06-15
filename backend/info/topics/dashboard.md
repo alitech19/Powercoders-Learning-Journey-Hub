@@ -50,9 +50,10 @@ System-wide **read-only metrics** plus in-app **Management** (staff UI — not o
 
 | Action | Purpose |
 |--------|---------|
-| **Cohorts & Groups** | Create cohorts and groups, assign teachers, bulk-assign students (US-39). |
+| **Cohorts & Groups** | Create cohorts and groups, assign teachers, bulk-assign students (US-39). ⓘ help on page. |
 | **Student Progress** | Cross-app metrics per student; drill down to student detail. |
 | **Users** | List, filter by role, create, deactivate/reactivate, admin delete. |
+| **File storage** | Google Drive — Shared drive and student OAuth. |
 | **+ Create user** / **↑ Import users (CSV)** | Onboarding; import follows the CSV template on the import page. |
 | **Audit log (admin)** | Django admin changelist for `AuditLog` (middleware records sensitive actions). |
 

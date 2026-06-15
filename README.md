@@ -196,13 +196,15 @@ Powercoders-Learning-Journey-Hub/
 │   ├── SCALING_ROADMAP.md
 │   ├── USABILITY_TESTING.md
 │   └── plans/             # Feature plans
-├── scripts/               # render-web-start.sh, render-beat-start.sh
+├── scripts/               # Render Native: render-web-start.sh, render-beat-start.sh
+├── start.sh               # Docker image CMD (Gunicorn + legacy DB bootstrap; not used by compose)
 ├── docker-compose.yml
 ├── Dockerfile
 ├── requirements.txt
 ├── requirements-dev.txt
 ├── runtime.txt            # Python version pin for Render Native
-└── .env.example
+└── .env.example           # Local Docker — copy to .env
+    .env.render-test.example  # Render tester deploy (see docs/DEPLOY.md)
 ```
 
 ---

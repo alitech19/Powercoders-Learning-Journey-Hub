@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'resources.apps.ResourcesConfig',
     'dashboard.apps.DashboardConfig',
     'info.apps.InfoConfig',
+    'google_storage.apps.GoogleStorageConfig',
 ]
 
 MIDDLEWARE = [

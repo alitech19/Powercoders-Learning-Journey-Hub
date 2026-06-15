@@ -72,6 +72,30 @@ ROUTE_MAP: dict[str, tuple[str, str]] = {
     'resources:item_delete': ('resources', 'form-delete'),
     # Accounts
     'accounts:profile': ('accounts', 'profile'),
+    'accounts:storage_settings': ('google_drive', 'student-oauth-gcp'),
+    # Administration (in-app staff UI)
+    'accounts:cohort_list': ('administration', 'cohorts-groups'),
+    'accounts:cohort_create': ('administration', 'cohorts-groups'),
+    'accounts:cohort_edit': ('administration', 'cohorts-groups'),
+    'accounts:cohort_delete': ('administration', 'cohorts-groups'),
+    'accounts:group_create': ('administration', 'cohorts-groups'),
+    'accounts:group_edit': ('administration', 'cohorts-groups'),
+    'accounts:group_delete': ('administration', 'cohorts-groups'),
+    'accounts:group_assign_students': ('administration', 'cohorts-groups'),
+    'accounts:student_progress': ('administration', 'student-progress'),
+    'accounts:student_detail': ('administration', 'student-detail'),
+    'accounts:user_list': ('administration', 'users'),
+    'accounts:user_create': ('administration', 'create-user'),
+    'accounts:user_deactivate': ('administration', 'users'),
+    'accounts:user_reactivate': ('administration', 'users'),
+    'accounts:user_delete_account': ('administration', 'users'),
+    'accounts:user_import': ('administration', 'import-users'),
+}
+
+# Django admin pages linked from Administration menu
+ADMIN_HELP_ROUTES: dict[str, tuple[str, str]] = {
+    'admin:accounts_auditlog_changelist': ('administration', 'audit-log'),
+    'admin:index': ('administration', 'django-admin'),
 }
 
 DASHBOARD_SECTION_BY_ROLE = {
@@ -140,6 +164,22 @@ HELP_LABELS: dict[str, str] = {
     'group_space:feed': 'Group chat',
     'resources:index': 'Resources',
     'accounts:profile': 'Profile',
+    'accounts:storage_settings': 'File storage',
+    'accounts:cohort_list': 'Cohorts & Groups',
+    'accounts:cohort_create': 'New cohort',
+    'accounts:cohort_edit': 'Edit cohort',
+    'accounts:cohort_delete': 'Delete cohort',
+    'accounts:group_create': 'New group',
+    'accounts:group_edit': 'Edit group',
+    'accounts:group_delete': 'Delete group',
+    'accounts:group_assign_students': 'Assign students',
+    'accounts:student_progress': 'Student Progress',
+    'accounts:student_detail': 'Student detail',
+    'accounts:user_list': 'Users',
+    'accounts:user_create': 'Create User',
+    'accounts:user_import': 'Import Users',
+    'admin:accounts_auditlog_changelist': 'Audit Log',
+    'admin:index': 'Django Admin',
 }
 
 ALLOWED_APP_SLUGS = frozenset(
@@ -154,6 +194,8 @@ ALLOWED_APP_SLUGS = frozenset(
         'group_space',
         'resources',
         'accounts',
+        'google_drive',
+        'administration',
     }
 )
 
@@ -188,10 +230,15 @@ def resolve_help_target(request) -> tuple[str, str, str] | None:
         return None
     if url_name in DISABLED_URL_NAMES:
         return None
-    if match.namespace == 'admin':
-        return None
 
     help_key = view_name.replace(':', '.')
+
+    if match.namespace == 'admin':
+        admin_mapped = ADMIN_HELP_ROUTES.get(view_name)
+        if admin_mapped:
+            app_slug, section = admin_mapped
+            return help_key, app_slug, section
+        return None
 
     if view_name == 'dashboard:dashboard':
         section = _dashboard_section(request.user)

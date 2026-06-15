@@ -9,9 +9,9 @@ Related: [TESTING.md](TESTING.md) · [DEPLOY.md](DEPLOY.md) (Render only) · [RE
 | | **`integration` branch (this guide)** | **`deploy` branch on Render** |
 |--|--------------------------------------|-------------------------------|
 | Config | [`.env.example`](../.env.example) → `.env` | [`.env.render-test.example`](../.env.render-test.example) in Render dashboard |
-| Start | `docker compose up` → **runserver** | Gunicorn + `scripts/render-web-start.sh` (migrate in start on free tier) |
 | Database | `POSTGRES_HOST=db` | `DATABASE_URL` or internal `POSTGRES_HOST` |
-| Do not use locally | `scripts/render-*.sh`, Render env template | — |
+| Start | `docker compose up` → **runserver** (overrides image CMD) | Gunicorn + `scripts/render-web-start.sh` |
+| Do not use locally | `start.sh`, `scripts/render-*.sh` | — |
 
 Code is shared after merging `integration` → `deploy`; only **how you run** the app differs.
 
@@ -57,11 +57,15 @@ This starts five services:
 |---------|------|
 | `db` | PostgreSQL 17 |
 | `redis` | Cache + Celery message broker |
-| `web` | Django (`migrate`, `collectstatic`, `runserver`) |
-| `worker` | Celery worker (runs tasks) |
-| `beat` | Celery beat (`django-celery-beat` — schedules in Django admin) |
+| `web` | `locked_migrate`, `collectstatic`, `runserver` |
+| `worker` | `locked_migrate`, Celery worker |
+| `beat` | `locked_migrate`, Celery beat (`django-celery-beat`) |
 
-On first run, migrations run automatically.
+`web`, `worker`, and `beat` each run **`locked_migrate`** on start (PostgreSQL advisory lock — safe if they start together). Prefer `locked_migrate` over plain `migrate` for manual runs too:
+
+```bash
+docker compose exec web python manage.py locked_migrate --noinput
+```
 
 ### Frontend (`integration` branch)
 
@@ -140,8 +144,8 @@ docker compose down -v --remove-orphans
 docker compose stop db
 docker compose rm -f db
 
-# Run migrations manually
-docker compose exec web python manage.py migrate
+# Run migrations manually (parallel-safe)
+docker compose exec web python manage.py locked_migrate --noinput
 
 # Django shell
 docker compose exec web python manage.py shell
@@ -235,5 +239,6 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push/PR: migrate, migr
 | [TESTING.md](TESTING.md) | Automated tests |
 | [DEPLOY.md](DEPLOY.md) | Render (tester) |
 | [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) | Production go-live |
+| [GOOGLE_DRIVE_SETUP.md](GOOGLE_DRIVE_SETUP.md) | Google Drive storage (MVP + Workspace) |
 | [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) | Incidents |
 | [plans/TODO.md](plans/TODO.md) | Beat / Slack follow-ups |

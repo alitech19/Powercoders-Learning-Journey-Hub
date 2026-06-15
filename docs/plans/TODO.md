@@ -51,16 +51,23 @@ Timezone: **Europe/Zurich** (all schedules).
 
 ## Google Drive & resources storage
 
-Plan: **[GOOGLE_DRIVE_INTEGRATION_PLAN.md](GOOGLE_DRIVE_INTEGRATION_PLAN.md)** (per-user Drive; local `MEDIA_ROOT` until then)
+Setup: **[GOOGLE_DRIVE_SETUP.md](../GOOGLE_DRIVE_SETUP.md)** · in-app **Administration → File storage** (ⓘ) · `/info/google_drive/`
 
 | Feature | Status |
 |---------|--------|
-| Chat file uploads → uploader’s Drive (not `MEDIA_ROOT`) | Planned |
-| Auto folder `PowerHUB/Groups/{group}/` per user | Planned |
-| Auto share **anyone with the link** on upload | Planned |
-| Google OAuth (org email must match `User.email`) | Planned |
-| Resources tiles use `webViewLink`; open in browser Google session | Planned |
-| Legacy local `media/group_files/` (read-only / migration) | Current → sunset |
+| **Staff** uploads → org **Shared drive** (`PowerHUB/Groups/…`, service account) | Done |
+| **Student** uploads → uploader’s **My Drive** (OAuth) | Done |
+| Create Google Doc / Sheet / Slides / Form from group chat | Done |
+| Staff **Contributor** / admin **Content manager**; delete org files **admin only** | Done |
+| Admin **storage settings** (web + Django admin) — Google creds in DB, not `.env` | Done |
+| Staff turnover: files stay in Shared drive; new teachers via drive membership | Done (IT process) |
+| Auto share **anyone with the link** (students open staff files without Shared drive ACL) | Done |
+| Student Google OAuth (email must match `User.email`) | Done |
+| Resources tiles use `webViewLink` | Done |
+| Upload retry in chat, rate limits, admin upload log / connections | Done |
+| Legacy local `media/group_files/` (read-only / migration) | Sunset — new uploads go to Drive only |
+
+**Follow-up (no separate plan):** `PowerHUB/Projects/{space}/` folders when [project spaces](GROUP_SPACE_PROJECT_PLAN.md) ship.
 
 ---
 
@@ -160,12 +167,9 @@ Plan: **[BUG_BOUNTY_PLAN.md](BUG_BOUNTY_PLAN.md)** — toggleable app `bug_repor
 
 1. Finish Beat + env for existing Slack digest  
 2. Scheduling MVP (publish + entity reminders) on one entity (Task)  
-3. Google Drive chat upload (Phase 0–1)  
-4. **Admin restructure** ([ADMIN_RESTRUCTURE_PLAN.md](ADMIN_RESTRUCTURE_PLAN.md)) — dropdown + Django admin grouping  
-5. **Bug reports app** ([BUG_BOUNTY_PLAN.md](BUG_BOUNTY_PLAN.md))  
-6. **App module toggles** ([APP_MODULE_TOGGLES_PLAN.md](APP_MODULE_TOGGLES_PLAN.md)) — include `bug_reports` slug  
-7. **Project spaces** (Phases 0–2 in [GROUP_SPACE_PROJECT_PLAN.md](GROUP_SPACE_PROJECT_PLAN.md))  
-8. Personal Slack OAuth + dispatcher  
-9. Group chat ↔ Slack sync  
-
-Adjust order with team/IT (Workspace sharing policy blocks Drive link sharing if misconfigured).
+3. **Admin restructure** ([ADMIN_RESTRUCTURE_PLAN.md](ADMIN_RESTRUCTURE_PLAN.md)) — dropdown + Django admin grouping  
+4. **Bug reports app** ([BUG_BOUNTY_PLAN.md](BUG_BOUNTY_PLAN.md))  
+5. **App module toggles** ([APP_MODULE_TOGGLES_PLAN.md](APP_MODULE_TOGGLES_PLAN.md)) — include `bug_reports` slug  
+6. **Project spaces** (Phases 0–2 in [GROUP_SPACE_PROJECT_PLAN.md](GROUP_SPACE_PROJECT_PLAN.md))  
+7. Personal Slack OAuth + dispatcher  
+8. Group chat ↔ Slack sync

@@ -32,7 +32,7 @@ On the **`integration`** branch we **intentionally keep** the CDN-based frontend
 ### Already done on `integration` (do not repeat)
 
 - [x] Production security when `DEBUG=False`: HTTPS redirect, HSTS, secure cookies, `SECRET_KEY` guard, `SECURE_REFERRER_POLICY` (see `.env.example` production comments)
-- [x] Celery beat: `migrate` before beat in `docker-compose.yml` and `scripts/render-beat-start.sh`
+- [x] Celery beat: `locked_migrate` before beat in `docker-compose.yml` and `scripts/render-beat-start.sh`
 - [x] Gunicorn + WhiteNoise in `requirements.txt` (Render uses Gunicorn; local compose may still use `runserver`)
 
 ### Optional in same pre-prod pass

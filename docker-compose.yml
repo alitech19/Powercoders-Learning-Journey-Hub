@@ -37,7 +37,7 @@ services:
       redis:
         condition: service_healthy
     command: >
-      sh -c "python manage.py migrate --noinput &&
+      sh -c "python manage.py locked_migrate --noinput &&
              python manage.py collectstatic --noinput &&
              python manage.py runserver 0.0.0.0:8000"
 
@@ -54,7 +54,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: celery -A config worker --loglevel=info
+    command: >
+      sh -c "python manage.py locked_migrate --noinput &&
+             celery -A config worker --loglevel=info"
 
   beat:
     build: .
@@ -68,7 +70,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: >
+      sh -c "python manage.py locked_migrate --noinput &&
+             celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler"
 
 volumes:
   postgres_data:

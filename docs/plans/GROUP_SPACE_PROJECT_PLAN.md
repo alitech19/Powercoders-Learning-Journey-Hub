@@ -359,7 +359,7 @@ Keep `feed.html` as wrapper:
 ### Out of scope for v1
 
 - Slack sync per project channel
-- Google Drive folder `PowerHUB/Projects/{space}/` (follow-up after [GOOGLE_DRIVE_INTEGRATION_PLAN.md](GOOGLE_DRIVE_INTEGRATION_PLAN.md); extend folder resolver by `space.kind`)
+- Google Drive folder `PowerHUB/Projects/{space}/` (extend folder resolver by `space.kind`; see [GOOGLE_DRIVE_SETUP.md](../GOOGLE_DRIVE_SETUP.md))
 - Comments on posts (if not exposed in UI today, keep deferred)
 - Student-created spaces
 
@@ -447,6 +447,5 @@ Factories: `test_utils/group_space.py` — `make_project_space`, `add_member`.
 
 ## Related docs
 
-- [GOOGLE_DRIVE_INTEGRATION_PLAN.md](GOOGLE_DRIVE_INTEGRATION_PLAN.md) — Drive uploads (v1 local `media/group_files/` until then)
-- [GOOGLE_DRIVE_INTEGRATION_PLAN.md](GOOGLE_DRIVE_INTEGRATION_PLAN.md) — future per-space Drive folders
+- [GOOGLE_DRIVE_SETUP.md](../GOOGLE_DRIVE_SETUP.md) — hybrid Drive uploads; future `PowerHUB/Projects/{space}/` folders
 - [SLACK_INTEGRATION_PLAN.md](SLACK_INTEGRATION_PLAN.md) — group channel sync; project channels later

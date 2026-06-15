@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% block title %}File storage{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+  <div class="mb-6">
+    <a href="{% url 'dashboard:dashboard' %}" class="text-sm text-gray-400 hover:text-[#B23149] transition-colors">← Dashboard</a>
+    {% include "includes/_page_title.html" with title="File storage" %}
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+      Google Drive — org Shared drive (staff) and student My Drive (OAuth).
+      Credentials are stored encrypted in the database.
+      <a href="{% url 'info:topic' app_slug='google_drive' %}" class="text-[#B23149] hover:underline">Setup guide</a>
+    </p>
+  </div>
+
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+    <h2 class="text-sm font-semibold text-[#343534] dark:text-gray-100 mb-3">Status</h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+      <div>
+        <dt class="text-gray-400">Last health check</dt>
+        <dd class="text-[#343534] dark:text-gray-200 font-medium">
+          {% if config.last_health_check_at %}{{ config.last_health_check_at|date:"d M Y H:i" }}{% else %}—{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-400">Connection</dt>
+        <dd class="font-medium {% if config.last_health_ok %}text-green-600 dark:text-green-400{% elif config.last_health_ok == False %}text-red-600 dark:text-red-400{% else %}text-gray-500{% endif %}">
+          {% if config.last_health_ok %}OK{% elif config.last_health_ok == False %}Failed{% else %}Not tested{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-400">Staff uploads</dt>
+        <dd class="text-[#343534] dark:text-gray-200 font-medium">{% if config.is_enabled %}Enabled{% else %}Disabled{% endif %}</dd>
+      </div>
+      <div>
+        <dt class="text-gray-400">Student OAuth</dt>
+        <dd class="text-[#343534] dark:text-gray-200 font-medium">{% if config.student_oauth_enabled %}Enabled{% else %}Disabled{% endif %}</dd>
+      </div>
+      <div class="sm:col-span-2">
+        <dt class="text-gray-400">Service account</dt>
+        <dd class="text-[#343534] dark:text-gray-200 font-mono text-xs">{{ config.service_account_email|default:"—" }}</dd>
+      </div>
+      <div class="sm:col-span-2">
+        <dt class="text-gray-400">Root folder id</dt>
+        <dd class="text-[#343534] dark:text-gray-200 font-mono text-xs break-all">{{ config.shared_root_folder_id|default:"—" }}</dd>
+      </div>
+      {% if config.last_error %}
+      <div class="sm:col-span-2">
+        <dt class="text-gray-400">Last error</dt>
+        <dd class="text-red-600 dark:text-red-400 text-xs">{{ config.last_error }}</dd>
+      </div>
+      {% endif %}
+    </dl>
+    <p class="text-xs text-gray-400 mt-4">
+      Uploads (7 days): {{ upload_stats_7d.success }} ok · {{ upload_stats_7d.failed }} failed · {{ upload_stats_7d.pending }} pending
+    </p>
+  </div>
+
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100 mb-4">General</h2>
+      <label class="flex items-center gap-3 cursor-pointer">
+        {{ form.is_enabled }}
+        <span class="text-sm font-medium text-[#343534] dark:text-gray-200">Enable staff uploads to org Shared drive</span>
+      </label>
+    </div>
+
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Org Shared drive (staff)</h2>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">Shared drive ID</label>
+        {{ form.shared_drive_id }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">Display name</label>
+        {{ form.shared_drive_name }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">Root folder name</label>
+        {{ form.root_folder_name }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">Service account JSON</label>
+        {% if has_sa_json %}
+        <p class="text-xs text-gray-400 mb-2">Current: {{ masked_sa|default:"configured" }}</p>
+        {% endif %}
+        {{ form.service_account_json }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">Root folder id (read-only)</label>
+        {{ form.shared_root_folder_id }}
+      </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Students (My Drive)</h2>
+      <label class="flex items-center gap-3 cursor-pointer">
+        {{ form.student_oauth_enabled }}
+        <span class="text-sm font-medium text-[#343534] dark:text-gray-200">Enable student OAuth uploads</span>
+      </label>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">OAuth client ID</label>
+        {{ form.oauth_client_id }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">OAuth client secret</label>
+        {% if has_oauth_secret %}
+        <p class="text-xs text-gray-400 mb-2">Current: {{ masked_oauth_secret }}</p>
+        {% endif %}
+        {{ form.oauth_client_secret }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">Redirect URI</label>
+        {{ form.oauth_redirect_uri }}
+        <p class="text-xs text-gray-400 mt-1">Register this URI in Google Cloud Console. Suggested: <code class="text-xs">{{ suggested_redirect_uri }}</code></p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">Workspace email domain (optional)</label>
+        {{ form.workspace_hosted_domain }}
+        <p class="text-xs text-gray-400 mt-1">Leave empty to allow Gmail and any Google account (MVP). Set e.g. <code>powercoders.ch</code> to restrict OAuth sign-in.</p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-3">
+      <button type="submit"
+              class="bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors">
+        Save settings
+      </button>
+    </div>
+  </form>
+
+  <div class="mt-6 flex flex-wrap gap-3">
+    <form method="post" action="{% url 'accounts:storage_test_connection' %}">
+      {% csrf_token %}
+      <button type="submit" class="border border-gray-200 dark:border-gray-600 hover:border-[#B23149] text-sm font-medium px-4 py-2 rounded-lg transition-colors dark:text-gray-200">
+        Test Shared drive connection
+      </button>
+    </form>
+    <form method="post" action="{% url 'accounts:storage_test_oauth' %}">
+      {% csrf_token %}
+      <button type="submit" class="border border-gray-200 dark:border-gray-600 hover:border-[#B23149] text-sm font-medium px-4 py-2 rounded-lg transition-colors dark:text-gray-200">
+        Validate OAuth config
+      </button>
+    </form>
+    <form method="post" action="{% url 'accounts:storage_ensure_root' %}">
+      {% csrf_token %}
+      <button type="submit" class="border border-gray-200 dark:border-gray-600 hover:border-[#B23149] text-sm font-medium px-4 py-2 rounded-lg transition-colors dark:text-gray-200">
+        Ensure PowerHUB root folder
+      </button>
+    </form>
+  </div>
+
+  <div class="mt-8 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <h2 class="text-sm font-semibold text-[#343534] dark:text-gray-100 mb-3">Student Google connections</h2>
+    {% if student_connections %}
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left">
+        <thead class="text-xs text-gray-400 border-b border-gray-200 dark:border-gray-700">
+          <tr>
+            <th class="py-2 pr-4">User</th>
+            <th class="py-2 pr-4">Google email</th>
+            <th class="py-2 pr-4">Connected</th>
+            <th class="py-2">Root folder</th>
+          </tr>
+        </thead>
+        <tbody class="text-[#343534] dark:text-gray-200">
+          {% for conn in student_connections %}
+          <tr class="border-b border-gray-100 dark:border-gray-800">
+            <td class="py-2 pr-4">{{ conn.user.display_name }}</td>
+            <td class="py-2 pr-4 font-mono text-xs">{{ conn.google_email }}</td>
+            <td class="py-2 pr-4">{{ conn.connected_at|date:"d M Y" }}</td>
+            <td class="py-2 font-mono text-xs break-all">{{ conn.root_folder_id|default:"—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-sm text-gray-500 dark:text-gray-400">No active student connections.</p>
+    {% endif %}
+  </div>
+
+  <div class="mt-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <h2 class="text-sm font-semibold text-[#343534] dark:text-gray-100 mb-3">Recent upload log</h2>
+    {% if recent_upload_logs %}
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left">
+        <thead class="text-xs text-gray-400 border-b border-gray-200 dark:border-gray-700">
+          <tr>
+            <th class="py-2 pr-4">When</th>
+            <th class="py-2 pr-4">User</th>
+            <th class="py-2 pr-4">Backend</th>
+            <th class="py-2 pr-4">Status</th>
+            <th class="py-2">Error</th>
+          </tr>
+        </thead>
+        <tbody class="text-[#343534] dark:text-gray-200">
+          {% for log in recent_upload_logs %}
+          <tr class="border-b border-gray-100 dark:border-gray-800">
+            <td class="py-2 pr-4 whitespace-nowrap">{{ log.created_at|date:"d M H:i" }}</td>
+            <td class="py-2 pr-4">{{ log.user.display_name }}</td>
+            <td class="py-2 pr-4">{{ log.storage_backend|default:"—" }}</td>
+            <td class="py-2 pr-4 {% if log.status == 'failed' %}text-red-600 dark:text-red-400{% elif log.status == 'success' %}text-green-600 dark:text-green-400{% endif %}">{{ log.get_status_display }}</td>
+            <td class="py-2 text-xs text-gray-500 dark:text-gray-400">{{ log.error_message|truncatechars:80 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="text-xs text-gray-400 mt-3">Full history: Django admin → Drive upload logs.</p>
+    {% else %}
+    <p class="text-sm text-gray-500 dark:text-gray-400">No uploads yet.</p>
+    {% endif %}
+  </div>
+
+  {% if drive_folder_mappings %}
+  <details class="mt-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+    <summary class="text-sm font-semibold text-[#343534] dark:text-gray-100 cursor-pointer">Cached Drive folder mappings ({{ drive_folder_mappings|length }})</summary>
+    <ul class="mt-3 text-xs font-mono text-gray-600 dark:text-gray-400 space-y-1">
+      {% for row in drive_folder_mappings %}
+      <li>{{ row.drive_path }} — <span class="text-gray-400">{{ row.drive_folder_id }}</span></li>
+      {% endfor %}
+    </ul>
+  </details>
+  {% endif %}
+
+  <details class="mt-8 bg-[#F5EDE0]/40 dark:bg-gray-800/50 rounded-xl border border-[#EDE3D5] dark:border-gray-700 p-5">
+    <summary class="text-sm font-semibold text-[#343534] dark:text-gray-100 cursor-pointer">Setup: student OAuth (Google Cloud)</summary>
+    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
+      Client ID and secret come from <a href="https://console.cloud.google.com/" class="text-[#B23149] hover:underline" target="_blank" rel="noopener noreferrer">Google Cloud Console</a> — not from PowerHUB.
+      Full guide: ⓘ help on this page or <code class="text-xs">docs/GOOGLE_DRIVE_SETUP.md</code>.
+    </p>
+    <ol class="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
+      <li><strong>New GCP project</strong> → enable <strong>Google Drive API</strong> (APIs &amp; Services → Library).</li>
+      <li><strong>OAuth consent screen</strong> → External → app name + emails. If <strong>Testing</strong>, add each student email under <strong>Test users</strong>.</li>
+      <li><strong>Data access scopes</strong> → add <strong>Google Drive API</strong> → <code class="text-xs">drive.file</code> (required for uploads).</li>
+      <li><strong>Credentials → Create → OAuth client ID</strong> → Web application → redirect URI:
+        <code class="text-xs block mt-1 ml-5">{{ suggested_redirect_uri }}</code>
+      </li>
+      <li>Copy <strong>Client ID</strong> and <strong>Client secret</strong> (secret shown once) into the form above.</li>
+      <li>Enable <strong>student OAuth uploads</strong> (separate from staff Shared drive) → Save → <strong>Validate OAuth config</strong>.</li>
+    </ol>
+    <p class="mt-3 text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2">
+      Staff checkbox alone does not enable student Profile connect. Leave <code class="text-xs">SITE_URL</code> in <code class="text-xs">.env</code> aligned with this host.
+    </p>
+  </details>
+
+  <details class="mt-4 bg-[#F5EDE0]/40 dark:bg-gray-800/50 rounded-xl border border-[#EDE3D5] dark:border-gray-700 p-5">
+    <summary class="text-sm font-semibold text-[#343534] dark:text-gray-100 cursor-pointer">Setup: Google Workspace + staff Shared drive</summary>
+    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
+      For <strong>teachers/admins</strong> — org Shared drive via <strong>service account</strong> (separate from student OAuth).
+      Details: ⓘ help → sections <em>Google Workspace</em>, <em>service account</em>, <em>PowerHUB staff</em>.
+    </p>
+    <p class="text-xs font-semibold text-[#343534] dark:text-gray-200 mt-4 mb-1">A. Google Workspace</p>
+    <ol class="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
+      <li><strong>Shared drives → New</strong> (e.g. <code class="text-xs">PowerHUB Files</code>).</li>
+      <li>Add <strong>teachers</strong> as <strong>Contributor</strong> (Google Group recommended).</li>
+      <li>Copy <strong>Shared drive ID</strong> from URL: <code class="text-xs">drive.google.com/drive/folders/<em>ID</em></code></li>
+      <li>Allow <strong>anyone with the link</strong> sharing in org policy (students open files without drive access).</li>
+    </ol>
+    <p class="text-xs font-semibold text-[#343534] dark:text-gray-200 mt-4 mb-1">B. Google Cloud — service account</p>
+    <ol class="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
+      <li>Same GCP project as student OAuth is fine → enable <strong>Google Drive API</strong>.</li>
+      <li><strong>IAM → Service accounts → Create</strong> → <strong>Keys → Add key → JSON</strong> (download once).</li>
+      <li>On the Shared drive: <strong>Manage members</strong> → add <code class="text-xs">client_email</code> from JSON as <strong>Content manager</strong>.</li>
+    </ol>
+    <p class="text-xs font-semibold text-[#343534] dark:text-gray-200 mt-4 mb-1">C. PowerHUB (form above)</p>
+    <ol class="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
+      <li>Enable <strong>staff uploads</strong> → paste <strong>Shared drive ID</strong> + <strong>service account JSON</strong>.</li>
+      <li><strong>Save</strong> → <strong>Test Shared drive connection</strong> → <strong>Ensure PowerHUB root folder</strong>.</li>
+    </ol>
+    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+      Workspace students: set <strong>Workspace email domain</strong> below; OAuth consent <strong>Internal</strong> in GCP. Staff do not use Profile → Connect Google.
+    </p>
+  </details>
+
+</div>
+{% endblock %}
