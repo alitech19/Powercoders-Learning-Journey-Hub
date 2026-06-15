@@ -1,13 +1,30 @@
+import logging
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.views import PasswordResetView
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from .forms import ProfileForm
 from .models import User
+
+logger = logging.getLogger(__name__)
+
+
+class SafePasswordResetView(PasswordResetView):
+    """PasswordResetView that catches SMTP errors and redirects cleanly."""
+
+    def form_valid(self, form):
+        try:
+            return super().form_valid(form)
+        except Exception as exc:
+            logger.warning('Password reset email failed: %s', exc, exc_info=True)
+            return HttpResponseRedirect(self.get_success_url())
 
 
 def _build_checklist(user):
