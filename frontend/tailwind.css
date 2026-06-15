@@ -32,6 +32,7 @@
 /* no template changes needed.                                             */
 /* Zinc is a perfectly neutral gray with zero warm/cool tint.             */
 .dark {
+  color-scheme: dark;          /* browser renders ALL native controls (select popup, scrollbars, date picker) in dark palette */
   --color-gray-950: #09090b;   /* zinc-950 — deepest background               */
   --color-gray-900: #18181b;   /* zinc-900 — page background                  */
   --color-gray-800: #27272a;   /* zinc-800 — nav / card surfaces              */
