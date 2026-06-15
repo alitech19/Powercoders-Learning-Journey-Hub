@@ -51,9 +51,14 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* Alpine.js: hide elements marked x-cloak until Alpine initialises */
-[x-cloak] {
-  display: none !important;
+/* Bug report crosshair icon: black PNG → white in dark mode */
+.bug-report-icon {
+  display: block;
+  height: 1.5rem;
+  width: 1.5rem;
+}
+.dark .bug-report-icon {
+  filter: brightness(0) invert(1);
 }
 
 /* ── Dark-mode form controls ─────────────────────────────────────────── */

@@ -9,13 +9,14 @@ class BugReportWorkflowError(Exception):
     pass
 
 
-def create_report(*, reporter, page_url, page_path, description):
+def create_report(*, reporter, page_url, page_path, description, client_context=None):
     with transaction.atomic():
         report = BugReport.objects.create(
             reporter=reporter,
             page_url=page_url,
             page_path=page_path,
             description=description.strip(),
+            client_context=client_context or {},
         )
     notify_report_created(report)
     return report
@@ -84,3 +85,22 @@ def add_staff_reply(*, report: BugReport, author, body: str):
     )
     notify_admin_reply(report, message)
     return message
+
+
+def report_action_flags(report: BugReport, admin_user) -> dict[str, bool]:
+    """UI flags for triage buttons (list + detail)."""
+    assigned_other = bool(
+        report.assigned_to_id and report.assigned_to_id != admin_user.pk
+    )
+    terminal = report.status in (
+        BugReport.Status.CLOSED,
+        BugReport.Status.REJECTED,
+    )
+    return {
+        'can_take': not assigned_other
+        and report.status
+        in (BugReport.Status.SUBMITTED, BugReport.Status.REOPENED),
+        'can_close': not terminal,
+        'can_reject': not terminal,
+        'can_reopen': terminal,
+    }

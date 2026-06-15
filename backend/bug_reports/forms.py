@@ -1,9 +1,12 @@
 from django import forms
 
+from .client_context import parse_client_context
 from .models import BugReport
 
 
 class BugReportCreateForm(forms.ModelForm):
+    client_context = forms.CharField(required=False, widget=forms.HiddenInput)
+
     class Meta:
         model = BugReport
         fields = ('description',)
@@ -20,6 +23,9 @@ class BugReportCreateForm(forms.ModelForm):
                 }
             ),
         }
+
+    def clean_client_context(self):
+        return parse_client_context(self.cleaned_data.get('client_context'))
 
 
 class BugReportReplyForm(forms.Form):

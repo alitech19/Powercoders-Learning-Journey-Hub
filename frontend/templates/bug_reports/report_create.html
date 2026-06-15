@@ -1,18 +1,14 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Report a bug{% endblock %}
 
 {% block content %}
 <div class="max-w-xl mx-auto">
   {% include "includes/_page_header.html" with title="Report a bug" subtitle="Tell us what went wrong on this page." %}
 
-  <form method="post" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-5 space-y-4">
+  <form method="post" id="bug-report-form" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-5 space-y-4">
     {% csrf_token %}
-
-    <div>
-      <label class="block text-xs font-medium text-gray-500 mb-1">Page URL</label>
-      <input type="text" value="{{ page_url }}" readonly
-             class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
-    </div>
+    <input type="hidden" name="client_context" id="bug-report-client-context" value="">
 
     <div>
       <label for="id_description" class="block text-xs font-medium text-gray-500 mb-1">Description <span class="text-red-500">*</span></label>
@@ -20,6 +16,12 @@
       {% if form.description.errors %}
       <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ form.description.errors.0 }}</p>
       {% endif %}
+    </div>
+
+    <div id="bug-report-share-preview" class="border-t border-gray-100 dark:border-gray-800 pt-3 space-y-2">
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Technical context</p>
+      <dl id="bug-report-share-list" class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm"></dl>
+      <p class="text-xs text-gray-400">Also sent: this page URL and your account. Not sent: location, IP, extensions, cookies, or browsing history.</p>
     </div>
 
     <div class="flex flex-wrap gap-3 pt-1">
@@ -33,5 +35,6 @@
       </a>
     </div>
   </form>
+  <script src="{% static 'js/bug-report-context.js' %}"></script>
 </div>
 {% endblock %}

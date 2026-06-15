@@ -1,4 +1,4 @@
-const CACHE = 'powerhub-v2';
+const CACHE = 'powerhub-v4';
 const OFFLINE_URL = '/offline/';
 const PRECACHE = [
   OFFLINE_URL,

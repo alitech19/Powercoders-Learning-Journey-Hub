@@ -12,8 +12,10 @@ from .services import (
     create_report,
     reject_report,
     reopen_report,
+    report_action_flags,
     take_report,
 )
+from .client_context import format_client_context
 from .url_utils import normalize_page_url
 
 
@@ -28,6 +30,7 @@ def report_create(request):
                 page_url=page_url,
                 page_path=page_path,
                 description=form.cleaned_data['description'],
+                client_context=form.cleaned_data.get('client_context'),
             )
             messages.success(request, 'Thanks — we’ll review your report.')
             return redirect('dashboard:dashboard')
@@ -66,11 +69,18 @@ def report_list(request):
             ]
         )
 
+    reports = list(qs[:200])
     return render(
         request,
         'bug_reports/report_list.html',
         {
-            'reports': qs[:200],
+            'report_cards': [
+                {
+                    'report': report,
+                    **report_action_flags(report, request.user),
+                }
+                for report in reports
+            ],
             'status_filter': status,
             'assigned_filter': assigned,
             'status_choices': BugReport.Status.choices,
@@ -85,6 +95,7 @@ def report_detail(request, pk):
         pk=pk,
     )
     reply_form = BugReportReplyForm()
+    flags = report_action_flags(report, request.user)
     return render(
         request,
         'bug_reports/report_detail.html',
@@ -92,8 +103,8 @@ def report_detail(request, pk):
             'report': report,
             'messages_thread': report.messages.select_related('author'),
             'reply_form': reply_form,
-            'can_take': report.status in (BugReport.Status.SUBMITTED, BugReport.Status.REOPENED)
-            and (report.assigned_to_id is None or report.assigned_to_id == request.user.pk),
+            'client_context_rows': format_client_context(report.client_context),
+            **flags,
         },
     )
 

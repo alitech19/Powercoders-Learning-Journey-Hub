@@ -1,8 +1,10 @@
 from django.core import mail
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
+import json
 
 from bug_reports.models import BugReport
+from bug_reports.services import report_action_flags
 from config.models import IntegratedModule
 from config.module_access import invalidate_module_cache
 from test_utils.users import login_as, make_admin, make_student
@@ -20,13 +22,29 @@ class BugReportSubmitTests(TestCase):
         url = reverse('bug_reports:report_create') + '?from=/tasks/'
         response = self.client.post(
             url,
-            {'description': 'Button does not work'},
+            {
+                'description': 'Button does not work',
+                'client_context': json.dumps(
+                    {
+                        'browser': 'Chrome 128',
+                        'os': 'Linux',
+                        'viewport': '1200×800',
+                        'screen': '1920×1080',
+                        'pixel_ratio': 1,
+                        'color_scheme': 'light',
+                        'timezone': 'Europe/Zurich',
+                        'language': 'en',
+                        'touch': False,
+                    }
+                ),
+            },
             follow=True,
         )
         self.assertEqual(response.status_code, 200)
         report = BugReport.objects.get()
         self.assertEqual(report.reporter, self.student)
         self.assertIn('/tasks/', report.page_path)
+        self.assertEqual(report.client_context.get('browser'), 'Chrome 128')
         self.assertEqual(len(mail.outbox), 1)
 
     def test_anonymous_redirected_to_login(self):
@@ -61,6 +79,14 @@ class BugReportInboxTests(TestCase):
         response = self.client.get(reverse('bug_reports:report_list'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'student@example.com')
+        self.assertContains(response, 'Take in progress')
+
+    def test_action_flags_for_submitted_report(self):
+        flags = report_action_flags(self.report, self.admin_a)
+        self.assertTrue(flags['can_take'])
+        self.assertTrue(flags['can_close'])
+        self.assertTrue(flags['can_reject'])
+        self.assertFalse(flags['can_reopen'])
 
     def test_student_cannot_view_inbox(self):
         login_as(self.client, self.student)

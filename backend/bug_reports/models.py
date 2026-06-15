@@ -18,6 +18,7 @@ class BugReport(models.Model):
     page_url = models.CharField(max_length=2048)
     page_path = models.CharField(max_length=512, blank=True)
     description = models.TextField()
+    client_context = models.JSONField(default=dict, blank=True)
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
