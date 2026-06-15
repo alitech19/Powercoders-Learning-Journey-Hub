@@ -137,7 +137,7 @@ class GoogleAccountConnection(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['google_email']),
+            models.Index(fields=['google_email'], name='google_stor_google__5785ef_idx'),
         ]
 
     def __str__(self):
@@ -222,7 +222,7 @@ class GoogleDriveFolder(models.Model):
             ),
         ]
         indexes = [
-            models.Index(fields=['storage_backend', 'folder_kind']),
+            models.Index(fields=['storage_backend', 'folder_kind'], name='google_stor_storage_5524f9_idx'),
         ]
 
     def __str__(self):
@@ -257,7 +257,7 @@ class DriveUploadLog(models.Model):
     class Meta:
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['status', 'created_at'], name='google_stor_status_450919_idx'),
         ]
 
     def __str__(self):

@@ -51,17 +51,18 @@ Edit `.env` if needed. Defaults work for local Docker development.
 docker compose up --build
 ```
 
-This starts five services:
+This starts six services:
 
 | Service | Role |
 |---------|------|
 | `db` | PostgreSQL 17 |
 | `redis` | Cache + Celery message broker |
-| `web` | Django (`migrate`, `collectstatic`, `runserver`) |
+| `migrate` | One-shot `locked_migrate` (runs once per `up`, then exits) |
+| `web` | Django (`collectstatic`, `runserver`) — starts **after** migrate |
 | `worker` | Celery worker (runs tasks) |
 | `beat` | Celery beat (`django-celery-beat` — schedules in Django admin) |
 
-On first run, migrations run automatically.
+On first run, the **`migrate`** service applies migrations automatically. Do **not** run `manage.py migrate` at the same time as `docker compose up` — use `locked_migrate` if you need to migrate manually later.
 
 ### Frontend (`integration` branch)
 

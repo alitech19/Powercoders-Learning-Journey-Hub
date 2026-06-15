@@ -21,6 +21,19 @@ services:
       timeout: 5s
       retries: 5
 
+  migrate:
+    build: .
+    working_dir: /app/backend
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    command: python manage.py locked_migrate --noinput
+    restart: 'no'
+
   web:
     build: .
     working_dir: /app/backend
@@ -36,9 +49,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     command: >
-      sh -c "python manage.py migrate --noinput &&
-             python manage.py collectstatic --noinput &&
+      sh -c "python manage.py collectstatic --noinput &&
              python manage.py runserver 0.0.0.0:8000"
 
   worker:
@@ -54,6 +68,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     command: celery -A config worker --loglevel=info
 
   beat:
@@ -68,6 +84,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
 
 volumes:
