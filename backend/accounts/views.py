@@ -8,6 +8,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import PasswordResetView
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
 from django.utils import timezone
 
 from .forms import ProfileForm
@@ -19,12 +20,14 @@ logger = logging.getLogger(__name__)
 class SafePasswordResetView(PasswordResetView):
     """PasswordResetView that catches SMTP errors and redirects cleanly."""
 
+    success_url = reverse_lazy('accounts:password_reset_done')
+
     def form_valid(self, form):
         try:
             return super().form_valid(form)
         except Exception as exc:
             logger.warning('Password reset email failed: %s', exc, exc_info=True)
-            return HttpResponseRedirect(self.get_success_url())
+            return HttpResponseRedirect(str(self.success_url))
 
 
 def _build_checklist(user):
