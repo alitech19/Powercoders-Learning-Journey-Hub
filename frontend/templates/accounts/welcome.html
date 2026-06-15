@@ -47,7 +47,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50/20 flex flex-col"
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50/20 dark:from-gray-950 dark:via-gray-900 dark:to-gray-900 flex flex-col"
      x-data="{
        step: 1,
        totalSteps: {{ onboarding_total_steps }},
@@ -80,7 +80,7 @@
                ? 'w-6 h-2.5 bg-[#B23149]'
                : step > i
                ? 'w-2.5 h-2.5 bg-[#B23149]/30'
-               : 'w-2.5 h-2.5 bg-gray-200 hover:bg-gray-300'">
+               : 'w-2.5 h-2.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'">
         </div>
       </template>
       <span class="text-xs text-gray-400 font-medium ml-1" x-text="step + ' / ' + totalSteps"></span>

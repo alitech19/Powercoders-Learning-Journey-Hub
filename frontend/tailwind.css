@@ -55,6 +55,40 @@ body {
   display: none !important;
 }
 
+/* ── Dark-mode form controls ─────────────────────────────────────────── */
+/*
+  Step 1 — color-scheme: dark tells the browser to render the native dropdown
+  popup list and date/time picker chrome in its own dark palette.  This fixes
+  the OS-level white popup that CSS background-color cannot reach.
+  Applies to every interactive input (radio/checkbox/range/file excluded).
+*/
+:where(.dark) input:where(:not([type=radio]):not([type=checkbox]):not([type=range]):not([type=file])),
+:where(.dark) textarea,
+:where(.dark) select {
+  color-scheme: dark;
+}
+
+/*
+  Step 2 — zero-specificity background + text base.
+  Inputs with no explicit dark bg class default to white (browser native).
+  This sets zinc-800 / zinc-100 as the fallback.
+  bg-transparent inputs/textareas are excluded so they keep showing their
+  parent card bg.  Any explicit dark:bg-* or dark:text-* Tailwind utility
+  wins because its specificity (0,1,0) beats :where()-wrapped (0,0,1).
+*/
+:where(.dark) input:where(:not([type=radio]):not([type=checkbox]):not([type=range]):not([type=file]):not(.bg-transparent)),
+:where(.dark) textarea:where(:not(.bg-transparent)),
+:where(.dark) select {
+  background-color: #27272a; /* zinc-800 */
+  color: #f4f4f5;             /* zinc-100 */
+}
+
+/* Belt-and-suspenders for browsers that honour option styling */
+:where(.dark) option {
+  background-color: #27272a;
+  color: #f4f4f5;
+}
+
 /* ── 2FA login: OTP input field styling ─────────────────────────────── */
 input[name="token-otp_token"],
 input[name="otp_token"],
@@ -73,4 +107,15 @@ input[name="otp_token"]:focus,
   outline: none;
   border-color: #B23149;
   box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.2);
+}
+/* Dark override for OTP field (border only — bg/text handled by global rule above) */
+.dark input[name="token-otp_token"],
+.dark input[name="otp_token"],
+.dark #id_token-otp_token {
+  border-color: #52525b; /* zinc-600 */
+}
+.dark input[name="token-otp_token"]:focus,
+.dark input[name="otp_token"]:focus,
+.dark #id_token-otp_token:focus {
+  border-color: #B23149;
 }

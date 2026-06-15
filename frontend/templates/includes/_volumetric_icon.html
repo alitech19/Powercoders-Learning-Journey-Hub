@@ -3,9 +3,9 @@
   {% elif size == 'sm' %}h-8 w-8 rounded-lg
   {% elif size == 'lg' %}h-12 w-12 rounded-xl
   {% else %}h-10 w-10 rounded-xl{% endif %}
-  {% if variant == 'cream' %}bg-white/80 dark:bg-gray-900 text-[#343534] dark:text-gray-100 shadow-sm
-  {% elif variant == 'soft' %}bg-[#F5EDE0] dark:bg-gray-800 text-[#343534] dark:text-gray-100 shadow-sm
-  {% elif variant == 'nav' %}bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 shadow-sm
+  {% if variant == 'cream' %}bg-white/80 dark:bg-gray-800! text-[#343534] dark:text-gray-100! shadow-sm
+  {% elif variant == 'soft' %}bg-[#F5EDE0] dark:bg-gray-800! text-[#343534] dark:text-gray-100! shadow-sm
+  {% elif variant == 'nav' %}bg-gray-100 dark:bg-gray-800! text-gray-500 dark:text-gray-400! shadow-sm
   {% elif variant == 'nav-ghost' %}text-gray-500 dark:text-gray-400 group-hover:bg-gray-100 dark:group-hover:bg-gray-800 group-hover:text-[#B23149] dark:group-hover:text-[#B23149] transition-colors
   {% else %}bg-[#B23149] text-white shadow-sm{% endif %}
   {% if extra_class %} {{ extra_class }}{% endif %}"

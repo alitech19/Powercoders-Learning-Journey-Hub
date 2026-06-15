@@ -35,7 +35,7 @@
       {% elif wizard.steps.current == 'generator' %}
       <div>
         <p class="text-sm font-semibold text-[#343534] dark:text-gray-100 mb-3">1. Scan this QR code with your authenticator app</p>
-        <div class="bg-white dark:bg-gray-900 p-3 rounded-lg border-2 border-[#EDE3D5] dark:border-gray-700 inline-block mb-4">
+        <div class="bg-white p-3 rounded-lg border-2 border-gray-200 dark:border-gray-500 dark:ring-1 dark:ring-white/10 inline-block mb-4">
           <img src="{% url 'two_factor:qr' %}" alt="QR Code" class="h-40 w-40">
         </div>
         <p class="text-sm font-semibold text-[#343534] dark:text-gray-100 mb-2">2. Enter the 6-digit code</p>
@@ -70,6 +70,15 @@
     border-color: #B23149;
     box-shadow: 0 0 0 2px rgba(192,57,43,0.2);
     outline: none;
+  }
+  .dark #id_generator-token, .dark #id_token, .dark input[name="token"] {
+    background-color: #1f2937;
+    color: #f3f4f6;
+    border-color: #4b5563;
+  }
+  .dark #id_generator-token:focus, .dark #id_token:focus, .dark input[name="token"]:focus {
+    border-color: #B23149;
+    box-shadow: 0 0 0 2px rgba(178,49,73,0.25);
   }
 </style>
 {% endblock %}
