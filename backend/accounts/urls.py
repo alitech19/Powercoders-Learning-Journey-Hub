@@ -54,6 +54,7 @@ urlpatterns = [
         template_name='accounts/password_reset_form.html',
         email_template_name='accounts/password_reset_email.txt',
         subject_template_name='accounts/password_reset_subject.txt',
+        extra_email_context={'site_name': 'PowerHUB'},
     ), name='password_reset'),
     path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(
         template_name='accounts/password_reset_done.html',
