@@ -1,0 +1,40 @@
+{% if can_take or can_close or can_reject or can_reopen %}
+<div class="flex flex-wrap gap-2 {{ extra_classes }}">
+  {% if can_take %}
+  <form method="post" action="{% url 'bug_reports:report_take' report.pk %}" class="pointer-events-auto">
+    {% csrf_token %}
+    <button type="submit"
+            class="text-xs font-semibold px-3 py-2 rounded-lg bg-[#B23149] hover:bg-[#8E273A] text-white whitespace-nowrap">
+      Take in progress
+    </button>
+  </form>
+  {% endif %}
+  {% if can_close %}
+  <form method="post" action="{% url 'bug_reports:report_close' report.pk %}" class="pointer-events-auto">
+    {% csrf_token %}
+    <button type="submit"
+            class="text-xs font-semibold px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-[#B23149] whitespace-nowrap">
+      Close
+    </button>
+  </form>
+  {% endif %}
+  {% if can_reject %}
+  <form method="post" action="{% url 'bug_reports:report_reject' report.pk %}" class="pointer-events-auto">
+    {% csrf_token %}
+    <button type="submit"
+            class="text-xs font-semibold px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-red-500 text-red-600 dark:text-red-400 whitespace-nowrap">
+      Reject
+    </button>
+  </form>
+  {% endif %}
+  {% if can_reopen %}
+  <form method="post" action="{% url 'bug_reports:report_reopen' report.pk %}" class="pointer-events-auto">
+    {% csrf_token %}
+    <button type="submit"
+            class="text-xs font-semibold px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-[#B23149] whitespace-nowrap">
+      Reopen
+    </button>
+  </form>
+  {% endif %}
+</div>
+{% endif %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Module unavailable{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto text-center py-16 px-4">
+  <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100 mb-3">{{ module_label }} is not available</h1>
+  <p class="text-gray-600 dark:text-gray-400 text-sm mb-6">
+    This part of PowerHUB has been turned off for your organisation. Your other data is unchanged.
+  </p>
+  <a href="{% url 'dashboard:dashboard' %}"
+     class="inline-flex items-center justify-center bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+    Back to dashboard
+  </a>
+  {% if show_admin_hint %}
+  <p class="text-xs text-gray-500 dark:text-gray-400 mt-8">
+    Admin: re-enable <strong>{{ module_label }}</strong> in
+    <a href="{% url 'admin:powerhub_config_integratedmodule_changelist' %}" class="text-[#B23149] font-semibold hover:underline">Django admin → Integrated modules</a>.
+  </p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -7,6 +7,7 @@ from django.views.generic import RedirectView
 from two_factor import urls as two_factor_urls
 
 from accounts.two_factor_views import EmailLoginView
+from config.views import module_disabled_view
 
 
 def _two_factor_urlpatterns():
@@ -71,6 +72,8 @@ urlpatterns = [
     path('habits/', include('habits.urls')),
     path('group/', include('group_space.urls')),
     path('resources/', include('resources.urls')),
+    path('bugs/', include('bug_reports.urls')),
+    path('module-disabled/<slug:slug>/', module_disabled_view, name='module_disabled'),
     path('', include('info.urls')),
     path('', include('dashboard.urls')),
     path('home/', RedirectView.as_view(pattern_name='dashboard:dashboard', permanent=False), name='home'),

@@ -19,6 +19,9 @@ document.addEventListener('alpine:init', function () {
       try {
         localStorage.setItem('powerhub-theme', this.dark ? 'dark' : 'light');
       } catch (e) {}
+      document.dispatchEvent(
+        new CustomEvent('powerhub-theme-change', { detail: { dark: this.dark } })
+      );
     }
   });
 });

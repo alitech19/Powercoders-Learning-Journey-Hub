@@ -1,0 +1,14 @@
+{% load static %}
+{% if bug_report_button.enabled %}
+<a href="{{ bug_report_button.url }}"
+   class="inline-flex h-6 w-6 items-center justify-center rounded-full hover:opacity-80 transition-opacity shrink-0"
+   aria-label="{{ bug_report_button.aria_label }}"
+   title="{{ bug_report_button.aria_label }}">
+  <img src="{% static 'img/bug-report-icon.png' %}"
+       alt=""
+       width="24"
+       height="24"
+       class="bug-report-icon"
+       aria-hidden="true">
+</a>
+{% endif %}
