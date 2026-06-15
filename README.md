@@ -10,7 +10,7 @@
 [![Django](https://img.shields.io/badge/Django-5.2-092E20?style=flat-square&logo=django&logoColor=white)](https://djangoproject.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com)
-[![Tests](https://img.shields.io/badge/Tests-223%20passing-22C55E?style=flat-square)](#-testing)
+[![Tests](https://img.shields.io/badge/Tests-251%20passing-22C55E?style=flat-square)](#-testing)
 [![License](https://img.shields.io/badge/License-Private-B23149?style=flat-square)](#)
 
 <br/>
@@ -144,8 +144,8 @@ Home at `/` is a **role-based dashboard**. Contextual **ⓘ help** is in the pag
 | Database | PostgreSQL | 17 |
 | Cache & queue | Redis | 7 |
 | Tasks | Celery + django-celery-beat | DB scheduler |
-| Frontend CSS | Tailwind CSS | CDN (v4) with `@custom-variant dark` for class-based dark mode |
-| Frontend JS | HTMX · Alpine.js | Self-hosted (`frontend/static/js/`) — CDN domains removed from CSP |
+| Frontend CSS | Tailwind CSS | Compiled v4 (`frontend/static/css/tailwind.css`, built via `npm run build:css`) — `@custom-variant dark` for class-based dark mode |
+| Frontend JS | HTMX · Alpine.js | Self-hosted (`frontend/static/js/`) |
 | Charts | Chart.js | v4.4.4, self-hosted — analytics dashboard |
 | PWA | Web App Manifest + Service Worker | Network-first nav, cache-first static assets, offline fallback |
 | Auth | django-two-factor-auth · django-axes | TOTP 2FA + brute-force protection |
@@ -181,7 +181,6 @@ Powercoders-Learning-Journey-Hub/
 │   ├── resources/         # ResourceContainer + ResourceItem
 │   ├── tasks/             # Task · TaskEnrollment · Subtask · TaskUpdate
 │   ├── workflows/         # Workflow · WorkflowStep · WorkflowEnrollment
-│   ├── dev/               # Dev seed YAML (dev only)
 │   ├── test_utils/        # Shared test factories
 │   ├── tests/             # Cross-app integration tests
 │   └── manage.py
@@ -259,7 +258,7 @@ Add further users from **Administration → Users** (or CSV import) — each get
 
 ## 🧪 Testing
 
-**223 tests** pass on main.
+**251 tests** pass on main.
 
 ### Run all tests (Docker)
 
