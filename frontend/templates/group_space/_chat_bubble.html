@@ -20,6 +20,9 @@
       {% elif post.drive_storage_backend == "personal" %}
       <span class="text-xs px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-300 shrink-0">My Drive</span>
       {% endif %}
+      {% if post.drive_doc_kind %}
+      <span class="text-xs px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 shrink-0">{{ post.get_drive_doc_kind_display }}</span>
+      {% endif %}
       <time class="text-xs text-gray-400 ml-auto shrink-0 whitespace-nowrap" datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|date:"d M Y, H:i" }}</time>
     </header>
 

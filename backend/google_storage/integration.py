@@ -41,6 +41,13 @@ def student_must_connect_google_for_upload(user) -> bool:
     )
 
 
+from .doc_types import GOOGLE_DOC_TYPES
+
+
+def can_create_google_doc(user) -> bool:
+    return should_upload_file_to_drive(user)
+
+
 def composer_upload_context(user) -> dict:
     return {
         'drive_chat_upload_enabled': should_upload_file_to_drive(user)
@@ -49,4 +56,6 @@ def composer_upload_context(user) -> dict:
         'drive_student_connect_required': student_must_connect_google_for_upload(user),
         'drive_staff_path': user.role in (User.Role.TEACHER, User.Role.ADMIN)
         and staff_drive_uploads_enabled(),
+        'can_create_google_doc': can_create_google_doc(user),
+        'google_doc_types': GOOGLE_DOC_TYPES,
     }

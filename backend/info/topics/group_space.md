@@ -55,6 +55,7 @@ If you remove the file, link, or name on edit, the linked Resources entry is **r
 - Enter **resource name** — e.g. “Week 3 slides”.
 - Allowed types include PDF, Word, text, common images (see form hint for full list); max size **10 MB**.
 - When Google Drive is enabled, files upload to Drive (students: **My Drive** after connecting Google on Profile; staff: org **Shared drive**). The chat shows **Uploading…** then **Open in Google Drive**. Failed uploads can be **retried** from the message.
+- **New Google file** (Doc, Sheet, Slides, Form) creates an empty file in the same Drive folder and adds it to Resources when you provide a name.
 - The saved link in Resources points to the Drive (or legacy) file so the group can open it again later.
 
 ### Link in message

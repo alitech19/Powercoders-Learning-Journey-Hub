@@ -217,6 +217,78 @@ class ShareConfirmForm(forms.Form):
         return cleaned
 
 
+class GoogleDocCreateForm(forms.Form):
+    doc_kind = forms.ChoiceField(
+        choices=[],
+        widget=forms.Select(attrs={
+            'class': (
+                'w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm '
+                'focus:outline-none focus:ring-2 focus:ring-[#B23149] focus:border-[#B23149]'
+            ),
+        }),
+    )
+    resource_label = forms.CharField(
+        max_length=RESOURCE_LABEL_MAX_LENGTH,
+        widget=forms.TextInput(attrs={
+            'class': (
+                'w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm '
+                'focus:outline-none focus:ring-2 focus:ring-[#B23149] focus:border-[#B23149]'
+            ),
+            'placeholder': 'Name for the group Resources list',
+        }),
+    )
+    body = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': 2,
+            'class': (
+                'w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 text-sm resize-none '
+                'focus:outline-none focus:ring-2 focus:ring-[#B23149] focus:border-[#B23149]'
+            ),
+            'placeholder': 'Optional message…',
+        }),
+    )
+
+    def __init__(self, *args, user=None, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+        from google_storage.doc_types import GOOGLE_DOC_TYPE_CHOICES
+
+        self.fields['doc_kind'].choices = GOOGLE_DOC_TYPE_CHOICES
+
+    def clean_resource_label(self):
+        return (self.cleaned_data.get('resource_label') or '').strip()
+
+    def clean_body(self):
+        return (self.cleaned_data.get('body') or '').strip()
+
+    def clean(self):
+        cleaned = super().clean()
+        if self.user:
+            from accounts.models import User
+            from google_storage.integration import (
+                should_upload_file_to_drive,
+                student_must_connect_google_for_upload,
+            )
+
+            if student_must_connect_google_for_upload(self.user):
+                raise ValidationError(
+                    'Connect Google Drive on your profile before creating Google files.',
+                )
+            if self.user.role in (User.Role.TEACHER, User.Role.ADMIN) and not should_upload_file_to_drive(
+                self.user,
+            ):
+                raise ValidationError('Org file storage is not configured. Contact an admin.')
+            if not should_upload_file_to_drive(self.user):
+                raise ValidationError('Google Drive is not available for your account.')
+        label = cleaned.get('resource_label', '')
+        if not label:
+            raise ValidationError({
+                'resource_label': 'Give the file a name — it appears on the group Resources list.',
+            })
+        return cleaned
+
+
 class ShareKindForm(forms.Form):
     kind = forms.ChoiceField(
         choices=[

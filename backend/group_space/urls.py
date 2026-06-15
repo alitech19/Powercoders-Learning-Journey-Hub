@@ -7,6 +7,7 @@ app_name = 'group_space'
 urlpatterns = [
     path('', views.feed, name='feed'),
     path('send/', views.message_create, name='message_create'),
+    path('google-doc/', views.google_doc_create, name='google_doc_create'),
     path('share/', views.share_create, name='share_create'),
     path('new/', views.post_create, name='post_create'),
     path('share/start/', views.share_start, name='share_start'),

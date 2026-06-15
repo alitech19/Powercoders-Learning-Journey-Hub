@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 from accounts.models import User
 
 from .chat import ChatItem, build_chat_timeline
-from .forms import ChatComposerForm, PostForm
+from .forms import ChatComposerForm, GoogleDocCreateForm, PostForm
 from .models import Post
 from .permissions import (
     can_delete_post,
@@ -21,7 +21,11 @@ from .permissions import (
 from .constants import SHARE_KIND_PANEL
 from google_storage.integration import composer_upload_context
 from google_storage.integration import should_upload_file_to_drive
-from google_storage.orchestrator import prepare_drive_upload, retry_failed_drive_upload
+from google_storage.orchestrator import (
+    create_google_doc_for_post,
+    prepare_drive_upload,
+    retry_failed_drive_upload,
+)
 from google_storage.permissions import can_retry_drive_upload, delete_drive_file_for_post
 from google_storage.rate_limit import DriveUploadRateLimitError
 
@@ -84,6 +88,7 @@ def feed(request):
         'chat_items': chat_items,
         'share_menu': share_menu,
         'composer_form': ChatComposerForm(user=user),
+        'gdoc_form': GoogleDocCreateForm(user=user),
         **composer_upload_context(user),
     })
 
@@ -120,37 +125,86 @@ def message_create(request):
             except DriveUploadRateLimitError as exc:
                 post.delete()
                 form.add_error('file', str(exc))
-                response = render(
-                    request,
-                    'group_space/_chat_composer.html',
-                    {
-                        **_group_context(user, group),
-                        'share_menu': _share_menu_for(user),
-                        'composer_form': form,
-                        **composer_upload_context(user),
-                    },
-                    status=422,
+                return _composer_error_response(
+                    request, user, group, composer_form=form,
                 )
-                response['HX-Retarget'] = '#chat-composer'
-                response['HX-Reswap'] = 'outerHTML'
-                return response
         after_post_saved(post)
         return _bubble_response(request, post, group)
 
+    return _composer_error_response(request, user, group, composer_form=form)
+
+
+def _composer_error_response(
+    request,
+    user,
+    group,
+    *,
+    composer_form=None,
+    gdoc_form=None,
+    initial_gdoc=False,
+):
     response = render(
         request,
         'group_space/_chat_composer.html',
         {
             **_group_context(user, group),
             'share_menu': _share_menu_for(user),
-            'composer_form': form,
+            'composer_form': composer_form or ChatComposerForm(user=user),
+            'gdoc_form': gdoc_form or GoogleDocCreateForm(user=user),
             **composer_upload_context(user),
         },
         status=422,
     )
+    if initial_gdoc:
+        response['HX-Trigger-After-Swap'] = 'openGdocMode'
     response['HX-Retarget'] = '#chat-composer'
     response['HX-Reswap'] = 'outerHTML'
     return response
+
+
+@login_required
+@require_POST
+def google_doc_create(request):
+    user = request.user
+    group = resolve_group(
+        get_accessible_groups(user),
+        request.POST.get('group_pk', ''),
+    )
+    if not group:
+        raise Http404
+
+    group_space = get_group_space_for_group(group)
+    if not can_post_in_group_space(user, group_space):
+        raise Http404
+
+    form = GoogleDocCreateForm(request.POST, user=user)
+    if form.is_valid():
+        post = Post(
+            group_space=group_space,
+            author=user,
+            body=form.cleaned_data.get('body', ''),
+            resource_label=form.cleaned_data['resource_label'],
+        )
+        post.save()
+        try:
+            create_google_doc_for_post(
+                post,
+                user,
+                doc_kind=form.cleaned_data['doc_kind'],
+                title=form.cleaned_data['resource_label'],
+            )
+        except DriveUploadRateLimitError as exc:
+            post.delete()
+            form.add_error(None, str(exc))
+            return _composer_error_response(request, user, group, gdoc_form=form, initial_gdoc=True)
+        except Exception as exc:
+            post.delete()
+            form.add_error(None, str(exc))
+            return _composer_error_response(request, user, group, gdoc_form=form, initial_gdoc=True)
+        after_post_saved(post)
+        return _bubble_response(request, post, group)
+
+    return _composer_error_response(request, user, group, gdoc_form=form, initial_gdoc=True)
 
 
 @login_required

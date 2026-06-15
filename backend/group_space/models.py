@@ -38,6 +38,12 @@ class Post(models.Model):
         READY = 'ready', 'Ready'
         FAILED = 'failed', 'Failed'
 
+    class DriveDocKind(models.TextChoices):
+        DOCUMENT = 'document', 'Google Doc'
+        SPREADSHEET = 'spreadsheet', 'Google Sheet'
+        PRESENTATION = 'presentation', 'Google Slides'
+        FORM = 'form', 'Google Form'
+
     group_space = models.ForeignKey(
         GroupSpace,
         on_delete=models.CASCADE,
@@ -66,6 +72,11 @@ class Post(models.Model):
         blank=True,
     )
     drive_upload_error = models.TextField(blank=True)
+    drive_doc_kind = models.CharField(
+        max_length=20,
+        choices=DriveDocKind.choices,
+        blank=True,
+    )
     resource_label = models.CharField(
         max_length=RESOURCE_LABEL_MAX_LENGTH,
         blank=True,
