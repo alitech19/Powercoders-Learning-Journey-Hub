@@ -19,6 +19,15 @@ class RoleDecoratorTests(TestCase):
         request.user = make_admin('admin@example.com')
         self.assertEqual(view(request).content, b'ok')
 
+    def test_admin_required_allows_superuser_with_student_role(self):
+        @admin_required
+        def view(request):
+            return HttpResponse('ok')
+
+        request = self.factory.get('/')
+        request.user = make_student('su@example.com', is_superuser=True, is_staff=True)
+        self.assertEqual(view(request).content, b'ok')
+
     def test_admin_required_redirects_student(self):
         @admin_required
         def view(request):

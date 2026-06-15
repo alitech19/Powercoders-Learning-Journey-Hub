@@ -44,7 +44,7 @@
   </div>
 
   {% else %}
-  <div class="flex flex-col flex-1 min-h-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+  <div class="flex flex-col flex-1 min-h-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
 
     {% if pinned_posts %}
     <div class="shrink-0 border-b border-amber-100 bg-amber-50/50 dark:bg-amber-950/40 px-4 py-2 space-y-2 max-h-32 overflow-y-auto">
@@ -77,7 +77,7 @@
       <div id="chat-bottom" class="h-px" aria-hidden="true"></div>
     </div>
 
-    {% include "group_space/_chat_composer.html" with composer_form=composer_form group=group %}
+    {% include "group_space/_chat_composer.html" with composer_form=composer_form gdoc_form=gdoc_form group=group %}
   </div>
   {% endif %}
 </div>
@@ -94,6 +94,16 @@
   function isAttachModeOpen() {
     const panel = document.getElementById('attach-panel');
     return panel && !panel.classList.contains('hidden');
+  }
+
+  function isGdocPickerOpen() {
+    const panel = document.getElementById('gdoc-picker-panel');
+    return panel && !panel.classList.contains('hidden');
+  }
+
+  function isGdocModeOpen() {
+    const form = document.getElementById('gdoc-form');
+    return form && !form.classList.contains('hidden');
   }
 
   function isShareModeOpen() {
@@ -151,8 +161,10 @@
     const textMode = document.getElementById('compose-text-mode');
     const actions = document.getElementById('composer-actions');
     const attachOpen = isAttachModeOpen();
+    const gdocOpen = isGdocModeOpen();
+    const gdocPickerOpen = isGdocPickerOpen();
     const shareOpen = isShareModeOpen();
-    const hideCompose = attachOpen || shareOpen;
+    const hideCompose = attachOpen || shareOpen || gdocOpen || gdocPickerOpen;
 
     textMode?.classList.toggle('hidden', hideCompose);
     actions?.classList.toggle('hidden', hideCompose);
@@ -160,8 +172,19 @@
     updateResourceLabelVisibility();
   }
 
+  function closeGdocFormOnly() {
+    const form = document.getElementById('gdoc-form');
+    const label = document.getElementById('gdoc-resource-label');
+    const body = document.getElementById('gdoc-body');
+    if (label) label.value = '';
+    if (body) body.value = '';
+    if (form) form.classList.add('hidden');
+  }
+
   function openShareMode() {
     closeAttachMode();
+    closeGdocFormOnly();
+    closeGdocPickerMode();
     document.getElementById('share-panel')?.classList.remove('hidden');
     updateComposeMode();
   }
@@ -178,6 +201,8 @@
 
   function openAttachMode() {
     closeSharePanel();
+    closeGdocFormOnly();
+    closeGdocPickerMode();
     document.getElementById('attach-panel')?.classList.remove('hidden');
     updateComposeMode();
     document.getElementById('chat-file')?.focus();
@@ -192,11 +217,48 @@
     updateComposeMode();
   }
 
+  function openGdocPickerMode() {
+    closeSharePanel();
+    closeAttachMode();
+    closeGdocFormOnly();
+    document.getElementById('gdoc-picker-panel')?.classList.remove('hidden');
+    updateComposeMode();
+  }
+
+  function closeGdocPickerMode() {
+    document.getElementById('gdoc-picker-panel')?.classList.add('hidden');
+    updateComposeMode();
+  }
+
+  function openGdocMode(docKind, docLabel) {
+    closeSharePanel();
+    closeAttachMode();
+    closeGdocPickerMode();
+    const form = document.getElementById('gdoc-form');
+    const kindSelect = document.getElementById('id_doc_kind');
+    const typeLabel = document.getElementById('gdoc-type-label');
+    if (form) form.classList.remove('hidden');
+    if (kindSelect && docKind) kindSelect.value = docKind;
+    if (typeLabel) {
+      const selected = kindSelect?.selectedOptions?.[0];
+      typeLabel.textContent = docLabel || selected?.textContent || 'Google file';
+    }
+    updateComposeMode();
+    document.getElementById('gdoc-resource-label')?.focus();
+  }
+
+  function closeGdocMode() {
+    closeGdocFormOnly();
+    updateComposeMode();
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     scrollChatToBottom();
     applySnapshotProgressBars();
     if (document.getElementById('chat-composer')?.dataset.initialAttach === '1') {
       openAttachMode();
+    } else if (document.getElementById('chat-composer')?.dataset.initialGdoc === '1') {
+      openGdocMode();
     } else {
       updateComposeMode();
     }
@@ -211,12 +273,29 @@
   document.body.addEventListener('click', function (e) {
     if (!e.target.closest('#chat-composer')) return;
 
+    if (e.target.closest('#gdoc-picker-toggle')) {
+      openGdocPickerMode();
+      return;
+    }
+    if (e.target.closest('#gdoc-picker-cancel')) {
+      closeGdocPickerMode();
+      return;
+    }
     if (e.target.closest('#attach-toggle')) {
       openAttachMode();
       return;
     }
     if (e.target.closest('#attach-cancel')) {
       closeAttachMode();
+      return;
+    }
+    if (e.target.closest('#gdoc-cancel')) {
+      closeGdocMode();
+      return;
+    }
+    const gdocPick = e.target.closest('.gdoc-type-pick');
+    if (gdocPick) {
+      openGdocMode(gdocPick.dataset.docKind, gdocPick.dataset.docLabel);
       return;
     }
     if (e.target.closest('#share-toggle')) {
@@ -258,16 +337,25 @@
       applySnapshotProgressBars(evt.detail.target);
       closeSharePanel();
       closeAttachMode();
+      closeGdocPickerMode();
+      closeGdocMode();
       document.getElementById('chat-message-form')?.reset();
+      document.getElementById('gdoc-form')?.reset();
       updateComposeMode();
     }
     if (evt.detail.target && evt.detail.target.id === 'chat-composer') {
       if (document.getElementById('chat-composer')?.dataset.initialAttach === '1') {
         openAttachMode();
+      } else if (document.getElementById('chat-composer')?.dataset.initialGdoc === '1') {
+        openGdocMode();
       } else {
         updateComposeMode();
       }
     }
+  });
+
+  document.body.addEventListener('openGdocMode', function () {
+    openGdocMode();
   });
 })();
 </script>

@@ -5,7 +5,7 @@
 {% block content %}
 <div class="flex items-center justify-between mb-6">
   <div>
-    <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100">User Management</h1>
+    {% include "includes/_page_title.html" with title="User Management" %}
     <p class="text-gray-500 text-sm mt-0.5">{{ page_obj.paginator.count }} user{{ page_obj.paginator.count|pluralize }} total</p>
   </div>
   <a href="{% url 'accounts:user_create' %}"

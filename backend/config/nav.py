@@ -77,6 +77,7 @@ ADMIN_NAV_MENU_LABEL = 'Administration'
 ADMIN_NAV_ITEMS: tuple[NavItem, ...] = (
     NavItem('Cohorts & Groups', 'accounts:cohort_list'),
     NavItem('Student Progress', 'accounts:student_progress'),
+    NavItem('File storage', 'accounts:storage_settings'),
     NavItem('Users', 'accounts:user_list'),
     NavItem('Create User', 'accounts:user_create'),
     NavItem('Import Users (CSV)', 'accounts:user_import'),

@@ -65,7 +65,7 @@ Nginx terminates SSL and serves `/static/` and `/media/`; Gunicorn handles Djang
 | `CONN_MAX_AGE` on DB | Fewer connection spikes |
 | Object storage for `MEDIA_ROOT` | Ephemeral disks (Render) lose uploads |
 
-**Resources:** group chat file uploads — local `MEDIA_ROOT` now; [plans/GOOGLE_DRIVE_INTEGRATION_PLAN.md](plans/GOOGLE_DRIVE_INTEGRATION_PLAN.md) for Drive; S3 noted here if needed later.
+**Resources:** group chat uploads use **Google Drive** ([GOOGLE_DRIVE_SETUP.md](GOOGLE_DRIVE_SETUP.md)); optional S3 for other `MEDIA_ROOT` use cases later.
 
 ---
 

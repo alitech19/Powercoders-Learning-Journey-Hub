@@ -54,9 +54,18 @@
         {{ item.title }}
       </a>
       <p class="text-xs text-gray-400 truncate mt-0.5">{{ item.url }}</p>
-      {% if item.from_group_chat %}
-      <span class="inline-block mt-1 text-[10px] uppercase tracking-wide text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded">Group chat</span>
-      {% endif %}
+      <div class="flex flex-wrap gap-1 mt-1">
+        {% if item.from_group_chat %}
+        <span class="text-[10px] uppercase tracking-wide text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded">Group chat</span>
+        {% endif %}
+        {% if item.storage_backend == "google_drive_shared" %}
+        <span class="text-[10px] uppercase tracking-wide text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-1.5 py-0.5 rounded">Org drive</span>
+        {% elif item.storage_backend == "google_drive_personal" %}
+        <span class="text-[10px] uppercase tracking-wide text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 px-1.5 py-0.5 rounded">My Drive</span>
+        {% elif item.storage_backend == "legacy_local" %}
+        <span class="text-[10px] uppercase tracking-wide text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">Legacy file</span>
+        {% endif %}
+      </div>
     </div>
     {% if can_edit %}
     <div class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">

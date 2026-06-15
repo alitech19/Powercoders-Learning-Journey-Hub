@@ -29,6 +29,21 @@ class Post(models.Model):
         GOAL = 'goal', 'Goal'
         TASK = 'task', 'Task'
 
+    class DriveStorageBackend(models.TextChoices):
+        SHARED_ORG = 'shared_org', 'Org Shared drive'
+        PERSONAL = 'personal', 'My Drive'
+
+    class DriveUploadStatus(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        READY = 'ready', 'Ready'
+        FAILED = 'failed', 'Failed'
+
+    class DriveDocKind(models.TextChoices):
+        DOCUMENT = 'document', 'Google Doc'
+        SPREADSHEET = 'spreadsheet', 'Google Sheet'
+        PRESENTATION = 'presentation', 'Google Slides'
+        FORM = 'form', 'Google Form'
+
     group_space = models.ForeignKey(
         GroupSpace,
         on_delete=models.CASCADE,
@@ -44,6 +59,24 @@ class Post(models.Model):
         validators=[MaxLengthValidator(BODY_TEXT_MAX_LENGTH)],
     )
     file = models.FileField(upload_to='group_files/%Y/%m/', null=True, blank=True)
+    drive_storage_backend = models.CharField(
+        max_length=20,
+        choices=DriveStorageBackend.choices,
+        blank=True,
+    )
+    drive_file_id = models.CharField(max_length=128, blank=True)
+    drive_web_view_link = models.URLField(max_length=2048, blank=True)
+    drive_upload_status = models.CharField(
+        max_length=20,
+        choices=DriveUploadStatus.choices,
+        blank=True,
+    )
+    drive_upload_error = models.TextField(blank=True)
+    drive_doc_kind = models.CharField(
+        max_length=20,
+        choices=DriveDocKind.choices,
+        blank=True,
+    )
     resource_label = models.CharField(
         max_length=RESOURCE_LABEL_MAX_LENGTH,
         blank=True,
@@ -81,7 +114,14 @@ class Post(models.Model):
 
     @property
     def has_file(self):
-        return bool(self.file)
+        return bool(self.file) or bool(self.drive_file_id)
+
+    @property
+    def has_drive_file(self):
+        return bool(self.drive_file_id) or self.drive_upload_status in {
+            self.DriveUploadStatus.PENDING,
+            self.DriveUploadStatus.READY,
+        }
 
     def clean(self):
         from django.core.exceptions import ValidationError
