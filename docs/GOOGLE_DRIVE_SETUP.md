@@ -2,7 +2,7 @@
 
 Operational guide for PowerHUB file storage (hybrid: staff → org Shared drive, students → My Drive).
 
-Related: [GOOGLE_DRIVE_INTEGRATION_PLAN.md](plans/GOOGLE_DRIVE_INTEGRATION_PLAN.md) · in-app **Administration → File storage** (ⓘ help) · `/info/google_drive/`
+Related: in-app **Administration → File storage** (ⓘ help) · `/info/google_drive/`
 
 ---
 

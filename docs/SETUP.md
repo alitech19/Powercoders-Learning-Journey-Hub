@@ -9,9 +9,9 @@ Related: [TESTING.md](TESTING.md) · [DEPLOY.md](DEPLOY.md) (Render only) · [RE
 | | **`integration` branch (this guide)** | **`deploy` branch on Render** |
 |--|--------------------------------------|-------------------------------|
 | Config | [`.env.example`](../.env.example) → `.env` | [`.env.render-test.example`](../.env.render-test.example) in Render dashboard |
-| Start | `docker compose up` → **runserver** | Gunicorn + `scripts/render-web-start.sh` (migrate in start on free tier) |
 | Database | `POSTGRES_HOST=db` | `DATABASE_URL` or internal `POSTGRES_HOST` |
-| Do not use locally | `scripts/render-*.sh`, Render env template | — |
+| Start | `docker compose up` → **runserver** (overrides image CMD) | Gunicorn + `scripts/render-web-start.sh` |
+| Do not use locally | `start.sh`, `scripts/render-*.sh` | — |
 
 Code is shared after merging `integration` → `deploy`; only **how you run** the app differs.
 

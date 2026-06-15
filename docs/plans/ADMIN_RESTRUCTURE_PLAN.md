@@ -17,7 +17,7 @@ Documentation only unless implementation is requested separately.
 | **Dropdown scope** | Django admin + PowerHUB URLs guarded by **`@admin_required`** on the main screen (no teacher access) |
 | **In dropdown (existing)** | **Адмін-панель** · **Когорти та групи** (`accounts:cohort_list`) · **Масовий імпорт** (`accounts:user_import`) |
 | **In dropdown (planned)** | **Баг-репорти** inbox when [BUG_BOUNTY_PLAN.md](BUG_BOUNTY_PLAN.md) ships |
-| **In dropdown (planned)** | **Сховище файлів** (`accounts:storage_settings`) — [GOOGLE_DRIVE_INTEGRATION_PLAN.md](GOOGLE_DRIVE_INTEGRATION_PLAN.md) |
+| **In dropdown (done)** | **File storage** (`google_storage:storage_settings`) — [GOOGLE_DRIVE_SETUP.md](../GOOGLE_DRIVE_SETUP.md) |
 | **Not in dropdown** | User list, create user, student progress (teachers use the same pages) · audit log / module toggles (Django admin only) |
 | **Django admin access** | Admin + superuser only (`is_staff` / `/admin/`) — audit log, Celery Beat, module toggles, model CRUD live **here**, not in the web dropdown |
 | **Teachers** | No Administration dropdown; same product nav groups as today/planned |
