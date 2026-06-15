@@ -55,15 +55,18 @@ Plan: **[GOOGLE_DRIVE_INTEGRATION_PLAN.md](GOOGLE_DRIVE_INTEGRATION_PLAN.md)** (
 
 | Feature | Status |
 |---------|--------|
-| **Staff** uploads → org **Shared drive** (`PowerHUB/Groups/…`, service account) | Planned |
-| **Student** uploads → uploader’s **My Drive** (OAuth) | Planned |
-| Staff **Contributor** / admin **Content manager**; delete org files **admin only** | Planned |
-| Admin **storage settings** (web + Django admin) — all Google creds in DB, not `.env` | Planned |
-| Staff turnover: files stay in Shared drive; new teachers via drive membership | Planned |
-| Auto share **anyone with the link** (students open staff files without Shared drive ACL) | Planned |
-| Student Google OAuth (email must match `User.email`) | Planned |
-| Resources tiles use `webViewLink` | Planned |
+| **Staff** uploads → org **Shared drive** (`PowerHUB/Groups/…`, service account) | Done |
+| **Student** uploads → uploader’s **My Drive** (OAuth) | Done |
+| Staff **Contributor** / admin **Content manager**; delete org files **admin only** | Done |
+| Admin **storage settings** (web + Django admin) — all Google creds in DB, not `.env` | Done |
+| Staff turnover: files stay in Shared drive; new teachers via drive membership | Done (IT process) |
+| Auto share **anyone with the link** (students open staff files without Shared drive ACL) | Done |
+| Student Google OAuth (email must match `User.email`) | Done |
+| Resources tiles use `webViewLink` | Done |
+| Upload retry in chat, rate limits, admin upload log / connections | Done |
 | Legacy local `media/group_files/` (read-only / migration) | Current → sunset |
+
+Setup: **[GOOGLE_DRIVE_SETUP.md](../GOOGLE_DRIVE_SETUP.md)** · Plan: **[GOOGLE_DRIVE_INTEGRATION_PLAN.md](GOOGLE_DRIVE_INTEGRATION_PLAN.md)**
 
 ---
 

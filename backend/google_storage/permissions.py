@@ -18,6 +18,18 @@ def can_delete_drive_post(user, post) -> bool:
     return True
 
 
+def can_retry_drive_upload(user, post) -> bool:
+    from group_space.models import Post
+
+    from .staging import has_staged_upload
+
+    if not user.is_authenticated or post.author_id != user.pk:
+        return False
+    if post.drive_upload_status != Post.DriveUploadStatus.FAILED:
+        return False
+    return has_staged_upload(post.pk)
+
+
 def student_google_connect_enabled(user) -> bool:
     if user.role != User.Role.STUDENT:
         return False

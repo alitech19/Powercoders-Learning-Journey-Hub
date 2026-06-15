@@ -97,3 +97,28 @@ class DriveChatUploadTests(TestCase):
 
         self.assertFalse(can_delete_post(teacher, post))
         self.assertTrue(can_delete_post(admin, post))
+
+    @patch('google_storage.tasks.upload_to_shared_drive')
+    def test_retry_failed_drive_upload(self, mock_upload):
+        mock_upload.side_effect = [
+            Exception('network'),
+            Exception('network'),
+            Exception('network'),
+            {'id': 'f-2', 'webViewLink': 'https://drive/x'},
+        ]
+        teacher = make_teacher('retry@example.com')
+        assign_teacher(self.group, teacher)
+        login_as(self.client, teacher)
+        upload = SimpleUploadedFile('r.pdf', b'%PDF', content_type='application/pdf')
+        self.client.post(
+            reverse('group_space:message_create'),
+            {'group_pk': self.group.pk, 'resource_label': 'Retry me', 'file': upload},
+        )
+        post = Post.objects.latest('pk')
+        self.assertEqual(post.drive_upload_status, Post.DriveUploadStatus.FAILED)
+
+        response = self.client.post(reverse('group_space:post_upload_retry', args=[post.pk]))
+        self.assertEqual(response.status_code, 200)
+        post.refresh_from_db()
+        self.assertEqual(post.drive_upload_status, Post.DriveUploadStatus.READY)
+        self.assertEqual(mock_upload.call_count, 2)

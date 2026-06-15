@@ -236,5 +236,6 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push/PR: migrate, migr
 | [TESTING.md](TESTING.md) | Automated tests |
 | [DEPLOY.md](DEPLOY.md) | Render (tester) |
 | [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) | Production go-live |
+| [GOOGLE_DRIVE_SETUP.md](GOOGLE_DRIVE_SETUP.md) | Google Drive storage (MVP + Workspace) |
 | [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) | Incidents |
 | [plans/TODO.md](plans/TODO.md) | Beat / Slack follow-ups |

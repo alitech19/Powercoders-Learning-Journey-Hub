@@ -72,6 +72,7 @@ ROUTE_MAP: dict[str, tuple[str, str]] = {
     'resources:item_delete': ('resources', 'form-delete'),
     # Accounts
     'accounts:profile': ('accounts', 'profile'),
+    'accounts:storage_settings': ('google_drive', 'admin'),
 }
 
 DASHBOARD_SECTION_BY_ROLE = {
@@ -140,6 +141,7 @@ HELP_LABELS: dict[str, str] = {
     'group_space:feed': 'Group chat',
     'resources:index': 'Resources',
     'accounts:profile': 'Profile',
+    'accounts:storage_settings': 'File storage',
 }
 
 ALLOWED_APP_SLUGS = frozenset(
@@ -154,6 +156,7 @@ ALLOWED_APP_SLUGS = frozenset(
         'group_space',
         'resources',
         'accounts',
+        'google_drive',
     }
 )
 

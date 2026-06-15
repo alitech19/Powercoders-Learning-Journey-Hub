@@ -21,8 +21,9 @@ from .permissions import (
 from .constants import SHARE_KIND_PANEL
 from google_storage.integration import composer_upload_context
 from google_storage.integration import should_upload_file_to_drive
-from google_storage.orchestrator import prepare_drive_upload
-from google_storage.permissions import delete_drive_file_for_post
+from google_storage.orchestrator import prepare_drive_upload, retry_failed_drive_upload
+from google_storage.permissions import can_retry_drive_upload, delete_drive_file_for_post
+from google_storage.rate_limit import DriveUploadRateLimitError
 
 from .services import after_post_saved, get_group_space_for_group, load_post, resolve_group
 from . import snapshots
@@ -113,8 +114,26 @@ def message_create(request):
             post.file = None
         post.save()
         if use_drive:
-            prepare_drive_upload(post, user, uploaded)
-            post.refresh_from_db()
+            try:
+                prepare_drive_upload(post, user, uploaded)
+                post.refresh_from_db()
+            except DriveUploadRateLimitError as exc:
+                post.delete()
+                form.add_error('file', str(exc))
+                response = render(
+                    request,
+                    'group_space/_chat_composer.html',
+                    {
+                        **_group_context(user, group),
+                        'share_menu': _share_menu_for(user),
+                        'composer_form': form,
+                        **composer_upload_context(user),
+                    },
+                    status=422,
+                )
+                response['HX-Retarget'] = '#chat-composer'
+                response['HX-Reswap'] = 'outerHTML'
+                return response
         after_post_saved(post)
         return _bubble_response(request, post, group)
 
@@ -167,6 +186,22 @@ def share_create(request):
     post.full_clean()
     post.save()
     after_post_saved(post)
+    return _bubble_response(request, post, group)
+
+
+@login_required
+@require_POST
+def post_upload_retry(request, pk):
+    """Re-enqueue a failed Drive upload (author only, staged file must exist)."""
+    user = request.user
+    post = get_post_or_404(user, pk)
+    group = post.group
+    if not can_retry_drive_upload(user, post):
+        raise Http404
+    if not retry_failed_drive_upload(post):
+        messages.error(request, 'Could not retry upload — staged file is no longer available.')
+        return _bubble_response(request, post, group)
+    post.refresh_from_db()
     return _bubble_response(request, post, group)
 
 

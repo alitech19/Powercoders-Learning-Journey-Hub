@@ -15,6 +15,7 @@ from .models import GoogleAccountConnection, GoogleWorkspaceStorageConfig
 from . import oauth as google_oauth
 from .permissions import student_google_connect_enabled
 from .storage_admin import run_ensure_root_folder, run_test_connection, validate_oauth_config
+from .storage_dashboard import storage_dashboard_context
 
 
 def _default_oauth_redirect(request) -> str:
@@ -51,6 +52,7 @@ def storage_settings(request):
             'has_oauth_secret': bool(config.oauth_client_secret_encrypted),
             'masked_sa': config.masked_service_account_json,
             'masked_oauth_secret': config.masked_oauth_client_secret,
+            **storage_dashboard_context(),
         },
     )
 

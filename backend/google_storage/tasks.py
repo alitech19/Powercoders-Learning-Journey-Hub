@@ -8,14 +8,19 @@ import time
 from celery import shared_task
 from group_space.models import Post
 
+from .constants import DRIVE_UPLOAD_MAX_RETRIES, DRIVE_UPLOAD_RETRY_DELAY_SECONDS
 from .models import DriveUploadLog
-from .staging import delete_staged_upload, load_staged_upload
+from .staging import delete_staged_upload, has_staged_upload, load_staged_upload
 from .upload_services import upload_to_personal_drive, upload_to_shared_drive
 
 logger = logging.getLogger(__name__)
 
 
-@shared_task(bind=True, max_retries=2, default_retry_delay=60)
+@shared_task(
+    bind=True,
+    max_retries=DRIVE_UPLOAD_MAX_RETRIES,
+    default_retry_delay=DRIVE_UPLOAD_RETRY_DELAY_SECONDS,
+)
 def upload_post_file_to_drive(self, post_id: int):
     started = time.monotonic()
     post = (
@@ -84,4 +89,8 @@ def upload_post_file_to_drive(self, post_id: int):
         log.error_message = str(exc)[:500]
         log.duration_ms = int((time.monotonic() - started) * 1000)
         log.save(update_fields=['status', 'error_message', 'duration_ms'])
-        raise self.retry(exc=exc)
+        if isinstance(exc, FileNotFoundError) or not has_staged_upload(post_id):
+            return None
+        if self.request.retries < self.max_retries:
+            raise self.retry(exc=exc)
+        return None

@@ -11,6 +11,7 @@ urlpatterns = [
     path('new/', views.post_create, name='post_create'),
     path('share/start/', views.share_start, name='share_start'),
     path('<int:pk>/poll/', views.post_upload_poll, name='post_upload_poll'),
+    path('<int:pk>/retry-upload/', views.post_upload_retry, name='post_upload_retry'),
     path('<int:pk>/edit/', views.post_edit, name='post_edit'),
     path('<int:pk>/delete/', views.post_delete, name='post_delete'),
 ]

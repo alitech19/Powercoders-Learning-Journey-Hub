@@ -505,12 +505,12 @@ Create matching users in PowerHUB (`dev-login` or admin UI) with same emails.
 - **Delete policy:** `can_delete_drive_artifact` — admin-only for `shared_org`
 - Disable new writes to `Post.file`
 
-### Phase 2 — Hardening
+### Phase 2 — Hardening ✅
 
-- Retry policy, rate limits, upload size
-- Admin: list student connections, SA health, Shared drive folder ids
-- IT runbook (Shared drive membership, sharing policy)
-- Link health checks (optional)
+- Retry policy (Celery + manual **Retry upload** in chat), rate limits (10/min), upload size aligned with chat (10 MB)
+- Admin **File storage** page: student connections, upload log (7d stats), cached folder ids
+- IT runbook: [GOOGLE_DRIVE_SETUP.md](../GOOGLE_DRIVE_SETUP.md) + in-app help `/info/google_drive/`
+- Link health checks — deferred (optional Phase 3)
 
 ### Phase 3 — Extensions (optional)
 

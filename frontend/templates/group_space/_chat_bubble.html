@@ -44,6 +44,15 @@
         <p class="text-xs text-amber-700 dark:text-amber-400 font-medium">Uploading to Google Drive…</p>
         {% elif post.drive_upload_status == "failed" %}
         <p class="text-xs text-red-600 dark:text-red-400">Drive upload failed. {{ post.drive_upload_error|truncatechars:120 }}</p>
+        {% if post|can_retry_drive_upload:user %}
+        <form method="post" action="{% url 'group_space:post_upload_retry' post.pk %}" class="inline">
+          {% csrf_token %}
+          <button type="submit"
+                  class="text-xs font-medium text-[#B23149] dark:text-red-300 hover:underline">
+            Retry upload
+          </button>
+        </form>
+        {% endif %}
         {% elif post.drive_web_view_link %}
         <a href="{{ post.drive_web_view_link }}" target="_blank" rel="noopener noreferrer"
            class="inline-flex items-center gap-1.5 text-xs text-green-700 dark:text-green-300 hover:text-green-900 dark:hover:text-green-200 font-medium">
