@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import os
+
 from django.contrib import messages
 from django.shortcuts import redirect
-from django.urls import reverse
 from google_auth_oauthlib.flow import Flow
 
 from .config import get_workspace_storage_config
 from .drive.oauth_client import (
+    DRIVE_FILE_SCOPE,
     build_oauth_client_config,
     default_redirect_uri,
     fetch_google_email,
@@ -30,6 +32,36 @@ def _flow(config, *, redirect_uri: str) -> Flow:
     )
 
 
+def _fetch_token(flow: Flow, *, code: str) -> None:
+    """
+    Google may return scopes in a different order or omit one if consent is stale.
+    Relax oauthlib's strict check, then validate required scopes ourselves.
+    """
+    prior = os.environ.get('OAUTHLIB_RELAX_TOKEN_SCOPE')
+    os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+    try:
+        flow.fetch_token(code=code)
+    finally:
+        if prior is None:
+            os.environ.pop('OAUTHLIB_RELAX_TOKEN_SCOPE', None)
+        else:
+            os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = prior
+
+
+def _credentials_missing_drive_scope(credentials) -> bool:
+    granted = set(credentials.scopes or [])
+    return DRIVE_FILE_SCOPE not in granted
+
+
+def _drive_scope_error_message() -> str:
+    return (
+        'Google did not grant Drive file access. In Google Cloud Console open '
+        'OAuth consent screen → Data access → add Google Drive '
+        '(drive.file — per-file access). Then revoke this app at '
+        'myaccount.google.com/permissions and connect again.'
+    )
+
+
 def start_connect(request):
     config = get_workspace_storage_config()
     if not config.student_uploads_enabled():
@@ -38,11 +70,15 @@ def start_connect(request):
 
     redirect_uri = (config.oauth_redirect_uri or '').strip() or default_redirect_uri(request)
     flow = _flow(config, redirect_uri=redirect_uri)
-    authorization_url, state = flow.authorization_url(
-        access_type='offline',
-        include_granted_scopes='true',
-        prompt='consent',
-    )
+    auth_kwargs = {
+        'access_type': 'offline',
+        'include_granted_scopes': 'false',
+        'prompt': 'consent',
+    }
+    domain = (config.workspace_hosted_domain or '').strip()
+    if domain:
+        auth_kwargs['hd'] = domain
+    authorization_url, state = flow.authorization_url(**auth_kwargs)
     request.session[SESSION_STATE_KEY] = state
     request.session['google_oauth_code_verifier'] = flow.code_verifier
     request.session['google_oauth_redirect_uri'] = redirect_uri
@@ -74,8 +110,12 @@ def finish_connect(request):
     flow = _flow(config, redirect_uri=redirect_uri)
     if code_verifier:
         flow.code_verifier = code_verifier
-    flow.fetch_token(code=code)
+    _fetch_token(flow, code=code)
     credentials = flow.credentials
+
+    if _credentials_missing_drive_scope(credentials):
+        messages.error(request, _drive_scope_error_message())
+        return redirect('accounts:profile')
 
     google_subject, google_email = fetch_google_email(credentials)
     user_email = request.user.email.strip().lower()

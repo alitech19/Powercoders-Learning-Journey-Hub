@@ -132,4 +132,16 @@ Use **Administration** pages first; open Django admin when you need Beat schedul
 
 <!-- role: admin -->
 
-Google Drive setup lives on **Administration → File storage**. See the dedicated help topic (same ⓘ button on that page) for Shared drive, student OAuth, and troubleshooting.
+**Administration → File storage** — Google Drive for group chat and Resources.
+
+| Toggle | Who it affects |
+|--------|----------------|
+| **Enable staff uploads** | Teachers/admins → org **Shared drive** (Workspace Shared drive + GCP **service account JSON**) |
+| **Enable student OAuth uploads** | Students → **My Drive** (GCP **OAuth client ID + secret**) |
+
+These are **independent**. Full step-by-step in ⓘ help on File storage:
+
+- Students (Gmail MVP): *Student OAuth — Google Cloud* / *PowerHUB*
+- Organisation (Workspace): *Google Workspace*, *service account*, *PowerHUB staff*, *Students with Google Workspace*
+
+Repo: `docs/GOOGLE_DRIVE_SETUP.md`.

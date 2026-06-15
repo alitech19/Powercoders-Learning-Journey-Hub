@@ -228,13 +228,53 @@
   {% endif %}
 
   <details class="mt-8 bg-[#F5EDE0]/40 dark:bg-gray-800/50 rounded-xl border border-[#EDE3D5] dark:border-gray-700 p-5">
-    <summary class="text-sm font-semibold text-[#343534] dark:text-gray-100 cursor-pointer">Quick setup (Google Cloud)</summary>
-    <ol class="mt-3 text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
-      <li>Create a GCP project → enable <strong>Google Drive API</strong>.</li>
-      <li><strong>Students:</strong> OAuth Web client → redirect URI from this page → enable student OAuth above.</li>
-      <li><strong>Staff (when Workspace ready):</strong> service account JSON → add SA as <strong>Content manager</strong> on the org Shared drive → paste drive ID → test connection → ensure root folder.</li>
-      <li>Chat uploads: max <strong>10 MB</strong>; failed uploads can be retried from chat while staged file exists.</li>
+    <summary class="text-sm font-semibold text-[#343534] dark:text-gray-100 cursor-pointer">Setup: student OAuth (Google Cloud)</summary>
+    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
+      Client ID and secret come from <a href="https://console.cloud.google.com/" class="text-[#B23149] hover:underline" target="_blank" rel="noopener noreferrer">Google Cloud Console</a> — not from PowerHUB.
+      Full guide: ⓘ help on this page or <code class="text-xs">docs/GOOGLE_DRIVE_SETUP.md</code>.
+    </p>
+    <ol class="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
+      <li><strong>New GCP project</strong> → enable <strong>Google Drive API</strong> (APIs &amp; Services → Library).</li>
+      <li><strong>OAuth consent screen</strong> → External → app name + emails. If <strong>Testing</strong>, add each student email under <strong>Test users</strong>.</li>
+      <li><strong>Data access scopes</strong> → add <strong>Google Drive API</strong> → <code class="text-xs">drive.file</code> (required for uploads).</li>
+      <li><strong>Credentials → Create → OAuth client ID</strong> → Web application → redirect URI:
+        <code class="text-xs block mt-1 ml-5">{{ suggested_redirect_uri }}</code>
+      </li>
+      <li>Copy <strong>Client ID</strong> and <strong>Client secret</strong> (secret shown once) into the form above.</li>
+      <li>Enable <strong>student OAuth uploads</strong> (separate from staff Shared drive) → Save → <strong>Validate OAuth config</strong>.</li>
     </ol>
+    <p class="mt-3 text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2">
+      Staff checkbox alone does not enable student Profile connect. Leave <code class="text-xs">SITE_URL</code> in <code class="text-xs">.env</code> aligned with this host.
+    </p>
+  </details>
+
+  <details class="mt-4 bg-[#F5EDE0]/40 dark:bg-gray-800/50 rounded-xl border border-[#EDE3D5] dark:border-gray-700 p-5">
+    <summary class="text-sm font-semibold text-[#343534] dark:text-gray-100 cursor-pointer">Setup: Google Workspace + staff Shared drive</summary>
+    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
+      For <strong>teachers/admins</strong> — org Shared drive via <strong>service account</strong> (separate from student OAuth).
+      Details: ⓘ help → sections <em>Google Workspace</em>, <em>service account</em>, <em>PowerHUB staff</em>.
+    </p>
+    <p class="text-xs font-semibold text-[#343534] dark:text-gray-200 mt-4 mb-1">A. Google Workspace</p>
+    <ol class="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
+      <li><strong>Shared drives → New</strong> (e.g. <code class="text-xs">PowerHUB Files</code>).</li>
+      <li>Add <strong>teachers</strong> as <strong>Contributor</strong> (Google Group recommended).</li>
+      <li>Copy <strong>Shared drive ID</strong> from URL: <code class="text-xs">drive.google.com/drive/folders/<em>ID</em></code></li>
+      <li>Allow <strong>anyone with the link</strong> sharing in org policy (students open files without drive access).</li>
+    </ol>
+    <p class="text-xs font-semibold text-[#343534] dark:text-gray-200 mt-4 mb-1">B. Google Cloud — service account</p>
+    <ol class="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
+      <li>Same GCP project as student OAuth is fine → enable <strong>Google Drive API</strong>.</li>
+      <li><strong>IAM → Service accounts → Create</strong> → <strong>Keys → Add key → JSON</strong> (download once).</li>
+      <li>On the Shared drive: <strong>Manage members</strong> → add <code class="text-xs">client_email</code> from JSON as <strong>Content manager</strong>.</li>
+    </ol>
+    <p class="text-xs font-semibold text-[#343534] dark:text-gray-200 mt-4 mb-1">C. PowerHUB (form above)</p>
+    <ol class="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
+      <li>Enable <strong>staff uploads</strong> → paste <strong>Shared drive ID</strong> + <strong>service account JSON</strong>.</li>
+      <li><strong>Save</strong> → <strong>Test Shared drive connection</strong> → <strong>Ensure PowerHUB root folder</strong>.</li>
+    </ol>
+    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+      Workspace students: set <strong>Workspace email domain</strong> below; OAuth consent <strong>Internal</strong> in GCP. Staff do not use Profile → Connect Google.
+    </p>
   </details>
 
 </div>

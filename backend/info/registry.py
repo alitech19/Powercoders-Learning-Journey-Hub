@@ -72,7 +72,7 @@ ROUTE_MAP: dict[str, tuple[str, str]] = {
     'resources:item_delete': ('resources', 'form-delete'),
     # Accounts
     'accounts:profile': ('accounts', 'profile'),
-    'accounts:storage_settings': ('google_drive', 'admin'),
+    'accounts:storage_settings': ('google_drive', 'student-oauth-gcp'),
     # Administration (in-app staff UI)
     'accounts:cohort_list': ('administration', 'cohorts-groups'),
     'accounts:cohort_create': ('administration', 'cohorts-groups'),

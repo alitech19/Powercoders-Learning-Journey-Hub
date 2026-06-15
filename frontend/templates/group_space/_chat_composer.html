@@ -1,4 +1,4 @@
-<div id="chat-composer" class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-b-xl"
+<div id="chat-composer" class="relative z-10 shrink-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-b-xl overflow-visible"
      {% if composer_form.file.errors or composer_form.resource_label.errors %}data-initial-attach="1"{% elif gdoc_form.errors %}data-initial-gdoc="1"{% endif %}>
 
   {% if user.role == "student" %}
@@ -73,6 +73,28 @@
       </button>
     </div>
 
+    {% if can_create_google_doc %}
+    <div id="gdoc-picker-panel" class="hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 space-y-3">
+      <div class="flex items-center justify-between gap-2">
+        <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">New Google file</p>
+        <button type="button" id="gdoc-picker-cancel"
+                class="text-xs font-medium text-gray-500 hover:text-red-600 dark:hover:text-red-400 px-2 py-1 rounded-lg hover:bg-white dark:hover:bg-gray-900">
+          ✕ Cancel
+        </button>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {% for doc_type in google_doc_types %}
+        <button type="button"
+                class="gdoc-type-pick text-xs font-medium px-3 py-2 rounded-lg border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-[#B23149]"
+                data-doc-kind="{{ doc_type.key }}"
+                data-doc-label="{{ doc_type.label }}">
+          {{ doc_type.label }}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
     <div id="resource-label-wrap" class="space-y-1 hidden">
       <label for="chat-resource-label" id="resource-label-caption" class="text-xs font-medium text-gray-500">Resource name</label>
       <input type="text" name="resource_label" id="chat-resource-label" maxlength="100"
@@ -92,30 +114,17 @@
     <p class="text-xs text-gray-500 dark:text-gray-400">Files and new Google docs go to the organisation Shared drive.</p>
     {% endif %}
 
-    <div id="composer-actions" class="flex items-center gap-3 text-xs flex-wrap">
+    <div id="composer-actions" class="flex items-center gap-3 text-xs flex-wrap overflow-visible">
       <button type="button" id="attach-toggle" class="text-gray-500 hover:text-[#B23149] font-medium {% if drive_student_connect_required %}opacity-50{% endif %}"
               {% if drive_student_connect_required %}disabled title="Connect Google Drive first"{% endif %}>
         📎 Attach file
       </button>
       {% if can_create_google_doc %}
-      <div class="relative" id="gdoc-menu-wrap">
-        <details class="group">
-          <summary class="list-none cursor-pointer text-gray-500 hover:text-[#B23149] font-medium marker:content-none flex items-center gap-1">
-            <span>📄 New Google file</span>
-            <span class="text-[10px] opacity-60">▾</span>
-          </summary>
-          <div class="absolute bottom-full left-0 mb-1 z-20 min-w-[10rem] rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg py-1">
-            {% for doc_type in google_doc_types %}
-            <button type="button"
-                    class="gdoc-type-pick block w-full text-left px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                    data-doc-kind="{{ doc_type.key }}"
-                    data-doc-label="{{ doc_type.label }}">
-              {{ doc_type.label }}
-            </button>
-            {% endfor %}
-          </div>
-        </details>
-      </div>
+      <button type="button" id="gdoc-picker-toggle"
+              class="text-gray-500 hover:text-[#B23149] font-medium {% if drive_student_connect_required %}opacity-50{% endif %}"
+              {% if drive_student_connect_required %}disabled title="Connect Google Drive first"{% endif %}>
+        📄 New Google file
+      </button>
       {% endif %}
       {% if user.role == "student" %}
       <button type="button" id="share-toggle" class="text-gray-500 hover:text-[#B23149] font-medium">

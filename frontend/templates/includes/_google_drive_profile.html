@@ -31,7 +31,14 @@
       </a>
       {% endif %}
     {% else %}
-    <p class="text-xs text-gray-400">Student Google Drive uploads are not enabled on this server yet.</p>
+    <p class="text-xs text-gray-400">
+      Student Google Drive uploads are not enabled on this server yet.
+      {% if google_storage_config.is_enabled %}
+      Staff Shared drive is configured separately — an admin must also enable <strong>student OAuth uploads</strong> and add OAuth client ID + secret under <strong>Administration → File storage</strong>.
+      {% else %}
+      Ask an admin to enable <strong>student OAuth uploads</strong> and OAuth credentials in <strong>Administration → File storage</strong>.
+      {% endif %}
+    </p>
     {% endif %}
   {% endif %}
 </div>
