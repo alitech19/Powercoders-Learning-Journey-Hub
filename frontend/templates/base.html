@@ -134,8 +134,8 @@
                     class="flex items-center rounded-full focus:outline-none focus:ring-2 focus:ring-[#B23149]/40"
                     aria-label="Account menu"
                     :aria-expanded="avatarOpen.toString()">
-              {% if user.avatar %}
-              <img src="{{ user.avatar.url }}" alt="" class="h-8 w-8 rounded-full object-cover ring-2 ring-[#B23149]">
+              {% if user.has_custom_avatar %}
+              <img src="{{ user.get_avatar_url }}" alt="" class="h-8 w-8 rounded-full object-cover ring-2 ring-[#B23149]">
               {% else %}
               <div class="h-8 w-8 rounded-full bg-[#B23149] flex items-center justify-center ring-2 ring-[#B23149]/30">
                 <span class="text-white text-sm font-bold">{{ user.display_name|first|upper }}</span>

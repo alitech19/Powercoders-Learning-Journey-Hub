@@ -40,7 +40,7 @@ class CustomUserAdmin(BaseUserAdmin):
 
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Site profile', {'fields': ('display_name', 'avatar')}),
+        ('Site profile', {'fields': ('display_name', 'avatar_updated_at')}),
         (
             'PowerHUB',
             {

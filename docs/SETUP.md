@@ -6,26 +6,26 @@ Related: [TESTING.md](TESTING.md) · [DEPLOY.md](DEPLOY.md) (Render only) · [RE
 
 ## Local vs Render
 
-| | **`integration` branch (this guide)** | **`deploy` branch on Render** |
-|--|--------------------------------------|-------------------------------|
+| | **`main` branch (this guide)** | **`deploy` branch on Render** |
+|--|--------------------------------|-------------------------------|
 | Config | [`.env.example`](../.env.example) → `.env` | [`.env.render-test.example`](../.env.render-test.example) in Render dashboard |
 | Database | `POSTGRES_HOST=db` | `DATABASE_URL` or internal `POSTGRES_HOST` |
 | Start | `docker compose up` → **runserver** (overrides image CMD) | Gunicorn + `scripts/render-web-start.sh` |
 | Do not use locally | `start.sh`, `scripts/render-*.sh` | — |
 
-Code is shared after merging `integration` → `deploy`; only **how you run** the app differs.
+Code is shared after merging `main` → `deploy`; only **how you run** the app differs.
 
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2
 - Git
 
-## 1. Clone and switch branch
+## 1. Clone
 
 ```bash
 git clone <REPO_URL>
 cd Powercoders-Learning-Journey-Hub
-git checkout integration
+git checkout main
 ```
 
 ## 2. Environment file
@@ -67,7 +67,7 @@ This starts five services:
 docker compose exec web python manage.py locked_migrate --noinput
 ```
 
-### Frontend (`integration` branch)
+### Frontend (current `main`)
 
 Templates use **CDN** Tailwind, HTMX, and Alpine (`frontend/templates/base.html`). Brand colours: `#B23149` (primary), `#343534` (charcoal). Compiled CSS and self-hosted JS are planned before production — [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md).
 
@@ -213,7 +213,7 @@ Normal on first build. Static files are collected to `frontend/staticfiles/` (gi
 
 Shared environment for QA and usability testing — **not** production.
 
-1. Use Git branch **`deploy`** (merge from `integration` when ready).
+1. Use Git branch **`deploy`** (merge from `main` when ready).
 2. Follow **[DEPLOY.md](DEPLOY.md)** (Gunicorn, Whitenoise, env vars, web + worker + beat).
 
 ## Production deploy

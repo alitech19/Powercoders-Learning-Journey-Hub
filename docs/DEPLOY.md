@@ -4,11 +4,12 @@ This guide is for a **shared tester environment** on [Render](https://render.com
 
 Related: [SETUP.md](SETUP.md) (local) · [TESTING.md](TESTING.md) · [README](../README.md)
 
-**Branch model:** develop on **`integration`** (local Docker — [SETUP.md](SETUP.md)). When ready for testers, merge `integration` → **`deploy`** and push; Render services use branch **`deploy`**, not `main` or `integration`.
+**Branch model:** develop on **`main`** (local Docker — [SETUP.md](SETUP.md)). When ready for testers, merge `main` → **`deploy`** and push; Render services track branch **`deploy`**.
 
 ```bash
 git checkout deploy
-git merge integration
+git pull origin deploy
+git merge main
 git push origin deploy
 ```
 
@@ -41,7 +42,7 @@ Run **`collectstatic`** on every web deploy (build command below). Local Docker 
 
 ### Media files (tester env)
 
-Uploaded files (avatars, group chat attachments) use `MEDIA_ROOT` on disk. Render web disks are **ephemeral** — uploads can disappear on redeploy. For tester QA this is often acceptable; for stable files use S3 later ([SCALING_ROADMAP.md](SCALING_ROADMAP.md)).
+Profile photos are stored in the database (base64). Group chat attachments and other uploads still use `MEDIA_ROOT` on disk. Render web disks are **ephemeral** — those file uploads can disappear on redeploy. For tester QA this is often acceptable; for stable files use S3 later ([SCALING_ROADMAP.md](SCALING_ROADMAP.md)).
 
 ### Creating users on Render
 
@@ -86,7 +87,7 @@ Then Shell: `cd backend && python manage.py createsuperuser`.
 ```bash
 git checkout deploy
 git pull origin deploy
-git merge integration   # or cherry-pick specific commits
+git merge main   # or cherry-pick specific commits
 # resolve conflicts, run tests locally
 git push origin deploy
 ```
@@ -249,7 +250,7 @@ Share the URL and test accounts with testers via a **private** channel (not in t
 
 | Symptom | Check |
 |---------|--------|
-| `No such file: requirements.txt` | **Branch** must be `deploy` (or `integration`), not `main`. **Root Directory** must be empty. |
+| `No such file: requirements.txt` | **Branch** must be `deploy`. **Root Directory** must be empty. |
 | Python 3.14 / wrong version | Add `runtime.txt` at repo root or env `PYTHON_VERSION=3.12.12` |
 | `We don't have access to your repo` | GitHub: Settings → Applications → authorize Render; or deploy with public repo access |
 | 502 / app not listening | Start command uses `$PORT` and `gunicorn` |

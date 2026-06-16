@@ -78,8 +78,8 @@
       <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
         <td class="px-4 py-3">
           <div class="flex items-center gap-3">
-            {% if u.avatar %}
-              <img src="{{ u.avatar.url }}" alt="" class="h-9 w-9 rounded-full object-cover flex-shrink-0">
+            {% if u.has_custom_avatar %}
+              <img src="{{ u.get_avatar_url }}" alt="" class="h-9 w-9 rounded-full object-cover flex-shrink-0">
             {% else %}
               <div class="h-9 w-9 rounded-full bg-[#B23149]/10 flex items-center justify-center flex-shrink-0">
                 <span class="text-[#B23149] text-sm font-bold">{{ u.display_name|first|upper }}</span>

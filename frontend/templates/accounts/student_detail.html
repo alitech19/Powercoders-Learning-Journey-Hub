@@ -17,8 +17,8 @@
 
   <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
     <div class="flex items-center gap-4">
-      {% if student.avatar %}
-      <img src="{{ student.avatar.url }}" alt="" class="h-16 w-16 rounded-full object-cover flex-shrink-0">
+      {% if student.has_custom_avatar %}
+      <img src="{{ student.get_avatar_url }}" alt="" class="h-16 w-16 rounded-full object-cover flex-shrink-0">
       {% else %}
       <div class="h-16 w-16 rounded-full bg-[#B23149] flex items-center justify-center flex-shrink-0">
         <span class="text-white text-2xl font-bold">{{ student.display_name|first|upper }}</span>

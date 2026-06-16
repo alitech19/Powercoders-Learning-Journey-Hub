@@ -56,7 +56,9 @@ class User(AbstractUser):
         max_length=150,
         help_text='Name shown on the site (not your legal name).',
     )
-    avatar = models.ImageField(upload_to='avatars/%Y/%m/', blank=True)
+    avatar_data = models.TextField(blank=True)
+    avatar_content_type = models.CharField(max_length=64, blank=True)
+    avatar_updated_at = models.DateTimeField(null=True, blank=True)
     role = models.CharField(
         max_length=20,
         choices=Role.choices,
@@ -122,7 +124,12 @@ class User(AbstractUser):
 
     @property
     def has_custom_avatar(self):
-        return bool(self.avatar)
+        return bool(self.avatar_data)
+
+    def clear_avatar(self):
+        self.avatar_data = ''
+        self.avatar_content_type = ''
+        self.avatar_updated_at = None
 
     def get_default_avatar_path(self):
         return self.DEFAULT_AVATAR_BY_ROLE.get(
@@ -131,8 +138,13 @@ class User(AbstractUser):
         )
 
     def get_avatar_url(self):
-        if self.avatar:
-            return self.avatar.url
+        if self.avatar_data:
+            from django.urls import reverse
+
+            url = reverse('accounts:avatar', args=[self.pk])
+            if self.avatar_updated_at:
+                url = f'{url}?v={int(self.avatar_updated_at.timestamp())}'
+            return url
         from django.templatetags.static import static
 
         return static(self.get_default_avatar_path())

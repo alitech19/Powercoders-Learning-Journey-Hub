@@ -1,10 +1,9 @@
-import shutil
-import tempfile
+import base64
 from io import BytesIO
 
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
 from PIL import Image
 
 from accounts.models import User
@@ -35,34 +34,26 @@ class ProfileViewTests(TestCase):
         self.assertTrue(self.user.email_notifications_enabled)
 
     def test_post_remove_avatar(self):
-        tmp_media = tempfile.mkdtemp()
-        try:
-            with self.settings(MEDIA_ROOT=tmp_media):
-                image = Image.new('RGB', (8, 8), color='red')
-                buffer = BytesIO()
-                image.save(buffer, format='PNG')
-                buffer.seek(0)
-                self.user.avatar = SimpleUploadedFile(
-                    'avatar.png',
-                    buffer.read(),
-                    content_type='image/png',
-                )
-                self.user.save(update_fields=['avatar'])
-                self.assertTrue(self.user.avatar)
+        image = Image.new('RGB', (8, 8), color='red')
+        buffer = BytesIO()
+        image.save(buffer, format='PNG')
+        self.user.avatar_data = base64.b64encode(buffer.getvalue()).decode('ascii')
+        self.user.avatar_content_type = 'image/png'
+        self.user.avatar_updated_at = timezone.now()
+        self.user.save(update_fields=['avatar_data', 'avatar_content_type', 'avatar_updated_at'])
+        self.assertTrue(self.user.has_custom_avatar)
 
-                response = self.client.post(
-                    reverse('accounts:profile'),
-                    {
-                        'display_name': self.user.display_name,
-                        'email_notifications_enabled': 'on',
-                        'remove_avatar': '1',
-                    },
-                )
-                self.assertRedirects(response, reverse('accounts:profile'))
-                self.user.refresh_from_db()
-                self.assertFalse(self.user.avatar)
-        finally:
-            shutil.rmtree(tmp_media, ignore_errors=True)
+        response = self.client.post(
+            reverse('accounts:profile'),
+            {
+                'display_name': self.user.display_name,
+                'email_notifications_enabled': 'on',
+                'remove_avatar': '1',
+            },
+        )
+        self.assertRedirects(response, reverse('accounts:profile'))
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.has_custom_avatar)
 
 
 class OnboardingViewTests(TestCase):
