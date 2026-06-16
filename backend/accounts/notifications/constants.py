@@ -11,12 +11,33 @@ class EventType(models.TextChoices):
     GROUP_CHAT_ALL = 'group_chat_all', 'All group chat messages'
 
 
-EVENT_SETTING_FIELD = {
-    EventType.FEEDBACK: 'notify_feedback',
-    EventType.NEW_WORKFLOW: 'notify_new_workflow',
-    EventType.NEW_TASK: 'notify_new_task',
-    EventType.NEW_GOAL: 'notify_new_goal',
-    EventType.DEADLINE_REMINDER: 'notify_deadline_reminder',
-    EventType.GROUP_CHAT_MENTION: 'notify_group_chat_mentions',
-    EventType.GROUP_CHAT_ALL: 'notify_group_chat_all_messages',
+EVENT_SETTING_FIELDS = {
+    EventType.FEEDBACK: {
+        'email': 'email_feedback',
+        'slack': 'slack_feedback',
+    },
+    EventType.NEW_WORKFLOW: {
+        'email': 'email_new_workflow',
+        'slack': 'slack_new_workflow',
+    },
+    EventType.NEW_TASK: {
+        'email': 'email_new_task',
+        'slack': 'slack_new_task',
+    },
+    EventType.NEW_GOAL: {
+        'email': 'email_new_goal',
+        'slack': 'slack_new_goal',
+    },
+    EventType.DEADLINE_REMINDER: {
+        'email': 'email_deadline_reminder',
+        'slack': 'slack_deadline_reminder',
+    },
+    EventType.GROUP_CHAT_MENTION: {
+        'email': 'email_group_chat_mentions',
+        'slack': 'slack_group_chat_mentions',
+    },
+    EventType.GROUP_CHAT_ALL: {
+        'email': 'email_group_chat_all_messages',
+        'slack': 'slack_group_chat_all_messages',
+    },
 }

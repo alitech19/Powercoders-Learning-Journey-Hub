@@ -1,21 +1,40 @@
 import logging
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from django.db import IntegrityError
 from django.utils import timezone
 
 from accounts.models import Notification, NotificationDeliveryLog, UserNotificationSettings
 
-from .constants import EVENT_SETTING_FIELD, EventType
+from .constants import EVENT_SETTING_FIELDS
 from .settings import get_notification_settings
 
 logger = logging.getLogger(__name__)
 
 
-def event_enabled(settings, event_type):
-    field_name = EVENT_SETTING_FIELD.get(event_type)
+def event_enabled_for_channel(settings, event_type, channel):
+    field_name = EVENT_SETTING_FIELDS.get(event_type, {}).get(channel)
     if not field_name:
         return True
     return bool(getattr(settings, field_name, True))
+
+
+def in_quiet_hours(settings):
+    if not settings.quiet_hours_start or not settings.quiet_hours_end:
+        return False
+    try:
+        tz = ZoneInfo(settings.timezone or 'Europe/Zurich')
+    except Exception:
+        tz = ZoneInfo('Europe/Zurich')
+    now_local = timezone.now().astimezone(tz).time()
+    start = settings.quiet_hours_start
+    end = settings.quiet_hours_end
+    if start == end:
+        return False
+    if start < end:
+        return start <= now_local < end
+    return now_local >= start or now_local < end
 
 
 def _claim_delivery(event_key, recipient, channel):
@@ -96,14 +115,6 @@ def dispatch_event(
 
     for recipient in recipients:
         settings = get_notification_settings(recipient)
-        if not event_enabled(settings, event_type):
-            _log_skipped_all_channels(
-                dedupe_key,
-                recipient,
-                reason=f'{event_type} disabled in user settings',
-            )
-            continue
-
         _dispatch_in_app(
             dedupe_key=dedupe_key,
             recipient=recipient,
@@ -112,12 +123,31 @@ def dispatch_event(
             url=url,
         )
 
-        if settings.email_enabled and recipient.email_notifications_enabled:
-            _dispatch_email(
-                dedupe_key=dedupe_key,
-                recipient=recipient,
-                subject=email_subject,
-                body=email_body,
+        if (
+            settings.email_enabled
+            and recipient.email_notifications_enabled
+            and event_enabled_for_channel(settings, event_type, 'email')
+        ):
+            if in_quiet_hours(settings):
+                _log_skipped_channel(
+                    dedupe_key,
+                    recipient,
+                    NotificationDeliveryLog.Channel.EMAIL,
+                    reason='In quiet hours',
+                )
+            else:
+                _dispatch_email(
+                    dedupe_key=dedupe_key,
+                    recipient=recipient,
+                    subject=email_subject,
+                    body=email_body,
+                )
+        elif not event_enabled_for_channel(settings, event_type, 'email'):
+            _log_skipped_channel(
+                dedupe_key,
+                recipient,
+                NotificationDeliveryLog.Channel.EMAIL,
+                reason=f'{event_type} disabled for email',
             )
         else:
             _log_skipped_channel(
@@ -127,11 +157,26 @@ def dispatch_event(
                 reason='Email notifications disabled',
             )
 
-        if settings.slack_enabled and slack_text:
-            _dispatch_slack(
-                dedupe_key=dedupe_key,
-                recipient=recipient,
-                text=slack_text,
+        if slack_text and settings.slack_enabled and event_enabled_for_channel(settings, event_type, 'slack'):
+            if in_quiet_hours(settings):
+                _log_skipped_channel(
+                    dedupe_key,
+                    recipient,
+                    NotificationDeliveryLog.Channel.SLACK,
+                    reason='In quiet hours',
+                )
+            else:
+                _dispatch_slack(
+                    dedupe_key=dedupe_key,
+                    recipient=recipient,
+                    text=slack_text,
+                )
+        elif slack_text and not event_enabled_for_channel(settings, event_type, 'slack'):
+            _log_skipped_channel(
+                dedupe_key,
+                recipient,
+                NotificationDeliveryLog.Channel.SLACK,
+                reason=f'{event_type} disabled for slack',
             )
         elif slack_text:
             _log_skipped_channel(

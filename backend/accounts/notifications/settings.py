@@ -5,7 +5,10 @@ def get_notification_settings(user):
     """Return per-user notification settings, creating defaults on first access."""
     settings, _created = UserNotificationSettings.objects.get_or_create(
         user=user,
-        defaults={'email_enabled': user.email_notifications_enabled},
+        defaults={
+            'email_enabled': user.email_notifications_enabled,
+            'timezone': 'Europe/Zurich',
+        },
     )
     return settings
 

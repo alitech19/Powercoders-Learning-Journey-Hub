@@ -80,8 +80,9 @@ class DispatchEventTests(TestCase):
 
     def test_skips_all_channels_when_event_disabled(self):
         settings = get_notification_settings(self.student)
-        settings.notify_feedback = False
-        settings.save(update_fields=['notify_feedback'])
+        settings.email_feedback = False
+        settings.slack_feedback = False
+        settings.save(update_fields=['email_feedback', 'slack_feedback'])
 
         dispatch_event(
             event_type=EventType.FEEDBACK,
@@ -91,7 +92,7 @@ class DispatchEventTests(TestCase):
             url='/journal/1/',
             dedupe_key='feedback:3',
         )
-        self.assertEqual(Notification.objects.filter(recipient=self.student).count(), 0)
+        self.assertEqual(Notification.objects.filter(recipient=self.student).count(), 1)
         self.assertEqual(len(mail.outbox), 0)
 
 
@@ -111,15 +112,22 @@ class NotificationSettingsViewTests(TestCase):
             reverse('accounts:notification_settings'),
             {
                 'email_enabled': 'on',
-                'notify_feedback': 'on',
-                'notify_new_task': 'on',
-                'notify_new_goal': 'on',
-                'notify_new_workflow': 'on',
-                'notify_deadline_reminder': 'on',
-                'notify_group_chat_mentions': 'on',
+                'email_feedback': 'on',
+                'email_new_task': 'on',
+                'email_new_goal': 'on',
+                'email_new_workflow': 'on',
+                'email_deadline_reminder': 'on',
+                'email_group_chat_mentions': 'on',
+                'slack_feedback': 'on',
+                'slack_new_task': 'on',
+                'slack_new_goal': 'on',
+                'slack_new_workflow': 'on',
+                'slack_deadline_reminder': 'on',
+                'slack_group_chat_mentions': 'on',
+                'timezone': 'Europe/Zurich',
             },
         )
         self.assertRedirects(response, reverse('accounts:notification_settings'))
         settings = UserNotificationSettings.objects.get(user=self.user)
-        self.assertTrue(settings.notify_feedback)
-        self.assertFalse(settings.notify_group_chat_all_messages)
+        self.assertTrue(settings.email_feedback)
+        self.assertFalse(settings.slack_group_chat_all_messages)

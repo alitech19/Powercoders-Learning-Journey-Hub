@@ -91,23 +91,40 @@ class NotificationSettingsForm(forms.ModelForm):
         model = UserNotificationSettings
         fields = [
             'email_enabled',
-            'notify_feedback',
-            'notify_new_task',
-            'notify_new_goal',
-            'notify_new_workflow',
-            'notify_deadline_reminder',
-            'notify_group_chat_mentions',
-            'notify_group_chat_all_messages',
             'slack_enabled',
+            'email_feedback',
+            'email_new_task',
+            'email_new_goal',
+            'email_new_workflow',
+            'email_deadline_reminder',
+            'email_group_chat_mentions',
+            'email_group_chat_all_messages',
+            'slack_feedback',
+            'slack_new_task',
+            'slack_new_goal',
+            'slack_new_workflow',
+            'slack_deadline_reminder',
+            'slack_group_chat_mentions',
+            'slack_group_chat_all_messages',
+            'quiet_hours_start',
+            'quiet_hours_end',
+            'timezone',
         ]
         labels = {
-            'notify_feedback': 'Feedback from teachers',
-            'notify_new_task': 'New tasks',
-            'notify_new_goal': 'New goals',
-            'notify_new_workflow': 'New workflows',
-            'notify_deadline_reminder': 'Deadline reminders',
-            'notify_group_chat_mentions': 'Mentions in group chat',
-            'notify_group_chat_all_messages': 'All group chat messages',
+            'email_feedback': 'Feedback from teachers',
+            'email_new_task': 'New tasks',
+            'email_new_goal': 'New goals',
+            'email_new_workflow': 'New workflows',
+            'email_deadline_reminder': 'Deadline reminders',
+            'email_group_chat_mentions': 'Mentions in group chat',
+            'email_group_chat_all_messages': 'All group chat messages',
+            'slack_feedback': 'Feedback from teachers',
+            'slack_new_task': 'New tasks',
+            'slack_new_goal': 'New goals',
+            'slack_new_workflow': 'New workflows',
+            'slack_deadline_reminder': 'Deadline reminders',
+            'slack_group_chat_mentions': 'Mentions in group chat',
+            'slack_group_chat_all_messages': 'All group chat messages',
         }
 
     _CHECKBOX_CLASS = (
@@ -119,6 +136,15 @@ class NotificationSettingsForm(forms.ModelForm):
         for name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs.setdefault('class', self._CHECKBOX_CLASS)
+        self.fields['quiet_hours_start'].widget = forms.TimeInput(
+            attrs={'type': 'time', 'class': _INPUT_CLASS},
+            format='%H:%M',
+        )
+        self.fields['quiet_hours_end'].widget = forms.TimeInput(
+            attrs={'type': 'time', 'class': _INPUT_CLASS},
+            format='%H:%M',
+        )
+        self.fields['timezone'].widget.attrs.setdefault('class', _INPUT_CLASS)
 
     def save(self, commit=True):
         settings = super().save(commit=commit)

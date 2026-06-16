@@ -66,10 +66,40 @@
     </div>
 
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Notify me about</h2>
+      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Quiet hours and timezone</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label class="space-y-1">
+          <span class="text-xs uppercase tracking-wide text-gray-400">Quiet hours start</span>
+          {{ form.quiet_hours_start }}
+        </label>
+        <label class="space-y-1">
+          <span class="text-xs uppercase tracking-wide text-gray-400">Quiet hours end</span>
+          {{ form.quiet_hours_end }}
+        </label>
+      </div>
+      <label class="space-y-1 block">
+        <span class="text-xs uppercase tracking-wide text-gray-400">Timezone</span>
+        {{ form.timezone }}
+      </label>
+      <p class="text-xs text-gray-400">During quiet hours, email and Slack notifications are paused. Web notifications stay on.</p>
+    </div>
 
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Email notifications</h2>
       {% for field in form.visible_fields %}
-        {% if field.name != 'email_enabled' and field.name != 'slack_enabled' %}
+        {% if field.name|slice:":6" == "email_" and field.name != 'email_enabled' %}
+        <label class="flex items-center justify-between gap-4 cursor-pointer">
+          <span class="text-sm text-[#343534] dark:text-gray-100">{{ field.label }}</span>
+          {{ field }}
+        </label>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Slack notifications</h2>
+      {% for field in form.visible_fields %}
+        {% if field.name|slice:":6" == "slack_" and field.name != 'slack_enabled' %}
         <label class="flex items-center justify-between gap-4 cursor-pointer">
           <span class="text-sm text-[#343534] dark:text-gray-100">{{ field.label }}</span>
           {{ field }}

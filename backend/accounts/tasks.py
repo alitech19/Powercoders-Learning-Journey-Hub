@@ -38,6 +38,13 @@ def notify_workflow_assigned_task(workflow_id, student_ids, actor_id):
 
 
 @shared_task
+def run_deadline_reminders_task():
+    from accounts.notifications.deadline_reminders import send_deadline_reminders
+
+    send_deadline_reminders()
+
+
+@shared_task
 def notify_missing_reflections():
     """Slack digest: students without a weekly reflection submitted this week."""
     from django.contrib.auth import get_user_model

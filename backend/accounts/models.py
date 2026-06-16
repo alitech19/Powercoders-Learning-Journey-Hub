@@ -185,6 +185,7 @@ class UserNotificationSettings(models.Model):
     )
     slack_enabled = models.BooleanField(default=False)
     email_enabled = models.BooleanField(default=True)
+    # Legacy fields kept for migration compatibility.
     notify_new_workflow = models.BooleanField(default=True)
     notify_new_task = models.BooleanField(default=True)
     notify_new_goal = models.BooleanField(default=True)
@@ -192,6 +193,20 @@ class UserNotificationSettings(models.Model):
     notify_deadline_reminder = models.BooleanField(default=True)
     notify_group_chat_mentions = models.BooleanField(default=True)
     notify_group_chat_all_messages = models.BooleanField(default=False)
+    email_new_workflow = models.BooleanField(default=True)
+    email_new_task = models.BooleanField(default=True)
+    email_new_goal = models.BooleanField(default=True)
+    email_feedback = models.BooleanField(default=True)
+    email_deadline_reminder = models.BooleanField(default=True)
+    email_group_chat_mentions = models.BooleanField(default=True)
+    email_group_chat_all_messages = models.BooleanField(default=False)
+    slack_new_workflow = models.BooleanField(default=True)
+    slack_new_task = models.BooleanField(default=True)
+    slack_new_goal = models.BooleanField(default=True)
+    slack_feedback = models.BooleanField(default=True)
+    slack_deadline_reminder = models.BooleanField(default=True)
+    slack_group_chat_mentions = models.BooleanField(default=True)
+    slack_group_chat_all_messages = models.BooleanField(default=False)
     digest_mode = models.CharField(
         max_length=16,
         choices=DigestMode.choices,
