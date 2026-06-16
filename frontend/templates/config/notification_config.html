@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Notification Management{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+
+  <div class="mb-6 flex items-start justify-between gap-4 flex-wrap">
+    <div>
+      {% include "includes/_page_title.html" with title="Notification Management" %}
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        Global settings for deadline reminders and the weekly reflection digest.
+      </p>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <button name="run_reminders" type="submit"
+              class="px-4 py-2 rounded-lg bg-[#B23149] hover:bg-[#9a2a3f] text-white text-sm font-semibold transition-colors">
+        Run reminders now
+      </button>
+    </form>
+  </div>
+
+  {% if config.last_reminder_run_at %}
+  <div class="mb-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-5 py-3 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-3">
+    <span>Last run: <strong class="text-[#343534] dark:text-gray-100">{{ config.last_reminder_run_at|date:"d M Y H:i" }} UTC</strong></span>
+    {% if config.last_reminder_error %}
+    <span class="text-red-500">Error: {{ config.last_reminder_error|truncatechars:120 }}</span>
+    {% else %}
+    <span class="text-green-600 dark:text-green-400">OK</span>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Deadline reminders</h2>
+      <p class="text-xs text-gray-400">Run hourly. Sends in-app + email/Slack to students based on their own notification preferences.</p>
+
+      <label class="flex items-center justify-between gap-4 cursor-pointer">
+        <span class="text-sm font-medium text-[#343534] dark:text-gray-100">Enable deadline reminders</span>
+        {{ form.deadline_reminders_enabled }}
+      </label>
+      <div class="border-t border-gray-100 dark:border-gray-800 pt-3 space-y-3">
+        <label class="flex items-center justify-between gap-4 cursor-pointer">
+          <span class="text-sm text-gray-600 dark:text-gray-300">{{ form.reminder_offset_24h.label }}</span>
+          {{ form.reminder_offset_24h }}
+        </label>
+        <label class="flex items-center justify-between gap-4 cursor-pointer">
+          <span class="text-sm text-gray-600 dark:text-gray-300">{{ form.reminder_offset_2h.label }}</span>
+          {{ form.reminder_offset_2h }}
+        </label>
+        <label class="flex items-center justify-between gap-4 cursor-pointer">
+          <span class="text-sm text-gray-600 dark:text-gray-300">{{ form.reminder_offset_overdue.label }}</span>
+          {{ form.reminder_offset_overdue }}
+        </label>
+      </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Weekly reflection digest</h2>
+      <p class="text-xs text-gray-400">Posts a Slack message to the staff webhook listing students who haven't submitted a reflection this week.</p>
+
+      <label class="flex items-center justify-between gap-4 cursor-pointer">
+        <span class="text-sm font-medium text-[#343534] dark:text-gray-100">Enable reflection digest</span>
+        {{ form.reflection_digest_enabled }}
+      </label>
+
+      <div class="grid grid-cols-3 gap-4 pt-2">
+        <label class="space-y-1">
+          <span class="text-xs uppercase tracking-wide text-gray-400">Day</span>
+          {{ form.reflection_reminder_day }}
+        </label>
+        <label class="space-y-1">
+          <span class="text-xs uppercase tracking-wide text-gray-400">Hour (0–23)</span>
+          {{ form.reflection_reminder_hour }}
+        </label>
+        <label class="space-y-1">
+          <span class="text-xs uppercase tracking-wide text-gray-400">Minute (0–59)</span>
+          {{ form.reflection_reminder_minute }}
+        </label>
+      </div>
+      <p class="text-xs text-gray-400">Timezone: Europe/Zurich. Saving updates the Celery Beat schedule automatically.</p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button type="submit"
+              class="px-5 py-2.5 rounded-lg bg-[#B23149] hover:bg-[#9a2a3f] text-white text-sm font-semibold transition-colors">
+        Save settings
+      </button>
+      <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="text-sm text-gray-500 hover:text-[#B23149]">Back</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

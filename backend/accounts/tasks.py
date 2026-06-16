@@ -40,13 +40,28 @@ def notify_workflow_assigned_task(workflow_id, student_ids, actor_id):
 @shared_task
 def run_deadline_reminders_task():
     from accounts.notifications.deadline_reminders import send_deadline_reminders
+    from config.models import NotificationConfig
 
-    send_deadline_reminders()
+    config = NotificationConfig.get()
+    if not config.deadline_reminders_enabled:
+        return
+    try:
+        send_deadline_reminders(config=config)
+        config.record_run()
+    except Exception as exc:
+        config.record_run(error=str(exc))
+        raise
 
 
 @shared_task
 def notify_missing_reflections():
     """Slack digest: students without a weekly reflection submitted this week."""
+    from config.models import NotificationConfig
+
+    config = NotificationConfig.get()
+    if not config.reflection_digest_enabled:
+        return
+
     from django.contrib.auth import get_user_model
 
     from dashboard.services import students_missing_weekly_reflection

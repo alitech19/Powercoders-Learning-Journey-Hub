@@ -14,6 +14,7 @@ ADMIN_NAV_ITEMS: tuple[NavItem, ...] = (
     NavItem('Cohorts & Groups', 'accounts:cohort_list'),
     NavItem('Student Progress', 'accounts:student_progress'),
     NavItem('File storage', 'accounts:storage_settings'),
+    NavItem('Notifications', 'config:notification_config'),
     NavItem('Bug Reports', 'bug_reports:report_list'),
     NavItem('Users', 'accounts:user_list'),
     NavItem('Create User', 'accounts:user_create'),

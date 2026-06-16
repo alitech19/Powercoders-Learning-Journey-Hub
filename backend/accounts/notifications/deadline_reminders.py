@@ -26,7 +26,7 @@ def _build_message(label, title):
     return f"Overdue: '{title}' deadline has passed."
 
 
-def send_deadline_reminders():
+def send_deadline_reminders(config=None):
     from goals.models import GoalEnrollment
     from tasks.models import TaskEnrollment
 
@@ -44,6 +44,7 @@ def send_deadline_reminders():
             due_date=due,
             detail_url=f'/tasks/{enrollment.task_id}/',
             today=today,
+            config=config,
         )
 
     for enrollment in GoalEnrollment.objects.select_related('goal', 'student'):
@@ -58,19 +59,26 @@ def send_deadline_reminders():
             due_date=due,
             detail_url=f'/goals/{enrollment.goal_id}/',
             today=today,
+            config=config,
         )
 
 
-def _dispatch_for_enrollment(*, kind, item_id, user, title, due_date, detail_url, today):
+def _dispatch_for_enrollment(*, kind, item_id, user, title, due_date, detail_url, today, config=None):
     if due_date < today:
         label = 'overdue'
         dedupe_day = today.isoformat()
+        if config and not config.reminder_offset_overdue:
+            return
     elif due_date == today:
         label = '2h'
         dedupe_day = due_date.isoformat()
+        if config and not config.reminder_offset_2h:
+            return
     elif due_date == today + timedelta(days=1):
         label = '24h'
         dedupe_day = due_date.isoformat()
+        if config and not config.reminder_offset_24h:
+            return
     else:
         return
 

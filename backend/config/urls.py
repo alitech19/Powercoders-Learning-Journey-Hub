@@ -74,6 +74,7 @@ urlpatterns = [
     path('resources/', include('resources.urls')),
     path('bugs/', include('bug_reports.urls')),
     path('module-disabled/<slug:slug>/', module_disabled_view, name='module_disabled'),
+    path('admin-config/', include('config.notification_config_urls')),
     path('', include('info.urls')),
     path('', include('dashboard.urls')),
     path('home/', RedirectView.as_view(pattern_name='dashboard:dashboard', permanent=False), name='home'),
