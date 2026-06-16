@@ -20,8 +20,8 @@
           <div>
             <label class="block text-sm font-semibold text-[#343534] dark:text-gray-100 mb-2">Profile photo</label>
             <div class="flex items-center gap-4">
-              {% if user.avatar %}
-                <img src="{{ user.avatar.url }}" alt="" class="h-16 w-16 rounded-full object-cover ring-2 ring-[#EDE3D5]">
+              {% if user.has_custom_avatar %}
+                <img src="{{ user.get_avatar_url }}" alt="" class="h-16 w-16 rounded-full object-cover ring-2 ring-[#EDE3D5]">
               {% else %}
                 <div class="h-16 w-16 rounded-full bg-[#B23149]/10 flex items-center justify-center ring-2 ring-[#EDE3D5]">
                   <span class="text-[#B23149] text-2xl font-bold">{{ user.display_name|first|upper }}</span>
@@ -34,7 +34,7 @@
                               file:bg-[#B23149]/10 file:text-[#B23149] hover:file:bg-[#B23149]/20
                               file:cursor-pointer cursor-pointer">
                 <p class="text-xs text-gray-400">JPG or PNG, max 2 MB</p>
-                {% if user.avatar %}
+                {% if user.has_custom_avatar %}
                 <label class="flex items-center gap-2 cursor-pointer w-fit">
                   <input type="checkbox" name="remove_avatar" value="1"
                          class="rounded border-gray-300 dark:border-gray-600 text-red-500 focus:ring-red-400">

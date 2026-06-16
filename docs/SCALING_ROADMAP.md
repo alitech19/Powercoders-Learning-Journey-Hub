@@ -6,7 +6,7 @@ Current architecture, limits, and phased improvements for PowerHUB.
 
 ---
 
-## Current state (integration / deploy branch)
+## Current state (`main` / `deploy`)
 
 | Service | Role | Limitation |
 |---------|------|------------|

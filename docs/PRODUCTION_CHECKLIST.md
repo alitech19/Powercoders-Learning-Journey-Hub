@@ -4,13 +4,13 @@ Use this before every **production** deployment.
 
 For a **tester-only** host on Render (`deploy` branch), see [DEPLOY.md](DEPLOY.md). Local dev: [SETUP.md](SETUP.md). Dev seed may stay in the repo until a production release, but do not expose weak dev passwords on a public URL.
 
-## Pre-production bundle (deferred on `integration`)
+## Pre-production bundle (deferred on `main`)
 
-On the **`integration`** branch we **intentionally keep** the CDN-based frontend (Tailwind compiler in the browser, HTMX/Alpine from CDNs) while merging features from `main`. That is faster for day-to-day template work and does not block feature integration.
+On **`main`** we **intentionally keep** the CDN-based frontend (Tailwind compiler in the browser, HTMX/Alpine from CDNs) for now. That is faster for day-to-day template work while features land via PRs into `main`.
 
-**Do not go live with CDN Tailwind.** Complete this block in the **same pre-release pass** as [dev users removal](#dev-users--remove-from-the-codebase) (one PR or release branch, e.g. `deploy` → production).
+**Do not go live with CDN Tailwind.** Complete this block in the **same pre-release pass** as [dev users removal](#dev-users--remove-from-the-codebase) (one PR or release branch before production).
 
-### Frontend: compiled CSS and self-hosted JS (from `main` / phase “perf”)
+### Frontend: compiled CSS and self-hosted JS (pre-release “perf” pass)
 
 - [ ] Add `frontend/package.json`, `frontend/src/input.css` (Tailwind v4 with `@source` on templates)
 - [ ] Run `cd frontend && npm install && npm run build` → commit `frontend/static/css/app.css`
@@ -27,9 +27,9 @@ On the **`integration`** branch we **intentionally keep** the CDN-based frontend
 - [ ] Styles and HTMX/Alpine still work (forms, group chat, Alpine nav)
 - [ ] `manage.py test` passes after the switch
 
-**Dev workflow until then:** CDN remains on `integration`; acceptable for local QA. Staging on Render may be slower or CDN-dependent — plan the perf block before exposing testers to a “production-like” URL.
+**Dev workflow until then:** CDN remains on `main`; acceptable for local QA. Staging on Render (`deploy`) may be slower or CDN-dependent — plan the perf block before exposing testers to a “production-like” URL.
 
-### Already done on `integration` (do not repeat)
+### Already done on `main` (do not repeat)
 
 - [x] Production security when `DEBUG=False`: HTTPS redirect, HSTS, secure cookies, `SECRET_KEY` guard, `SECURE_REFERRER_POLICY` (see `.env.example` production comments)
 - [x] Celery beat: `locked_migrate` before beat in `docker-compose.yml` and `scripts/render-beat-start.sh`
@@ -44,7 +44,7 @@ On the **`integration`** branch we **intentionally keep** the CDN-based frontend
 
 ## Dev users — remove from the codebase
 
-> **✅ Completed** (on the `Ali` branch). The dev-user mechanism has been deleted from the repository, not just disabled:
+> **✅ Completed.** The dev-user mechanism has been deleted from the repository, not just disabled:
 > `backend/dev/`, `accounts/dev_seed.py`, the `seed_dev_data` and `create_dev_superuser` management commands, `_dev_login_panel.html`, the `dev_quick_login` view + `dev-login/` route, the `dev_login_panel` context processor, the 2FA dev-bypass in `middleware.py`, the dev-seed settings (`ENABLE_DEV_SEED` / `DEV_SEED_FILE` / `DEV_SUPERUSER_EMAIL`), the login-page panel, the Docker/Render seed commands, the `ENABLE_DEV_SEED` / `DJANGO_SUPERUSER_*` env blocks, and `PyYAML` (no longer used).
 >
 > Verified: `python manage.py check` clean; full test suite (251 tests) passes; `/account/login/` renders the email/password form only (no dev panel); no `dev_quick_login` reference remains.

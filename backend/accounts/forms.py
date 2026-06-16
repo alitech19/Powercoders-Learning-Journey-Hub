@@ -3,12 +3,14 @@ import string
 
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
+from django.utils import timezone
 
 from config.form_widgets import configure_html5_date_field, html5_date_widget
 
 from cohorts.models import Cohort, Group, GroupTeacher
 from cohorts.permissions import get_teacher_group_ids
 
+from .avatar_storage import AvatarUploadError, encode_upload
 from .models import User
 
 
@@ -50,13 +52,36 @@ class EmailAuthenticationForm(AuthenticationForm):
 
 
 class ProfileForm(forms.ModelForm):
+    avatar = forms.ImageField(required=False, label='Profile photo')
+
     class Meta:
         model = User
-        fields = ['display_name', 'avatar', 'email_notifications_enabled']
+        fields = ['display_name', 'email_notifications_enabled']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['avatar'].required = False
+
+    def clean_avatar(self):
+        upload = self.cleaned_data.get('avatar')
+        if not upload:
+            return None
+        try:
+            self._avatar_payload = encode_upload(upload)
+        except AvatarUploadError as exc:
+            raise forms.ValidationError(str(exc)) from exc
+        return upload
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if hasattr(self, '_avatar_payload'):
+            avatar_data, content_type = self._avatar_payload
+            user.avatar_data = avatar_data
+            user.avatar_content_type = content_type
+            user.avatar_updated_at = timezone.now()
+        if commit:
+            user.save()
+        return user
 
 
 class CreateUserForm(forms.Form):

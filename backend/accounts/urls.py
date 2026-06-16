@@ -19,6 +19,7 @@ urlpatterns = [
         name='logout',
     ),
     path('profile/', views.profile, name='profile'),
+    path('avatar/<int:user_id>/', views.serve_avatar, name='avatar'),
     path('storage/', google_storage_views.storage_settings, name='storage_settings'),
     path(
         'storage/test-connection/',

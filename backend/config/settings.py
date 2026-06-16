@@ -1,5 +1,5 @@
 """
-Django settings for PowerHUB (integration branch — infrastructure skeleton).
+Django settings for PowerHUB.
 """
 
 import os

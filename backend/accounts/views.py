@@ -6,11 +6,13 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import PasswordResetView
-from django.http import HttpResponseRedirect
-from django.shortcuts import redirect, render
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
+from django.utils.http import http_date
 
+from .avatar_storage import AVATAR_CACHE_MAX_AGE, decode_avatar_data
 from .forms import ProfileForm
 from .models import User
 
@@ -120,9 +122,8 @@ def profile(request):
         form = ProfileForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             user = form.save(commit=False)
-            if request.POST.get('remove_avatar') and user.avatar:
-                user.avatar.delete(save=False)
-                user.avatar = None
+            if request.POST.get('remove_avatar') and user.has_custom_avatar:
+                user.clear_avatar()
             user.save()
             messages.success(request, 'Profile updated.')
             return redirect('accounts:profile')
@@ -139,6 +140,45 @@ def profile(request):
             **profile_google_context(request.user),
         },
     )
+
+
+def _avatar_etag(user):
+    if user.avatar_updated_at:
+        return f'"{user.pk}-{int(user.avatar_updated_at.timestamp())}"'
+    return f'"{user.pk}"'
+
+
+@login_required
+def serve_avatar(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    if not user.avatar_data:
+        return HttpResponse(status=404)
+
+    etag = _avatar_etag(user)
+    if request.META.get('HTTP_IF_NONE_MATCH') == etag:
+        return HttpResponse(status=304)
+
+    if user.avatar_updated_at:
+        if_modified_since = request.META.get('HTTP_IF_MODIFIED_SINCE')
+        if if_modified_since:
+            try:
+                from email.utils import parsedate_to_datetime
+
+                client_time = parsedate_to_datetime(if_modified_since)
+                if timezone.is_naive(client_time):
+                    client_time = timezone.make_aware(client_time, timezone.utc)
+                if user.avatar_updated_at <= client_time:
+                    return HttpResponse(status=304)
+            except (TypeError, ValueError, OverflowError):
+                pass
+
+    body = decode_avatar_data(user.avatar_data)
+    response = HttpResponse(body, content_type=user.avatar_content_type or 'image/jpeg')
+    response['Cache-Control'] = f'public, max-age={AVATAR_CACHE_MAX_AGE}, immutable'
+    response['ETag'] = etag
+    if user.avatar_updated_at:
+        response['Last-Modified'] = http_date(user.avatar_updated_at.timestamp())
+    return response
 
 
 @login_required
