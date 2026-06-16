@@ -163,7 +163,12 @@ STORAGES = {
         'BACKEND': 'django.core.files.storage.FileSystemStorage',
     },
     'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+        # Manifest variant appends a content hash to every filename
+        # (dark-mode.<hash>.js). {% static %} resolves to the hashed name
+        # automatically, so a deploy that changes a file is served under a
+        # brand-new URL -- no stale browser cache, no manual hard-refresh.
+        # Unchanged files keep their old hash and stay cached indefinitely.
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
     },
 }
 

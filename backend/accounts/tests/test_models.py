@@ -53,7 +53,10 @@ class UserModelTests(TestCase):
     def test_get_avatar_url_default_when_no_upload(self):
         user = make_student('s@example.com')
         url = user.get_avatar_url()
-        self.assertIn('student.svg', url)
+        # Manifest static storage inserts a content hash (student.<hash>.svg),
+        # so check the stem and extension rather than the exact filename.
+        self.assertIn('avatars/student', url)
+        self.assertTrue(url.endswith('.svg'), url)
 
     def test_has_custom_avatar_false_by_default(self):
         user = make_student('s@example.com')
