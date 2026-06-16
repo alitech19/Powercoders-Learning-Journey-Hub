@@ -43,6 +43,8 @@ def _build_checklist(user):
     from reflections.models import Reflection
     from tasks.models import TaskEnrollment
 
+    from config.module_access import is_module_enabled
+
     steps = [
         {
             'key': 'profile_photo',
@@ -95,6 +97,18 @@ def _build_checklist(user):
             'done': Post.objects.filter(author=user).exists(),
             'icon_key': 'chat',
         },
+    ]
+    module_keys = {
+        'first_journal': 'journal',
+        'first_goal': 'goals',
+        'first_task': 'tasks',
+        'first_reflection': 'reflections',
+        'first_group_post': 'group_space',
+    }
+    steps = [
+        step
+        for step in steps
+        if step['key'] not in module_keys or is_module_enabled(module_keys[step['key']])
     ]
     done_count = sum(1 for step in steps if step['done'])
     return steps, done_count

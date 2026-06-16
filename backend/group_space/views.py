@@ -19,7 +19,6 @@ from .permissions import (
     get_post_or_404,
 )
 from .constants import SHARE_KIND_PANEL
-from google_storage.integration import composer_upload_context
 from google_storage.integration import should_upload_file_to_drive
 from google_storage.orchestrator import (
     create_google_doc_for_post,
@@ -28,9 +27,21 @@ from google_storage.orchestrator import (
 )
 from google_storage.permissions import can_retry_drive_upload, delete_drive_file_for_post
 from google_storage.rate_limit import DriveUploadRateLimitError
+from google_storage.integration import composer_upload_context
 
-from .services import after_post_saved, get_group_space_for_group, load_post, resolve_group
 from . import snapshots
+from .services import after_post_saved, get_group_space_for_group, load_post, resolve_group
+
+
+def _filtered_share_kind_panel():
+    from config.module_access import is_module_enabled
+    from config.modules import SNAPSHOT_KIND_TO_SLUG
+
+    return tuple(
+        (kind, label)
+        for kind, label in SHARE_KIND_PANEL
+        if is_module_enabled(SNAPSHOT_KIND_TO_SLUG.get(kind, ''))
+    )
 
 
 def _share_menu_for(user):
@@ -45,7 +56,7 @@ def _group_context(user, group, *, extra=None):
         'available_groups': get_accessible_groups(user),
         'selected_group_pk': str(group.pk) if group else '',
         'can_post': bool(group),
-        'share_kind_panel': SHARE_KIND_PANEL,
+        'share_kind_panel': _filtered_share_kind_panel(),
     }
     if extra:
         ctx.update(extra)
@@ -221,6 +232,13 @@ def share_create(request):
     kind = request.POST.get('kind', '')
     obj_id = request.POST.get('obj_id', '')
     if not obj_id.isdigit():
+        raise Http404
+
+    from config.module_access import is_module_enabled
+    from config.modules import SNAPSHOT_KIND_TO_SLUG
+
+    module_slug = SNAPSHOT_KIND_TO_SLUG.get(kind)
+    if not module_slug or not is_module_enabled(module_slug):
         raise Http404
 
     obj = snapshots.get_shareable_object(user, kind, int(obj_id))

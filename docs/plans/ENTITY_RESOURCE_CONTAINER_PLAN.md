@@ -29,7 +29,7 @@ Uses the **existing thematic container type** — no new container type, nothing
 | **Reuse** | Same thematic theme may be linked from multiple entities |
 | **Cohort workflow** | Same as group workflow: one thematic container; every enrolled student opens it from workflow detail — access via **entity**, not via sharing one group’s Themes tab membership alone |
 | **Resources UI** | Linked containers live on existing **Themes** tab (no new Activity tab) |
-| **Module off** | Hide picker; stub on open ([APP_MODULE_TOGGLES_PLAN.md](APP_MODULE_TOGGLES_PLAN.md)) |
+| **Module off** | Hide picker; stub on open (module-toggle behavior is implemented in platform) |
 
 ---
 
@@ -203,6 +203,5 @@ No new tab. Entity-linked themes appear on **Themes** tab (with optional badge �
 
 ## Related docs
 
-- [APP_MODULE_TOGGLES_PLAN.md](APP_MODULE_TOGGLES_PLAN.md)
 - [GROUP_SPACE_PROJECT_PLAN.md](GROUP_SPACE_PROJECT_PLAN.md)
 - [frontend/ICON_SET.md](../../frontend/ICON_SET.md)
