@@ -120,3 +120,40 @@ class WelcomeEmailTests(TestCase):
         self.assertEqual(response.status_code, 200)
         mock_email.assert_called_once()
         mock_slack.assert_called_once()
+
+    @patch('accounts.emails.send_new_user_slack')
+    @patch('accounts.emails.send_welcome_email')
+    def test_user_create_admin_role_grants_staff_access(self, mock_email, mock_slack):
+        """Admin-role accounts must get is_staff=True or they can never reach /admin/."""
+        from test_utils.users import make_admin
+
+        admin = make_admin('admin2@example.com')
+        login_as(self.client, admin)
+        self.client.post(
+            reverse('accounts:user_create'),
+            {
+                'email': 'newadmin@example.com',
+                'display_name': 'New Admin',
+                'role': User.Role.ADMIN,
+            },
+        )
+        new_admin = User.objects.get(email='newadmin@example.com')
+        self.assertTrue(new_admin.is_staff)
+
+    @patch('accounts.emails.send_new_user_slack')
+    @patch('accounts.emails.send_welcome_email')
+    def test_user_create_student_role_stays_non_staff(self, mock_email, mock_slack):
+        from test_utils.users import make_admin
+
+        admin = make_admin('admin3@example.com')
+        login_as(self.client, admin)
+        self.client.post(
+            reverse('accounts:user_create'),
+            {
+                'email': 'newstudent@example.com',
+                'display_name': 'New Student',
+                'role': User.Role.STUDENT,
+            },
+        )
+        new_student = User.objects.get(email='newstudent@example.com')
+        self.assertFalse(new_student.is_staff)
