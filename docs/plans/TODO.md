@@ -96,23 +96,6 @@ Plan: **[GROUP_SPACE_PROJECT_PLAN.md](GROUP_SPACE_PROJECT_PLAN.md)** — extends
 
 ---
 
-## App module toggles (admin)
-
-Plan: **[APP_MODULE_TOGGLES_PLAN.md](APP_MODULE_TOGGLES_PLAN.md)**
-
-**Product rules:** toggles **only in Django admin**, **admin role only**; disabled → no nav/dashboard/share tabs; chat history unchanged; files/links in chat OK, no Resources sync if resources off; app URLs → **stub** (admin sees enable hint); friendly 404/403/500 pages.
-
-| Feature | Status |
-|---------|--------|
-| `IntegratedModule` + Django admin (admin-only) | Planned |
-| Nav, dashboard, chat share panel filtered | Planned |
-| Stub pages + middleware (not bare 404) | Planned |
-| Friendly error pages (404/403/500) | Planned |
-| Chat: skip Resources sync; task links → stub when tasks off | Planned |
-| Single release (visibility + gates together) | Planned |
-
----
-
 ## Entity → Resources container link
 
 Plan: **[ENTITY_RESOURCE_CONTAINER_PLAN.md](ENTITY_RESOURCE_CONTAINER_PLAN.md)**
@@ -136,32 +119,16 @@ Plan: **[ENTITY_RESOURCE_CONTAINER_PLAN.md](ENTITY_RESOURCE_CONTAINER_PLAN.md)**
 
 ---
 
-## Admin restructure (web + Django admin)
+## Admin/platform updates (implemented)
 
-Plan: **[ADMIN_RESTRUCTURE_PLAN.md](ADMIN_RESTRUCTURE_PLAN.md)**
+These are now implemented in code and no longer tracked as separate plan docs:
 
-| Feature | Status |
-|---------|--------|
-| Nav **Адміністрування ▾**: Django admin, cohorts/groups, bulk import, bug inbox | Planned |
-| Users/progress via dashboard + staff nav (not in administration dropdown) | Planned |
-| Custom `AdminSite` — grouped index (logs → core → toggles → apps) | Planned |
-| Remove loose navbar “Admin” link | Planned |
-
----
-
-## Bug bounty / bug reports
-
-Plan: **[BUG_BOUNTY_PLAN.md](BUG_BOUNTY_PLAN.md)** — toggleable app `bug_reports`.
-
-| Feature | Status |
-|---------|--------|
-| Crosshair button next to ⓘ (per-page URL) | Done |
-| Submit form + DB storage | Done |
-| Admin inbox: take / close / reject / reopen + assignee visible | Done |
-| Admin reply + emails (reporter ack, admins new, reply) | Done |
-| Django admin + `IntegratedModule` toggle (`bug_reports` slug) | Done |
-| Dashboard tile “Open bug reports (n)” | Planned |
-| Help topic `info/topics/bug_reports.md` | Planned |
+| Capability | Status |
+|------------|--------|
+| Administration dropdown + current item structure | Done |
+| Custom Django Admin index grouping (logs/core/scheduling/modules/apps) | Done |
+| App module toggles (`IntegratedModule`) + module gate/stub pages | Done |
+| Bug reports app + admin inbox + email flow | Done |
 
 ---
 
@@ -169,9 +136,7 @@ Plan: **[BUG_BOUNTY_PLAN.md](BUG_BOUNTY_PLAN.md)** — toggleable app `bug_repor
 
 1. Finish Beat + env for existing Slack digest  
 2. Scheduling MVP (publish + entity reminders) on one entity (Task)  
-3. **Admin restructure** ([ADMIN_RESTRUCTURE_PLAN.md](ADMIN_RESTRUCTURE_PLAN.md)) — dropdown + Django admin grouping  
-4. **Bug reports app** ([BUG_BOUNTY_PLAN.md](BUG_BOUNTY_PLAN.md))  
-5. **App module toggles** ([APP_MODULE_TOGGLES_PLAN.md](APP_MODULE_TOGGLES_PLAN.md)) — include `bug_reports` slug  
-6. **Project spaces** (Phases 0–2 in [GROUP_SPACE_PROJECT_PLAN.md](GROUP_SPACE_PROJECT_PLAN.md))  
-7. Personal Slack OAuth + dispatcher  
-8. Group chat ↔ Slack sync
+3. **Project spaces** (Phases 0–2 in [GROUP_SPACE_PROJECT_PLAN.md](GROUP_SPACE_PROJECT_PLAN.md))  
+4. **Entity → Resources container link** ([ENTITY_RESOURCE_CONTAINER_PLAN.md](ENTITY_RESOURCE_CONTAINER_PLAN.md))  
+5. Personal Slack OAuth + dispatcher  
+6. Group chat ↔ Slack sync

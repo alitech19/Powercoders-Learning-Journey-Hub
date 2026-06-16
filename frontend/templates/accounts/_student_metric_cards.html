@@ -1,37 +1,27 @@
-{# Mobile metric grid — nav order #}
+{# Mobile metric grid #}
 {% with s=row.student %}
 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+  {% for slug, label in metric_columns %}
   <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-2.5">
-    <p class="text-xs text-gray-400 mb-0.5">Workflows</p>
+    <p class="text-xs text-gray-400 mb-0.5">{{ label }}</p>
+    {% if slug == 'workflows' %}
     <p class="font-semibold text-[#343534] dark:text-gray-100">{{ s.workflow_label }}</p>
-  </div>
-  <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-2.5">
-    <p class="text-xs text-gray-400 mb-0.5">Goals</p>
-    <p class="font-semibold text-[#343534] dark:text-gray-100">{{ s.goal_label }}</p>
-  </div>
-  <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-2.5">
-    <p class="text-xs text-gray-400 mb-0.5">Tasks</p>
+    {% elif slug == 'tasks' %}
     <p class="font-semibold text-[#343534] dark:text-gray-100">{{ s.task_label }}</p>
-  </div>
-  <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-2.5">
-    <p class="text-xs text-gray-400 mb-0.5">Reflections</p>
-    <p class="font-semibold text-[#343534] dark:text-gray-100">{{ s.reflection_total }}{% if row.missing_reflection %} ⚠{% endif %}</p>
-  </div>
-  <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-2.5">
-    <p class="text-xs text-gray-400 mb-0.5">Journal</p>
-    <p class="font-semibold text-[#343534] dark:text-gray-100">{{ s.journal_total }}{% if row.streak %} <span class="text-amber-600 dark:text-amber-400 text-xs">🔥{{ row.streak }}d</span>{% endif %}</p>
-  </div>
-  <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-2.5">
-    <p class="text-xs text-gray-400 mb-0.5">Habits</p>
+    {% elif slug == 'goals' %}
+    <p class="font-semibold text-[#343534] dark:text-gray-100">{{ s.goal_label }}</p>
+    {% elif slug == 'habits' %}
     <p class="font-semibold text-[#343534] dark:text-gray-100">{{ s.habits_active }} · {{ s.habit_logs_week }}wk</p>
-  </div>
-  <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-2.5">
-    <p class="text-xs text-gray-400 mb-0.5">Group</p>
+    {% elif slug == 'reflections' %}
+    <p class="font-semibold text-[#343534] dark:text-gray-100">{{ s.reflection_total }}{% if row.missing_reflection %} ⚠{% endif %}</p>
+    {% elif slug == 'journal' %}
+    <p class="font-semibold text-[#343534] dark:text-gray-100">{{ s.journal_total }}{% if row.streak %} <span class="text-amber-600 dark:text-amber-400 text-xs">🔥{{ row.streak }}d</span>{% endif %}</p>
+    {% elif slug == 'group_space' %}
     <p class="font-semibold text-[#343534] dark:text-gray-100">{{ s.group_posts_week }} posts</p>
-  </div>
-  <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-2.5">
-    <p class="text-xs text-gray-400 mb-0.5">Resources</p>
+    {% elif slug == 'resources' %}
     <p class="font-semibold text-[#343534] dark:text-gray-100">{{ s.resources_count }}</p>
+    {% endif %}
   </div>
+  {% endfor %}
 </div>
 {% endwith %}

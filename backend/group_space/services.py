@@ -80,9 +80,13 @@ def validate_uploaded_file(uploaded_file):
 
 
 def sync_group_resource_from_post(post):
+    from config.module_access import is_module_enabled
     from resources.models import ResourceItem
     from resources.services import sync_from_group_post
 
+    if not is_module_enabled('resources'):
+        ResourceItem.objects.filter(source_post=post).delete()
+        return
     if not post_qualifies_for_resources(post):
         ResourceItem.objects.filter(source_post=post).delete()
         return

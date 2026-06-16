@@ -15,6 +15,9 @@ from journal.models import JournalEntry
 from tasks.models import Task
 from tasks.permissions import get_enrollment_for_user as get_task_enrollment
 
+from config.module_access import is_module_enabled
+from config.modules import SNAPSHOT_KIND_TO_SLUG
+
 from .constants import SNAPSHOT_KINDS
 from .models import Post
 
@@ -158,11 +161,16 @@ def get_shareable_tasks(user):
 def build_share_menu(user):
     if user.role != user.Role.STUDENT:
         return None
-    return {
+    menu = {
         'journal': list(get_shareable_journal_entries(user)[:30]),
         'habit': list(get_shareable_habits(user)[:30]),
         'goal': list(get_shareable_goals(user)[:30]),
         'task': list(get_shareable_tasks(user)[:30]),
+    }
+    return {
+        kind: items
+        for kind, items in menu.items()
+        if is_module_enabled(SNAPSHOT_KIND_TO_SLUG.get(kind, ''))
     }
 
 
@@ -175,6 +183,9 @@ def list_shareable_objects(user, kind):
 
 def get_shareable_object(user, kind, obj_id):
     if kind not in SNAPSHOT_KINDS:
+        return None
+    module_slug = SNAPSHOT_KIND_TO_SLUG.get(kind)
+    if not module_slug or not is_module_enabled(module_slug):
         return None
     if kind == Post.SnapshotKind.JOURNAL:
         entry = JournalEntry.objects.filter(pk=obj_id, author=user).first()
