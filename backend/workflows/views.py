@@ -306,7 +306,18 @@ def enroll_student(request, workflow_pk):
 
         student = get_object_or_404(User, pk=student_id, role=User.Role.STUDENT)
         if can_assign_students(request.user, workflow, [student]):
-            WorkflowEnrollment.objects.get_or_create(workflow=workflow, student=student)
+            enrollment, created = WorkflowEnrollment.objects.get_or_create(
+                workflow=workflow,
+                student=student,
+            )
+            if created:
+                from accounts.notifications.scheduling import schedule_workflow_assigned
+
+                schedule_workflow_assigned(
+                    workflow=workflow,
+                    students=[student],
+                    actor=request.user,
+                )
     return redirect('workflows:detail', pk=workflow_pk)
 
 

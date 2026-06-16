@@ -143,7 +143,15 @@ def create_workflow(*, user, post):
             WorkflowEnrollment(workflow=workflow, student=student)
             for student in students
         ])
+        notify_students = students
+    else:
+        from .permissions import get_workflow_assigned_students
 
+        notify_students = get_workflow_assigned_students(workflow)
+
+    from accounts.notifications.scheduling import schedule_workflow_assigned
+
+    schedule_workflow_assigned(workflow=workflow, students=notify_students, actor=user)
     return workflow
 
 
@@ -220,6 +228,16 @@ def update_workflow_assignment(*, workflow, user, post):
 
         for student_id in new_ids - existing_ids:
             WorkflowEnrollment.objects.create(workflow=workflow, student_id=student_id)
+
+        if new_ids - existing_ids:
+            from accounts.notifications.scheduling import schedule_workflow_assigned
+
+            added_students = User.objects.filter(
+                pk__in=new_ids - existing_ids,
+                role=User.Role.STUDENT,
+                is_active=True,
+            )
+            schedule_workflow_assigned(workflow=workflow, students=added_students, actor=user)
 
     if old_mode != progress_mode:
         StepCompletion.objects.filter(workflow=workflow).delete()

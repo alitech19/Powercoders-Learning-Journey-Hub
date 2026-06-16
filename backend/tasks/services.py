@@ -340,6 +340,10 @@ def create_tasks_bulk(*, user, post):
             status=initial_status,
         )
         sync_subtask_enrollments(enrollment)
+
+    from accounts.notifications.scheduling import schedule_task_assigned
+
+    schedule_task_assigned(task=task, students=students, actor=user)
     return task
 
 
@@ -375,13 +379,18 @@ def create_group_task(*, user, post):
 
     _create_template_subtasks(task, post)
 
-    for student in get_active_students_for_group(group):
+    enrolled_students = list(get_active_students_for_group(group))
+    for student in enrolled_students:
         enrollment = TaskEnrollment.objects.create(
             task=task,
             student=student,
             status=task.status,
         )
         sync_subtask_enrollments(enrollment)
+
+    from accounts.notifications.scheduling import schedule_task_assigned
+
+    schedule_task_assigned(task=task, students=enrolled_students, actor=user)
     return task
 
 
@@ -411,6 +420,7 @@ def add_task_enrollments(*, user, task, post):
         raise ValidationError('All selected students are already enrolled.')
 
     initial_status = _parse_initial_status(post)
+    added_students = []
     for student_id in new_ids:
         enrollment = TaskEnrollment.objects.create(
             task=task,
@@ -418,6 +428,11 @@ def add_task_enrollments(*, user, task, post):
             status=initial_status,
         )
         sync_subtask_enrollments(enrollment)
+        added_students.append(enrollment.student)
+
+    from accounts.notifications.scheduling import schedule_task_assigned
+
+    schedule_task_assigned(task=task, students=added_students, actor=user)
     return len(new_ids)
 
 

@@ -26,6 +26,7 @@ Plan: **[SLACK_INTEGRATION_PLAN.md](SLACK_INTEGRATION_PLAN.md)**
 | Unified notification dispatcher (dedupe, delivery log) | Done (Phase 0 — in-app + email) |
 | Per-user Slack OAuth (connect / disconnect) | Done (Phase 1 MVP) |
 | Personal Slack DM via dispatcher (feedback) | Done (Phase 1 MVP) |
+| Assignment notifications (task / goal / workflow) | Done |
 | Slack DM: feedback, new task/goal/workflow, deadline reminders | Planned |
 | Group chat → Slack channel sync (one-way) | Planned |
 | Group chat ↔ Slack (two-way) + thread → flat reply links | Planned |

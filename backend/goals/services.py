@@ -222,6 +222,9 @@ def create_goals_bulk(*, user, post):
     for ms in parse_milestones_from_post(post):
         Milestone.objects.create(goal=goal, **ms)
 
+    from accounts.notifications.scheduling import schedule_goal_assigned
+
+    schedule_goal_assigned(goal=goal, students=students, actor=user)
     return goal
 
 
