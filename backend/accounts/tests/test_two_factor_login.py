@@ -96,3 +96,32 @@ class TwoFactorLoginTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Invalid token')
         self.assertNotIn('_auth_user_id', self.client.session)
+
+
+class ProfilePageTests(TestCase):
+    """The branded 'Account Security' page (frontend/templates/two_factor/profile/profile.html)."""
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_shows_backup_tokens_for_user_with_device(self):
+        teacher = make_teacher('profile-with-device@example.com')
+        TOTPDevice.objects.create(user=teacher, name='default', confirmed=True)
+        self.client.force_login(teacher)
+
+        response = self.client.get(reverse('two_factor:profile'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Account Security')
+        self.assertContains(response, 'Backup Tokens')
+        self.assertContains(response, 'Show Codes')
+
+    def test_shows_enable_cta_for_user_without_device(self):
+        student = make_student('profile-no-device@example.com')
+        self.client.force_login(student)
+
+        response = self.client.get(reverse('two_factor:profile'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Enable Two-Factor Authentication')
+        self.assertNotContains(response, 'Backup Tokens')
