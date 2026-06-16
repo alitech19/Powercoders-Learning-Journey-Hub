@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.http import http_date
 
 from .avatar_storage import AVATAR_CACHE_MAX_AGE, decode_avatar_data
+from .notifications.settings import get_notification_settings, sync_email_enabled
 from .forms import ProfileForm
 from .models import User
 
@@ -125,6 +126,7 @@ def profile(request):
             if request.POST.get('remove_avatar') and user.has_custom_avatar:
                 user.clear_avatar()
             user.save()
+            sync_email_enabled(user, user.email_notifications_enabled)
             messages.success(request, 'Profile updated.')
             return redirect('accounts:profile')
     else:

@@ -27,12 +27,21 @@ def _send(subject, body, recipient_email):
 
 
 def create_notification(recipient, title, body='', url=''):
+    """Legacy helper — prefer accounts.notifications.dispatcher.dispatch_event."""
     from .models import Notification
 
     try:
         Notification.objects.create(recipient=recipient, title=title, body=body, url=url)
     except Exception:
         pass
+
+
+def send_notification_email(*, recipient, subject, body):
+    _send(
+        subject=subject,
+        body=body,
+        recipient_email=recipient.email,
+    )
 
 
 def send_new_user_slack(user):
@@ -64,15 +73,12 @@ You will be asked to set a new password on first login.
 
 
 def notify_feedback_received(*, entry, recipient, title, relative_url):
-    """In-app notification, optional email, and Slack when staff leaves feedback."""
+    """In-app notification, optional email, and global staff Slack webhook."""
+    from accounts.notifications.constants import EventType
+    from accounts.notifications.dispatcher import dispatch_event
+
     site = getattr(settings, 'SITE_URL', '').rstrip('/')
     full_url = f'{site}{relative_url}' if relative_url else site
-    create_notification(recipient, title, body=entry.body, url=relative_url)
-    send_slack_message(
-        f'💬 *{entry.author.display_name}* left feedback for *{recipient.display_name}*: {title}'
-    )
-    if not recipient.email_notifications_enabled:
-        return
     email_body = f"""Hi {recipient.display_name},
 
 {title}
@@ -85,8 +91,20 @@ View it here: {full_url}
 
 — Powercoders Team
 """
-    _send(
-        subject=title,
-        body=email_body,
-        recipient_email=recipient.email,
+    dispatch_event(
+        event_type=EventType.FEEDBACK,
+        recipients=[recipient],
+        title=title,
+        body=entry.body,
+        url=relative_url,
+        dedupe_key=f'feedback:{entry.pk}',
+        email_subject=title,
+        email_body=email_body,
+        slack_text=(
+            f'💬 *{entry.author.display_name}* left feedback for you: {title}\n'
+            f'{entry.body[:500]}'
+        ),
+    )
+    send_slack_message(
+        f'💬 *{entry.author.display_name}* left feedback for *{recipient.display_name}*: {title}'
     )

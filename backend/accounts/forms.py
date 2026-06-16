@@ -11,7 +11,8 @@ from cohorts.models import Cohort, Group, GroupTeacher
 from cohorts.permissions import get_teacher_group_ids
 
 from .avatar_storage import AvatarUploadError, encode_upload
-from .models import User
+from .models import User, UserNotificationSettings
+from .notifications.settings import get_notification_settings, sync_email_enabled
 
 
 _INPUT_CLASS = (
@@ -81,7 +82,49 @@ class ProfileForm(forms.ModelForm):
             user.avatar_updated_at = timezone.now()
         if commit:
             user.save()
+            sync_email_enabled(user, user.email_notifications_enabled)
         return user
+
+
+class NotificationSettingsForm(forms.ModelForm):
+    class Meta:
+        model = UserNotificationSettings
+        fields = [
+            'email_enabled',
+            'notify_feedback',
+            'notify_new_task',
+            'notify_new_goal',
+            'notify_new_workflow',
+            'notify_deadline_reminder',
+            'notify_group_chat_mentions',
+            'notify_group_chat_all_messages',
+            'slack_enabled',
+        ]
+        labels = {
+            'notify_feedback': 'Feedback from teachers',
+            'notify_new_task': 'New tasks',
+            'notify_new_goal': 'New goals',
+            'notify_new_workflow': 'New workflows',
+            'notify_deadline_reminder': 'Deadline reminders',
+            'notify_group_chat_mentions': 'Mentions in group chat',
+            'notify_group_chat_all_messages': 'All group chat messages',
+        }
+
+    _CHECKBOX_CLASS = (
+        'rounded border-gray-300 dark:border-gray-600 text-[#B23149] focus:ring-[#B23149]'
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.setdefault('class', self._CHECKBOX_CLASS)
+
+    def save(self, commit=True):
+        settings = super().save(commit=commit)
+        if commit:
+            sync_email_enabled(settings.user, settings.email_enabled)
+        return settings
 
 
 class CreateUserForm(forms.Form):

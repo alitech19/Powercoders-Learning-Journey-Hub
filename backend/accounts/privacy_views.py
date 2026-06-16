@@ -6,7 +6,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from .data_export import build_user_data_markdown
-from .models import Notification
+from .forms import NotificationSettingsForm
+from .models import Notification, SlackIntegration
+from .notifications.settings import get_notification_settings
+from .slack_provider import slack_oauth_configured
 
 User = get_user_model()
 
@@ -38,6 +41,28 @@ def delete_own_account(request):
 
 def account_deleted(request):
     return render(request, 'accounts/account_deleted.html')
+
+
+@login_required
+def notification_settings(request):
+    settings = get_notification_settings(request.user)
+    if request.method == 'POST':
+        form = NotificationSettingsForm(request.POST, instance=settings)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Notification settings updated.')
+            return redirect('accounts:notification_settings')
+    else:
+        form = NotificationSettingsForm(instance=settings)
+    return render(
+        request,
+        'accounts/notification_settings.html',
+        {
+            'form': form,
+            'slack_configured': slack_oauth_configured(),
+            'slack_integration': SlackIntegration.objects.filter(user=request.user).first(),
+        },
+    )
 
 
 @login_required

@@ -4,6 +4,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
+from google_storage.crypto import decrypt_secret, encrypt_secret
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -168,6 +170,135 @@ class Notification(models.Model):
 
     def __str__(self):
         return f'→ {self.recipient}: {self.title}'
+
+
+class UserNotificationSettings(models.Model):
+    class DigestMode(models.TextChoices):
+        INSTANT = 'instant', 'Instant'
+        HOURLY = 'hourly', 'Hourly'
+        DAILY = 'daily', 'Daily'
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notification_settings',
+    )
+    slack_enabled = models.BooleanField(default=False)
+    email_enabled = models.BooleanField(default=True)
+    notify_new_workflow = models.BooleanField(default=True)
+    notify_new_task = models.BooleanField(default=True)
+    notify_new_goal = models.BooleanField(default=True)
+    notify_feedback = models.BooleanField(default=True)
+    notify_deadline_reminder = models.BooleanField(default=True)
+    notify_group_chat_mentions = models.BooleanField(default=True)
+    notify_group_chat_all_messages = models.BooleanField(default=False)
+    digest_mode = models.CharField(
+        max_length=16,
+        choices=DigestMode.choices,
+        default=DigestMode.INSTANT,
+    )
+    quiet_hours_start = models.TimeField(null=True, blank=True)
+    quiet_hours_end = models.TimeField(null=True, blank=True)
+    timezone = models.CharField(max_length=64, default='Europe/Zurich')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'notification settings'
+        verbose_name_plural = 'notification settings'
+
+    def __str__(self):
+        return f'Notification settings — {self.user.display_name}'
+
+
+class NotificationDeliveryLog(models.Model):
+    class Channel(models.TextChoices):
+        IN_APP = 'in_app', 'In-app'
+        EMAIL = 'email', 'Email'
+        SLACK = 'slack', 'Slack'
+
+    class Status(models.TextChoices):
+        QUEUED = 'queued', 'Queued'
+        SENT = 'sent', 'Sent'
+        FAILED = 'failed', 'Failed'
+        SKIPPED = 'skipped', 'Skipped'
+
+    event_key = models.CharField(max_length=255)
+    recipient = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notification_deliveries',
+    )
+    channel = models.CharField(max_length=16, choices=Channel.choices)
+    status = models.CharField(
+        max_length=16,
+        choices=Status.choices,
+        default=Status.QUEUED,
+    )
+    provider_message_id = models.CharField(max_length=255, blank=True)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [models.Index(fields=['recipient', 'created_at'])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['event_key', 'recipient', 'channel'],
+                name='accounts_deliverylog_event_recipient_channel_uniq',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.channel} {self.status} — {self.recipient_id} ({self.event_key})'
+
+
+class SlackIntegration(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='slack_integration',
+    )
+    is_active = models.BooleanField(default=True)
+    slack_user_id = models.CharField(max_length=64)
+    slack_team_id = models.CharField(max_length=64)
+    access_token_encrypted = models.TextField(blank=True)
+    connected_at = models.DateTimeField(auto_now_add=True)
+    disconnected_at = models.DateTimeField(null=True, blank=True)
+    last_error = models.TextField(blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['slack_team_id', 'slack_user_id'],
+                name='accounts_slack_team_user_uniq',
+            ),
+        ]
+
+    def __str__(self):
+        return f'Slack — {self.user.display_name}'
+
+    @property
+    def is_connected(self):
+        return self.is_active and self.disconnected_at is None and bool(self.access_token_encrypted)
+
+    def set_access_token(self, token: str) -> None:
+        self.access_token_encrypted = encrypt_secret(token) if token else ''
+
+    def get_access_token(self) -> str:
+        return decrypt_secret(self.access_token_encrypted)
+
+    def mark_disconnected(self) -> None:
+        self.is_active = False
+        self.disconnected_at = timezone.now()
+        self.access_token_encrypted = ''
+        self.save(
+            update_fields=[
+                'is_active',
+                'disconnected_at',
+                'access_token_encrypted',
+            ],
+        )
 
 
 class AuditLog(models.Model):
