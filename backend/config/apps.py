@@ -6,3 +6,8 @@ class PowerhubConfigConfig(AppConfig):
     name = 'config'
     label = 'powerhub_config'
     verbose_name = 'PowerHUB configuration'
+
+    def ready(self):
+        from config.admin_site import install_powerhub_admin_site
+
+        install_powerhub_admin_site()

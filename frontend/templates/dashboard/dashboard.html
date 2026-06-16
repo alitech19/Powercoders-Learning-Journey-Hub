@@ -31,29 +31,39 @@
     <p class="text-2xl font-bold text-[#343534] dark:text-gray-100 group-hover:text-[#B23149] transition-colors">{{ total_groups }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Groups</p>
   </a>
+  {% if 'journal' in enabled_module_slugs %}
   <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center">
     <p class="text-2xl font-bold text-[#343534] dark:text-gray-100">{{ journal_week }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Journal Entries (7d)</p>
   </div>
+  {% endif %}
 </div>
 
 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+  {% if 'habits' in enabled_module_slugs %}
   <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center">
     <p class="text-2xl font-bold text-[#343534] dark:text-gray-100">{{ habits_active }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Active Habits</p>
   </div>
+  {% endif %}
+  {% if 'workflows' in enabled_module_slugs %}
   <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center">
     <p class="text-2xl font-bold text-[#343534] dark:text-gray-100">{{ workflows_total }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Workflows</p>
   </div>
+  {% endif %}
+  {% if 'group_space' in enabled_module_slugs %}
   <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center">
     <p class="text-2xl font-bold text-[#343534] dark:text-gray-100">{{ group_posts_week }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Group Posts (7d)</p>
   </div>
+  {% endif %}
+  {% if 'resources' in enabled_module_slugs %}
   <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center">
     <p class="text-2xl font-bold text-[#343534] dark:text-gray-100">{{ resource_items }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Resource Links</p>
   </div>
+  {% endif %}
 </div>
 
 <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-8">
@@ -116,32 +126,45 @@
 </div>
 
 <div class="flex flex-wrap gap-2 mb-6">
+  {% if 'workflows' in enabled_module_slugs %}
   <a href="{% url 'workflows:list' %}"
      class="inline-flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-[#B23149] text-gray-600 dark:text-gray-400 hover:text-[#B23149] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
     {% volumetric_icon "workflows" size="xs" variant="nav" %} Workflows
   </a>
+  {% endif %}
+  {% if 'goals' in enabled_module_slugs %}
   <a href="{% url 'goals:list' %}"
      class="inline-flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-[#B23149] text-gray-600 dark:text-gray-400 hover:text-[#B23149] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
     {% volumetric_icon "goals" size="xs" variant="nav" %} Goals
   </a>
+  {% endif %}
+  {% if 'tasks' in enabled_module_slugs %}
   <a href="{% url 'tasks:task_create' %}"
      class="inline-flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-[#B23149] text-gray-600 dark:text-gray-400 hover:text-[#B23149] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
     {% volumetric_icon "tasks" size="xs" variant="nav" %} Assign task
   </a>
+  {% endif %}
+  {% if 'reflections' in enabled_module_slugs %}
   <a href="{% url 'reflections:list' %}"
      class="inline-flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-[#B23149] text-gray-600 dark:text-gray-400 hover:text-[#B23149] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
     {% volumetric_icon "reflections" size="xs" variant="nav" %} Reflections
   </a>
+  {% endif %}
+  {% if 'group_space' in enabled_module_slugs %}
   <a href="{% url 'group_space:feed' %}"
      class="inline-flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-[#B23149] text-gray-600 dark:text-gray-400 hover:text-[#B23149] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
     {% volumetric_icon "chat" size="xs" variant="nav" %} Group chat
   </a>
+  {% endif %}
+  {% if 'resources' in enabled_module_slugs %}
   <a href="{% url 'resources:index' %}"
      class="inline-flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-[#B23149] text-gray-600 dark:text-gray-400 hover:text-[#B23149] text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
     {% volumetric_icon "resources" size="xs" variant="nav" %} Resources
   </a>
+  {% endif %}
 </div>
 
+{% if 'reflections' in enabled_module_slugs %}
 {% if missing_students %}
 <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 rounded-xl p-5 mb-6">
   <div class="flex items-center justify-between mb-3">
@@ -173,6 +196,7 @@
   <p class="text-sm text-green-700 dark:text-green-300 font-medium">All students have submitted their reflection this week.</p>
 </div>
 {% endif %}
+{% endif %}
 
 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
   <a href="{% url 'accounts:student_progress' %}"
@@ -184,6 +208,7 @@
     <p class="text-2xl font-bold text-[#343534] dark:text-gray-100">{{ assigned_groups|length }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Your Groups</p>
   </div>
+  {% if 'group_space' in enabled_module_slugs %}
   <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center">
     <p class="text-2xl font-bold text-[#343534] dark:text-gray-100">{{ group_posts_week }}</p>
     <p class="text-xs text-gray-500 font-medium mt-0.5">Group Posts (7d)</p>
@@ -192,6 +217,7 @@
      class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[#B23149]/40 p-4 text-center transition-colors group">
     <p class="text-sm font-semibold text-[#B23149] group-hover:text-[#8E273A]">Open Group Chat →</p>
   </a>
+  {% endif %}
 </div>
 
 {% if student_preview_rows %}
@@ -237,10 +263,12 @@
     <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-[#B23149]/40 transition-colors">
       <p class="font-semibold text-[#343534] dark:text-gray-100 text-sm">{{ group.name }}</p>
       <p class="text-xs text-gray-500 mt-0.5">{{ group.cohort.name }}</p>
+      {% if 'group_space' in enabled_module_slugs %}
       <a href="{% url 'group_space:feed' %}"
          class="inline-block mt-3 text-xs font-semibold text-[#B23149] hover:text-[#8E273A] transition-colors">
         Open group chat →
       </a>
+      {% endif %}
     </div>
     {% endfor %}
   </div>
@@ -262,7 +290,7 @@
   </p>
 </div>
 
-{% if reflection_due %}
+{% if reflection_due and 'reflections' in enabled_module_slugs %}
 <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 rounded-xl p-4 mb-6 flex items-center justify-between gap-3">
   <div class="flex items-center gap-2">
     {% volumetric_icon "alert" size="xs" variant="soft" %}
@@ -276,6 +304,7 @@
 {% endif %}
 
 {# Row 1 — Workflows (featured) #}
+{% if 'workflows' in enabled_module_slugs %}
 <a href="{% url 'workflows:list' %}"
    class="block mb-6 bg-[#F5EDE0] dark:bg-gray-800 border-2 border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/50 hover:shadow-md rounded-2xl p-6 sm:p-8 transition-all group">
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -303,9 +332,12 @@
     </div>
   </div>
 </a>
+{% endif %}
 
 {# Row 2 — Goals · Tasks · Reflections #}
+{% if 'goals' in enabled_module_slugs or 'tasks' in enabled_module_slugs or 'reflections' in enabled_module_slugs %}
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+  {% if 'goals' in enabled_module_slugs %}
   <a href="{% url 'goals:list' %}" class="bg-[#F5EDE0] dark:bg-gray-800 border border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
     <div class="flex items-center gap-2 mb-2">
       {% volumetric_icon "goals" size="sm" variant="cream" %}
@@ -316,7 +348,9 @@
       {% if last_goal_updated %}Updated {{ last_goal_updated|timesince }} ago{% else %}{{ goals_in_progress }} in progress{% endif %}
     </p>
   </a>
+  {% endif %}
 
+  {% if 'tasks' in enabled_module_slugs %}
   <a href="{% url 'tasks:task_list' %}" class="bg-[#F5EDE0] dark:bg-gray-800 border border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
     <div class="flex items-center gap-2 mb-2">
       {% volumetric_icon "tasks" size="sm" variant="cream" %}
@@ -335,7 +369,9 @@
     <p class="text-sm text-gray-400 mt-1">No tasks yet</p>
     {% endif %}
   </a>
+  {% endif %}
 
+  {% if 'reflections' in enabled_module_slugs %}
   <a href="{% url 'reflections:list' %}" class="bg-[#F5EDE0] dark:bg-gray-800 border {% if reflection_due %}border-amber-300{% else %}border-[#EDE3D5] dark:border-gray-700{% endif %} hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all group h-full">
     <div class="flex items-center gap-2 mb-2">
       {% volumetric_icon "reflections" size="sm" variant="cream" %}
@@ -347,10 +383,14 @@
       {% if last_reflection %}Last: {{ last_reflection|date:"d M" }}{% else %}No check-ins yet{% endif %}
     </p>
   </a>
+  {% endif %}
 </div>
+{% endif %}
 
 {# Row 3 — Journal · Habits · Group · Resources (nav order) #}
+{% if 'journal' in enabled_module_slugs or 'habits' in enabled_module_slugs or 'group_space' in enabled_module_slugs or 'resources' in enabled_module_slugs %}
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  {% if 'journal' in enabled_module_slugs %}
   <div class="bg-[#F5EDE0] dark:bg-gray-800 border border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all">
     <a href="{% url 'journal:list' %}" class="block">
       <div class="flex items-center gap-2 mb-2">
@@ -372,7 +412,9 @@
     </div>
     {% endif %}
   </div>
+  {% endif %}
 
+  {% if 'habits' in enabled_module_slugs %}
   <a href="{% url 'habits:list' %}" class="bg-[#F5EDE0] dark:bg-gray-800 border border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
     <div class="flex items-center gap-2 mb-2">
       {% volumetric_icon "habits" size="sm" variant="cream" %}
@@ -381,7 +423,9 @@
     <p class="text-2xl font-bold text-[#343534] dark:text-gray-100">{{ habits_active }}</p>
     <p class="text-xs text-gray-400 mt-0.5">{{ habit_logs_week }} log{{ habit_logs_week|pluralize }} this week</p>
   </a>
+  {% endif %}
 
+  {% if 'group_space' in enabled_module_slugs %}
   {% if has_group %}
   <a href="{% url 'group_space:feed' %}" class="bg-[#F5EDE0] dark:bg-gray-800 border border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
     <div class="flex items-center gap-2 mb-2">
@@ -400,7 +444,9 @@
     <p class="text-xs text-gray-400">No group assigned</p>
   </div>
   {% endif %}
+  {% endif %}
 
+  {% if 'resources' in enabled_module_slugs %}
   <a href="{% url 'resources:index' %}" class="bg-[#F5EDE0] dark:bg-gray-800 border border-[#EDE3D5] dark:border-gray-700 hover:border-[#B23149]/40 hover:shadow-sm rounded-xl p-5 transition-all h-full">
     <div class="flex items-center gap-2 mb-2">
       {% volumetric_icon "resources" size="sm" variant="cream" %}
@@ -409,7 +455,9 @@
     <p class="text-2xl font-bold text-[#343534] dark:text-gray-100">{{ resource_personal_items }}</p>
     <p class="text-xs text-gray-400 mt-0.5">my links{% if resource_group_items %} · {{ resource_group_items }} in group{% endif %}</p>
   </a>
+  {% endif %}
 </div>
+{% endif %}
 {% endif %}
 
 {% endblock %}

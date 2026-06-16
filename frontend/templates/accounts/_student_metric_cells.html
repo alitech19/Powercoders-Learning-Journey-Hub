@@ -1,33 +1,20 @@
-{# Metric cells for one student row — order matches config/nav.py NAV_REGISTRY #}
+{# Metric cells for one student row #}
 {% with s=row.student %}
-
+{% for slug, label in metric_columns %}
 <td class="px-4 py-4 whitespace-nowrap">
+  {% if slug == 'workflows' %}
   <span class="text-sm text-gray-800 dark:text-gray-200 font-medium">{{ s.workflow_label }}</span>
-  {% if s.workflow_total > 0 %}
-  <p class="text-xs text-gray-400">done</p>
-  {% endif %}
-</td>
-
-<td class="px-4 py-4 whitespace-nowrap">
+  {% if s.workflow_total > 0 %}<p class="text-xs text-gray-400">done</p>{% endif %}
+  {% elif slug == 'tasks' %}
   <span class="text-sm text-gray-800 dark:text-gray-200 font-medium">{{ s.task_label }}</span>
-  {% if s.task_total > 0 %}
-  <p class="text-xs text-gray-400">done</p>
-  {% endif %}
-</td>
-
-<td class="px-4 py-4 whitespace-nowrap">
+  {% if s.task_total > 0 %}<p class="text-xs text-gray-400">done</p>{% endif %}
+  {% elif slug == 'goals' %}
   <span class="text-sm text-gray-800 dark:text-gray-200 font-medium">{{ s.goal_label }}</span>
-  {% if s.goal_total > 0 %}
-  <p class="text-xs text-gray-400">completed</p>
-  {% endif %}
-</td>
-
-<td class="px-4 py-4 whitespace-nowrap">
+  {% if s.goal_total > 0 %}<p class="text-xs text-gray-400">completed</p>{% endif %}
+  {% elif slug == 'habits' %}
   <p class="text-sm text-[#343534] dark:text-gray-100 font-medium">{{ s.habits_active }} active</p>
   <p class="text-xs text-gray-400">{{ s.habit_logs_week }} log{{ s.habit_logs_week|pluralize }} (wk)</p>
-</td>
-
-<td class="px-4 py-4 whitespace-nowrap">
+  {% elif slug == 'reflections' %}
   <p class="text-sm text-[#343534] dark:text-gray-100 font-medium">
     {{ s.reflection_total }}
     {% if row.missing_reflection %}
@@ -39,9 +26,7 @@
   {% else %}
   <p class="text-xs text-gray-300">—</p>
   {% endif %}
-</td>
-
-<td class="px-4 py-4 whitespace-nowrap">
+  {% elif slug == 'journal' %}
   <p class="text-sm text-[#343534] dark:text-gray-100 font-medium">{{ s.journal_total }}</p>
   {% if row.streak > 0 %}
   <p class="text-xs text-amber-600 dark:text-amber-400 font-medium">🔥 {{ row.streak }}d</p>
@@ -50,16 +35,13 @@
   {% else %}
   <p class="text-xs text-gray-300">—</p>
   {% endif %}
-</td>
-
-<td class="px-4 py-4 whitespace-nowrap">
+  {% elif slug == 'group_space' %}
   <p class="text-sm text-[#343534] dark:text-gray-100 font-medium">{{ s.group_posts_week }}</p>
   <p class="text-xs text-gray-400">posts (7d)</p>
-</td>
-
-<td class="px-4 py-4 whitespace-nowrap">
+  {% elif slug == 'resources' %}
   <p class="text-sm text-[#343534] dark:text-gray-100 font-medium">{{ s.resources_count }}</p>
   <p class="text-xs text-gray-400">links</p>
+  {% endif %}
 </td>
-
+{% endfor %}
 {% endwith %}

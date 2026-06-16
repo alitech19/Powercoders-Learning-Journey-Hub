@@ -71,22 +71,6 @@ def _build_nav_registry() -> tuple[NavItem, ...]:
 # Flat registry (nav order for student metrics, share panel, etc.)
 NAV_REGISTRY: tuple[NavItem, ...] = _build_nav_registry()
 
-ADMIN_NAV_MENU_LABEL = 'Administration'
-
-# Admin/superuser only — mirrors admin dashboard Management block
-ADMIN_NAV_ITEMS: tuple[NavItem, ...] = (
-    NavItem('Cohorts & Groups', 'accounts:cohort_list'),
-    NavItem('Student Progress', 'accounts:student_progress'),
-    NavItem('File storage', 'accounts:storage_settings'),
-    NavItem('Bug Reports', 'bug_reports:report_list'),
-    NavItem('Users', 'accounts:user_list'),
-    NavItem('Create User', 'accounts:user_create'),
-    NavItem('Import Users (CSV)', 'accounts:user_import'),
-    NavItem('Audit Log', 'admin:accounts_auditlog_changelist'),
-    NavItem('Django Admin', 'admin:index'),
-)
-
-
 def _app_namespace(url_name: str) -> str:
     return url_name.split(':', 1)[0]
 
@@ -111,13 +95,23 @@ def _item_active(
     return False
 
 
+def _nav_item_allowed(entry: NavItem) -> bool:
+    from config.module_access import is_module_enabled
+    from config.modules import module_slug_for_nav_url
+
+    slug = module_slug_for_nav_url(entry.url_name)
+    if slug and not is_module_enabled(slug):
+        return False
+    return entry.enabled
+
+
 def _serialize_item(
     entry: NavItem,
     *,
     current_view_name: str | None,
     current_app: str | None,
 ) -> dict[str, str | bool] | None:
-    if not entry.enabled:
+    if not _nav_item_allowed(entry):
         return None
     url = _resolve_url(entry.url_name)
     if url is None:
@@ -203,18 +197,8 @@ def integrated_nav_groups(
     return groups
 
 
-def admin_nav_items(*, user) -> list[dict[str, str | bool]]:
-    from cohorts.permissions import user_is_admin
+def metric_columns_for_request() -> list[tuple[str, str]]:
     from config.module_access import is_module_enabled
+    from config.modules import METRIC_COLUMNS
 
-    if not user_is_admin(user):
-        return []
-    items: list[dict[str, str | bool]] = []
-    for entry in ADMIN_NAV_ITEMS:
-        if entry.url_name == 'bug_reports:report_list' and not is_module_enabled('bug_reports'):
-            continue
-        url = _resolve_url(entry.url_name)
-        if url is None:
-            continue
-        items.append({'label': entry.label, 'url': url, 'url_name': entry.url_name})
-    return items
+    return [(slug, label) for slug, label in METRIC_COLUMNS if is_module_enabled(slug)]

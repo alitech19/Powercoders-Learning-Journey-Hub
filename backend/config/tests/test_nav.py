@@ -1,16 +1,11 @@
-from django.test import SimpleTestCase
+from django.test import TestCase
 
-from config.nav import (
-    ADMIN_NAV_ITEMS,
-    NAV_GROUPS,
-    NAV_REGISTRY,
-    admin_nav_items,
-    integrated_nav_groups,
-    integrated_nav_items,
-)
+from config.admin_menu import admin_nav_items
+from config.nav import NAV_GROUPS, NAV_REGISTRY, integrated_nav_groups, integrated_nav_items
+from test_utils.users import make_admin
 
 
-class NavRegistryTests(SimpleTestCase):
+class NavRegistryTests(TestCase):
     def test_registry_order_matches_ui_plan(self):
         labels = [item.label for item in NAV_REGISTRY]
         self.assertEqual(
@@ -34,7 +29,7 @@ class NavRegistryTests(SimpleTestCase):
 
     def test_integrated_nav_groups_resolves_urls(self):
         groups = integrated_nav_groups(current_app='tasks')
-        learning = groups[0]
+        learning = next(g for g in groups if g['label'] == 'Learning')
         self.assertEqual(learning['label'], 'Learning')
         self.assertEqual(learning['kind'], 'dropdown')
         self.assertTrue(learning['active'])
@@ -57,27 +52,10 @@ class NavRegistryTests(SimpleTestCase):
 
         self.assertEqual(admin_nav_items(user=AnonymousUser()), [])
 
-    def test_admin_nav_includes_dashboard_management_links(self):
-        from accounts.models import User
-
-        admin = User(role=User.Role.ADMIN, email='a@test.com')
-        items = admin_nav_items(user=admin)
-        self.assertEqual(len(items), len(ADMIN_NAV_ITEMS))
-        labels = [i['label'] for i in items]
+    def test_admin_nav_labels_for_admin(self):
+        admin = make_admin('nav-admin@test.com')
+        labels = [i['label'] for i in admin_nav_items(user=admin)]
+        self.assertIn('Django Admin', labels)
+        self.assertIn('Cohorts & Groups', labels)
         self.assertIn('Users', labels)
         self.assertIn('Student Progress', labels)
-        self.assertIn('Cohorts & Groups', labels)
-        self.assertIn('File storage', labels)
-        self.assertIn('Bug Reports', labels)
-        self.assertEqual(
-            labels.index('File storage'),
-            labels.index('Student Progress') + 1,
-        )
-        self.assertEqual(
-            labels.index('Bug Reports'),
-            labels.index('File storage') + 1,
-        )
-        self.assertEqual(
-            labels.index('Users'),
-            labels.index('Bug Reports') + 1,
-        )
