@@ -91,6 +91,7 @@ def user_create(request):
                 group=group,
                 must_change_password=True,
                 is_staff=(role == User.Role.ADMIN),
+                is_superuser=(role == User.Role.ADMIN),
             )
             from .emails import send_new_user_slack, send_welcome_email
 
@@ -159,6 +160,7 @@ def user_import(request):
                 group=group,
                 must_change_password=True,
                 is_staff=(role == User.Role.ADMIN),
+                is_superuser=(role == User.Role.ADMIN),
             )
             from .emails import send_new_user_slack, send_welcome_email
 

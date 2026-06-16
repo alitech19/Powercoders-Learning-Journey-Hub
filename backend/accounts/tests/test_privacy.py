@@ -123,8 +123,9 @@ class WelcomeEmailTests(TestCase):
 
     @patch('accounts.emails.send_new_user_slack')
     @patch('accounts.emails.send_welcome_email')
-    def test_user_create_admin_role_grants_staff_access(self, mock_email, mock_slack):
-        """Admin-role accounts must get is_staff=True or they can never reach /admin/."""
+    def test_user_create_admin_role_grants_full_admin_access(self, mock_email, mock_slack):
+        """Admin-role accounts must get is_staff + is_superuser, or they either
+        can't reach /admin/ at all, or land there seeing almost no app sections."""
         from test_utils.users import make_admin
 
         admin = make_admin('admin2@example.com')
@@ -139,6 +140,7 @@ class WelcomeEmailTests(TestCase):
         )
         new_admin = User.objects.get(email='newadmin@example.com')
         self.assertTrue(new_admin.is_staff)
+        self.assertTrue(new_admin.is_superuser)
 
     @patch('accounts.emails.send_new_user_slack')
     @patch('accounts.emails.send_welcome_email')
@@ -157,3 +159,4 @@ class WelcomeEmailTests(TestCase):
         )
         new_student = User.objects.get(email='newstudent@example.com')
         self.assertFalse(new_student.is_staff)
+        self.assertFalse(new_student.is_superuser)

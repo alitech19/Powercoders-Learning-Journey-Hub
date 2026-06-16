@@ -206,8 +206,9 @@ class UserImportIntegrationTests(TestCase):
         mock_slack.assert_called_once()
 
     @patch('accounts.emails.send_new_user_slack')
-    def test_csv_import_admin_role_grants_staff_access(self, mock_slack):
-        """Admin-role rows must get is_staff=True or they can never reach /admin/."""
+    def test_csv_import_admin_role_grants_full_admin_access(self, mock_slack):
+        """Admin-role rows must get is_staff + is_superuser, or they either
+        can't reach /admin/ at all, or land there seeing almost no app sections."""
         csv_content = 'email,display_name,role\nimportedadmin@example.com,Imported Admin,admin\n'
         self.client.post(
             reverse('accounts:user_import'),
@@ -215,3 +216,4 @@ class UserImportIntegrationTests(TestCase):
         )
         imported_admin = User.objects.get(email='importedadmin@example.com')
         self.assertTrue(imported_admin.is_staff)
+        self.assertTrue(imported_admin.is_superuser)
