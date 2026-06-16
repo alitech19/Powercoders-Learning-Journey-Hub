@@ -60,6 +60,15 @@ WELCOME_EXEMPT = (
     '/health/',
     '/static/',
     '/media/',
+    # Step 3 of welcome.html links straight to these (the onboarding checklist).
+    # welcome_seen is still False until the wizard is finished, so without this
+    # exemption, clicking a checklist card bounces the user back to step 1.
+    '/accounts/profile/',
+    '/journal/',
+    '/goals/',
+    '/reflections/',
+    '/tasks/',
+    '/group/',
 )
 
 

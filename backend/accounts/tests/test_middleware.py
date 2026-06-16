@@ -81,6 +81,28 @@ class WelcomeMiddlewareTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn('welcome', response.url)
 
+    def test_onboarding_checklist_links_are_exempt(self):
+        """Step 3 of welcome.html links to these mid-onboarding; they must not
+        bounce back to welcome step 1 (regression test for that bug)."""
+        user = make_student('s@example.com', bypass_onboarding=False)
+        user.privacy_policy_accepted = True
+        user.welcome_seen = False
+        user.save(update_fields=['privacy_policy_accepted', 'welcome_seen'])
+
+        checklist_paths = [
+            reverse('accounts:profile'),
+            reverse('journal:list'),
+            reverse('goals:list'),
+            reverse('reflections:list'),
+            reverse('tasks:task_list'),
+            reverse('group_space:feed'),
+        ]
+        for path in checklist_paths:
+            request = RequestFactory().get(path)
+            request.user = user
+            response = WelcomeMiddleware(lambda r: HttpResponse('ok'))(request)
+            self.assertEqual(response.status_code, 200, f'{path} unexpectedly redirected')
+
 
 class WelcomeDashboardIntegrationTests(TestCase):
     """Dashboard view must not duplicate WelcomeMiddleware redirect."""
