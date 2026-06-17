@@ -114,6 +114,8 @@ class Task(models.Model):
         blank=True,
         related_name='tasks',
     )
+    scheduled_publish_at = models.DateTimeField(null=True, blank=True)
+    scheduled_publish_task_id = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

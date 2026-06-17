@@ -10,11 +10,6 @@ from celery import shared_task
 logger = logging.getLogger(__name__)
 
 
-@shared_task
-def ping():
-    return 'pong'
-
-
 @shared_task(bind=True, max_retries=2, default_retry_delay=300)
 def backup_database(self):
     """Weekly pg_dump → gzip → S3-compatible upload with automatic retention pruning."""
@@ -85,3 +80,19 @@ def _prune_old_backups(s3, bucket: str, retention_days: int) -> None:
     if to_delete:
         s3.delete_objects(Bucket=bucket, Delete={'Objects': to_delete})
         logger.info('Pruned %d old backup(s) older than %d days', len(to_delete), retention_days)
+
+
+@shared_task
+def ping():
+    return 'pong'
+
+
+@shared_task
+def publish_scheduled_entity_task(entity_type: str, entity_pk: int) -> bool:
+    from config.entity_publish import publish_entity_now
+
+    try:
+        return publish_entity_now(entity_type, entity_pk)
+    except Exception:
+        logger.exception('Scheduled publish failed for %s %s', entity_type, entity_pk)
+        return False

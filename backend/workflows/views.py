@@ -21,6 +21,11 @@ from .permissions import (
     get_visible_workflows_for_user,
     shared_progress_pct,
 )
+from config.entity_publish import (
+    scheduled_publish_detail_context,
+    scheduled_publish_form_defaults,
+    scheduled_publish_picker_context,
+)
 from resources.entity_links import entity_materials_context, resource_container_picker_context
 
 from .services import (
@@ -111,6 +116,9 @@ def workflow_create(request):
         'workflow': None,
         **get_assignment_form_context(request.user),
         **resource_container_picker_context(request.user),
+        **scheduled_publish_form_defaults(),
+        'draft_label': 'private',
+        'entity_label': 'workflow',
     }
     return render(request, 'workflows/form.html', context)
 
@@ -139,6 +147,7 @@ def workflow_detail(request, pk):
             'progress': progress,
             'can_toggle': True,
             **entity_materials_context(user, workflow),
+            **scheduled_publish_detail_context(workflow),
         }
     else:
         enrollments = (
@@ -177,6 +186,7 @@ def workflow_detail(request, pk):
             'assigned_count': assigned_students.count(),
             'available_students': available_students,
             **entity_materials_context(user, workflow),
+            **scheduled_publish_detail_context(workflow),
         }
 
     return render(request, 'workflows/detail.html', context)
@@ -213,6 +223,9 @@ def workflow_edit(request, pk):
             entity_title=workflow.title,
             linked_container=workflow.resource_container,
         ),
+        **scheduled_publish_picker_context(workflow),
+        'draft_label': 'private',
+        'entity_label': 'workflow',
     }
     return render(request, 'workflows/form.html', context)
 
@@ -223,6 +236,9 @@ def workflow_delete(request, pk):
     if not can_manage_workflow(request.user, workflow):
         return HttpResponseForbidden()
     if request.method == 'POST':
+        from config.entity_publish import cancel_scheduled_publish
+
+        cancel_scheduled_publish(workflow, save=False)
         workflow.delete()
         messages.success(request, 'Workflow deleted.')
         return redirect('workflows:list')

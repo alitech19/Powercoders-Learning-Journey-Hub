@@ -350,9 +350,17 @@ def create_tasks_bulk(*, user, post):
         )
         sync_subtask_enrollments(enrollment)
 
+    from config.entity_publish import (
+        apply_publish_schedule_from_post,
+        should_defer_assignment_notifications,
+    )
+
+    apply_publish_schedule_from_post(entity=task, post=post, actor=user, students=students)
+
     from accounts.notifications.scheduling import schedule_task_assigned
 
-    schedule_task_assigned(task=task, students=students, actor=user)
+    if not should_defer_assignment_notifications(task):
+        schedule_task_assigned(task=task, students=students, actor=user)
     return task
 
 
@@ -406,9 +414,22 @@ def create_group_task(*, user, post):
         )
         sync_subtask_enrollments(enrollment)
 
+    from config.entity_publish import (
+        apply_publish_schedule_from_post,
+        should_defer_assignment_notifications,
+    )
+
+    apply_publish_schedule_from_post(
+        entity=task,
+        post=post,
+        actor=user,
+        students=enrolled_students,
+    )
+
     from accounts.notifications.scheduling import schedule_task_assigned
 
-    schedule_task_assigned(task=task, students=enrolled_students, actor=user)
+    if not should_defer_assignment_notifications(task):
+        schedule_task_assigned(task=task, students=enrolled_students, actor=user)
     return task
 
 

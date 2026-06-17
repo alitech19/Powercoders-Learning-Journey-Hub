@@ -23,6 +23,13 @@ from cohorts.permissions import (
 
 from feedback.services import build_section_context
 
+from config.entity_publish import (
+    apply_publish_schedule_from_post,
+    cancel_scheduled_publish,
+    scheduled_publish_detail_context,
+    scheduled_publish_form_defaults,
+    scheduled_publish_picker_context,
+)
 from resources.entity_links import apply_entity_resource_container, entity_materials_context, resource_container_picker_context
 
 from .forms import SubtaskForm, TaskCommentForm, TaskForm, TaskUpdateForm
@@ -521,6 +528,8 @@ def task_create(request):
     if user_is_staff(request.user):
         context.update(get_assignment_form_context(request.user))
         context.update(resource_container_picker_context(request.user))
+        context.update(scheduled_publish_form_defaults())
+        context.update({'draft_label': 'draft', 'entity_label': 'task'})
     return render(request, 'tasks/task_form.html', context)
 
 
@@ -553,6 +562,7 @@ def task_detail(request, pk):
             'status_choices': Task.Status.choices,
             'today': timezone.localdate(),
             **entity_materials_context(user, task),
+            **scheduled_publish_detail_context(task),
         }
         if ctx['show_subtasks']:
             ctx.update(_subtask_ctx(user, enrollment))
@@ -581,6 +591,7 @@ def task_detail(request, pk):
             'status_choices': Task.Status.choices,
             'today': timezone.localdate(),
             **entity_materials_context(user, task),
+            **scheduled_publish_detail_context(task),
         }
         if ctx['show_subtasks']:
             ctx.update(_subtask_ctx(user, enrollment))
@@ -680,6 +691,7 @@ def task_detail(request, pk):
                 'show_staff_subtasks': True,
             })
     ctx.update(entity_materials_context(user, task))
+    ctx.update(scheduled_publish_detail_context(task))
     return render(request, 'tasks/task_detail.html', ctx)
 
 
@@ -712,8 +724,24 @@ def task_edit(request, pk):
                 initial=task.status,
             )
         if form.is_valid():
+            old_visibility = task.visibility
             form.save()
+            task.refresh_from_db()
             if is_staff_assigned(task):
+                from accounts.models import User
+
+                students = User.objects.filter(
+                    pk__in=task.enrollments.values_list('student_id', flat=True),
+                    role=User.Role.STUDENT,
+                    is_active=True,
+                )
+                apply_publish_schedule_from_post(
+                    entity=task,
+                    post=request.POST,
+                    actor=request.user,
+                    previous_visibility=old_visibility,
+                    students=students,
+                )
                 apply_entity_resource_container(
                     entity=task,
                     user=request.user,
@@ -765,6 +793,8 @@ def task_edit(request, pk):
                 linked_container=task.resource_container,
             ),
         )
+        context.update(scheduled_publish_picker_context(task))
+        context.update({'draft_label': 'draft', 'entity_label': 'task'})
     return render(request, 'tasks/task_form.html', context)
 
 
@@ -774,6 +804,7 @@ def task_delete(request, pk):
     if not can_delete_task(request.user, task):
         return HttpResponseForbidden()
     if request.method == 'POST':
+        cancel_scheduled_publish(task, save=False)
         task.delete()
         messages.success(request, 'Task deleted.')
         return redirect('tasks:task_list')
