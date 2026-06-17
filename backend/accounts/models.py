@@ -268,6 +268,69 @@ class NotificationDeliveryLog(models.Model):
         return f'{self.channel} {self.status} — {self.recipient_id} ({self.event_key})'
 
 
+class NotificationDigestItem(models.Model):
+    class Channel(models.TextChoices):
+        EMAIL = 'email', 'Email'
+        SLACK = 'slack', 'Slack'
+
+    class DigestBucket(models.TextChoices):
+        HOURLY = 'hourly', 'Hourly'
+        DAILY = 'daily', 'Daily'
+
+    class Status(models.TextChoices):
+        QUEUED = 'queued', 'Queued'
+        SENT = 'sent', 'Sent'
+        FAILED = 'failed', 'Failed'
+        SKIPPED = 'skipped', 'Skipped'
+
+    recipient = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notification_digest_items',
+    )
+    channel = models.CharField(max_length=16, choices=Channel.choices)
+    digest_bucket = models.CharField(max_length=16, choices=DigestBucket.choices)
+
+    # We reuse the same dedupe_key from dispatch_event, so an event appears
+    # at most once per (recipient, channel, digest_bucket).
+    event_key = models.CharField(max_length=255)
+    event_type = models.CharField(max_length=64, blank=True)
+
+    title = models.CharField(max_length=255)
+    # For email digests
+    email_subject = models.CharField(max_length=255, blank=True)
+    email_body = models.TextField(blank=True)
+    # For Slack digests
+    slack_text = models.TextField(blank=True)
+    url = models.CharField(max_length=500, blank=True)
+
+    scheduled_for = models.DateTimeField()
+    status = models.CharField(
+        max_length=16,
+        choices=Status.choices,
+        default=Status.QUEUED,
+    )
+    provider_message_id = models.CharField(max_length=255, blank=True)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['recipient', 'digest_bucket', 'scheduled_for', 'status']),
+            models.Index(fields=['channel', 'digest_bucket', 'scheduled_for', 'status']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['event_key', 'recipient', 'channel', 'digest_bucket'],
+                name='accounts_digestitem_event_recipient_channel_bucket_uniq',
+            )
+        ]
+
+    def __str__(self):
+        return f'DigestItem {self.channel} {self.digest_bucket} — {self.recipient_id} ({self.event_key})'
+
+
 class SlackIntegration(models.Model):
     user = models.OneToOneField(
         User,

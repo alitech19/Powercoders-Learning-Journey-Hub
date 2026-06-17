@@ -5,9 +5,9 @@ from zoneinfo import ZoneInfo
 from django.db import IntegrityError
 from django.utils import timezone
 
-from accounts.models import Notification, NotificationDeliveryLog, UserNotificationSettings
+from accounts.models import Notification, NotificationDeliveryLog, NotificationDigestItem, UserNotificationSettings
 
-from .constants import EVENT_SETTING_FIELDS
+from .constants import EVENT_SETTING_FIELDS, EventType
 from .settings import get_notification_settings
 
 logger = logging.getLogger(__name__)
@@ -35,6 +35,23 @@ def in_quiet_hours(settings):
     if start < end:
         return start <= now_local < end
     return now_local >= start or now_local < end
+
+
+def _digest_bucket_from_mode(digest_mode: str) -> str | None:
+    if digest_mode == UserNotificationSettings.DigestMode.HOURLY:
+        return NotificationDigestItem.DigestBucket.HOURLY
+    if digest_mode == UserNotificationSettings.DigestMode.DAILY:
+        return NotificationDigestItem.DigestBucket.DAILY
+    return None
+
+
+def _scheduled_for_for_bucket(*, bucket: str) -> datetime:
+    tz = ZoneInfo('Europe/Zurich')
+    now_local = timezone.now().astimezone(tz)
+    if bucket == NotificationDigestItem.DigestBucket.HOURLY:
+        return now_local.replace(minute=0, second=0, microsecond=0)
+    # daily
+    return now_local.replace(hour=0, minute=0, second=0, microsecond=0)
 
 
 def _claim_delivery(event_key, recipient, channel):
@@ -122,6 +139,9 @@ def dispatch_event(
             body=body,
             url=url,
         )
+        digest_bucket = None
+        if event_type != EventType.DEADLINE_REMINDER:
+            digest_bucket = _digest_bucket_from_mode(settings.digest_mode)
 
         if (
             settings.email_enabled
@@ -134,6 +154,17 @@ def dispatch_event(
                     recipient,
                     NotificationDeliveryLog.Channel.EMAIL,
                     reason='In quiet hours',
+                )
+            elif digest_bucket:
+                _queue_digest_email(
+                    dedupe_key=dedupe_key,
+                    recipient=recipient,
+                    event_type=event_type,
+                    title=title,
+                    email_subject=email_subject,
+                    email_body=email_body,
+                    url=url,
+                    digest_bucket=digest_bucket,
                 )
             else:
                 _dispatch_email(
@@ -165,6 +196,16 @@ def dispatch_event(
                     NotificationDeliveryLog.Channel.SLACK,
                     reason='In quiet hours',
                 )
+            elif digest_bucket:
+                _queue_digest_slack(
+                    dedupe_key=dedupe_key,
+                    recipient=recipient,
+                    event_type=event_type,
+                    title=title,
+                    slack_text=slack_text,
+                    url=url,
+                    digest_bucket=digest_bucket,
+                )
             else:
                 _dispatch_slack(
                     dedupe_key=dedupe_key,
@@ -185,6 +226,61 @@ def dispatch_event(
                 NotificationDeliveryLog.Channel.SLACK,
                 reason='Slack not enabled for user',
             )
+
+
+def _queue_digest_email(*, dedupe_key, recipient, event_type, title, email_subject, email_body, url, digest_bucket: str) -> None:
+    claimed, _log = _claim_delivery(dedupe_key, recipient, NotificationDeliveryLog.Channel.EMAIL)
+    if not claimed:
+        return
+
+    NotificationDigestItem.objects.create(
+        recipient=recipient,
+        channel=NotificationDigestItem.Channel.EMAIL,
+        digest_bucket=digest_bucket,
+        event_key=dedupe_key,
+        event_type=event_type,
+        title=title,
+        email_subject=email_subject or title,
+        email_body=email_body or '',
+        url=url or '',
+        scheduled_for=_scheduled_for_for_bucket(bucket=digest_bucket),
+        status=NotificationDigestItem.Status.QUEUED,
+    )
+
+
+def _queue_digest_slack(*, dedupe_key, recipient, event_type, title, slack_text, url, digest_bucket: str) -> None:
+    from accounts.models import SlackIntegration
+
+    try:
+        integration = recipient.slack_integration
+    except SlackIntegration.DoesNotExist:
+        integration = None
+
+    if not integration or not integration.is_connected:
+        _log_skipped_channel(
+            dedupe_key,
+            recipient,
+            NotificationDeliveryLog.Channel.SLACK,
+            reason='Slack not connected',
+        )
+        return
+
+    claimed, _log = _claim_delivery(dedupe_key, recipient, NotificationDeliveryLog.Channel.SLACK)
+    if not claimed:
+        return
+
+    NotificationDigestItem.objects.create(
+        recipient=recipient,
+        channel=NotificationDigestItem.Channel.SLACK,
+        digest_bucket=digest_bucket,
+        event_key=dedupe_key,
+        event_type=event_type,
+        title=title,
+        slack_text=slack_text or '',
+        url=url or '',
+        scheduled_for=_scheduled_for_for_bucket(bucket=digest_bucket),
+        status=NotificationDigestItem.Status.QUEUED,
+    )
 
 
 def _dispatch_in_app(*, dedupe_key, recipient, title, body, url):

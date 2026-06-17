@@ -224,6 +224,14 @@ CELERY_BEAT_SCHEDULE = {
         # Every Sunday at 02:00 Europe/Zurich
         'schedule': crontab(hour=2, minute=0, day_of_week='sunday'),
     },
+    'hourly-notification-digests': {
+        'task': 'accounts.tasks.dispatch_hourly_notification_digests_task',
+        'schedule': crontab(minute=0),
+    },
+    'daily-notification-digests': {
+        'task': 'accounts.tasks.dispatch_daily_notification_digests_task',
+        'schedule': crontab(hour=0, minute=0),
+    },
 }
 
 # --- Database backups ---

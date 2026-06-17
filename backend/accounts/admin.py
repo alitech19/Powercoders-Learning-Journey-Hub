@@ -2,7 +2,15 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group as AuthGroup
 
-from .models import AuditLog, Notification, NotificationDeliveryLog, SlackIntegration, User, UserNotificationSettings
+from .models import (
+    AuditLog,
+    Notification,
+    NotificationDeliveryLog,
+    NotificationDigestItem,
+    SlackIntegration,
+    User,
+    UserNotificationSettings,
+)
 
 try:
     admin.site.unregister(AuthGroup)
@@ -116,6 +124,30 @@ class NotificationDeliveryLogAdmin(admin.ModelAdmin):
         'provider_message_id',
         'error_message',
         'created_at',
+        'sent_at',
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(NotificationDigestItem)
+class NotificationDigestItemAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'recipient', 'channel', 'digest_bucket', 'status', 'event_key')
+    list_filter = ('channel', 'digest_bucket', 'status')
+    search_fields = ('event_key', 'recipient__email', 'recipient__display_name')
+    readonly_fields = (
+        'event_key',
+        'recipient',
+        'channel',
+        'digest_bucket',
+        'scheduled_for',
+        'created_at',
+        'provider_message_id',
+        'error_message',
         'sent_at',
     )
 
