@@ -116,7 +116,9 @@
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
       <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Group chat → Slack channel</h2>
       <p class="text-sm text-gray-500 dark:text-gray-400">
-        One-way mirror: new Group Space messages post to mapped Slack channels. Map each cohort group or custom group space on its admin page.
+        Two-way sync between Group Space chat and mapped Slack channels: new messages, edits, deletes, and thread replies.
+        Map each cohort group or custom group space on its admin page. Requires bot token and Events API signing secret below.
+        When sync is on for a space, personal Slack mention/all-message DMs for that chat are skipped (in-app and email still apply).
       </p>
       <label class="flex items-center gap-3 cursor-pointer">
         {{ form.chat_sync_enabled }}
@@ -128,7 +130,7 @@
         {% if has_bot_token %}
         <p class="text-xs text-gray-400 mt-1">Current: {{ masked_bot_token }}</p>
         {% endif %}
-        <p class="text-xs text-gray-400 mt-1">Install a Slack app with <code class="text-xs">chat:write</code> bot scope; invite the bot to each mapped channel.</p>
+        <p class="text-xs text-gray-400 mt-1">Install a Slack app with <code class="text-xs">chat:write</code> bot scope; invite the bot to each mapped channel. PowerHUB edits and deletes update the channel message.</p>
       </div>
       <div>
         <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">Signing secret (Events API)</label>
@@ -136,7 +138,7 @@
         {% if has_signing_secret %}
         <p class="text-xs text-gray-400 mt-1">Current: {{ masked_signing_secret }}</p>
         {% endif %}
-        <p class="text-xs text-gray-400 mt-1">Required for Slack → PowerHUB messages. Subscribe to <code class="text-xs">message.channels</code> (or groups/IM as needed).</p>
+        <p class="text-xs text-gray-400 mt-1">Required for Slack → PowerHUB messages (and inbound edits/deletes). Subscribe to <code class="text-xs">message.channels</code> (or groups/IM as needed).</p>
         <p class="text-xs text-gray-500 mt-2">Request URL: <code class="text-xs break-all">{{ events_url }}</code></p>
       </div>
     </div>

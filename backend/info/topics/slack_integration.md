@@ -121,7 +121,7 @@ This is **comparable risk to Google Drive credentials in File storage**: slightl
 
 <!-- role: admin -->
 
-Mirror **Group Space** messages to Slack channels (one-way: PowerHUB → Slack). Personal DMs (mentions / all messages) are separate — users control those on Notification settings.
+Mirror **Group Space** chat with mapped Slack channels (**two-way** when bot token and Events API are configured). Personal DMs (mentions / all messages) follow Notification settings unless channel sync is on for that space.
 
 ### 1. Slack app (bot)
 
@@ -133,7 +133,7 @@ Mirror **Group Space** messages to Slack channels (one-way: PowerHUB → Slack).
 ### 2. PowerHUB settings
 
 1. **Administration → Slack integration**.
-2. Enable **Group chat → Slack channel** and paste the **bot token** → **Save**.
+2. Enable **Group chat → Slack channel**, paste the **bot token**, and the **signing secret** (Events API) → **Save**.
 3. Optional: **Send test bot message** with a channel ID (`C…`).
 
 ### 3. Map each chat
@@ -155,7 +155,7 @@ Enter the Slack **channel ID** (right-click channel → View channel details →
 - When channel sync is **off**, personal mention / all-message Slack DMs work as before (Notification settings).
 - **Two-way sync**: messages posted in a mapped Slack channel appear in PowerHUB when the author has connected Slack (Profile → Notification settings) with the same Slack user id.
 
-### 4. Two-way sync (Slack → PowerHUB)
+### 4. Events API (Slack → PowerHUB)
 
 1. In the Slack app: **Event Subscriptions** → enable → Request URL = the value shown on **Slack integration** (`…/accounts/slack/events/`).
 2. Subscribe to bot events: **`message.channels`** (and `message.groups` / `message.im` if you use those channel types). Edits and deletes require the same `message.*` events — Slack delivers `message_changed` and `message_deleted` automatically.

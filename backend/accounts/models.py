@@ -376,7 +376,7 @@ class SlackWorkspaceConfig(models.Model):
     webhook_url_encrypted = models.TextField(blank=True)
     chat_sync_enabled = models.BooleanField(
         default=False,
-        help_text='Mirror Group Space chat posts to mapped Slack channels (bot token).',
+        help_text='Two-way sync between Group Space chat and mapped Slack channels (bot token + Events API).',
     )
     bot_token_encrypted = models.TextField(blank=True)
     signing_secret_encrypted = models.TextField(blank=True)
