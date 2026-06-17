@@ -42,7 +42,7 @@ Plan: **[SLACK_INTEGRATION_PLAN.md](SLACK_INTEGRATION_PLAN.md)**
 | Digest mode (hourly / daily email + Slack) | Done |
 | Global reminder admin UI (deadline + reflection digest schedule) | Done |
 | Group chat in-app / email / Slack (mentions + all messages) | Done |
-| Group chat → Slack channel sync (one-way) | Planned |
+| Group chat → Slack channel sync (one-way) | Done |
 | Group chat ↔ Slack (two-way) + thread → flat reply links | Planned |
 
 ---

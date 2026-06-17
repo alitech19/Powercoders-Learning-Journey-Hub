@@ -61,6 +61,10 @@ def parse_mentioned_users(text, candidates):
     return mentioned
 
 
+def post_preview(post: Post) -> str:
+    return _post_preview(post)
+
+
 def _post_preview(post: Post) -> str:
     if post.body.strip():
         return post.body.strip()[:500]

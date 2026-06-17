@@ -387,11 +387,18 @@ def group_create(request, cohort_pk):
 @admin_required
 def group_edit(request, pk):
     group = get_object_or_404(Group.objects.select_related('cohort'), pk=pk)
+    from group_space.services import get_group_space_for_group
+    from group_space.slack_forms import apply_slack_mapping_from_request, slack_mapping_context
+
+    group_space = get_group_space_for_group(group)
     if request.method == 'POST':
         form = GroupForm(request.POST, instance=group)
         if form.is_valid():
             form.save()
             _save_group_teachers(group, form.cleaned_data.get('teachers', []))
+            slack_error = apply_slack_mapping_from_request(request, group_space=group_space)
+            if slack_error:
+                messages.warning(request, f'Slack mapping not saved: {slack_error}')
             messages.success(request, f'Group "{group.name}" updated.')
             return redirect('accounts:cohort_list')
     else:
@@ -399,7 +406,13 @@ def group_edit(request, pk):
     return render(
         request,
         'accounts/group_form.html',
-        {'form': form, 'group': group, 'cohort': group.cohort, 'title': 'Edit Group'},
+        {
+            'form': form,
+            'group': group,
+            'cohort': group.cohort,
+            'title': 'Edit Group',
+            **slack_mapping_context(group_space=group_space),
+        },
     )
 
 

@@ -25,6 +25,12 @@
         </dd>
       </div>
       <div>
+        <dt class="text-gray-400">Group chat sync (bot)</dt>
+        <dd class="font-medium {% if chat_sync_ready %}text-green-600 dark:text-green-400{% else %}text-gray-500{% endif %}">
+          {% if chat_sync_ready %}Ready{% else %}Not configured{% endif %}
+        </dd>
+      </div>
+      <div>
         <dt class="text-gray-400">Last webhook test</dt>
         <dd class="text-[#343534] dark:text-gray-200 font-medium">
           {% if config.last_webhook_test_at %}{{ config.last_webhook_test_at|date:"d M Y H:i" }}{% else %}—{% endif %}
@@ -34,6 +40,18 @@
         <dt class="text-gray-400">Webhook test result</dt>
         <dd class="font-medium {% if config.last_webhook_ok %}text-green-600 dark:text-green-400{% elif config.last_webhook_ok == False %}text-red-600 dark:text-red-400{% else %}text-gray-500{% endif %}">
           {% if config.last_webhook_ok %}OK{% elif config.last_webhook_ok == False %}Failed{% else %}Not tested{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-400">Last bot test</dt>
+        <dd class="text-[#343534] dark:text-gray-200 font-medium">
+          {% if config.last_bot_test_at %}{{ config.last_bot_test_at|date:"d M Y H:i" }}{% else %}—{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-400">Bot test result</dt>
+        <dd class="font-medium {% if config.last_bot_ok %}text-green-600 dark:text-green-400{% elif config.last_bot_ok == False %}text-red-600 dark:text-red-400{% else %}text-gray-500{% endif %}">
+          {% if config.last_bot_ok %}OK{% elif config.last_bot_ok == False %}Failed{% else %}Not tested{% endif %}
         </dd>
       </div>
       <div class="sm:col-span-2">
@@ -95,6 +113,25 @@
       </div>
     </div>
 
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Group chat → Slack channel</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        One-way mirror: new Group Space messages post to mapped Slack channels. Map each cohort group or custom group space on its admin page.
+      </p>
+      <label class="flex items-center gap-3 cursor-pointer">
+        {{ form.chat_sync_enabled }}
+        <span class="text-sm font-medium text-[#343534] dark:text-gray-200">Enable chat channel sync</span>
+      </label>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">Bot token</label>
+        {{ form.bot_token }}
+        {% if has_bot_token %}
+        <p class="text-xs text-gray-400 mt-1">Current: {{ masked_bot_token }}</p>
+        {% endif %}
+        <p class="text-xs text-gray-400 mt-1">Install a Slack app with <code class="text-xs">chat:write</code> bot scope; invite the bot to each mapped channel.</p>
+      </div>
+    </div>
+
     <div class="flex flex-wrap gap-3">
       <button type="submit"
               class="px-5 py-2.5 rounded-lg bg-[#B23149] hover:bg-[#9a2a3f] text-white text-sm font-semibold transition-colors">
@@ -116,6 +153,15 @@
       <button type="submit"
               class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:border-[#B23149]/40">
         Send test webhook message
+      </button>
+    </form>
+    <form method="post" action="{% url 'accounts:slack_test_bot' %}" class="flex flex-wrap gap-2 items-center">
+      {% csrf_token %}
+      <input type="text" name="test_channel_id" placeholder="C0123456789"
+             class="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-mono w-40">
+      <button type="submit"
+              class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:border-[#B23149]/40">
+        Send test bot message
       </button>
     </form>
   </div>

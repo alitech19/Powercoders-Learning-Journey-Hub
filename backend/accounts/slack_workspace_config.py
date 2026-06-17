@@ -55,3 +55,15 @@ def staff_webhook_configured() -> bool:
 def resolve_webhook_url(config: SlackWorkspaceConfig | None = None) -> str:
     config = config or get_slack_workspace_config()
     return config.get_webhook_url()
+
+
+def resolve_bot_token(config: SlackWorkspaceConfig | None = None) -> str:
+    config = config or get_slack_workspace_config()
+    return config.get_bot_token()
+
+
+def chat_sync_configured() -> bool:
+    config = get_slack_workspace_config()
+    if not config.chat_sync_enabled:
+        return False
+    return bool(resolve_bot_token(config))

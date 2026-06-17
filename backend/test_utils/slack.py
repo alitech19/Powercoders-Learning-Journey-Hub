@@ -12,6 +12,8 @@ def clear_slack_workspace_config() -> None:
     config.oauth_redirect_uri = ''
     config.webhook_enabled = False
     config.webhook_url_encrypted = ''
+    config.chat_sync_enabled = False
+    config.bot_token_encrypted = ''
     config.save()
     invalidate_slack_workspace_config()
 
@@ -42,6 +44,19 @@ def configure_slack_webhook(
     config = SlackWorkspaceConfig.get()
     config.webhook_enabled = enabled
     config.set_webhook_url(url)
+    config.save()
+    invalidate_slack_workspace_config()
+    return config
+
+
+def configure_slack_bot(
+    *,
+    token: str = 'xoxb-test-token',
+    enabled: bool = True,
+) -> SlackWorkspaceConfig:
+    config = SlackWorkspaceConfig.get()
+    config.chat_sync_enabled = enabled
+    config.set_bot_token(token)
     config.save()
     invalidate_slack_workspace_config()
     return config

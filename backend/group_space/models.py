@@ -84,7 +84,52 @@ class ProjectSpaceMembership(models.Model):
         return f'{self.user} in {self.project_space}'
 
 
+class SpaceSlackChannel(models.Model):
+    """Maps a cohort group or custom group space chat to a Slack channel."""
+
+    group_space = models.OneToOneField(
+        GroupSpace,
+        on_delete=models.CASCADE,
+        related_name='slack_channel',
+        null=True,
+        blank=True,
+    )
+    project_space = models.OneToOneField(
+        ProjectSpace,
+        on_delete=models.CASCADE,
+        related_name='slack_channel',
+        null=True,
+        blank=True,
+    )
+    slack_channel_id = models.CharField(
+        max_length=32,
+        help_text='Slack channel ID (e.g. C0123456789). The bot must be invited to the channel.',
+    )
+    is_enabled = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(group_space__isnull=False, project_space__isnull=True)
+                    | Q(group_space__isnull=True, project_space__isnull=False)
+                ),
+                name='group_space_slack_exactly_one_parent',
+            ),
+        ]
+
+    def __str__(self):
+        parent = self.group_space or self.project_space
+        return f'Slack {self.slack_channel_id} — {parent}'
+
+
 class Post(models.Model):
+    class SourceSystem(models.TextChoices):
+        POWERHUB = 'powerhub', 'PowerHUB'
+        SLACK = 'slack', 'Slack'
+
     class SnapshotKind(models.TextChoices):
         JOURNAL = 'journal', 'Journal entry'
         HABIT = 'habit', 'Habit'
@@ -161,6 +206,13 @@ class Post(models.Model):
     )
     snapshot_html = models.TextField(blank=True)
     snapshot_meta = models.JSONField(default=dict, blank=True)
+    source_system = models.CharField(
+        max_length=20,
+        choices=SourceSystem.choices,
+        default=SourceSystem.POWERHUB,
+    )
+    slack_channel_id = models.CharField(max_length=32, blank=True)
+    slack_ts = models.CharField(max_length=32, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -171,6 +223,7 @@ class Post(models.Model):
             models.Index(fields=['group_space', 'pinned']),
             models.Index(fields=['project_space', 'created_at']),
             models.Index(fields=['project_space', 'pinned']),
+            models.Index(fields=['slack_channel_id', 'slack_ts']),
         ]
         constraints = [
             models.CheckConstraint(

@@ -64,6 +64,11 @@ urlpatterns = [
         name='slack_validate_oauth',
     ),
     path(
+        'slack/settings/test-bot/',
+        slack_settings_views.slack_test_bot,
+        name='slack_test_bot',
+    ),
+    path(
         'notifications/<int:pk>/read/',
         privacy_views.notification_mark_read,
         name='notification_read',

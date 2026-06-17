@@ -374,8 +374,15 @@ class SlackWorkspaceConfig(models.Model):
         help_text='Post staff-channel digests (e.g. missing reflections) via incoming webhook.',
     )
     webhook_url_encrypted = models.TextField(blank=True)
+    chat_sync_enabled = models.BooleanField(
+        default=False,
+        help_text='Mirror Group Space chat posts to mapped Slack channels (bot token).',
+    )
+    bot_token_encrypted = models.TextField(blank=True)
     last_webhook_test_at = models.DateTimeField(null=True, blank=True)
     last_webhook_ok = models.BooleanField(null=True, blank=True)
+    last_bot_test_at = models.DateTimeField(null=True, blank=True)
+    last_bot_ok = models.BooleanField(null=True, blank=True)
     last_error = models.TextField(blank=True)
     updated_at = models.DateTimeField(auto_now=True)
     updated_by = models.ForeignKey(
@@ -415,6 +422,17 @@ class SlackWorkspaceConfig(models.Model):
 
     def get_webhook_url(self) -> str:
         return decrypt_secret(self.webhook_url_encrypted)
+
+    def set_bot_token(self, token: str) -> None:
+        token = (token or '').strip()
+        self.bot_token_encrypted = encrypt_secret(token) if token else ''
+
+    def get_bot_token(self) -> str:
+        return decrypt_secret(self.bot_token_encrypted)
+
+    @property
+    def masked_bot_token(self) -> str:
+        return mask_secret(self.get_bot_token())
 
     @property
     def masked_oauth_client_secret(self) -> str:

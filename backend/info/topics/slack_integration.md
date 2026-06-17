@@ -117,6 +117,41 @@ This is **comparable risk to Google Drive credentials in File storage**: slightl
 | DMs not arriving | User connected Slack, master Slack on, event row enabled, not in quiet hours; check digest mode |
 | Secrets after deploy | Re-enter if `SECRET_KEY` changed |
 
+## Group chat channel sync {#chat-channel-sync}
+
+<!-- role: admin -->
+
+Mirror **Group Space** messages to Slack channels (one-way: PowerHUB → Slack). Personal DMs (mentions / all messages) are separate — users control those on Notification settings.
+
+### 1. Slack app (bot)
+
+1. Use the same Slack app or create one for PowerHUB.
+2. **OAuth & Permissions → Bot Token Scopes**: add `chat:write`.
+3. **Install to workspace** and copy the **Bot User OAuth Token** (`xoxb-…`).
+4. Invite the bot to each channel you map (`/invite @YourBot`).
+
+### 2. PowerHUB settings
+
+1. **Administration → Slack integration**.
+2. Enable **Group chat → Slack channel** and paste the **bot token** → **Save**.
+3. Optional: **Send test bot message** with a channel ID (`C…`).
+
+### 3. Map each chat
+
+| Space type | Where to map |
+|------------|----------------|
+| Cohort group | **Administration → Cohorts & Groups** → edit group → Slack channel sync |
+| Custom group space | **Administration → Group spaces** → space detail → Slack channel sync |
+
+Enter the Slack **channel ID** (right-click channel → View channel details → copy ID at bottom).
+
+### Behaviour
+
+- New posts (text, links, snapshots) are queued to Slack asynchronously.
+- Message includes author, space name, preview, and link back to PowerHUB.
+- Does **not** replace personal mention DMs — those still follow notification settings.
+- **Two-way sync** (Slack → PowerHUB) is not implemented yet.
+
 ## Field reference {#field-reference}
 
 <!-- role: admin -->
@@ -129,5 +164,7 @@ This is **comparable risk to Google Drive credentials in File storage**: slightl
 | OAuth redirect URI | `{SITE_URL}/accounts/slack/callback/` |
 | Enable staff webhook | Your policy |
 | Webhook URL | Slack app → Incoming Webhooks → channel URL |
+| Enable chat channel sync | Your policy — requires bot token |
+| Bot token | Slack app → OAuth & Permissions → Bot User OAuth Token (`xoxb-…`) |
 
 `SITE_URL` must match how users reach PowerHUB (see `.env` / Render settings).

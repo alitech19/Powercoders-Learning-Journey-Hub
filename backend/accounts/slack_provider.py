@@ -139,6 +139,14 @@ def send_user_dm(*, access_token: str, slack_user_id: str, text: str) -> str:
     return posted.get('ts', '')
 
 
+def post_channel_message(*, token: str, channel_id: str, text: str, thread_ts: str = '') -> str:
+    payload = {'channel': channel_id, 'text': text}
+    if thread_ts:
+        payload['thread_ts'] = thread_ts
+    posted = _api_post('chat.postMessage', token=token, payload=payload)
+    return posted.get('ts', '')
+
+
 def revoke_access_token(token: str) -> None:
     if not token:
         return
@@ -167,5 +175,6 @@ __all__ = [
     'exchange_oauth_code',
     'revoke_access_token',
     'send_user_dm',
+    'post_channel_message',
     'slack_oauth_configured',
 ]

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Comment, GroupSpace, Post, ProjectSpace, ProjectSpaceMembership
+from .models import Comment, GroupSpace, Post, ProjectSpace, ProjectSpaceMembership, SpaceSlackChannel
 
 
 class ProjectSpaceMembershipInline(admin.TabularInline):
@@ -25,6 +25,13 @@ class ProjectSpaceAdmin(admin.ModelAdmin):
     @admin.action(description='Unarchive selected project spaces')
     def mark_unarchived(self, request, queryset):
         queryset.update(is_archived=False)
+
+
+@admin.register(SpaceSlackChannel)
+class SpaceSlackChannelAdmin(admin.ModelAdmin):
+    list_display = ('slack_channel_id', 'group_space', 'project_space', 'is_enabled', 'updated_at')
+    list_filter = ('is_enabled',)
+    raw_id_fields = ('group_space', 'project_space')
 
 
 @admin.register(GroupSpace)

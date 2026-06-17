@@ -9,6 +9,7 @@ from accounts.decorators import admin_required
 from .models import ProjectSpace, ProjectSpaceMembership
 from .permissions import can_manage_project_space, get_listable_project_spaces
 from .project_forms import ProjectMemberAddForm, ProjectSpaceForm
+from .slack_forms import apply_slack_mapping_from_request, slack_mapping_context
 
 
 @admin_required
@@ -47,6 +48,9 @@ def project_detail(request, pk):
         form = ProjectSpaceForm(request.POST, instance=project)
         if form.is_valid():
             form.save()
+            slack_error = apply_slack_mapping_from_request(request, project_space=project)
+            if slack_error:
+                messages.warning(request, f'Slack mapping not saved: {slack_error}')
             messages.success(request, 'Group space updated.')
             return redirect('group_space:project_detail', pk=project.pk)
     else:
@@ -60,6 +64,7 @@ def project_detail(request, pk):
         'members': members,
         'add_form': add_form,
         'feed_url': f"{reverse('group_space:feed')}?kind=project&space={project.pk}",
+        **slack_mapping_context(project_space=project),
     })
 
 

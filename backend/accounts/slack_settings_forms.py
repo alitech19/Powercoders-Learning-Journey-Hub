@@ -26,6 +26,18 @@ class SlackWorkspaceSettingsForm(forms.ModelForm):
         ),
         label='Incoming webhook URL',
     )
+    bot_token = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(
+            render_value=False,
+            attrs={
+                'class': 'w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm font-mono',
+                'placeholder': 'xoxb-… (leave blank to keep current)',
+                'autocomplete': 'new-password',
+            },
+        ),
+        label='Bot token',
+    )
 
     class Meta:
         model = SlackWorkspaceConfig
@@ -34,12 +46,16 @@ class SlackWorkspaceSettingsForm(forms.ModelForm):
             'oauth_client_id',
             'oauth_redirect_uri',
             'webhook_enabled',
+            'chat_sync_enabled',
         )
         widgets = {
             'oauth_enabled': forms.CheckboxInput(
                 attrs={'class': 'rounded border-gray-300 text-[#B23149]'},
             ),
             'webhook_enabled': forms.CheckboxInput(
+                attrs={'class': 'rounded border-gray-300 text-[#B23149]'},
+            ),
+            'chat_sync_enabled': forms.CheckboxInput(
                 attrs={'class': 'rounded border-gray-300 text-[#B23149]'},
             ),
             'oauth_client_id': forms.TextInput(
@@ -61,3 +77,6 @@ class SlackWorkspaceSettingsForm(forms.ModelForm):
         webhook = (self.cleaned_data.get('webhook_url') or '').strip()
         if webhook:
             instance.set_webhook_url(webhook)
+        bot = (self.cleaned_data.get('bot_token') or '').strip()
+        if bot:
+            instance.set_bot_token(bot)

@@ -7,11 +7,13 @@ from django.views.decorators.http import require_POST
 from accounts.decorators import admin_required
 from accounts.models import SlackWorkspaceConfig
 from accounts.slack import send_slack_message
-from accounts.slack_provider import default_redirect_uri, slack_oauth_configured
+from accounts.slack_provider import default_redirect_uri, post_channel_message, slack_oauth_configured, SlackApiError
 from accounts.slack_settings_forms import SlackWorkspaceSettingsForm
 from accounts.slack_workspace_config import (
+    chat_sync_configured,
     get_slack_workspace_config,
     invalidate_slack_workspace_config,
+    resolve_bot_token,
     resolve_oauth_client_id,
     resolve_oauth_redirect_uri,
     staff_webhook_configured,
@@ -51,10 +53,13 @@ def slack_settings(request):
             'suggested_redirect_uri': _suggested_redirect_uri(request),
             'has_oauth_secret': bool(config.oauth_client_secret_encrypted),
             'has_webhook_url': bool(config.webhook_url_encrypted),
+            'has_bot_token': bool(config.bot_token_encrypted),
             'masked_oauth_secret': config.masked_oauth_client_secret,
             'masked_webhook_url': config.masked_webhook_url,
+            'masked_bot_token': config.masked_bot_token,
             'oauth_ready': slack_oauth_configured(),
             'webhook_ready': staff_webhook_configured(),
+            'chat_sync_ready': chat_sync_configured(),
             'oauth_client_id_set': bool(resolve_oauth_client_id(config)),
             'callback_path': reverse('accounts:slack_callback'),
         },
@@ -108,4 +113,37 @@ def slack_validate_oauth(request):
         )
     except ValueError as exc:
         messages.error(request, str(exc))
+    return redirect('accounts:slack_settings')
+
+
+@admin_required
+@require_POST
+def slack_test_bot(request):
+    config = get_slack_workspace_config()
+    channel_id = (request.POST.get('test_channel_id') or '').strip()
+    if not chat_sync_configured():
+        messages.error(request, 'Enable chat sync and save a bot token first.')
+        return redirect('accounts:slack_settings')
+    if not channel_id:
+        messages.error(request, 'Enter a Slack channel ID to test.')
+        return redirect('accounts:slack_settings')
+
+    token = resolve_bot_token(config)
+    try:
+        post_channel_message(
+            token=token,
+            channel_id=channel_id,
+            text='PowerHUB test — group chat sync bot is working.',
+        )
+        config.last_bot_test_at = timezone.now()
+        config.last_bot_ok = True
+        config.last_error = ''
+        config.save(update_fields=['last_bot_test_at', 'last_bot_ok', 'last_error', 'updated_at'])
+        messages.success(request, f'Test message posted to channel {channel_id}.')
+    except SlackApiError as exc:
+        config.last_bot_test_at = timezone.now()
+        config.last_bot_ok = False
+        config.last_error = str(exc)[:2000]
+        config.save(update_fields=['last_bot_test_at', 'last_bot_ok', 'last_error', 'updated_at'])
+        messages.error(request, f'Bot test failed: {exc}')
     return redirect('accounts:slack_settings')
