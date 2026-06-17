@@ -235,7 +235,7 @@ Create one **Environment Group** in Render and attach it to all three services. 
 
 3. Log in at `/account/login/`, complete 2FA setup for staff accounts.
 4. Create cohorts/groups/users via **Admin** or `/accounts/users/` (admin).
-5. **Notifications:** open **Administration → Notifications** and confirm deadline / reflection settings. Check **Django admin → Periodic tasks** for `Hourly deadline reminders`, `Weekly missing-reflections digest`, and digest dispatch tasks ([plans/TODO.md](plans/TODO.md)).
+5. **Notifications:** open **Administration → Notifications** and confirm deadline / reflection settings. Check **Django admin → Periodic tasks** for digest and reminder tasks ([SLACK_SETUP.md](SLACK_SETUP.md#notifications-and-celery-beat)).
 6. Smoke-test: journal, reflection, group post with `@mention`, profile → export data, notifications bell.
 
 Share the URL and test accounts with testers via a **private** channel (not in the repo).

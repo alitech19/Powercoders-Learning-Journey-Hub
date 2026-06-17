@@ -1,6 +1,6 @@
 PowerHUB uses Slack in two ways: **personal DMs** (each user connects on Notification settings) and a **staff channel webhook** (operational digests).
 
-Credentials are stored **encrypted in the database** (same approach as File storage). Configure everything on **Administration → Slack integration** — no `.env` variables are required. Use the **ⓘ** button on that page for this guide.
+Credentials are stored **encrypted in the database** (same approach as File storage). Configure everything on **Administration → Slack integration** — no `.env` variables are required. Operational setup: [SLACK_SETUP.md](../../../docs/SLACK_SETUP.md). Use the **ⓘ** button on that page for in-app help.
 
 ## Overview {#overview}
 

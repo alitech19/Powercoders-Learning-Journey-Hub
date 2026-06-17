@@ -164,4 +164,4 @@ _(Findings table)_
 - [ ] All Critical resolved
 - [ ] All High have fix plan
 - [ ] Teaching team reviewed
-- [ ] Next steps in [plans/TODO.md](plans/TODO.md) or issue tracker
+- [ ] Next steps in issue tracker or [USABILITY_TESTING.md](USABILITY_TESTING.md) notes
