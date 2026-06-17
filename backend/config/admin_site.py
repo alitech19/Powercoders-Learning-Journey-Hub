@@ -39,6 +39,29 @@ APP_SECTIONS: dict[str, str] = {
 # than their Django app.
 MODEL_SECTION_OVERRIDES: dict[str, str] = {
     'accounts.auditlog': 'Logs / Operations',
+    'group_space.spaceslackchannel': 'Core Platform',
+}
+
+# Group models under a shared caption within a section (e.g. Slack, Notifications).
+MODEL_GROUP_OVERRIDES: dict[str, str] = {
+    'google_storage.googleworkspacestorageconfig': 'Google Drive',
+    'google_storage.googleaccountconnection': 'Google Drive',
+    'google_storage.googledrivefolder': 'Google Drive',
+    'google_storage.driveuploadlog': 'Google Drive',
+    'accounts.notification': 'Notifications',
+    'accounts.notificationdeliverylog': 'Notifications',
+    'accounts.notificationdigestitem': 'Notifications',
+    'accounts.usernotificationsettings': 'Notifications',
+    'accounts.slackintegration': 'Slack',
+    'accounts.slackworkspaceconfig': 'Slack',
+    'group_space.spaceslackchannel': 'Slack',
+}
+
+# Sort integration groups before the rest of Core Platform (Accounts, Cohorts, …).
+GROUP_SORT_ORDER: dict[str, int] = {
+    'Google Drive': 50,
+    'Notifications': 60,
+    'Slack': 70,
 }
 
 # App labels in display order (logs → core → toggles → learning apps).
@@ -90,6 +113,7 @@ class PowerHubAdminSite(AdminSite):
         context = super().each_context(request)
         app_list = self.get_app_list(request)
         app_order = {label: index for index, label in enumerate(ADMIN_APP_ORDER)}
+        section_order = {label: index for index, label in enumerate(SECTION_ORDER)}
         grouped: dict[str, list[dict]] = {section: [] for section in SECTION_ORDER}
         split_apps: dict[tuple[str, str], dict] = {}
 
@@ -99,10 +123,11 @@ class PowerHubAdminSite(AdminSite):
             for model in app.get('models', []):
                 model_key = f"{app_label}.{model.get('object_name', '').lower()}"
                 section = MODEL_SECTION_OVERRIDES.get(model_key, default_section)
-                split_key = (section, app_label)
+                group_name = MODEL_GROUP_OVERRIDES.get(model_key, app['name'])
+                split_key = (section, group_name)
                 if split_key not in split_apps:
                     split_apps[split_key] = {
-                        'name': app['name'],
+                        'name': group_name,
                         'app_label': app_label,
                         'app_url': app['app_url'],
                         'has_module_perms': app['has_module_perms'],
@@ -110,13 +135,15 @@ class PowerHubAdminSite(AdminSite):
                     }
                 split_apps[split_key]['models'].append(model)
 
-        for (section, _), app in sorted(
-            split_apps.items(),
-            key=lambda item: (
-                app_order.get(item[0][1], len(ADMIN_APP_ORDER)),
-                item[1]['name'].lower(),
-            ),
-        ):
+        def _group_sort_key(item: tuple[tuple[str, str], dict]) -> tuple:
+            (section, group_name), app = item
+            section_idx = section_order.get(section, len(SECTION_ORDER))
+            if group_name in GROUP_SORT_ORDER:
+                return (section_idx, GROUP_SORT_ORDER[group_name], group_name.lower())
+            app_idx = app_order.get(app['app_label'], len(ADMIN_APP_ORDER))
+            return (section_idx, 200 + app_idx, group_name.lower())
+
+        for (section, _), app in sorted(split_apps.items(), key=_group_sort_key):
             grouped.setdefault(section, []).append(app)
 
         context['powerhub_sections'] = [

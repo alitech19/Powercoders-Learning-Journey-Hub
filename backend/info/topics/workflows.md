@@ -4,22 +4,41 @@ Shows workflows assigned to your cohort or group. **Shared** workflows have one 
 
 ## Workflow detail {#detail}
 
-Steps checklist, enrollments (staff), and progress. Complete steps in order when the workflow is configured that way.
+Steps checklist, enrollments (staff), progress, and optional **Open materials** link when staff attached a Resources theme. Staff see a **Scheduled publication** banner when a draft is set to go public automatically.
+
+Complete steps in order when the workflow is configured that way.
 
 ## Create workflow {#form-create}
 
-Staff only. Two parts on one page (when creating) or split when editing.
+Staff only. One page when creating; **Save details** and **Assignment** are separate forms when editing.
 
-### Details
+### Field order (create)
 
-**Title (required)** — programme name shown in lists.
+1. **Title** and **Description**
+2. **Materials (Resources)** — optional
+3. **Assignment** — progress mode, cohort/group, students
+4. **Steps** — at least one step on create (you can add more later on the detail page)
+5. **Visibility** — toggle buttons at the bottom
+6. **Scheduled publication** — appears when **Private** is selected
+7. **Create workflow**
 
-**Description** — instructions students read on the workflow page.
+### Title (required)
 
-**Visibility**
+Programme name shown in lists.
 
-- **Public** — students in the assignment can see the workflow (after enrollment).
-- **Private** — draft hidden from students until you set Public.
+### Description
+
+Instructions students read on the workflow page.
+
+### Materials (Resources)
+
+Optional **Themes** board linked to this workflow:
+
+- **None** — no materials link on the detail page.
+- **Link existing theme** — pick a thematic container from the picker (staff-created themes only).
+- **Create new** — title defaults to `Materials: {workflow title}` (editable).
+
+All enrolled students who can view the workflow see **Open materials** on the detail page.
 
 ### Assignment
 
@@ -37,13 +56,31 @@ Staff only. Two parts on one page (when creating) or split when editing.
 
 After choosing cohort/group, check students to enroll. Only enrolled students see the workflow.
 
-Steps are added **after** creation on the workflow detail page (Add step). Order on that page is the order students follow.
+### Steps
+
+Add one or more steps before saving (title, optional description, “requires previous step”). After creation you can still **Add step** on the workflow detail page; order is the order students follow.
+
+### Visibility
+
+Toggle at the bottom of the form (not a dropdown):
+
+- **Private (staff only)** — draft hidden from students.
+- **Public** — students in the assignment can see the workflow (after enrollment).
+
+### Scheduled publication
+
+Shown only when **Private** is selected:
+
+- Check **Publish automatically at…** and pick date/time (platform timezone, e.g. Europe/Zurich).
+- Students stay unaware until that time; assignment notifications are sent when the workflow becomes public.
+- Switching to **Public** manually **cancels** the schedule.
+- Staff see the planned time on the workflow detail page until it fires or is cancelled.
 
 ## Edit workflow {#form-edit}
 
-**Save details** — title, description, visibility only.
+**Save details** — title, description, materials, visibility, and scheduled publication (same rules as create).
 
-**Assignment** section — change enrollments or modes where the UI allows.
+**Assignment** section — change enrollments or modes where the UI allows (separate save).
 
 ## Delete workflow {#form-delete}
 
