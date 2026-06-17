@@ -1,0 +1,11 @@
+{% if available_spaces|length > 1 %}
+<div class="flex gap-2 flex-wrap mb-3 shrink-0">
+  {% for space in available_spaces %}
+  <a href="?kind={{ space.kind }}&space={{ space.pk }}"
+     class="px-3 py-1 rounded-lg text-sm font-medium transition-colors
+            {% if selected_space_kind == space.kind and selected_space_pk == space.pk|stringformat:'s' %}bg-[#343534] text-white{% else %}bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-[#B23149]{% endif %}">
+    {{ space.label }}
+  </a>
+  {% endfor %}
+</div>
+{% endif %}

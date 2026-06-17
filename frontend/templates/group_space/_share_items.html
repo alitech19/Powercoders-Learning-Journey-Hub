@@ -3,7 +3,8 @@
     {% for obj in share_menu.journal %}
     <form hx-post="{% url 'group_space:share_create' %}" hx-target="#chat-messages" hx-swap="beforeend">
       {% csrf_token %}
-      <input type="hidden" name="group_pk" value="{{ group.pk }}">
+      <input type="hidden" name="space_kind" value="{{ space_ref.kind }}">
+      <input type="hidden" name="space_pk" value="{{ space_ref.pk }}">
       <input type="hidden" name="kind" value="journal">
       <input type="hidden" name="obj_id" value="{{ obj.pk }}">
       <button type="submit" class="w-full text-left text-sm px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#B23149]">
@@ -18,7 +19,8 @@
     {% for obj in share_menu.habit %}
     <form hx-post="{% url 'group_space:share_create' %}" hx-target="#chat-messages" hx-swap="beforeend">
       {% csrf_token %}
-      <input type="hidden" name="group_pk" value="{{ group.pk }}">
+      <input type="hidden" name="space_kind" value="{{ space_ref.kind }}">
+      <input type="hidden" name="space_pk" value="{{ space_ref.pk }}">
       <input type="hidden" name="kind" value="habit">
       <input type="hidden" name="obj_id" value="{{ obj.pk }}">
       <button type="submit" class="w-full text-left text-sm px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#B23149]">{{ obj.title }}</button>
@@ -30,7 +32,8 @@
     {% for obj in share_menu.goal %}
     <form hx-post="{% url 'group_space:share_create' %}" hx-target="#chat-messages" hx-swap="beforeend">
       {% csrf_token %}
-      <input type="hidden" name="group_pk" value="{{ group.pk }}">
+      <input type="hidden" name="space_kind" value="{{ space_ref.kind }}">
+      <input type="hidden" name="space_pk" value="{{ space_ref.pk }}">
       <input type="hidden" name="kind" value="goal">
       <input type="hidden" name="obj_id" value="{{ obj.pk }}">
       <button type="submit" class="w-full text-left text-sm px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#B23149]">{{ obj.title }}</button>
@@ -42,7 +45,8 @@
     {% for obj in share_menu.task %}
     <form hx-post="{% url 'group_space:share_create' %}" hx-target="#chat-messages" hx-swap="beforeend">
       {% csrf_token %}
-      <input type="hidden" name="group_pk" value="{{ group.pk }}">
+      <input type="hidden" name="space_kind" value="{{ space_ref.kind }}">
+      <input type="hidden" name="space_pk" value="{{ space_ref.pk }}">
       <input type="hidden" name="kind" value="task">
       <input type="hidden" name="obj_id" value="{{ obj.pk }}">
       <button type="submit" class="w-full text-left text-sm px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-[#B23149]">{{ obj.title }}</button>

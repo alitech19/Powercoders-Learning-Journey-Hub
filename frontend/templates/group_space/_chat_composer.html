@@ -33,7 +33,9 @@
         id="chat-message-form"
         class="p-3 space-y-2">
     {% csrf_token %}
-    <input type="hidden" name="group_pk" value="{{ group.pk }}">
+    <input type="hidden" name="space_kind" value="{{ space_ref.kind }}">
+    <input type="hidden" name="space_pk" value="{{ space_ref.pk }}">
+    {% if group %}<input type="hidden" name="group_pk" value="{{ group.pk }}">{% endif %}
 
     {% if composer_form.non_field_errors %}
     <p class="text-sm text-red-600 dark:text-red-400">{{ composer_form.non_field_errors.0 }}</p>
@@ -115,6 +117,7 @@
     {% endif %}
 
     <div id="composer-actions" class="flex items-center gap-3 text-xs flex-wrap overflow-visible">
+      {% if allow_file_upload %}
       <button type="button" id="attach-toggle" class="text-gray-500 hover:text-[#B23149] font-medium {% if drive_student_connect_required %}opacity-50{% endif %}"
               {% if drive_student_connect_required %}disabled title="Connect Google Drive first"{% endif %}>
         📎 Attach file
@@ -125,6 +128,7 @@
               {% if drive_student_connect_required %}disabled title="Connect Google Drive first"{% endif %}>
         📄 New Google file
       </button>
+      {% endif %}
       {% endif %}
       {% if user.role == "student" %}
       <button type="button" id="share-toggle" class="text-gray-500 hover:text-[#B23149] font-medium">
@@ -142,7 +146,9 @@
         id="gdoc-form"
         class="hidden p-3 pt-0 space-y-3 border-t border-gray-100 dark:border-gray-800">
     {% csrf_token %}
-    <input type="hidden" name="group_pk" value="{{ group.pk }}">
+    <input type="hidden" name="space_kind" value="{{ space_ref.kind }}">
+    <input type="hidden" name="space_pk" value="{{ space_ref.pk }}">
+    {% if group %}<input type="hidden" name="group_pk" value="{{ group.pk }}">{% endif %}
 
     <div id="gdoc-panel" class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 space-y-3">
       <div class="flex items-center justify-between gap-2">

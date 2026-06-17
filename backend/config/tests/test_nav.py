@@ -57,5 +57,6 @@ class NavRegistryTests(TestCase):
         labels = [i['label'] for i in admin_nav_items(user=admin)]
         self.assertIn('Django Admin', labels)
         self.assertIn('Cohorts & Groups', labels)
+        self.assertIn('Group spaces', labels)
         self.assertIn('Users', labels)
         self.assertIn('Student Progress', labels)

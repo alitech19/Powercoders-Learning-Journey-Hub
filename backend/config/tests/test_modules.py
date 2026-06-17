@@ -66,8 +66,11 @@ class ModuleToggleTests(TestCase):
             labels,
             [
                 'Cohorts & Groups',
+                'Group spaces',
                 'Student Progress',
                 'File storage',
+                'Slack integration',
+                'Notifications',
                 'Bug Reports',
                 'Users',
                 'Create User',
@@ -76,7 +79,7 @@ class ModuleToggleTests(TestCase):
                 'Django Admin',
             ],
         )
-        self.assertEqual(len(ADMIN_NAV_ITEMS), 9)
+        self.assertEqual(len(ADMIN_NAV_ITEMS), 12)
 
     def test_admin_nav_hides_bug_reports_when_disabled(self):
         IntegratedModule.objects.filter(slug='bug_reports').update(is_enabled=False)

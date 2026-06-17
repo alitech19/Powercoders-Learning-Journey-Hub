@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal
 
-from .models import Comment, GroupSpace, Post
+from django.db.models import Q
+
+from .models import Comment, GroupSpace, Post, ProjectSpace
 
 
 @dataclass(frozen=True)
@@ -31,10 +33,18 @@ class ChatItem:
         raise AttributeError('ChatItem has no pk')
 
 
-def build_chat_timeline(group_space: GroupSpace):
+def _posts_for_space(space):
+    if isinstance(space, GroupSpace):
+        return Post.objects.filter(group_space=space)
+    if isinstance(space, ProjectSpace):
+        return Post.objects.filter(project_space=space)
+    raise TypeError(f'Unsupported space type: {type(space)!r}')
+
+
+def build_chat_timeline(space: GroupSpace | ProjectSpace):
     """Chronological chat stream (oldest → newest). Pinned posts shown separately."""
     posts = list(
-        Post.objects.filter(group_space=group_space)
+        _posts_for_space(space)
         .select_related('author')
         .prefetch_related('comments__author')
         .order_by('created_at')

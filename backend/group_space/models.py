@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.core.validators import MaxLengthValidator
 from django.db import models
+from django.db.models import Q
 
-from config.input_limits import BODY_TEXT_MAX_LENGTH, RESOURCE_LABEL_MAX_LENGTH
+from config.input_limits import BODY_TEXT_MAX_LENGTH, RESOURCE_LABEL_MAX_LENGTH, TITLE_MAX_LENGTH
 
 
 class GroupSpace(models.Model):
@@ -20,6 +21,67 @@ class GroupSpace(models.Model):
 
     def __str__(self):
         return f'Group Space — {self.group}'
+
+
+class ProjectSpace(models.Model):
+    title = models.CharField(max_length=TITLE_MAX_LENGTH)
+    description = models.TextField(blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='created_project_spaces',
+    )
+    is_archived = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['created_at', 'pk']
+        indexes = [
+            models.Index(fields=['is_archived', 'title']),
+            models.Index(fields=['created_by']),
+        ]
+
+    def __str__(self):
+        return self.title
+
+
+class ProjectSpaceMembership(models.Model):
+    class Role(models.TextChoices):
+        MEMBER = 'member', 'Member'
+        MODERATOR = 'moderator', 'Moderator'
+
+    project_space = models.ForeignKey(
+        ProjectSpace,
+        on_delete=models.CASCADE,
+        related_name='memberships',
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='project_space_memberships',
+    )
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.MEMBER)
+    added_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='project_memberships_added',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['project_space', 'user'], name='group_space_unique_project_member'),
+        ]
+        indexes = [
+            models.Index(fields=['project_space', 'role']),
+            models.Index(fields=['user']),
+        ]
+
+    def __str__(self):
+        return f'{self.user} in {self.project_space}'
 
 
 class Post(models.Model):
@@ -48,6 +110,15 @@ class Post(models.Model):
         GroupSpace,
         on_delete=models.CASCADE,
         related_name='posts',
+        null=True,
+        blank=True,
+    )
+    project_space = models.ForeignKey(
+        ProjectSpace,
+        on_delete=models.CASCADE,
+        related_name='posts',
+        null=True,
+        blank=True,
     )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -98,15 +169,35 @@ class Post(models.Model):
         indexes = [
             models.Index(fields=['group_space', 'created_at']),
             models.Index(fields=['group_space', 'pinned']),
+            models.Index(fields=['project_space', 'created_at']),
+            models.Index(fields=['project_space', 'pinned']),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(group_space__isnull=False, project_space__isnull=True)
+                    | Q(group_space__isnull=True, project_space__isnull=False)
+                ),
+                name='group_space_post_exactly_one_parent',
+            ),
         ]
 
     def __str__(self):
+        parent = self.group_space or self.project_space
         preview = self.body[:50] if self.body else self.resource_label or 'Post'
-        return f'[{self.group_space.group}] {preview}'
+        return f'[{parent}] {preview}'
 
     @property
     def group(self):
-        return self.group_space.group
+        if self.group_space_id:
+            return self.group_space.group
+        return None
+
+    @property
+    def space_ref(self):
+        from .space import post_space_ref
+
+        return post_space_ref(self)
 
     @property
     def has_snapshot(self):
@@ -139,6 +230,10 @@ class Post(models.Model):
 
         if errors:
             raise ValidationError(errors)
+
+        if self.group_space_id or self.project_space_id:
+            if bool(self.group_space_id) == bool(self.project_space_id):
+                raise ValidationError('Post must belong to exactly one space.')
 
 
 class Comment(models.Model):

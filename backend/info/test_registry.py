@@ -63,6 +63,7 @@ class AdministrationHelpRegistryTests(SimpleTestCase):
         self.assertEqual(topic.app_slug, 'administration')
         section_ids = {s.section_id for s in topic.sections}
         self.assertIn('cohorts-groups', section_ids)
+        self.assertIn('group-spaces', section_ids)
         self.assertIn('student-progress', section_ids)
         self.assertIn('import-users', section_ids)
 
@@ -108,6 +109,51 @@ class AdministrationHelpRegistryTests(SimpleTestCase):
         section_ids = {s.section_id for s in topic.sections}
         self.assertIn('personal-oauth', section_ids)
         self.assertIn('staff-webhook', section_ids)
+
+    def test_group_spaces_admin_routes_mapped(self):
+        self.assertEqual(
+            ROUTE_MAP['group_space:project_list'],
+            ('group_spaces_admin', 'overview'),
+        )
+        self.assertEqual(
+            ROUTE_MAP['group_space:project_create'],
+            ('group_spaces_admin', 'create'),
+        )
+
+    def test_group_spaces_admin_topic_loads(self):
+        topic = load_topic('group_spaces_admin')
+        self.assertEqual(topic.app_slug, 'group_spaces_admin')
+        section_ids = {s.section_id for s in topic.sections}
+        self.assertIn('overview', section_ids)
+        self.assertIn('archive', section_ids)
+
+    def test_group_space_topic_has_space_types_section(self):
+        topic = load_topic('group_space')
+        section_ids = {s.section_id for s in topic.sections}
+        self.assertIn('space-types', section_ids)
+        self.assertIn('switching', section_ids)
+
+    def test_resolve_help_for_group_spaces_list(self):
+        factory = RequestFactory()
+        request = factory.get('/group/projects/')
+        request.user = User(role=User.Role.ADMIN, email='a@test.com')
+        request.resolver_match = type(
+            'M',
+            (),
+            {
+                'view_name': 'group_space:project_list',
+                'url_name': 'project_list',
+                'namespace': 'group_space',
+            },
+        )()
+        target = resolve_help_target(request)
+        self.assertEqual(
+            target,
+            ('group_space.project_list', 'group_spaces_admin', 'overview'),
+        )
+        help_meta = resolve_page_help(request)
+        self.assertTrue(help_meta.enabled)
+        self.assertIn('group_spaces_admin', help_meta.url)
 
     def test_anonymous_page_help_disabled(self):
         factory = RequestFactory()

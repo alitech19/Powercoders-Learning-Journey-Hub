@@ -16,30 +16,27 @@
 {% block content %}
 <div class="flex flex-col max-w-3xl mx-auto" style="height: calc(100vh - 9rem); min-height: 420px;">
 
-  {% include "includes/_page_header.html" with title="Group chat" compact=1 %}
-  {% if group %}
-  <p class="text-gray-500 text-sm -mt-2 mb-3 shrink-0">{{ group.name }} · {{ group.cohort.name }}</p>
+  {% include "includes/_page_header.html" with title="Group Space" compact=1 %}
+  {% if space_ref %}
+  <p class="text-gray-500 text-sm -mt-2 mb-3 shrink-0">
+    {% if space_ref.kind == "cohort_group" %}
+    Cohort group · {{ space_ref.label }}{% if space_ref.subtitle %} · {{ space_ref.subtitle }}{% endif %}
+    {% else %}
+    Custom group space · {{ space_ref.label }}
+    {% endif %}
+    {% if space_ref.is_archived %}<span class="text-amber-600 dark:text-amber-400">· archived (read-only)</span>{% endif %}
+  </p>
   {% else %}
   <p class="text-gray-500 text-sm -mt-2 mb-3 shrink-0">No group assigned</p>
   {% endif %}
 
-  {% if available_groups|length > 1 %}
-  <div class="flex gap-2 flex-wrap mb-3 shrink-0">
-    {% for g in available_groups %}
-    <a href="?group={{ g.pk }}"
-       class="px-3 py-1 rounded-lg text-sm font-medium transition-colors
-              {% if selected_group_pk == g.pk|stringformat:'s' %}bg-[#343534] text-white{% else %}bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-[#B23149]{% endif %}">
-      {{ g.name }}
-    </a>
-    {% endfor %}
-  </div>
-  {% endif %}
+  {% include "group_space/_space_picker.html" %}
 
-  {% if not group %}
+  {% if not space_ref %}
   <div class="flex-1 flex items-center justify-center text-center">
     <div>
       <div class="flex justify-center mb-3">{% volumetric_icon "chat" size="lg" variant="soft" %}</div>
-      <p class="text-gray-600 dark:text-gray-400 text-sm">Ask your teacher to add you to a group.</p>
+      <p class="text-gray-600 dark:text-gray-400 text-sm">Ask your teacher to add you to a cohort group.</p>
     </div>
   </div>
 
@@ -63,13 +60,13 @@
       <div id="chat-messages" class="space-y-1">
         {% if chat_items %}
           {% for item in chat_items %}
-            {% include "group_space/_chat_bubble.html" with item=item %}
+            {% include "group_space/_chat_bubble.html" with item=item space_ref=space_ref %}
           {% endfor %}
         {% else %}
         <div id="chat-empty" class="h-full flex items-center justify-center text-center py-16">
           <div>
             <p class="text-gray-500 text-sm">No messages yet.</p>
-            <p class="text-gray-400 text-xs mt-1">Say hello — your message appears here for the whole group.</p>
+            <p class="text-gray-400 text-xs mt-1">Say hello — your message appears here for everyone in this space.</p>
           </div>
         </div>
         {% endif %}
@@ -77,7 +74,13 @@
       <div id="chat-bottom" class="h-px" aria-hidden="true"></div>
     </div>
 
-    {% include "group_space/_chat_composer.html" with composer_form=composer_form gdoc_form=gdoc_form group=group %}
+    {% if can_post %}
+      {% include "group_space/_chat_composer.html" %}
+    {% elif space_ref.is_archived %}
+    <div class="shrink-0 border-t border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-500 text-center">
+      This group space is archived — chat is read-only.
+    </div>
+    {% endif %}
   </div>
   {% endif %}
 </div>
@@ -85,6 +88,7 @@
 <script>
 (function () {
   const URL_RE = /https?:\/\//i;
+  const resourcesLabel = {{ resources_scope_label|default:"group Resources list"|escapejs }};
 
   function scrollChatToBottom() {
     const el = document.getElementById('chat-scroll');
@@ -123,7 +127,6 @@
     const caption = document.getElementById('resource-label-caption');
     const labelInput = document.getElementById('chat-resource-label');
     const body = document.getElementById('chat-body');
-    const file = document.getElementById('chat-file');
     const attachOpen = isAttachModeOpen();
     if (!wrap) return;
 
@@ -139,8 +142,8 @@
     }
     if (labelInput) {
       labelInput.placeholder = attachOpen
-        ? 'How this file appears on the group Resources list'
-        : 'Name for the group Resources list';
+        ? 'How this file appears on the ' + resourcesLabel
+        : 'Name for the ' + resourcesLabel;
     }
   }
 

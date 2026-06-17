@@ -7,7 +7,8 @@ from django.core.exceptions import ValidationError
 from cohorts.models import Group
 
 from .constants import ALLOWED_GROUP_FILE_EXTENSIONS, GROUP_FILE_MAX_BYTES
-from .models import GroupSpace, Post
+from .models import GroupSpace, Post, ProjectSpace
+from .space import SpaceRef
 
 _URL_RE = re.compile(r'https?://[^\s<>"\']+', re.IGNORECASE)
 
@@ -38,6 +39,8 @@ def post_is_achievement_share(post):
 def post_qualifies_for_resources(post):
     if post_is_achievement_share(post):
         return False
+    if post.project_space_id and post.project_space.is_archived:
+        return False
     return post_has_link_or_file(post) and bool(post.resource_label.strip())
 
 
@@ -60,10 +63,23 @@ def get_group_space_for_group(group):
     return space
 
 
+def get_space_for_ref(space_ref: SpaceRef):
+    if space_ref.kind == 'cohort_group':
+        group = Group.objects.filter(pk=space_ref.pk).first()
+        if group is None:
+            return None
+        return get_group_space_for_group(group)
+    return ProjectSpace.objects.filter(pk=space_ref.pk).first()
+
+
 def load_post(pk):
     return (
         Post.objects.prefetch_related('comments__author')
-        .select_related('author', 'group_space__group__cohort')
+        .select_related(
+            'author',
+            'group_space__group__cohort',
+            'project_space',
+        )
         .get(pk=pk)
     )
 
@@ -79,10 +95,10 @@ def validate_uploaded_file(uploaded_file):
         raise ValidationError(f'File type not allowed. Allowed: {allowed}')
 
 
-def sync_group_resource_from_post(post):
+def sync_space_resource_from_post(post):
     from config.module_access import is_module_enabled
     from resources.models import ResourceItem
-    from resources.services import sync_from_group_post
+    from resources.services import sync_from_space_post
 
     if not is_module_enabled('resources'):
         ResourceItem.objects.filter(source_post=post).delete()
@@ -90,14 +106,22 @@ def sync_group_resource_from_post(post):
     if not post_qualifies_for_resources(post):
         ResourceItem.objects.filter(source_post=post).delete()
         return
-    sync_from_group_post(post)
+    sync_from_space_post(post)
 
 
 def after_post_saved(post):
-    sync_group_resource_from_post(post)
+    sync_space_resource_from_post(post)
 
 
 def feed_url_for_group(group):
     from django.urls import reverse
 
-    return f"{reverse('group_space:feed')}?group={group.pk}"
+    return f"{reverse('group_space:feed')}?kind=cohort_group&space={group.pk}"
+
+
+def feed_url_for_space_ref(space_ref: SpaceRef) -> str:
+    return space_ref.feed_url()
+
+
+# Backward-compatible alias used by notifications and older imports.
+sync_group_resource_from_post = sync_space_resource_from_post

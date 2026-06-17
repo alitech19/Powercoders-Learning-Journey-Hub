@@ -27,6 +27,10 @@ def can_view_container(user, container):
         return container.owner_id == user.pk
     if container.group_id and can_access_group(user, container.group):
         return True
+    if container.container_type == ResourceContainer.ContainerType.PROJECT:
+        from group_space.permissions import can_access_project_space
+
+        return can_access_project_space(user, container.project_space)
     return False
 
 
@@ -37,6 +41,12 @@ def can_edit_container_items(user, container):
         return container.owner_id == user.pk
     if container.container_type == ResourceContainer.ContainerType.GROUP:
         return can_access_group(user, container.group)
+    if container.container_type == ResourceContainer.ContainerType.PROJECT:
+        from group_space.permissions import can_access_project_space
+
+        if container.project_space.is_archived:
+            return False
+        return can_access_project_space(user, container.project_space)
     if container.container_type == ResourceContainer.ContainerType.THEMATIC:
         if container.created_by_id == user.pk:
             return True
@@ -75,7 +85,7 @@ def get_container_or_404(user, pk):
     from django.shortcuts import get_object_or_404
 
     container = get_object_or_404(
-        ResourceContainer.objects.select_related('group__cohort', 'owner', 'created_by'),
+        ResourceContainer.objects.select_related('group__cohort', 'project_space', 'owner', 'created_by'),
         pk=pk,
     )
     if not can_view_container(user, container):

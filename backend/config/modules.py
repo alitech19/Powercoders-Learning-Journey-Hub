@@ -52,7 +52,7 @@ METRIC_COLUMNS: tuple[tuple[str, str], ...] = (
     ('habits', 'Habits'),
     ('reflections', 'Reflections'),
     ('journal', 'Journal'),
-    ('group_space', 'Group'),
+    ('group_space', 'Group Space'),
     ('resources', 'Resources'),
 )
 
