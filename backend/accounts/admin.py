@@ -160,7 +160,7 @@ class NotificationDigestItemAdmin(admin.ModelAdmin):
 
 @admin.register(UserNotificationSettings)
 class UserNotificationSettingsAdmin(admin.ModelAdmin):
-    list_display = ('user', 'email_enabled', 'slack_enabled', 'digest_mode', 'updated_at')
+    list_display = ('user', 'in_app_enabled', 'email_enabled', 'slack_enabled', 'digest_mode', 'updated_at')
     search_fields = ('user__email', 'user__display_name')
     autocomplete_fields = ('user',)
 

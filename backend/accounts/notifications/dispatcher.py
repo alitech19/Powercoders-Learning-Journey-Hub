@@ -120,9 +120,7 @@ def dispatch_event(
     slack_text=None,
 ):
     """
-    Route a notification to in-app (always when enabled), email, and Slack channels.
-
-    Phase 0: in-app + email only. Slack deliveries are logged as skipped.
+    Route a notification to in-app, email, and Slack channels per user settings.
     """
     if not dedupe_key:
         raise ValueError('dedupe_key is required for dispatch_event')
@@ -132,13 +130,28 @@ def dispatch_event(
 
     for recipient in recipients:
         settings = get_notification_settings(recipient)
-        _dispatch_in_app(
-            dedupe_key=dedupe_key,
-            recipient=recipient,
-            title=title,
-            body=body,
-            url=url,
-        )
+        if (
+            settings.in_app_enabled
+            and event_enabled_for_channel(settings, event_type, 'in_app')
+        ):
+            _dispatch_in_app(
+                dedupe_key=dedupe_key,
+                recipient=recipient,
+                title=title,
+                body=body,
+                url=url,
+            )
+        else:
+            _log_skipped_channel(
+                dedupe_key,
+                recipient,
+                NotificationDeliveryLog.Channel.IN_APP,
+                reason=(
+                    'In-app notifications disabled'
+                    if not settings.in_app_enabled
+                    else f'{event_type} disabled for in-app'
+                ),
+            )
         digest_bucket = None
         if event_type != EventType.DEADLINE_REMINDER:
             digest_bucket = _digest_bucket_from_mode(settings.digest_mode)

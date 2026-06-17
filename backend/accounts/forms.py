@@ -12,12 +12,24 @@ from cohorts.permissions import get_teacher_group_ids
 
 from .avatar_storage import AvatarUploadError, encode_upload
 from .models import User, UserNotificationSettings
+from .notifications.form_choices import (
+    QUIET_HOURS_CHOICES,
+    TIMEZONE_CHOICES,
+    format_quiet_hour,
+    parse_optional_quiet_hour,
+)
 from .notifications.settings import get_notification_settings, sync_email_enabled
 
 
 _INPUT_CLASS = (
     'w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm '
     'focus:outline-none focus:ring-2 focus:ring-[#B23149] focus:border-[#B23149]'
+)
+_SELECT_CLASS = (
+    'w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 '
+    'bg-white dark:bg-gray-900 text-sm text-[#343534] dark:text-gray-100 '
+    'focus:outline-none focus:ring-2 focus:ring-[#B23149] focus:border-[#B23149] '
+    'max-h-48 overflow-y-auto'
 )
 
 
@@ -90,22 +102,30 @@ class NotificationSettingsForm(forms.ModelForm):
     class Meta:
         model = UserNotificationSettings
         fields = [
+            'in_app_enabled',
             'email_enabled',
             'slack_enabled',
             'digest_mode',
+            'notify_feedback',
             'email_feedback',
-            'email_new_task',
-            'email_new_goal',
-            'email_new_workflow',
-            'email_deadline_reminder',
-            'email_group_chat_mentions',
-            'email_group_chat_all_messages',
             'slack_feedback',
+            'notify_new_task',
+            'email_new_task',
             'slack_new_task',
+            'notify_new_goal',
+            'email_new_goal',
             'slack_new_goal',
+            'notify_new_workflow',
+            'email_new_workflow',
             'slack_new_workflow',
+            'notify_deadline_reminder',
+            'email_deadline_reminder',
             'slack_deadline_reminder',
+            'notify_group_chat_mentions',
+            'email_group_chat_mentions',
             'slack_group_chat_mentions',
+            'notify_group_chat_all_messages',
+            'email_group_chat_all_messages',
             'slack_group_chat_all_messages',
             'quiet_hours_start',
             'quiet_hours_end',
@@ -113,44 +133,70 @@ class NotificationSettingsForm(forms.ModelForm):
         ]
         labels = {
             'digest_mode': 'Email and Slack delivery',
-            'email_feedback': 'Feedback from teachers',
-            'email_new_task': 'New tasks',
-            'email_new_goal': 'New goals',
-            'email_new_workflow': 'New workflows',
-            'email_deadline_reminder': 'Deadline reminders',
-            'email_group_chat_mentions': 'Mentions in group chat',
-            'email_group_chat_all_messages': 'All group chat messages',
-            'slack_feedback': 'Feedback from teachers',
-            'slack_new_task': 'New tasks',
-            'slack_new_goal': 'New goals',
-            'slack_new_workflow': 'New workflows',
-            'slack_deadline_reminder': 'Deadline reminders',
-            'slack_group_chat_mentions': 'Mentions in group chat',
-            'slack_group_chat_all_messages': 'All group chat messages',
         }
         help_texts = {
-            'digest_mode': 'How often email and Slack notifications are delivered (in-app stays instant).',
+            'digest_mode': 'How often email and Slack notifications are delivered.',
         }
 
-    _CHECKBOX_CLASS = (
-        'rounded border-gray-300 dark:border-gray-600 text-[#B23149] focus:ring-[#B23149]'
+    _EVENT_CHECKBOX_CLASS = (
+        'notif-event-cb h-5 w-5 rounded border-2 border-gray-300 dark:border-gray-500 '
+        'text-[#B23149] focus:ring-2 focus:ring-[#B23149] focus:ring-offset-1 cursor-pointer '
+        'accent-[#B23149]'
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, slack_connected=False, **kwargs):
         super().__init__(*args, **kwargs)
+        self.slack_connected = slack_connected
         for name, field in self.fields.items():
-            if isinstance(field.widget, forms.CheckboxInput):
-                field.widget.attrs.setdefault('class', self._CHECKBOX_CLASS)
-        self.fields['quiet_hours_start'].widget = forms.TimeInput(
-            attrs={'type': 'time', 'class': _INPUT_CLASS},
-            format='%H:%M',
+            if not isinstance(field.widget, forms.CheckboxInput):
+                continue
+            if name in ('email_enabled', 'slack_enabled', 'in_app_enabled'):
+                continue
+            field.widget.attrs.setdefault('class', self._EVENT_CHECKBOX_CLASS)
+            if name.startswith('email_'):
+                field.widget.attrs['data-notif-channel'] = 'email'
+            elif name.startswith('slack_'):
+                field.widget.attrs['data-notif-channel'] = 'slack'
+            elif name.startswith('notify_'):
+                field.widget.attrs['data-notif-channel'] = 'in_app'
+        self.fields['quiet_hours_start'] = forms.ChoiceField(
+            choices=QUIET_HOURS_CHOICES,
+            required=False,
+            label=self.fields['quiet_hours_start'].label,
+            widget=forms.Select(attrs={'class': _SELECT_CLASS, 'size': 1}),
         )
-        self.fields['quiet_hours_end'].widget = forms.TimeInput(
-            attrs={'type': 'time', 'class': _INPUT_CLASS},
-            format='%H:%M',
+        self.fields['quiet_hours_end'] = forms.ChoiceField(
+            choices=QUIET_HOURS_CHOICES,
+            required=False,
+            label=self.fields['quiet_hours_end'].label,
+            widget=forms.Select(attrs={'class': _SELECT_CLASS, 'size': 1}),
         )
-        self.fields['timezone'].widget.attrs.setdefault('class', _INPUT_CLASS)
+        self.fields['timezone'] = forms.ChoiceField(
+            choices=TIMEZONE_CHOICES,
+            label=self.fields['timezone'].label,
+            widget=forms.Select(attrs={'class': _SELECT_CLASS, 'size': 1}),
+        )
+        if self.instance.pk:
+            self.initial['quiet_hours_start'] = format_quiet_hour(self.instance.quiet_hours_start)
+            self.initial['quiet_hours_end'] = format_quiet_hour(self.instance.quiet_hours_end)
+        if not slack_connected:
+            self.initial['slack_enabled'] = False
         self.fields['digest_mode'].widget.attrs.setdefault('class', _INPUT_CLASS)
+
+    def clean_quiet_hours_start(self):
+        return parse_optional_quiet_hour(self.cleaned_data.get('quiet_hours_start'))
+
+    def clean_quiet_hours_end(self):
+        return parse_optional_quiet_hour(self.cleaned_data.get('quiet_hours_end'))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not self.slack_connected:
+            cleaned_data['slack_enabled'] = False
+            for name in list(cleaned_data):
+                if name.startswith('slack_') and name != 'slack_enabled':
+                    cleaned_data[name] = False
+        return cleaned_data
 
     def save(self, commit=True):
         settings = super().save(commit=commit)

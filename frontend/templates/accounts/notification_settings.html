@@ -1,15 +1,159 @@
 {% extends "base.html" %}
 {% block title %}Notification settings{% endblock %}
 
+{% block extra_head %}
+<script>
+function notificationSettingsPage(config) {
+  return {
+    ...config,
+    dirty: false,
+    showLeaveModal: false,
+    pendingUrl: null,
+    saveAfterSubmit: false,
+    initialSnapshot: '',
+
+    init() {
+      this.$nextTick(() => {
+        this.initialSnapshot = this.formSnapshot();
+        this.syncChannels();
+      });
+      this.$refs.settingsForm?.addEventListener('change', () => this.updateDirty());
+      this.$refs.settingsForm?.addEventListener('input', () => this.updateDirty());
+      this._beforeUnload = (event) => {
+        if (!this.dirty) return;
+        event.preventDefault();
+        event.returnValue = '';
+      };
+      window.addEventListener('beforeunload', this._beforeUnload);
+      this._navGuard = (event) => {
+        if (!this.dirty) return;
+        const link = event.target.closest('a[href]');
+        if (!link || link.dataset.ignoreDirty === 'true') return;
+        const href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || link.target === '_blank') return;
+        const url = new URL(link.href, window.location.origin);
+        if (url.origin !== window.location.origin) return;
+        if (url.pathname === window.location.pathname) return;
+        event.preventDefault();
+        event.stopPropagation();
+        this.pendingUrl = link.href;
+        this.saveAfterSubmit = false;
+        this.showLeaveModal = true;
+      };
+      document.addEventListener('click', this._navGuard, true);
+    },
+
+    formSnapshot() {
+      const form = this.$refs.settingsForm;
+      if (!form) return '';
+      const data = new FormData(form);
+      data.delete('next');
+      const entries = [...data.entries()].sort((a, b) => {
+        if (a[0] === b[0]) return String(a[1]).localeCompare(String(b[1]));
+        return a[0].localeCompare(b[0]);
+      });
+      return JSON.stringify(entries);
+    },
+
+    updateDirty() {
+      this.dirty = this.formSnapshot() !== this.initialSnapshot;
+    },
+
+    handleNavigate(event) {
+      if (!this.dirty) return;
+      event.preventDefault();
+      this.pendingUrl = event.currentTarget.href;
+      this.saveAfterSubmit = false;
+      this.showLeaveModal = true;
+    },
+
+    closeLeaveModal() {
+      this.showLeaveModal = false;
+      this.pendingUrl = null;
+      this.saveAfterSubmit = false;
+    },
+
+    discardChanges() {
+      const target = this.pendingUrl;
+      this.dirty = false;
+      this.showLeaveModal = false;
+      if (target) window.location.href = target;
+    },
+
+    saveChanges(stayOnPage) {
+      this.saveAfterSubmit = !stayOnPage;
+      if (!stayOnPage && this.pendingUrl) {
+        this.$refs.nextField.value = this.pendingUrl;
+      } else {
+        this.$refs.nextField.value = '';
+      }
+      this.dirty = false;
+      this.showLeaveModal = false;
+      this.$refs.settingsForm.requestSubmit();
+    },
+
+    syncChannels() {
+      document.querySelectorAll('[data-notif-channel=in_app]').forEach((el) => {
+        el.disabled = !this.inAppOn;
+        el.closest('td')?.classList.toggle('opacity-40', !this.inAppOn);
+        el.closest('td')?.classList.toggle('pointer-events-none', !this.inAppOn);
+      });
+      document.querySelectorAll('[data-notif-channel=email]').forEach((el) => {
+        el.disabled = !this.emailOn;
+        el.closest('td')?.classList.toggle('opacity-40', !this.emailOn);
+        el.closest('td')?.classList.toggle('pointer-events-none', !this.emailOn);
+      });
+      document.querySelectorAll('[data-notif-channel=slack]').forEach((el) => {
+        el.disabled = !this.slackOn || !this.slackConnected;
+        el.closest('td')?.classList.toggle('opacity-40', !this.slackOn || !this.slackConnected);
+        el.closest('td')?.classList.toggle('pointer-events-none', !this.slackOn || !this.slackConnected);
+      });
+    },
+
+    onSlackToggle(event) {
+      if (!this.slackConnected) {
+        event.target.checked = false;
+        this.slackOn = false;
+        return;
+      }
+      this.slackOn = event.target.checked;
+      this.syncChannels();
+    },
+  };
+}
+</script>
+{% endblock %}
+
 {% block content %}
-<div class="max-w-2xl mx-auto">
+<div class="max-w-3xl mx-auto"
+     x-data="notificationSettingsPage({
+       inAppOn: {% if form.in_app_enabled.value %}true{% else %}false{% endif %},
+       emailOn: {% if form.email_enabled.value %}true{% else %}false{% endif %},
+       slackOn: {% if slack_connected and form.slack_enabled.value %}true{% else %}false{% endif %},
+       slackConnected: {% if slack_connected %}true{% else %}false{% endif %},
+     })">
 
   <div class="mb-6">
     {% include "includes/_page_title.html" with title="Notification settings" %}
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-      In-app alerts are always on.
-      <a href="{% url 'accounts:notifications' %}" class="text-[#B23149] hover:underline font-medium">View notification centre</a>
-    </p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+    <a href="{% url 'accounts:notifications' %}"
+       @click="handleNavigate($event)"
+       class="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border-2 border-[#B23149]/30 bg-[#F5EDE0] dark:bg-gray-800 hover:border-[#B23149] text-[#B23149] text-sm font-semibold transition-colors">
+      <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+      </svg>
+      Notification centre
+    </a>
+    <a href="{% url 'accounts:profile' %}"
+       @click="handleNavigate($event)"
+       class="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-[#B23149]/40 text-[#343534] dark:text-gray-100 text-sm font-semibold transition-colors">
+      <svg class="h-5 w-5 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+      </svg>
+      Back to profile
+    </a>
   </div>
 
   <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4 mb-6">
@@ -17,7 +161,7 @@
 
     {% if not slack_configured %}
     <p class="text-sm text-gray-500">Slack OAuth is not configured on this server yet.</p>
-    {% elif slack_integration and slack_integration.is_connected %}
+    {% elif slack_connected %}
     <p class="text-sm text-green-600 dark:text-green-400">Connected to Slack.</p>
     <div class="flex flex-wrap gap-2">
       <form method="post" action="{% url 'accounts:slack_test_message' %}">
@@ -37,6 +181,7 @@
     </div>
     {% else %}
     <a href="{% url 'accounts:slack_connect' %}"
+       @click="handleNavigate($event)"
        class="inline-flex px-3 py-1.5 rounded-lg bg-[#B23149] hover:bg-[#9a2a3f] text-white text-xs font-semibold">
       Connect Slack
     </a>
@@ -45,35 +190,85 @@
     {% if slack_integration and slack_integration.last_error %}
     <p class="text-xs text-red-500">{{ slack_integration.last_error }}</p>
     {% endif %}
+    {% if not slack_connected and slack_configured %}
+    <p class="text-xs text-gray-400">Connect Slack above before enabling Slack notifications.</p>
+    {% endif %}
   </div>
 
-  <form method="post" class="space-y-6">
+  <form method="post"
+        class="space-y-6"
+        x-ref="settingsForm"
+        @submit="document.querySelectorAll('[data-notif-channel]').forEach((el) => { el.disabled = false; })">
     {% csrf_token %}
+    <input type="hidden" name="next" value="" x-ref="nextField">
 
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Delivery channels</h2>
+      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Notification types</h2>
+      <p class="text-xs text-gray-400">
+        Use the master switches in the table header to turn a whole channel off, then fine-tune each event below.
+        Mention someone in group chat with <code>@"Display Name"</code> or <code>@email@example.com</code>.
+      </p>
 
-      <label class="flex items-center justify-between gap-4 cursor-pointer">
-        <span class="text-sm font-medium text-[#343534] dark:text-gray-100">Email notifications</span>
-        {{ form.email_enabled }}
-      </label>
-
-      <label class="flex items-center justify-between gap-4 cursor-pointer">
-        <span class="text-sm font-medium text-[#343534] dark:text-gray-100">Slack notifications</span>
-        {{ form.slack_enabled }}
-      </label>
-      <p class="text-xs text-gray-400">Requires a connected Slack account above.</p>
+      <div class="overflow-x-auto -mx-2 px-2">
+        <table class="w-full min-w-[28rem] text-sm">
+          <thead>
+            <tr class="border-b border-gray-200 dark:border-gray-700">
+              <th class="text-left py-3 pr-4 font-medium text-gray-500 dark:text-gray-400 align-bottom">Event</th>
+              <th class="text-center py-3 px-2 w-28 align-bottom">
+                <div class="flex flex-col items-center gap-2">
+                  <span class="text-xs font-semibold text-[#343534] dark:text-gray-200">In-app</span>
+                  {% include "includes/_toggle_switch.html" with name="in_app_enabled" id="id_in_app_enabled" checked=form.in_app_enabled.value alpine_onchange="inAppOn = $event.target.checked; syncChannels()" %}
+                </div>
+              </th>
+              <th class="text-center py-3 px-2 w-28 align-bottom">
+                <div class="flex flex-col items-center gap-2">
+                  <span class="text-xs font-semibold text-[#343534] dark:text-gray-200">Email</span>
+                  {% include "includes/_toggle_switch.html" with name="email_enabled" id="id_email_enabled" checked=form.email_enabled.value alpine_onchange="emailOn = $event.target.checked; syncChannels()" %}
+                </div>
+              </th>
+              <th class="text-center py-3 px-2 w-28 align-bottom">
+                <div class="flex flex-col items-center gap-2">
+                  <span class="text-xs font-semibold text-[#343534] dark:text-gray-200">Slack</span>
+                  {% if slack_connected %}
+                  {% include "includes/_toggle_switch.html" with name="slack_enabled" id="id_slack_enabled" checked=form.slack_enabled.value alpine_onchange="onSlackToggle($event)" %}
+                  {% else %}
+                  {% include "includes/_toggle_switch.html" with name="slack_enabled" id="id_slack_enabled" checked=False disabled=True alpine_onchange="onSlackToggle($event)" %}
+                  {% endif %}
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+            {% for row in notification_rows %}
+            <tr>
+              <td class="py-3.5 pr-4 text-[#343534] dark:text-gray-100">{{ row.label }}</td>
+              <td class="py-3.5 px-2 text-center transition-opacity">
+                <div class="flex justify-center">{{ row.in_app }}</div>
+              </td>
+              <td class="py-3.5 px-2 text-center transition-opacity">
+                <div class="flex justify-center">{{ row.email }}</div>
+              </td>
+              <td class="py-3.5 px-2 text-center transition-opacity">
+                <div class="flex justify-center">{{ row.slack }}</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
       <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Digest frequency</h2>
-      <label class="space-y-1 block">
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Groups email and Slack alerts into one summary per hour or day so you get fewer messages when activity is high.
+      </p>
+      <label class="space-y-1 block max-w-xs">
         <span class="text-xs uppercase tracking-wide text-gray-400">{{ form.digest_mode.label }}</span>
         {{ form.digest_mode }}
       </label>
       <p class="text-xs text-gray-400">
-        Instant sends email and Slack right away. Hourly and daily batch messages into one digest.
-        In-app notifications are always instant. Deadline reminders are always sent immediately.
+        In-app alerts stay instant. Deadline reminders are always sent immediately.
       </p>
     </div>
 
@@ -93,43 +288,52 @@
         <span class="text-xs uppercase tracking-wide text-gray-400">Timezone</span>
         {{ form.timezone }}
       </label>
-      <p class="text-xs text-gray-400">During quiet hours, email and Slack notifications are paused. Web notifications stay on.</p>
-    </div>
-
-    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Email notifications</h2>
-      {% for field in form.visible_fields %}
-        {% if field.name|slice:":6" == "email_" and field.name != 'email_enabled' %}
-        <label class="flex items-center justify-between gap-4 cursor-pointer">
-          <span class="text-sm text-[#343534] dark:text-gray-100">{{ field.label }}</span>
-          {{ field }}
-        </label>
-        {% endif %}
-      {% endfor %}
-      <p class="text-xs text-gray-400">
-        Mention someone in group chat with <code>@"Display Name"</code> or <code>@email@example.com</code>.
-      </p>
-    </div>
-
-    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Slack notifications</h2>
-      {% for field in form.visible_fields %}
-        {% if field.name|slice:":6" == "slack_" and field.name != 'slack_enabled' %}
-        <label class="flex items-center justify-between gap-4 cursor-pointer">
-          <span class="text-sm text-[#343534] dark:text-gray-100">{{ field.label }}</span>
-          {{ field }}
-        </label>
-        {% endif %}
-      {% endfor %}
+      <p class="text-xs text-gray-400">During quiet hours, email and Slack are paused. In-app alerts are unaffected unless you turned them off.</p>
     </div>
 
     <div class="flex items-center gap-3">
       <button type="submit"
+              @click="$refs.nextField.value = ''"
               class="px-5 py-2.5 rounded-lg bg-[#B23149] hover:bg-[#9a2a3f] text-white text-sm font-semibold transition-colors">
         Save settings
       </button>
-      <a href="{% url 'accounts:profile' %}" class="text-sm text-gray-500 hover:text-[#B23149]">Back to profile</a>
+      <p class="text-xs text-gray-400" x-show="dirty" x-cloak>Unsaved changes</p>
     </div>
   </form>
+
+  <div x-show="showLeaveModal"
+       x-cloak
+       class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="unsaved-title">
+    <div class="absolute inset-0 bg-black/40" @click="closeLeaveModal()"></div>
+    <div class="relative w-full max-w-md rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 shadow-xl">
+      <h3 id="unsaved-title" class="text-base font-semibold text-[#343534] dark:text-gray-100 mb-2">
+        Unsaved changes
+      </h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">
+        You have unsaved notification settings. Save them before leaving, or discard your changes.
+      </p>
+      <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+        <button type="button"
+                @click="discardChanges()"
+                class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:border-red-300 hover:text-red-500">
+          Discard changes
+        </button>
+        <button type="button"
+                @click="saveChanges(true)"
+                class="px-4 py-2 rounded-lg border border-[#B23149]/30 text-sm font-semibold text-[#B23149] hover:bg-[#B23149]/5">
+          Save and stay
+        </button>
+        <button type="button"
+                x-show="pendingUrl"
+                @click="saveChanges(false)"
+                class="px-4 py-2 rounded-lg bg-[#B23149] hover:bg-[#9a2a3f] text-white text-sm font-semibold">
+          Save and leave
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

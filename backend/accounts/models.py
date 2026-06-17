@@ -185,6 +185,7 @@ class UserNotificationSettings(models.Model):
     )
     slack_enabled = models.BooleanField(default=False)
     email_enabled = models.BooleanField(default=True)
+    in_app_enabled = models.BooleanField(default=True)
     # Legacy fields kept for migration compatibility.
     notify_new_workflow = models.BooleanField(default=True)
     notify_new_task = models.BooleanField(default=True)

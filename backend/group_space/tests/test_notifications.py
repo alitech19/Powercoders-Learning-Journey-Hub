@@ -31,7 +31,9 @@ class GroupChatNotificationTests(TestCase):
         )
         for student in (self.mentioned, self.watcher):
             settings = get_notification_settings(student)
+            settings.notify_group_chat_mentions = True
             settings.email_group_chat_mentions = True
+            settings.notify_group_chat_all_messages = True
             settings.email_group_chat_all_messages = True
             settings.slack_group_chat_mentions = False
             settings.slack_group_chat_all_messages = False
@@ -46,8 +48,9 @@ class GroupChatNotificationTests(TestCase):
 
     def test_notify_mention_creates_in_app_notification(self):
         settings = get_notification_settings(self.watcher)
+        settings.notify_group_chat_all_messages = False
         settings.email_group_chat_all_messages = False
-        settings.save(update_fields=['email_group_chat_all_messages'])
+        settings.save(update_fields=['notify_group_chat_all_messages', 'email_group_chat_all_messages'])
 
         post = make_post(
             self.space,
@@ -66,8 +69,9 @@ class GroupChatNotificationTests(TestCase):
 
     def test_notify_all_messages_when_enabled(self):
         settings = get_notification_settings(self.watcher)
+        settings.notify_group_chat_all_messages = True
         settings.email_group_chat_all_messages = True
-        settings.save(update_fields=['email_group_chat_all_messages'])
+        settings.save(update_fields=['notify_group_chat_all_messages', 'email_group_chat_all_messages'])
 
         post = make_post(self.space, self.author, body='General update')
         notify_group_chat_post(post)
@@ -82,14 +86,17 @@ class GroupChatNotificationTests(TestCase):
     def test_skips_author_and_does_not_email_when_all_messages_disabled(self):
         for student in (self.mentioned, self.watcher):
             settings = get_notification_settings(student)
+            settings.notify_group_chat_all_messages = False
             settings.email_group_chat_all_messages = False
-            settings.save(update_fields=['email_group_chat_all_messages'])
+            settings.save(
+                update_fields=['notify_group_chat_all_messages', 'email_group_chat_all_messages'],
+            )
 
         post = make_post(self.space, self.author, body='No mentions here')
         notify_group_chat_post(post)
 
         self.assertFalse(Notification.objects.filter(recipient=self.author).exists())
-        self.assertTrue(Notification.objects.filter(recipient=self.watcher).exists())
+        self.assertFalse(Notification.objects.filter(recipient=self.watcher).exists())
         self.assertEqual(len(mail.outbox), 0)
 
     @patch('group_space.notifications.dispatch_event')
@@ -113,8 +120,9 @@ class GroupChatNotificationTests(TestCase):
         teacher = make_teacher('teacher@example.com', display_name='Dana Teacher')
         assign_teacher(self.group, teacher)
         settings = get_notification_settings(teacher)
+        settings.notify_group_chat_mentions = True
         settings.email_group_chat_mentions = True
-        settings.save(update_fields=['email_group_chat_mentions'])
+        settings.save(update_fields=['notify_group_chat_mentions', 'email_group_chat_mentions'])
 
         post = make_post(self.space, self.author, body='Question for @"Dana Teacher"')
         notify_group_chat_post(post)

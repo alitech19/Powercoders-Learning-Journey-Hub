@@ -78,11 +78,38 @@ class DispatchEventTests(TestCase):
             ).exists()
         )
 
+    def test_skips_in_app_when_master_disabled(self):
+        settings = get_notification_settings(self.student)
+        settings.in_app_enabled = False
+        settings.notify_feedback = True
+        settings.save(update_fields=['in_app_enabled', 'notify_feedback'])
+
+        dispatch_event(
+            event_type=EventType.FEEDBACK,
+            recipients=[self.student],
+            title='Teacher left feedback',
+            body='Nice work',
+            url='/journal/1/',
+            dedupe_key='feedback:in-app-off',
+        )
+        self.assertEqual(Notification.objects.filter(recipient=self.student).count(), 0)
+        self.assertTrue(
+            NotificationDeliveryLog.objects.filter(
+                recipient=self.student,
+                channel=NotificationDeliveryLog.Channel.IN_APP,
+                status=NotificationDeliveryLog.Status.SKIPPED,
+            ).exists()
+        )
+
     def test_skips_all_channels_when_event_disabled(self):
         settings = get_notification_settings(self.student)
+        settings.in_app_enabled = True
         settings.email_feedback = False
         settings.slack_feedback = False
-        settings.save(update_fields=['email_feedback', 'slack_feedback'])
+        settings.notify_feedback = False
+        settings.save(
+            update_fields=['in_app_enabled', 'email_feedback', 'slack_feedback', 'notify_feedback'],
+        )
 
         dispatch_event(
             event_type=EventType.FEEDBACK,
@@ -92,7 +119,7 @@ class DispatchEventTests(TestCase):
             url='/journal/1/',
             dedupe_key='feedback:3',
         )
-        self.assertEqual(Notification.objects.filter(recipient=self.student).count(), 1)
+        self.assertEqual(Notification.objects.filter(recipient=self.student).count(), 0)
         self.assertEqual(len(mail.outbox), 0)
 
 
@@ -112,12 +139,20 @@ class NotificationSettingsViewTests(TestCase):
             reverse('accounts:notification_settings'),
             {
                 'email_enabled': 'on',
+                'in_app_enabled': 'on',
+                'slack_enabled': 'on',
                 'digest_mode': UserNotificationSettings.DigestMode.INSTANT,
+                'notify_feedback': 'on',
                 'email_feedback': 'on',
+                'notify_new_task': 'on',
                 'email_new_task': 'on',
+                'notify_new_goal': 'on',
                 'email_new_goal': 'on',
+                'notify_new_workflow': 'on',
                 'email_new_workflow': 'on',
+                'notify_deadline_reminder': 'on',
                 'email_deadline_reminder': 'on',
+                'notify_group_chat_mentions': 'on',
                 'email_group_chat_mentions': 'on',
                 'slack_feedback': 'on',
                 'slack_new_task': 'on',
@@ -133,3 +168,33 @@ class NotificationSettingsViewTests(TestCase):
         self.assertTrue(settings.email_feedback)
         self.assertEqual(settings.digest_mode, UserNotificationSettings.DigestMode.INSTANT)
         self.assertFalse(settings.slack_group_chat_all_messages)
+
+    def test_slack_master_disabled_when_not_connected(self):
+        response = self.client.post(
+            reverse('accounts:notification_settings'),
+            {
+                'email_enabled': 'on',
+                'in_app_enabled': 'on',
+                'slack_enabled': 'on',
+                'digest_mode': UserNotificationSettings.DigestMode.INSTANT,
+                'slack_feedback': 'on',
+                'timezone': 'Europe/Zurich',
+            },
+        )
+        self.assertRedirects(response, reverse('accounts:notification_settings'))
+        settings = UserNotificationSettings.objects.get(user=self.user)
+        self.assertFalse(settings.slack_enabled)
+        self.assertFalse(settings.slack_feedback)
+
+    def test_save_and_redirect_with_next(self):
+        response = self.client.post(
+            reverse('accounts:notification_settings'),
+            {
+                'email_enabled': 'on',
+                'in_app_enabled': 'on',
+                'digest_mode': UserNotificationSettings.DigestMode.INSTANT,
+                'timezone': 'Europe/Zurich',
+                'next': reverse('accounts:profile'),
+            },
+        )
+        self.assertRedirects(response, reverse('accounts:profile'))
