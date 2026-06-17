@@ -112,6 +112,7 @@ class NotificationSettingsViewTests(TestCase):
             reverse('accounts:notification_settings'),
             {
                 'email_enabled': 'on',
+                'digest_mode': UserNotificationSettings.DigestMode.INSTANT,
                 'email_feedback': 'on',
                 'email_new_task': 'on',
                 'email_new_goal': 'on',
@@ -130,4 +131,5 @@ class NotificationSettingsViewTests(TestCase):
         self.assertRedirects(response, reverse('accounts:notification_settings'))
         settings = UserNotificationSettings.objects.get(user=self.user)
         self.assertTrue(settings.email_feedback)
+        self.assertEqual(settings.digest_mode, UserNotificationSettings.DigestMode.INSTANT)
         self.assertFalse(settings.slack_group_chat_all_messages)

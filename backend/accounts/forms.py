@@ -92,6 +92,7 @@ class NotificationSettingsForm(forms.ModelForm):
         fields = [
             'email_enabled',
             'slack_enabled',
+            'digest_mode',
             'email_feedback',
             'email_new_task',
             'email_new_goal',
@@ -111,6 +112,7 @@ class NotificationSettingsForm(forms.ModelForm):
             'timezone',
         ]
         labels = {
+            'digest_mode': 'Email and Slack delivery',
             'email_feedback': 'Feedback from teachers',
             'email_new_task': 'New tasks',
             'email_new_goal': 'New goals',
@@ -125,6 +127,9 @@ class NotificationSettingsForm(forms.ModelForm):
             'slack_deadline_reminder': 'Deadline reminders',
             'slack_group_chat_mentions': 'Mentions in group chat',
             'slack_group_chat_all_messages': 'All group chat messages',
+        }
+        help_texts = {
+            'digest_mode': 'How often email and Slack notifications are delivered (in-app stays instant).',
         }
 
     _CHECKBOX_CLASS = (
@@ -145,6 +150,7 @@ class NotificationSettingsForm(forms.ModelForm):
             format='%H:%M',
         )
         self.fields['timezone'].widget.attrs.setdefault('class', _INPUT_CLASS)
+        self.fields['digest_mode'].widget.attrs.setdefault('class', _INPUT_CLASS)
 
     def save(self, commit=True):
         settings = super().save(commit=commit)

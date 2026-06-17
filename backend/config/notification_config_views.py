@@ -67,7 +67,9 @@ def notification_config_view(request):
             instance = form.save(commit=False)
             instance.updated_by = request.user
             instance.save()
-            _sync_beat_schedules(instance)
+            from config.notification_schedules import sync_notification_schedules
+
+            sync_notification_schedules(instance)
             messages.success(request, 'Notification settings saved.')
             return redirect('config:notification_config')
     else:
@@ -94,66 +96,3 @@ def _run_reminders_now(request, config):
         messages.error(request, f'Error running reminders: {exc}')
     return redirect('config:notification_config')
 
-
-def _sync_beat_schedules(config):
-    """Update or create django-celery-beat periodic tasks to match config."""
-    try:
-        from django_celery_beat.models import CrontabSchedule, PeriodicTask
-        import json
-
-        _sync_reflection_digest(config, CrontabSchedule, PeriodicTask)
-        _sync_deadline_reminders(config, CrontabSchedule, PeriodicTask)
-    except Exception:
-        pass
-
-
-def _sync_reflection_digest(config, CrontabSchedule, PeriodicTask):
-    dow_map = {
-        'monday': '1', 'tuesday': '2', 'wednesday': '3',
-        'thursday': '4', 'friday': '5', 'saturday': '6', 'sunday': '0',
-    }
-    import json
-
-    dow = dow_map.get(config.reflection_reminder_day, '1')
-    schedule, _ = CrontabSchedule.objects.get_or_create(
-        minute=str(config.reflection_reminder_minute),
-        hour=str(config.reflection_reminder_hour),
-        day_of_week=dow,
-        day_of_month='*',
-        month_of_year='*',
-        timezone='Europe/Zurich',
-    )
-    task, created = PeriodicTask.objects.update_or_create(
-        name='Weekly missing-reflections digest',
-        defaults={
-            'task': 'accounts.tasks.notify_missing_reflections',
-            'crontab': schedule,
-            'enabled': config.reflection_digest_enabled,
-            'args': json.dumps([]),
-        },
-    )
-    if not created and task.crontab_id != schedule.pk:
-        task.crontab = schedule
-        task.save(update_fields=['crontab'])
-
-
-def _sync_deadline_reminders(config, CrontabSchedule, PeriodicTask):
-    import json
-
-    schedule, _ = CrontabSchedule.objects.get_or_create(
-        minute='0',
-        hour='*',
-        day_of_week='*',
-        day_of_month='*',
-        month_of_year='*',
-        timezone='Europe/Zurich',
-    )
-    PeriodicTask.objects.update_or_create(
-        name='Hourly deadline reminders',
-        defaults={
-            'task': 'accounts.tasks.run_deadline_reminders_task',
-            'crontab': schedule,
-            'enabled': config.deadline_reminders_enabled,
-            'args': json.dumps([]),
-        },
-    )

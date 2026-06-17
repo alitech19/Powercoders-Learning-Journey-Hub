@@ -30,6 +30,7 @@ from google_storage.rate_limit import DriveUploadRateLimitError
 from google_storage.integration import composer_upload_context
 
 from . import snapshots
+from .notifications import notify_group_chat_post
 from .services import after_post_saved, get_group_space_for_group, load_post, resolve_group
 
 
@@ -140,6 +141,7 @@ def message_create(request):
                     request, user, group, composer_form=form,
                 )
         after_post_saved(post)
+        notify_group_chat_post(post)
         return _bubble_response(request, post, group)
 
     return _composer_error_response(request, user, group, composer_form=form)
@@ -213,6 +215,7 @@ def google_doc_create(request):
             form.add_error(None, str(exc))
             return _composer_error_response(request, user, group, gdoc_form=form, initial_gdoc=True)
         after_post_saved(post)
+        notify_group_chat_post(post)
         return _bubble_response(request, post, group)
 
     return _composer_error_response(request, user, group, gdoc_form=form, initial_gdoc=True)
@@ -258,6 +261,7 @@ def share_create(request):
     post.full_clean()
     post.save()
     after_post_saved(post)
+    notify_group_chat_post(post)
     return _bubble_response(request, post, group)
 
 

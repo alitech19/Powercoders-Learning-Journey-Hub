@@ -112,9 +112,9 @@ docker compose logs worker
 docker compose logs beat
 ```
 
-Worker should show `celery@... ready.` Beat should show scheduler started (no periodic tasks until you add them in admin or [plans/TODO.md](plans/TODO.md)).
+Worker should show `celery@... ready.` Beat should show scheduler started.
 
-**Periodic schedules:** Django admin → **Periodic tasks** (after `migrate` creates `django_celery_beat` tables).
+**Periodic schedules:** created automatically on `migrate` for deadline/reflection reminders (see **Administration → Notifications**). Hourly/daily user digests and weekly DB backup are registered from `CELERY_BEAT_SCHEDULE`. Verify in Django admin → **Periodic tasks**.
 
 Test the ping task:
 

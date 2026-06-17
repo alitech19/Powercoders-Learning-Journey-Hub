@@ -8,10 +8,21 @@ Deploy and Beat setup: [DEPLOY.md](../DEPLOY.md) · Local: [SETUP.md](../SETUP.m
 
 ## Near-term ops (no separate plan)
 
-- [ ] Register **weekly missing-reflections** in Django admin → **Periodic tasks** (`accounts.tasks.notify_missing_reflections`)
-- [ ] Production env: `SLACK_WEBHOOK_URL`, `SITE_URL` (global staff webhook — see [SLACK_INTEGRATION_PLAN.md](SLACK_INTEGRATION_PLAN.md))
+- [x] Global reminder schedule via **Administration → Notifications** (`/admin-config/notifications/`) — saves Celery Beat tasks automatically
+- [ ] Production env: `SLACK_WEBHOOK_URL`, `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, `SITE_URL`
+- [ ] After deploy: `python manage.py migrate` on web + beat services
 
-Beat admin: http://localhost:8000/admin/django_celery_beat/
+Beat admin: http://localhost:8000/admin/django_celery_beat/periodictask/
+
+Expected periodic tasks (created on migrate or when saving Notification Management):
+
+| Task name | Celery task |
+|-----------|-------------|
+| Hourly deadline reminders | `accounts.tasks.run_deadline_reminders_task` |
+| Weekly missing-reflections digest | `accounts.tasks.notify_missing_reflections` |
+| Hourly notification digests | `accounts.tasks.dispatch_hourly_notification_digests_task` |
+| Daily notification digests | `accounts.tasks.dispatch_daily_notification_digests_task` |
+| Weekly DB backup | `config.tasks.backup_database` |
 
 ---
 
@@ -21,13 +32,16 @@ Plan: **[SLACK_INTEGRATION_PLAN.md](SLACK_INTEGRATION_PLAN.md)**
 
 | Feature | Status |
 |---------|--------|
-| Global staff webhook (feedback, new user, missing reflections digest) | Partially done |
-| Per-user notification settings (in-app / email toggles) | Done (Phase 0) |
-| Unified notification dispatcher (dedupe, delivery log) | Done (Phase 0 — in-app + email) |
-| Per-user Slack OAuth (connect / disconnect) | Done (Phase 1 MVP) |
-| Personal Slack DM via dispatcher (feedback) | Done (Phase 1 MVP) |
+| Global staff webhook (feedback, new user, missing reflections digest) | Done |
+| Per-user notification settings (in-app / email / Slack toggles) | Done |
+| Unified notification dispatcher (dedupe, delivery log) | Done |
+| Per-user Slack OAuth (connect / disconnect) | Done |
+| Personal Slack DM via dispatcher | Done |
 | Assignment notifications (task / goal / workflow) | Done |
-| Slack DM: feedback, new task/goal/workflow, deadline reminders | Planned |
+| Slack DM: feedback, new task/goal/workflow, deadline reminders | Done |
+| Digest mode (hourly / daily email + Slack) | Done |
+| Global reminder admin UI (deadline + reflection digest schedule) | Done |
+| Group chat in-app / email / Slack (mentions + all messages) | Done |
 | Group chat → Slack channel sync (one-way) | Planned |
 | Group chat ↔ Slack (two-way) + thread → flat reply links | Planned |
 
@@ -40,7 +54,8 @@ Plan: **[SCHEDULING_AND_REMINDERS_PLAN.md](SCHEDULING_AND_REMINDERS_PLAN.md)**
 | Feature | Status |
 |---------|--------|
 | Scheduled publish (`publish_at`) for task / goal / workflow | Planned |
-| Entity deadline reminders (24h, 2h, overdue) | Planned |
+| Entity deadline reminders (24h, 2h, overdue) | Done |
+| Global reminder schedule (admin UI + Celery Beat) | Done |
 | Standalone reminders — one-time (staff) | Planned |
 | Standalone reminders — recurring (daily / weekly / monthly) | Planned |
 | Central scheduler (`ScheduledAction`) + delivery log | Planned |
