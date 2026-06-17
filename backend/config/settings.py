@@ -247,10 +247,6 @@ BACKUP_RETENTION_DAYS = int(os.environ.get('BACKUP_RETENTION_DAYS', '30'))
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@powercoders.org')
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8000').rstrip('/')
-SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL', '').strip()
-SLACK_CLIENT_ID = os.environ.get('SLACK_CLIENT_ID', '').strip()
-SLACK_CLIENT_SECRET = os.environ.get('SLACK_CLIENT_SECRET', '').strip()
-SLACK_REDIRECT_URI = os.environ.get('SLACK_REDIRECT_URI', '').strip()
 
 # Email — Brevo HTTP API (works on Render free tier; SMTP ports are blocked there)
 BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')

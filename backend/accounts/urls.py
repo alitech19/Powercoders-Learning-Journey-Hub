@@ -4,7 +4,7 @@ from django.views.generic import RedirectView
 
 from google_storage import views as google_storage_views
 
-from . import management_views, privacy_views, slack_views, views
+from . import management_views, privacy_views, slack_settings_views, slack_views, views
 
 app_name = 'accounts'
 
@@ -52,6 +52,17 @@ urlpatterns = [
     path('slack/callback/', slack_views.slack_callback, name='slack_callback'),
     path('slack/disconnect/', slack_views.slack_disconnect, name='slack_disconnect'),
     path('slack/test/', slack_views.slack_test_message, name='slack_test_message'),
+    path('slack/settings/', slack_settings_views.slack_settings, name='slack_settings'),
+    path(
+        'slack/settings/test-webhook/',
+        slack_settings_views.slack_test_webhook,
+        name='slack_test_webhook',
+    ),
+    path(
+        'slack/settings/validate-oauth/',
+        slack_settings_views.slack_validate_oauth,
+        name='slack_validate_oauth',
+    ),
     path(
         'notifications/<int:pk>/read/',
         privacy_views.notification_mark_read,

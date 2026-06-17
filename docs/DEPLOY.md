@@ -214,8 +214,7 @@ Create one **Environment Group** in Render and attach it to all three services. 
 | `SECRET_KEY` | Long random string; never commit |
 | `POSTGRES_*` | From Render Postgres (**internal** host) |
 | `REDIS_URL` / `CELERY_BROKER_URL` | Internal Redis URL (`rediss://` if TLS) |
-| `SLACK_WEBHOOK_URL` | Optional — staff channel digest for missing reflections |
-| `SLACK_CLIENT_ID` / `SLACK_CLIENT_SECRET` | Optional — per-user Slack OAuth (notification settings) |
+| Slack (OAuth + staff webhook) | **Administration → Slack integration** in the app (encrypted in DB) — not `.env` |
 | `EMAIL_HOST`, … | Only if using SMTP instead of console backend |
 
 **Removed:** `REFLECTION_REMINDER_HOUR`, `REFLECTION_REMINDER_MINUTE`, `REFLECTION_REMINDER_DAY` — use **Administration → Notifications** instead.

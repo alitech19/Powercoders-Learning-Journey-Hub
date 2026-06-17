@@ -102,6 +102,13 @@ class AdministrationHelpRegistryTests(SimpleTestCase):
         self.assertIn('notification-settings', section_ids)
         self.assertIn('notifications', section_ids)
 
+    def test_slack_integration_topic_loads(self):
+        topic = load_topic('slack_integration')
+        self.assertEqual(topic.app_slug, 'slack_integration')
+        section_ids = {s.section_id for s in topic.sections}
+        self.assertIn('personal-oauth', section_ids)
+        self.assertIn('staff-webhook', section_ids)
+
     def test_anonymous_page_help_disabled(self):
         factory = RequestFactory()
         request = factory.get('/accounts/cohorts/')

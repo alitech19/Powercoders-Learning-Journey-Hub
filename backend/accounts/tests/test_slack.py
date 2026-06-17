@@ -8,19 +8,18 @@ from accounts.notifications.constants import EventType
 from accounts.notifications.dispatcher import dispatch_event
 from accounts.notifications.settings import get_notification_settings
 from accounts.slack_provider import SlackApiError, build_authorize_url, exchange_oauth_code
+from test_utils.slack import clear_slack_workspace_config, configure_slack_oauth
 from test_utils.users import login_as, make_student
 
 
-@override_settings(
-    SLACK_CLIENT_ID='test-client-id',
-    SLACK_CLIENT_SECRET='test-client-secret',
-    SITE_URL='http://testserver',
-)
+@override_settings(SITE_URL='http://testserver')
 class SlackOAuthViewTests(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = make_student('slack-oauth@example.com')
         login_as(self.client, self.user)
+        clear_slack_workspace_config()
+        configure_slack_oauth()
 
     def test_connect_redirects_to_slack(self):
         response = self.client.get(reverse('accounts:slack_connect'))
@@ -126,7 +125,10 @@ class SlackDispatcherTests(TestCase):
 
 
 class SlackProviderTests(TestCase):
-    @override_settings(SLACK_CLIENT_ID='client', SLACK_CLIENT_SECRET='secret')
+    def setUp(self):
+        clear_slack_workspace_config()
+        configure_slack_oauth(client_id='client', secret='secret')
+
     def test_build_authorize_url_contains_user_scope(self):
         url = build_authorize_url(
             state='abc',
@@ -134,7 +136,6 @@ class SlackProviderTests(TestCase):
         )
         self.assertIn('user_scope=chat%3Awrite%2Cim%3Awrite', url)
 
-    @override_settings(SLACK_CLIENT_ID='client', SLACK_CLIENT_SECRET='secret')
     @patch('urllib.request.urlopen')
     def test_exchange_oauth_code_parses_user_token(self, mock_urlopen):
         mock_response = MagicMock()

@@ -14,11 +14,14 @@ function notificationSettingsPage(config) {
 
     init() {
       this.$nextTick(() => {
-        this.initialSnapshot = this.formSnapshot();
         this.syncChannels();
+        this.initialSnapshot = this.formSnapshot();
       });
       this.$refs.settingsForm?.addEventListener('change', () => this.updateDirty());
       this.$refs.settingsForm?.addEventListener('input', () => this.updateDirty());
+      this.$refs.settingsForm?.addEventListener('submit', () => {
+        this.dirty = false;
+      });
       this._beforeUnload = (event) => {
         if (!this.dirty) return;
         event.preventDefault();
@@ -160,7 +163,7 @@ function notificationSettingsPage(config) {
     <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Slack connection</h2>
 
     {% if not slack_configured %}
-    <p class="text-sm text-gray-500">Slack OAuth is not configured on this server yet.</p>
+    <p class="text-sm text-gray-500">Slack OAuth is not configured yet. Admins can set it up under <strong>Administration → Slack integration</strong>.</p>
     {% elif slack_connected %}
     <p class="text-sm text-green-600 dark:text-green-400">Connected to Slack.</p>
     <div class="flex flex-wrap gap-2">
@@ -295,7 +298,7 @@ function notificationSettingsPage(config) {
 
     <div class="flex items-center gap-3">
       <button type="submit"
-              @click="$refs.nextField.value = ''"
+              @click="$refs.nextField.value = ''; dirty = false"
               class="px-5 py-2.5 rounded-lg bg-[#B23149] hover:bg-[#9a2a3f] text-white text-sm font-semibold transition-colors">
         Save settings
       </button>

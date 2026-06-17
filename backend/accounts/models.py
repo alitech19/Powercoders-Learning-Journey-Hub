@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
-from google_storage.crypto import decrypt_secret, encrypt_secret
+from google_storage.crypto import decrypt_secret, encrypt_secret, mask_secret
 
 
 class UserManager(BaseUserManager):
@@ -356,6 +356,73 @@ class NotificationDigestItem(models.Model):
 
     def __str__(self):
         return f'DigestItem {self.channel} {self.digest_bucket} — {self.recipient_id} ({self.event_key})'
+
+
+class SlackWorkspaceConfig(models.Model):
+    """Singleton — Slack OAuth and staff webhook credentials (encrypted in DB)."""
+
+    id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
+    oauth_enabled = models.BooleanField(
+        default=False,
+        help_text='Allow users to connect personal Slack for notification DMs.',
+    )
+    oauth_client_id = models.CharField(max_length=255, blank=True)
+    oauth_client_secret_encrypted = models.TextField(blank=True)
+    oauth_redirect_uri = models.URLField(blank=True, max_length=512)
+    webhook_enabled = models.BooleanField(
+        default=False,
+        help_text='Post staff-channel digests (e.g. missing reflections) via incoming webhook.',
+    )
+    webhook_url_encrypted = models.TextField(blank=True)
+    last_webhook_test_at = models.DateTimeField(null=True, blank=True)
+    last_webhook_ok = models.BooleanField(null=True, blank=True)
+    last_error = models.TextField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='slack_workspace_config_updates',
+    )
+
+    class Meta:
+        verbose_name = 'Slack workspace configuration'
+        verbose_name_plural = 'Slack workspace configuration'
+
+    def __str__(self):
+        return 'Slack workspace configuration'
+
+    def save(self, *args, **kwargs):
+        self.id = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get(cls):
+        obj, _ = cls.objects.get_or_create(id=1)
+        return obj
+
+    def set_oauth_client_secret(self, secret: str) -> None:
+        secret = (secret or '').strip()
+        self.oauth_client_secret_encrypted = encrypt_secret(secret) if secret else ''
+
+    def get_oauth_client_secret(self) -> str:
+        return decrypt_secret(self.oauth_client_secret_encrypted)
+
+    def set_webhook_url(self, url: str) -> None:
+        url = (url or '').strip()
+        self.webhook_url_encrypted = encrypt_secret(url) if url else ''
+
+    def get_webhook_url(self) -> str:
+        return decrypt_secret(self.webhook_url_encrypted)
+
+    @property
+    def masked_oauth_client_secret(self) -> str:
+        return mask_secret(self.get_oauth_client_secret())
+
+    @property
+    def masked_webhook_url(self) -> str:
+        return mask_secret(self.get_webhook_url())
 
 
 class SlackIntegration(models.Model):

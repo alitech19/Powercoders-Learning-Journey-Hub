@@ -75,6 +75,7 @@ ROUTE_MAP: dict[str, tuple[str, str]] = {
     'accounts:notifications': ('accounts', 'notifications'),
     'accounts:notification_settings': ('accounts', 'notification-settings'),
     'accounts:storage_settings': ('google_drive', 'student-oauth-gcp'),
+    'accounts:slack_settings': ('slack_integration', 'admin-quick-start'),
     # Administration (in-app staff UI)
     'accounts:cohort_list': ('administration', 'cohorts-groups'),
     'accounts:cohort_create': ('administration', 'cohorts-groups'),
@@ -169,6 +170,7 @@ HELP_LABELS: dict[str, str] = {
     'accounts:notifications': 'Notification centre',
     'accounts:notification_settings': 'Notification settings',
     'accounts:storage_settings': 'File storage',
+    'accounts:slack_settings': 'Slack integration',
     'accounts:cohort_list': 'Cohorts & Groups',
     'accounts:cohort_create': 'New cohort',
     'accounts:cohort_edit': 'Edit cohort',
@@ -200,6 +202,7 @@ ALLOWED_APP_SLUGS = frozenset(
         'accounts',
         'google_drive',
         'administration',
+        'slack_integration',
     }
 )
 

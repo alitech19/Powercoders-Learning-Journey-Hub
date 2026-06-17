@@ -8,7 +8,12 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from django.conf import settings
+from .slack_workspace_config import (
+    resolve_oauth_client_id,
+    resolve_oauth_client_secret,
+    resolve_oauth_redirect_uri,
+    slack_oauth_configured,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,14 +29,12 @@ class SlackApiError(Exception):
         self.error_code = error_code
 
 
-def slack_oauth_configured() -> bool:
-    return bool(settings.SLACK_CLIENT_ID and settings.SLACK_CLIENT_SECRET)
-
-
 def default_redirect_uri(request) -> str:
-    configured = getattr(settings, 'SLACK_REDIRECT_URI', '').strip()
+    configured = resolve_oauth_redirect_uri()
     if configured:
         return configured
+    from django.conf import settings
+
     site = getattr(settings, 'SITE_URL', '').rstrip('/')
     if site:
         return f'{site}/accounts/slack/callback/'
@@ -41,7 +44,7 @@ def default_redirect_uri(request) -> str:
 def build_authorize_url(*, state: str, redirect_uri: str) -> str:
     params = urllib.parse.urlencode(
         {
-            'client_id': settings.SLACK_CLIENT_ID,
+            'client_id': resolve_oauth_client_id(),
             'user_scope': USER_SCOPES,
             'redirect_uri': redirect_uri,
             'state': state,
@@ -53,8 +56,8 @@ def build_authorize_url(*, state: str, redirect_uri: str) -> str:
 def exchange_oauth_code(*, code: str, redirect_uri: str) -> dict:
     payload = urllib.parse.urlencode(
         {
-            'client_id': settings.SLACK_CLIENT_ID,
-            'client_secret': settings.SLACK_CLIENT_SECRET,
+            'client_id': resolve_oauth_client_id(),
+            'client_secret': resolve_oauth_client_secret(),
             'code': code,
             'redirect_uri': redirect_uri,
         },
@@ -154,3 +157,15 @@ def revoke_access_token(token: str) -> None:
         return
     if not data.get('ok'):
         logger.warning('Slack token revoke returned error: %s', data.get('error'))
+
+
+__all__ = [
+    'SlackApiError',
+    'USER_SCOPES',
+    'build_authorize_url',
+    'default_redirect_uri',
+    'exchange_oauth_code',
+    'revoke_access_token',
+    'send_user_dm',
+    'slack_oauth_configured',
+]

@@ -1,13 +1,15 @@
 import json
 import urllib.request
 
-from django.conf import settings
+from .slack_workspace_config import resolve_webhook_url, staff_webhook_configured
 
 
-def send_slack_message(text):
-    url = getattr(settings, 'SLACK_WEBHOOK_URL', '') or ''
+def send_slack_message(text) -> bool:
+    if not staff_webhook_configured():
+        return False
+    url = resolve_webhook_url()
     if not url:
-        return
+        return False
     payload = json.dumps({'text': text}).encode()
     req = urllib.request.Request(
         url,
@@ -16,5 +18,6 @@ def send_slack_message(text):
     )
     try:
         urllib.request.urlopen(req, timeout=5)
+        return True
     except Exception:
-        pass
+        return False
