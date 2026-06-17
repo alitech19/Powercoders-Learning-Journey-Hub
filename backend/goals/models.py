@@ -51,6 +51,13 @@ class Goal(models.Model):
         choices=Visibility.choices,
         default=Visibility.PRIVATE,
     )
+    resource_container = models.ForeignKey(
+        'resources.ResourceContainer',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='goals',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

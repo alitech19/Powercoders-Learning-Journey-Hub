@@ -31,6 +31,10 @@ def can_view_container(user, container):
         from group_space.permissions import can_access_project_space
 
         return can_access_project_space(user, container.project_space)
+    if container.container_type == ResourceContainer.ContainerType.THEMATIC:
+        from .entity_links import can_view_container_via_entity_link
+
+        return can_view_container_via_entity_link(user, container)
     return False
 
 

@@ -332,6 +332,15 @@ def create_tasks_bulk(*, user, post):
 
     _create_template_subtasks(task, post)
 
+    from resources.entity_links import apply_entity_resource_container
+
+    apply_entity_resource_container(
+        entity=task,
+        user=user,
+        post=post,
+        assignee_group=None,
+    )
+
     initial_status = _parse_initial_status(post)
     for student in students:
         enrollment = TaskEnrollment.objects.create(
@@ -378,6 +387,15 @@ def create_group_task(*, user, post):
     )
 
     _create_template_subtasks(task, post)
+
+    from resources.entity_links import apply_entity_resource_container
+
+    apply_entity_resource_container(
+        entity=task,
+        user=user,
+        post=post,
+        assignee_group=group,
+    )
 
     enrolled_students = list(get_active_students_for_group(group))
     for student in enrolled_students:

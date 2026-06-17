@@ -23,6 +23,8 @@ from cohorts.permissions import (
 
 from feedback.services import build_section_context
 
+from resources.entity_links import apply_entity_resource_container, entity_materials_context, resource_container_picker_context
+
 from .forms import SubtaskForm, TaskCommentForm, TaskForm, TaskUpdateForm
 from .models import Subtask, SubtaskEnrollment, Task, TaskComment, TaskEnrollment, TaskUpdate
 from .permissions import (
@@ -75,6 +77,7 @@ def _task_queryset():
             'assignee_group',
             'assignee_group__cohort',
             'assignee_cohort',
+            'resource_container',
         )
         .prefetch_related(
             'subtasks',
@@ -517,6 +520,7 @@ def task_create(request):
     }
     if user_is_staff(request.user):
         context.update(get_assignment_form_context(request.user))
+        context.update(resource_container_picker_context(request.user))
     return render(request, 'tasks/task_form.html', context)
 
 
@@ -548,6 +552,7 @@ def task_detail(request, pk):
             'show_comments': False,
             'status_choices': Task.Status.choices,
             'today': timezone.localdate(),
+            **entity_materials_context(user, task),
         }
         if ctx['show_subtasks']:
             ctx.update(_subtask_ctx(user, enrollment))
@@ -575,6 +580,7 @@ def task_detail(request, pk):
             'show_comments': task_allows_comments(task) and can_content,
             'status_choices': Task.Status.choices,
             'today': timezone.localdate(),
+            **entity_materials_context(user, task),
         }
         if ctx['show_subtasks']:
             ctx.update(_subtask_ctx(user, enrollment))
@@ -673,6 +679,7 @@ def task_detail(request, pk):
                 'can_add_participant_subtask': False,
                 'show_staff_subtasks': True,
             })
+    ctx.update(entity_materials_context(user, task))
     return render(request, 'tasks/task_detail.html', ctx)
 
 
@@ -706,6 +713,13 @@ def task_edit(request, pk):
             )
         if form.is_valid():
             form.save()
+            if is_staff_assigned(task):
+                apply_entity_resource_container(
+                    entity=task,
+                    user=request.user,
+                    post=request.POST,
+                    assignee_group=task.assignee_group,
+                )
             if enrollment and 'status' in form.cleaned_data:
                 enrollment.status = form.cleaned_data['status']
                 enrollment.save(update_fields=['status', 'completed_at'])
@@ -733,7 +747,7 @@ def task_edit(request, pk):
                 initial=task.status,
             )
 
-    return render(request, 'tasks/task_form.html', {
+    context = {
         'form': form,
         'action': 'edit',
         'task': task,
@@ -742,7 +756,16 @@ def task_edit(request, pk):
         'visibility_mode': _visibility_form_mode(request.user, task=task),
         'status_choices': Task.Status.choices,
         'priority_choices': Task.Priority.choices,
-    })
+    }
+    if is_staff_assigned(task):
+        context.update(
+            resource_container_picker_context(
+                request.user,
+                entity_title=task.title,
+                linked_container=task.resource_container,
+            ),
+        )
+    return render(request, 'tasks/task_form.html', context)
 
 
 @login_required

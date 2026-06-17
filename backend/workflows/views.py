@@ -21,6 +21,8 @@ from .permissions import (
     get_visible_workflows_for_user,
     shared_progress_pct,
 )
+from resources.entity_links import entity_materials_context, resource_container_picker_context
+
 from .services import (
     create_workflow,
     get_assignment_form_context,
@@ -33,6 +35,7 @@ def _get_workflow_or_404(user, pk):
     workflow = get_object_or_404(
         Workflow.objects.select_related(
             'created_by', 'assignee_cohort', 'assignee_group', 'assignee_group__cohort',
+            'resource_container',
         ).prefetch_related('steps', 'completions'),
         pk=pk,
     )
@@ -107,6 +110,7 @@ def workflow_create(request):
         'editing': False,
         'workflow': None,
         **get_assignment_form_context(request.user),
+        **resource_container_picker_context(request.user),
     }
     return render(request, 'workflows/form.html', context)
 
@@ -134,6 +138,7 @@ def workflow_detail(request, pk):
             'step_data': build_step_data(user, workflow),
             'progress': progress,
             'can_toggle': True,
+            **entity_materials_context(user, workflow),
         }
     else:
         enrollments = (
@@ -171,6 +176,7 @@ def workflow_detail(request, pk):
             'enrollments': enrollments,
             'assigned_count': assigned_students.count(),
             'available_students': available_students,
+            **entity_materials_context(user, workflow),
         }
 
     return render(request, 'workflows/detail.html', context)
@@ -189,7 +195,7 @@ def workflow_edit(request, pk):
                 update_workflow_assignment(workflow=workflow, user=request.user, post=request.POST)
                 messages.success(request, 'Assignment updated.')
             else:
-                update_workflow_metadata(workflow=workflow, post=request.POST)
+                update_workflow_metadata(workflow=workflow, user=request.user, post=request.POST)
                 messages.success(request, 'Workflow updated.')
             return redirect('workflows:detail', pk=workflow.pk)
         except ValidationError as exc:
@@ -202,6 +208,11 @@ def workflow_edit(request, pk):
         'metadata_form': WorkflowMetadataForm(instance=workflow),
         'enrolled_ids': enrolled_ids,
         **get_assignment_form_context(request.user),
+        **resource_container_picker_context(
+            request.user,
+            entity_title=workflow.title,
+            linked_container=workflow.resource_container,
+        ),
     }
     return render(request, 'workflows/form.html', context)
 

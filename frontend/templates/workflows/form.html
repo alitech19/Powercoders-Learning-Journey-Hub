@@ -49,6 +49,7 @@
           <option value="private" {% if workflow.visibility == 'private' %}selected{% endif %}>Private</option>
         </select>
       </div>
+      {% include "includes/_resource_container_picker.html" %}
       <button type="submit" class="bg-[#343534] hover:bg-[#B23149] text-white text-sm font-semibold px-4 py-2 rounded-lg">
         Save details
       </button>
@@ -171,6 +172,7 @@
     </div>
 
     {% if not editing %}
+    {% include "includes/_resource_container_picker.html" %}
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-sm font-semibold">Steps</h2>

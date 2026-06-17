@@ -134,6 +134,15 @@ def create_workflow(*, user, post):
     workflow.full_clean()
     workflow.save()
 
+    from resources.entity_links import apply_entity_resource_container
+
+    apply_entity_resource_container(
+        entity=workflow,
+        user=user,
+        post=post,
+        assignee_group=group,
+    )
+
     for step_data in steps:
         WorkflowStep.objects.create(workflow=workflow, **step_data)
 
@@ -156,7 +165,7 @@ def create_workflow(*, user, post):
 
 
 @transaction.atomic
-def update_workflow_metadata(*, workflow, post):
+def update_workflow_metadata(*, workflow, user, post):
     title = post.get('title', '').strip()
     if not title:
         raise ValidationError('Title is required.')
@@ -169,6 +178,15 @@ def update_workflow_metadata(*, workflow, post):
     workflow.description = post.get('description', '').strip()
     workflow.visibility = visibility
     workflow.save(update_fields=['title', 'description', 'visibility', 'updated_at'])
+
+    from resources.entity_links import apply_entity_resource_container
+
+    apply_entity_resource_container(
+        entity=workflow,
+        user=user,
+        post=post,
+        assignee_group=workflow.assignee_group,
+    )
     return workflow
 
 

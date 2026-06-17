@@ -18,6 +18,7 @@
         {% if workflow.description %}
         <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">{{ workflow.description }}</p>
         {% endif %}
+        {% include "includes/_entity_materials_link.html" %}
       </div>
       {% if view_as == 'staff' and can_manage %}
       <div class="flex gap-2 flex-shrink-0">

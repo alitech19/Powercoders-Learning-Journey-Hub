@@ -77,6 +77,8 @@
     <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">{{ goal.description }}</p>
     {% endif %}
 
+    {% include "includes/_entity_materials_link.html" %}
+
     {% if view_as == 'student' %}
     {% include "goals/_goal_progress.html" %}
     {% else %}

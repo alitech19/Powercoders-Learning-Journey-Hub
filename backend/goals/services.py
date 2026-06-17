@@ -222,6 +222,15 @@ def create_goals_bulk(*, user, post):
     for ms in parse_milestones_from_post(post):
         Milestone.objects.create(goal=goal, **ms)
 
+    from resources.entity_links import apply_entity_resource_container
+
+    apply_entity_resource_container(
+        entity=goal,
+        user=user,
+        post=post,
+        assignee_group=group,
+    )
+
     from accounts.notifications.scheduling import schedule_goal_assigned
 
     schedule_goal_assigned(goal=goal, students=students, actor=user)
