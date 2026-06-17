@@ -74,6 +74,34 @@ class AdministrationHelpRegistryTests(SimpleTestCase):
         self.assertIn('student-progress', ids)
         self.assertNotIn('cohorts-groups', ids)
 
+    def test_resolve_help_for_notification_settings(self):
+        factory = RequestFactory()
+        request = factory.get('/accounts/notifications/settings/')
+        request.user = User(role=User.Role.STUDENT, email='s@example.com')
+        request.resolver_match = type(
+            'M',
+            (),
+            {
+                'view_name': 'accounts:notification_settings',
+                'url_name': 'notification_settings',
+                'namespace': 'accounts',
+            },
+        )()
+        target = resolve_help_target(request)
+        self.assertEqual(
+            target,
+            ('accounts.notification_settings', 'accounts', 'notification-settings'),
+        )
+        help_meta = resolve_page_help(request)
+        self.assertTrue(help_meta.enabled)
+        self.assertIn('notification-settings', help_meta.url)
+
+    def test_accounts_topic_has_notification_settings_section(self):
+        topic = load_topic('accounts')
+        section_ids = {s.section_id for s in topic.sections}
+        self.assertIn('notification-settings', section_ids)
+        self.assertIn('notifications', section_ids)
+
     def test_anonymous_page_help_disabled(self):
         factory = RequestFactory()
         request = factory.get('/accounts/cohorts/')

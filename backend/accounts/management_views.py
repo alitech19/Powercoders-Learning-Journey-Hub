@@ -97,6 +97,9 @@ def user_create(request):
 
             send_welcome_email(created_user, temp_password)
             send_new_user_slack(created_user)
+            from accounts.notifications.staff_events import notify_new_user_account
+
+            notify_new_user_account(created_user=created_user, created_by=request.user)
             messages.success(request, f'User {display_name} created. Share the temporary password securely.')
             form = CreateUserForm(creator=user)
     else:
@@ -166,6 +169,9 @@ def user_import(request):
 
             send_welcome_email(new_user, temp_pw)
             send_new_user_slack(new_user)
+            from accounts.notifications.staff_events import notify_new_user_account
+
+            notify_new_user_account(created_user=new_user, created_by=request.user)
             created.append(
                 {
                     'row': i,

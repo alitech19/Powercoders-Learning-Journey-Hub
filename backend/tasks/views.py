@@ -10,6 +10,10 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from accounts.models import User
+from accounts.notifications.staff_events import (
+    maybe_notify_workflow_completed,
+    notify_student_task_completed,
+)
 from cohorts.permissions import (
     get_teacher_accessible_students,
     user_is_admin,
@@ -705,6 +709,11 @@ def task_edit(request, pk):
             if enrollment and 'status' in form.cleaned_data:
                 enrollment.status = form.cleaned_data['status']
                 enrollment.save(update_fields=['status', 'completed_at'])
+                if (
+                    enrollment.status == Task.Status.DONE
+                    and user_is_student(request.user)
+                ):
+                    notify_student_task_completed(student=request.user, task=task)
             elif task.is_group_shared and 'status' in form.cleaned_data:
                 task.status = form.cleaned_data['status']
                 task.save(update_fields=['status', 'completed_at'])
@@ -768,6 +777,8 @@ def task_quick_status(request, pk):
             return HttpResponseForbidden()
         enrollment.status = status
         enrollment.save(update_fields=['status', 'completed_at'])
+        if status == Task.Status.DONE and user_is_student(request.user):
+            notify_student_task_completed(student=request.user, task=task)
 
     ctx = _task_status_context(request.user, task, enrollment)
     if request.GET.get('inline') == 'list':

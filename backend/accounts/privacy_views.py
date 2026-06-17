@@ -10,7 +10,10 @@ from .data_export import build_user_data_markdown
 from .forms import NotificationSettingsForm
 from .models import Notification, SlackIntegration
 from .notifications.settings import get_notification_settings
-from .notifications.ui_constants import NOTIFICATION_EVENT_ROWS
+from .notifications.ui_constants import (
+    notification_rows_for_user,
+    notification_settings_intro_for_user,
+)
 from .slack_provider import slack_oauth_configured
 
 User = get_user_model()
@@ -54,6 +57,7 @@ def notification_settings(request):
         form = NotificationSettingsForm(
             request.POST,
             instance=settings,
+            user=request.user,
             slack_connected=slack_connected,
         )
         if form.is_valid():
@@ -68,7 +72,11 @@ def notification_settings(request):
                 return redirect(next_url)
             return redirect('accounts:notification_settings')
     else:
-        form = NotificationSettingsForm(instance=settings, slack_connected=slack_connected)
+        form = NotificationSettingsForm(
+            instance=settings,
+            user=request.user,
+            slack_connected=slack_connected,
+        )
     notification_rows = [
         {
             'label': row['label'],
@@ -76,7 +84,7 @@ def notification_settings(request):
             'email': form[row['email_field']],
             'slack': form[row['slack_field']],
         }
-        for row in NOTIFICATION_EVENT_ROWS
+        for row in notification_rows_for_user(request.user)
     ]
     return render(
         request,
@@ -87,6 +95,7 @@ def notification_settings(request):
             'slack_configured': slack_oauth_configured(),
             'slack_integration': slack_integration,
             'slack_connected': slack_connected,
+            'notification_intro': notification_settings_intro_for_user(request.user),
         },
     )
 

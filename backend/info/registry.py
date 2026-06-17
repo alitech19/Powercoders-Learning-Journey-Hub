@@ -72,6 +72,8 @@ ROUTE_MAP: dict[str, tuple[str, str]] = {
     'resources:item_delete': ('resources', 'form-delete'),
     # Accounts
     'accounts:profile': ('accounts', 'profile'),
+    'accounts:notifications': ('accounts', 'notifications'),
+    'accounts:notification_settings': ('accounts', 'notification-settings'),
     'accounts:storage_settings': ('google_drive', 'student-oauth-gcp'),
     # Administration (in-app staff UI)
     'accounts:cohort_list': ('administration', 'cohorts-groups'),
@@ -164,6 +166,8 @@ HELP_LABELS: dict[str, str] = {
     'group_space:feed': 'Group chat',
     'resources:index': 'Resources',
     'accounts:profile': 'Profile',
+    'accounts:notifications': 'Notification centre',
+    'accounts:notification_settings': 'Notification settings',
     'accounts:storage_settings': 'File storage',
     'accounts:cohort_list': 'Cohorts & Groups',
     'accounts:cohort_create': 'New cohort',

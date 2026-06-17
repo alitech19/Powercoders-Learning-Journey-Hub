@@ -19,6 +19,7 @@ from .notifications.form_choices import (
     parse_optional_quiet_hour,
 )
 from .notifications.settings import get_notification_settings, sync_email_enabled
+from .notifications.ui_constants import notification_form_fields_for_user
 
 
 _INPUT_CLASS = (
@@ -127,6 +128,30 @@ class NotificationSettingsForm(forms.ModelForm):
             'notify_group_chat_all_messages',
             'email_group_chat_all_messages',
             'slack_group_chat_all_messages',
+            'notify_student_task_completed',
+            'email_student_task_completed',
+            'slack_student_task_completed',
+            'notify_student_goal_completed',
+            'email_student_goal_completed',
+            'slack_student_goal_completed',
+            'notify_student_workflow_completed',
+            'email_student_workflow_completed',
+            'slack_student_workflow_completed',
+            'notify_student_reflection_submitted',
+            'email_student_reflection_submitted',
+            'slack_student_reflection_submitted',
+            'notify_student_deadline_overdue',
+            'email_student_deadline_overdue',
+            'slack_student_deadline_overdue',
+            'notify_bug_report_new',
+            'email_bug_report_new',
+            'slack_bug_report_new',
+            'notify_bug_report_reopened',
+            'email_bug_report_reopened',
+            'slack_bug_report_reopened',
+            'notify_new_user_account',
+            'email_new_user_account',
+            'slack_new_user_account',
             'quiet_hours_start',
             'quiet_hours_end',
             'timezone',
@@ -144,9 +169,15 @@ class NotificationSettingsForm(forms.ModelForm):
         'accent-[#B23149]'
     )
 
-    def __init__(self, *args, slack_connected=False, **kwargs):
+    def __init__(self, *args, user=None, slack_connected=False, **kwargs):
+        self._settings_user = user
         super().__init__(*args, **kwargs)
         self.slack_connected = slack_connected
+        if user is not None:
+            allowed = set(notification_form_fields_for_user(user))
+            for name in list(self.fields.keys()):
+                if name not in allowed:
+                    del self.fields[name]
         for name, field in self.fields.items():
             if not isinstance(field.widget, forms.CheckboxInput):
                 continue

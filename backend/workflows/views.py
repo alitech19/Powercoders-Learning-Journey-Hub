@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from accounts.models import User
+from accounts.notifications.staff_events import maybe_notify_workflow_completed
 from cohorts.permissions import user_is_staff, user_is_student
 
 from .forms import WorkflowMetadataForm, WorkflowStepForm
@@ -288,6 +289,8 @@ def step_toggle(request, step_pk):
             student=student,
             completed_by=request.user,
         )
+        if user_is_student(request.user):
+            maybe_notify_workflow_completed(workflow=workflow, student=request.user)
 
     return redirect('workflows:detail', pk=workflow.pk)
 

@@ -5,6 +5,18 @@ from .emails import notify_admin_reply, notify_report_created
 from .models import BugReport, BugReportMessage
 
 
+def _notify_admins_bug_report_new(report):
+    from accounts.notifications.staff_events import notify_bug_report_new
+
+    notify_bug_report_new(report=report)
+
+
+def _notify_admins_bug_report_reopened(report):
+    from accounts.notifications.staff_events import notify_bug_report_reopened
+
+    notify_bug_report_reopened(report=report)
+
+
 class BugReportWorkflowError(Exception):
     pass
 
@@ -19,6 +31,7 @@ def create_report(*, reporter, page_url, page_path, description, client_context=
             client_context=client_context or {},
         )
     notify_report_created(report)
+    _notify_admins_bug_report_new(report)
     return report
 
 
@@ -73,6 +86,7 @@ def reopen_report(*, report: BugReport):
             'updated_at',
         ]
     )
+    _notify_admins_bug_report_reopened(report)
     return report
 
 

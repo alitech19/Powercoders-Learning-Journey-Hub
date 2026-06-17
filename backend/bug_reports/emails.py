@@ -1,12 +1,9 @@
 import logging
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 
 logger = logging.getLogger(__name__)
-
-User = get_user_model()
 
 
 def _send(subject, body, recipient_email):
@@ -34,7 +31,6 @@ def _site_url():
 
 
 def notify_report_created(report):
-    site = _site_url()
     reporter = report.reporter
     _send(
         subject='We received your bug report',
@@ -48,25 +44,6 @@ Page: {report.page_url}
 """,
         recipient_email=reporter.email,
     )
-
-    admin_url = f'{site}/bugs/inbox/{report.pk}/' if site else f'/bugs/inbox/{report.pk}/'
-    admin_body = f"""New bug report #{report.pk}
-
-Reporter: {reporter.display_name} ({reporter.email})
-Page: {report.page_url}
-
-Description:
-{report.description}
-
-Open in inbox: {admin_url}
-"""
-    admins = User.objects.filter(role=User.Role.ADMIN, is_active=True)
-    for admin in admins:
-        _send(
-            subject=f'New bug report #{report.pk}',
-            body=admin_body,
-            recipient_email=admin.email,
-        )
 
 
 def notify_admin_reply(report, message):

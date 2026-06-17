@@ -208,6 +208,32 @@ class UserNotificationSettings(models.Model):
     slack_deadline_reminder = models.BooleanField(default=True)
     slack_group_chat_mentions = models.BooleanField(default=True)
     slack_group_chat_all_messages = models.BooleanField(default=False)
+    # Teacher oversight — student activity in assigned groups.
+    notify_student_task_completed = models.BooleanField(default=True)
+    email_student_task_completed = models.BooleanField(default=True)
+    slack_student_task_completed = models.BooleanField(default=True)
+    notify_student_goal_completed = models.BooleanField(default=True)
+    email_student_goal_completed = models.BooleanField(default=True)
+    slack_student_goal_completed = models.BooleanField(default=True)
+    notify_student_workflow_completed = models.BooleanField(default=True)
+    email_student_workflow_completed = models.BooleanField(default=True)
+    slack_student_workflow_completed = models.BooleanField(default=True)
+    notify_student_reflection_submitted = models.BooleanField(default=True)
+    email_student_reflection_submitted = models.BooleanField(default=True)
+    slack_student_reflection_submitted = models.BooleanField(default=True)
+    notify_student_deadline_overdue = models.BooleanField(default=True)
+    email_student_deadline_overdue = models.BooleanField(default=True)
+    slack_student_deadline_overdue = models.BooleanField(default=True)
+    # Admin operations.
+    notify_bug_report_new = models.BooleanField(default=True)
+    email_bug_report_new = models.BooleanField(default=True)
+    slack_bug_report_new = models.BooleanField(default=True)
+    notify_bug_report_reopened = models.BooleanField(default=True)
+    email_bug_report_reopened = models.BooleanField(default=True)
+    slack_bug_report_reopened = models.BooleanField(default=True)
+    notify_new_user_account = models.BooleanField(default=True)
+    email_new_user_account = models.BooleanField(default=True)
+    slack_new_user_account = models.BooleanField(default=True)
     digest_mode = models.CharField(
         max_length=16,
         choices=DigestMode.choices,

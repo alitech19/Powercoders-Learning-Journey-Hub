@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from accounts.models import User
+from accounts.notifications.staff_events import notify_student_goal_completed
 from cohorts.permissions import (
     get_teacher_accessible_students,
     user_is_admin,
@@ -330,6 +331,8 @@ def goal_mark_achieved(request, pk):
     enrollment.status = GoalEnrollment.Status.COMPLETED
     enrollment.achieved_at = timezone.now()
     enrollment.save(update_fields=['status', 'achieved_at'])
+    if request.user.role == User.Role.STUDENT:
+        notify_student_goal_completed(student=request.user, goal=goal)
     messages.success(request, 'Goal marked as achieved.')
     return redirect('goals:detail', pk=goal.pk)
 

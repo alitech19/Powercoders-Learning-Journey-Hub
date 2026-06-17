@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from accounts.notifications.constants import EventType
 from accounts.notifications.dispatcher import dispatch_event
+from accounts.notifications.staff_events import notify_student_deadline_overdue
 
 
 def _task_is_complete(enrollment):
@@ -94,3 +95,12 @@ def _dispatch_for_enrollment(*, kind, item_id, user, title, due_date, detail_url
         email_body=f'Hi {user.display_name},\n\n{body}\n\n— Powercoders Team',
         slack_text=f'⏰ {body}',
     )
+    if label == 'overdue':
+        notify_student_deadline_overdue(
+            student=user,
+            kind=kind,
+            item_id=item_id,
+            title=title,
+            detail_url=detail_url,
+            dedupe_day=dedupe_day,
+        )

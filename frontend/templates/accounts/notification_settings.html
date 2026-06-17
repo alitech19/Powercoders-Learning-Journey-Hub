@@ -205,8 +205,10 @@ function notificationSettingsPage(config) {
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
       <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Notification types</h2>
       <p class="text-xs text-gray-400">
-        Use the master switches in the table header to turn a whole channel off, then fine-tune each event below.
+        {{ notification_intro }}
+        {% if user.role == 'student' or user.role == 'teacher' or user.role == 'admin' %}
         Mention someone in group chat with <code>@"Display Name"</code> or <code>@email@example.com</code>.
+        {% endif %}
       </p>
 
       <div class="overflow-x-auto -mx-2 px-2">
