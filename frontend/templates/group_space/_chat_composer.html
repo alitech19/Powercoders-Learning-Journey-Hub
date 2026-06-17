@@ -36,6 +36,18 @@
     <input type="hidden" name="space_kind" value="{{ space_ref.kind }}">
     <input type="hidden" name="space_pk" value="{{ space_ref.pk }}">
     {% if group %}<input type="hidden" name="group_pk" value="{{ group.pk }}">{% endif %}
+    <input type="hidden" name="reply_to_post" id="reply-to-post" value="">
+
+    <div id="reply-banner" class="hidden rounded-lg border border-[#B23149]/30 bg-[#B23149]/5 dark:bg-[#B23149]/10 px-3 py-2 text-xs text-gray-600 dark:text-gray-300 flex items-start justify-between gap-2">
+      <p class="min-w-0">
+        Replying to <span id="reply-banner-author" class="font-semibold text-[#343534] dark:text-gray-100"></span>:
+        <span id="reply-banner-preview" class="text-gray-500 dark:text-gray-400"></span>
+      </p>
+      <button type="button" id="reply-cancel"
+              class="shrink-0 font-medium text-gray-500 hover:text-red-600 dark:hover:text-red-400">
+        ✕
+      </button>
+    </div>
 
     {% if composer_form.non_field_errors %}
     <p class="text-sm text-red-600 dark:text-red-400">{{ composer_form.non_field_errors.0 }}</p>

@@ -185,3 +185,45 @@ def create_post_from_pending(pending: SlackPendingReply, parent: Post) -> Post |
         post.project_space = mapping.project_space
     post.save()
     return post
+
+
+def ingest_slack_message_changed(event: dict) -> Post | None:
+    if not chat_sync_configured():
+        return None
+
+    channel_id = normalize_slack_channel_id(event.get('channel', ''))
+    message = event.get('message') or {}
+    slack_ts = (message.get('ts') or '').strip()
+    if not channel_id or not slack_ts:
+        return None
+
+    post = Post.objects.filter(slack_channel_id=channel_id, slack_ts=slack_ts).first()
+    if post is None:
+        return None
+    if post.source_system == Post.SourceSystem.POWERHUB:
+        return None
+
+    text = (message.get('text') or '').strip()
+    if not text or text == post.body:
+        return None
+
+    post.body = text
+    post.save(update_fields=['body', 'updated_at'])
+    return post
+
+
+def ingest_slack_message_deleted(event: dict) -> bool:
+    if not chat_sync_configured():
+        return False
+
+    channel_id = normalize_slack_channel_id(event.get('channel', ''))
+    slack_ts = (event.get('deleted_ts') or event.get('ts') or '').strip()
+    if not channel_id or not slack_ts:
+        return False
+
+    post = Post.objects.filter(slack_channel_id=channel_id, slack_ts=slack_ts).first()
+    if post is None:
+        return False
+
+    Post.objects.filter(pk=post.pk).delete()
+    return True

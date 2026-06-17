@@ -255,6 +255,29 @@
     updateComposeMode();
   }
 
+  function clearReplyTarget() {
+    const input = document.getElementById('reply-to-post');
+    const banner = document.getElementById('reply-banner');
+    if (input) input.value = '';
+    if (banner) banner.classList.add('hidden');
+  }
+
+  function startReplyTarget(postId, author, preview) {
+    const input = document.getElementById('reply-to-post');
+    const banner = document.getElementById('reply-banner');
+    const authorEl = document.getElementById('reply-banner-author');
+    const previewEl = document.getElementById('reply-banner-preview');
+    if (input) input.value = postId;
+    if (authorEl) authorEl.textContent = author || '';
+    if (previewEl) previewEl.textContent = preview ? '“' + preview + '”' : '';
+    if (banner) banner.classList.remove('hidden');
+    closeSharePanel();
+    closeAttachMode();
+    closeGdocPickerMode();
+    closeGdocMode();
+    document.getElementById('chat-body')?.focus();
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     scrollChatToBottom();
     applySnapshotProgressBars();
@@ -274,6 +297,16 @@
   });
 
   document.body.addEventListener('click', function (e) {
+    const replyBtn = e.target.closest('.chat-reply-btn');
+    if (replyBtn) {
+      startReplyTarget(replyBtn.dataset.postId, replyBtn.dataset.author, replyBtn.dataset.preview);
+      return;
+    }
+    if (e.target.closest('#reply-cancel')) {
+      clearReplyTarget();
+      return;
+    }
+
     if (!e.target.closest('#chat-composer')) return;
 
     if (e.target.closest('#gdoc-picker-toggle')) {
@@ -342,6 +375,7 @@
       closeAttachMode();
       closeGdocPickerMode();
       closeGdocMode();
+      clearReplyTarget();
       document.getElementById('chat-message-form')?.reset();
       document.getElementById('gdoc-form')?.reset();
       updateComposeMode();

@@ -17,6 +17,7 @@ from .permissions import (
     can_pin_post,
     can_post_in_space,
     get_post_or_404,
+    validate_reply_to_post,
 )
 from .constants import SHARE_KIND_PANEL
 from google_storage.integration import should_upload_file_to_drive
@@ -32,6 +33,7 @@ from google_storage.integration import composer_upload_context
 from . import snapshots
 from .notifications import notify_group_chat_post
 from .services import after_post_saved, get_group_space_for_group, get_space_for_ref
+from .slack_sync import capture_slack_delete_target, enqueue_slack_post_delete
 from .space import SpaceRef, get_accessible_spaces, resolve_space_from_request
 
 
@@ -164,6 +166,15 @@ def message_create(request):
         else:
             post.project_space = space
             post.group_space = None
+
+        reply_pk = request.POST.get('reply_to_post', '').strip()
+        if reply_pk.isdigit():
+            parent = Post.objects.filter(pk=int(reply_pk)).select_related(
+                'group_space',
+                'project_space',
+            ).first()
+            post.reply_to_post = validate_reply_to_post(user, space_ref, parent)
+
         use_drive = bool(uploaded) and should_upload_file_to_drive(user)
         if use_drive:
             post.file = None
@@ -177,8 +188,7 @@ def message_create(request):
                 form.add_error('file', str(exc))
                 return _composer_error_response(request, user, space_ref, composer_form=form)
         after_post_saved(post)
-        if post.group_space_id:
-            notify_group_chat_post(post)
+        notify_group_chat_post(post)
         return _bubble_response(request, post, space_ref)
 
     return _composer_error_response(request, user, space_ref, composer_form=form)
@@ -294,8 +304,7 @@ def share_create(request):
     post.full_clean()
     post.save()
     after_post_saved(post)
-    if post.group_space_id:
-        notify_group_chat_post(post)
+    notify_group_chat_post(post)
     return _bubble_response(request, post, space_ref)
 
 
@@ -390,7 +399,10 @@ def post_delete(request, pk):
                 delete_drive_file_for_post(post)
             except Exception:
                 messages.warning(request, 'Post removed; Drive file may still exist.')
+        slack_delete_target = capture_slack_delete_target(post)
         post.delete()
+        if slack_delete_target:
+            enqueue_slack_post_delete(slack_delete_target)
         messages.success(request, 'Message removed.')
         return _feed_redirect(space_ref)
 

@@ -175,6 +175,22 @@ def can_access_post_space(user, post):
     return False
 
 
+def validate_reply_to_post(user, space_ref: SpaceRef, reply_to: Post | None) -> Post | None:
+    if reply_to is None:
+        return None
+    if not can_access_post_space(user, reply_to):
+        return None
+    if space_ref.kind == 'cohort_group':
+        if not reply_to.group_space_id or reply_to.group_space.group_id != space_ref.pk:
+            return None
+    elif space_ref.kind == 'project':
+        if not reply_to.project_space_id or reply_to.project_space_id != space_ref.pk:
+            return None
+    else:
+        return None
+    return reply_to
+
+
 def get_post_or_404(user, pk):
     from django.http import Http404
     from django.shortcuts import get_object_or_404

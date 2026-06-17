@@ -1,20 +1,32 @@
-"""One-way Group Space chat → Slack channel sync."""
+"""Group Space chat ↔ Slack channel sync (PowerHUB → Slack outbound)."""
 
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 
 from django.conf import settings
 
-from accounts.slack_provider import SlackApiError, post_channel_message
+from accounts.slack_provider import (
+    SlackApiError,
+    delete_channel_message,
+    post_channel_message,
+    update_channel_message,
+)
 from accounts.slack_workspace_config import chat_sync_configured, resolve_bot_token
 
 from .models import Post
 from .notifications import post_preview
-from .slack_mapping import get_mapping_for_post
+from .slack_mapping import channel_sync_active_for_post, get_mapping_for_post
 from .space import post_space_ref
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class SlackDeleteTarget:
+    channel_id: str
+    slack_ts: str
 
 
 def space_label_for_post(post: Post) -> str:
@@ -40,6 +52,15 @@ def format_slack_channel_message(post: Post) -> str:
     return '\n'.join(lines)
 
 
+def _slack_thread_ts_for_post(post: Post) -> str:
+    if not post.reply_to_post_id:
+        return ''
+    parent = post.reply_to_post
+    if parent is None or not parent.slack_ts:
+        return ''
+    return parent.slack_ts
+
+
 def should_sync_post_to_slack(post: Post) -> bool:
     if post.source_system != Post.SourceSystem.POWERHUB:
         return False
@@ -47,8 +68,29 @@ def should_sync_post_to_slack(post: Post) -> bool:
         return False
     if post.project_space_id and post.project_space.is_archived:
         return False
-    mapping = get_mapping_for_post(post)
-    return bool(mapping and mapping.is_enabled and mapping.slack_channel_id and chat_sync_configured())
+    return channel_sync_active_for_post(post)
+
+
+def should_sync_post_update_to_slack(post: Post) -> bool:
+    if post.source_system != Post.SourceSystem.POWERHUB:
+        return False
+    if not post.slack_ts or not post.slack_channel_id:
+        return False
+    if post.project_space_id and post.project_space.is_archived:
+        return False
+    return channel_sync_active_for_post(post)
+
+
+def should_sync_post_delete_to_slack(post: Post) -> bool:
+    if not post.slack_ts or not post.slack_channel_id:
+        return False
+    return channel_sync_active_for_post(post)
+
+
+def capture_slack_delete_target(post: Post) -> SlackDeleteTarget | None:
+    if not should_sync_post_delete_to_slack(post):
+        return None
+    return SlackDeleteTarget(channel_id=post.slack_channel_id, slack_ts=post.slack_ts)
 
 
 def enqueue_slack_channel_sync(post: Post) -> None:
@@ -59,10 +101,32 @@ def enqueue_slack_channel_sync(post: Post) -> None:
     sync_post_to_slack_channel_task.delay(post.pk)
 
 
+def enqueue_slack_post_update(post: Post) -> None:
+    if not should_sync_post_update_to_slack(post):
+        return
+    from .tasks import sync_post_update_to_slack_channel_task
+
+    sync_post_update_to_slack_channel_task.delay(post.pk)
+
+
+def enqueue_slack_post_delete(target: SlackDeleteTarget) -> None:
+    from .tasks import sync_post_delete_from_slack_channel_task
+
+    sync_post_delete_from_slack_channel_task.delay(target.channel_id, target.slack_ts)
+
+
+def enqueue_slack_post_lifecycle_sync(post: Post) -> None:
+    if should_sync_post_update_to_slack(post):
+        enqueue_slack_post_update(post)
+    else:
+        enqueue_slack_channel_sync(post)
+
+
 def deliver_post_to_slack_channel(post_id: int) -> bool:
     post = (
         Post.objects.select_related(
             'author',
+            'reply_to_post',
             'group_space__group__cohort',
             'project_space',
         )
@@ -80,11 +144,13 @@ def deliver_post_to_slack_channel(post_id: int) -> bool:
     if not token:
         return False
 
+    thread_ts = _slack_thread_ts_for_post(post)
     try:
         ts = post_channel_message(
             token=token,
             channel_id=mapping.slack_channel_id,
             text=format_slack_channel_message(post),
+            thread_ts=thread_ts,
         )
     except SlackApiError as exc:
         logger.warning('Slack channel sync failed for post %s: %s', post_id, exc)
@@ -93,8 +159,56 @@ def deliver_post_to_slack_channel(post_id: int) -> bool:
     Post.objects.filter(pk=post.pk).update(
         slack_channel_id=mapping.slack_channel_id,
         slack_ts=ts,
+        slack_thread_ts=thread_ts,
     )
     reconcile_pending_slack_replies(mapping.slack_channel_id, ts)
+    reconcile_outbound_slack_replies(post_id)
+    return True
+
+
+def deliver_post_update_to_slack_channel(post_id: int) -> bool:
+    post = (
+        Post.objects.select_related(
+            'author',
+            'group_space__group__cohort',
+            'project_space',
+        )
+        .filter(pk=post_id)
+        .first()
+    )
+    if post is None or not should_sync_post_update_to_slack(post):
+        return False
+
+    token = resolve_bot_token()
+    if not token:
+        return False
+
+    try:
+        update_channel_message(
+            token=token,
+            channel_id=post.slack_channel_id,
+            ts=post.slack_ts,
+            text=format_slack_channel_message(post),
+        )
+    except SlackApiError as exc:
+        logger.warning('Slack channel update failed for post %s: %s', post_id, exc)
+        return False
+    return True
+
+
+def deliver_post_delete_from_slack(channel_id: str, slack_ts: str) -> bool:
+    if not channel_id or not slack_ts or not chat_sync_configured():
+        return False
+
+    token = resolve_bot_token()
+    if not token:
+        return False
+
+    try:
+        delete_channel_message(token=token, channel_id=channel_id, ts=slack_ts)
+    except SlackApiError as exc:
+        logger.warning('Slack channel delete failed for %s/%s: %s', channel_id, slack_ts, exc)
+        return False
     return True
 
 
@@ -123,3 +237,21 @@ def reconcile_pending_slack_replies(channel_id: str, thread_ts: str) -> int:
             pending.delete()
             created += 1
     return created
+
+
+def reconcile_outbound_slack_replies(parent_post_id: int) -> int:
+    """Queue PH replies that were waiting for the parent's slack_ts."""
+    parent = Post.objects.filter(pk=parent_post_id).first()
+    if parent is None or not parent.slack_ts:
+        return 0
+
+    queued = 0
+    children = Post.objects.filter(
+        reply_to_post=parent,
+        source_system=Post.SourceSystem.POWERHUB,
+        slack_ts='',
+    )
+    for child in children:
+        enqueue_slack_channel_sync(child)
+        queued += 1
+    return queued

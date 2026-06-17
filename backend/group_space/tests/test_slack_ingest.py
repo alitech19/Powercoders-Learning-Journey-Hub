@@ -10,7 +10,12 @@ from django.urls import reverse
 from accounts.models import SlackIntegration
 from accounts.slack_events import verify_slack_signature
 from group_space.models import Post, SlackPendingReply
-from group_space.slack_ingest import ingest_slack_message_event, should_ignore_slack_message_event
+from group_space.slack_ingest import (
+    ingest_slack_message_changed,
+    ingest_slack_message_deleted,
+    ingest_slack_message_event,
+    should_ignore_slack_message_event,
+)
 from group_space.slack_sync import reconcile_pending_slack_replies
 from test_utils.cohorts import make_cohort, make_group
 from test_utils.group_space import get_space_for_group, make_post
@@ -113,6 +118,49 @@ class SlackIngestTests(TestCase):
 
     def test_ignore_bot_messages(self):
         self.assertTrue(should_ignore_slack_message_event({'type': 'message', 'bot_id': 'B1', 'text': 'x'}))
+
+    def test_ingest_message_changed_updates_slack_origin_post(self):
+        post = make_post(self.space, self.student, body='Old text')
+        post.source_system = Post.SourceSystem.SLACK
+        post.slack_channel_id = 'CINGEST'
+        post.slack_ts = '300.300'
+        post.save(update_fields=['source_system', 'slack_channel_id', 'slack_ts'])
+        updated = ingest_slack_message_changed({
+            'type': 'message',
+            'subtype': 'message_changed',
+            'channel': 'CINGEST',
+            'message': {'ts': '300.300', 'text': 'New text'},
+        })
+        self.assertIsNotNone(updated)
+        post.refresh_from_db()
+        self.assertEqual(post.body, 'New text')
+
+    def test_ingest_message_changed_ignores_powerhub_origin(self):
+        post = make_post(self.space, self.student, body='PH text')
+        post.slack_channel_id = 'CINGEST'
+        post.slack_ts = '301.301'
+        post.save(update_fields=['slack_channel_id', 'slack_ts'])
+        self.assertIsNone(ingest_slack_message_changed({
+            'type': 'message',
+            'subtype': 'message_changed',
+            'channel': 'CINGEST',
+            'message': {'ts': '301.301', 'text': 'Echo from bot'},
+        }))
+        post.refresh_from_db()
+        self.assertEqual(post.body, 'PH text')
+
+    def test_ingest_message_deleted_removes_post(self):
+        post = make_post(self.space, self.student, body='Delete me')
+        post.slack_channel_id = 'CINGEST'
+        post.slack_ts = '400.400'
+        post.save(update_fields=['slack_channel_id', 'slack_ts'])
+        self.assertTrue(ingest_slack_message_deleted({
+            'type': 'message',
+            'subtype': 'message_deleted',
+            'channel': 'CINGEST',
+            'deleted_ts': '400.400',
+        }))
+        self.assertFalse(Post.objects.filter(pk=post.pk).exists())
 
 
 class SlackEventsEndpointTests(TestCase):

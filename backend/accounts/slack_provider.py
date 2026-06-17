@@ -147,6 +147,24 @@ def post_channel_message(*, token: str, channel_id: str, text: str, thread_ts: s
     return posted.get('ts', '')
 
 
+def update_channel_message(*, token: str, channel_id: str, ts: str, text: str) -> str:
+    posted = _api_post(
+        'chat.update',
+        token=token,
+        payload={'channel': channel_id, 'ts': ts, 'text': text},
+    )
+    message = posted.get('message') or {}
+    return message.get('ts', ts)
+
+
+def delete_channel_message(*, token: str, channel_id: str, ts: str) -> None:
+    _api_post(
+        'chat.delete',
+        token=token,
+        payload={'channel': channel_id, 'ts': ts},
+    )
+
+
 def auth_test(*, token: str) -> dict:
     return _api_post('auth.test', token=token, payload={})
 
@@ -180,6 +198,8 @@ __all__ = [
     'revoke_access_token',
     'send_user_dm',
     'post_channel_message',
+    'update_channel_message',
+    'delete_channel_message',
     'auth_test',
     'slack_oauth_configured',
 ]

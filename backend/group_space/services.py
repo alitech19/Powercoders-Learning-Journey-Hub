@@ -111,9 +111,9 @@ def sync_space_resource_from_post(post):
 
 def after_post_saved(post):
     sync_space_resource_from_post(post)
-    from .slack_sync import enqueue_slack_channel_sync
+    from .slack_sync import enqueue_slack_post_lifecycle_sync
 
-    enqueue_slack_channel_sync(post)
+    enqueue_slack_post_lifecycle_sync(post)
 
 
 def feed_url_for_group(group):

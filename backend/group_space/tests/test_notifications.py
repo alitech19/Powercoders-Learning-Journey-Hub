@@ -7,8 +7,10 @@ from accounts.models import Notification, UserNotificationSettings
 from accounts.notifications.constants import EventType
 from accounts.notifications.settings import get_notification_settings
 from group_space.notifications import notify_group_chat_post, parse_mentioned_users
+from group_space.slack_mapping import save_space_slack_mapping
 from test_utils.cohorts import assign_teacher, make_cohort, make_group
 from test_utils.group_space import get_space_for_group, make_post
+from test_utils.slack import clear_slack_workspace_config, configure_slack_bot
 from test_utils.users import make_student, make_teacher
 
 
@@ -130,3 +132,44 @@ class GroupChatNotificationTests(TestCase):
         self.assertTrue(
             Notification.objects.filter(recipient=teacher).exists()
         )
+
+    @patch('group_space.notifications.dispatch_event')
+    def test_skips_slack_dm_when_channel_sync_enabled(self, mock_dispatch):
+        clear_slack_workspace_config()
+        configure_slack_bot()
+        save_space_slack_mapping(group_space=self.space, channel_id='CNOTIFY', enabled=True)
+
+        settings = get_notification_settings(self.mentioned)
+        settings.slack_group_chat_mentions = True
+        settings.save(update_fields=['slack_group_chat_mentions'])
+
+        post = make_post(self.space, self.author, body='Hello @"Bob Mentioned"')
+        notify_group_chat_post(post)
+
+        mentioned_calls = [
+            call
+            for call in mock_dispatch.call_args_list
+            if call.kwargs['recipients'] == [self.mentioned]
+        ]
+        self.assertEqual(len(mentioned_calls), 1)
+        self.assertIsNone(mentioned_calls[0].kwargs['slack_text'])
+
+    @patch('group_space.notifications.dispatch_event')
+    def test_sends_slack_dm_when_channel_sync_disabled(self, mock_dispatch):
+        clear_slack_workspace_config()
+        configure_slack_bot()
+
+        settings = get_notification_settings(self.mentioned)
+        settings.slack_group_chat_mentions = True
+        settings.save(update_fields=['slack_group_chat_mentions'])
+
+        post = make_post(self.space, self.author, body='Hello @"Bob Mentioned"')
+        notify_group_chat_post(post)
+
+        mentioned_calls = [
+            call
+            for call in mock_dispatch.call_args_list
+            if call.kwargs['recipients'] == [self.mentioned]
+        ]
+        self.assertEqual(len(mentioned_calls), 1)
+        self.assertIsNotNone(mentioned_calls[0].kwargs['slack_text'])

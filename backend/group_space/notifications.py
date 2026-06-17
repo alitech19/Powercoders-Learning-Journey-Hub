@@ -12,8 +12,9 @@ from accounts.notifications.dispatcher import dispatch_event
 from cohorts.models import GroupTeacher
 from cohorts.permissions import get_active_students_for_group
 
-from .models import Post
-from .services import feed_url_for_group
+from .models import Post, ProjectSpaceMembership
+from .slack_mapping import channel_sync_active_for_post
+from .space import post_space_ref
 
 _MENTION_QUOTED_RE = re.compile(r'@"([^"]+)"')
 _MENTION_TOKEN_RE = re.compile(r'@(\S+)')
@@ -30,6 +31,21 @@ def get_group_chat_participants(group):
             participants.append(teacher)
             seen.add(teacher.pk)
     return participants
+
+
+def get_project_chat_participants(project_space):
+    user_ids = ProjectSpaceMembership.objects.filter(
+        project_space=project_space,
+    ).values_list('user_id', flat=True)
+    return list(User.objects.filter(pk__in=user_ids, is_active=True))
+
+
+def get_space_chat_participants(post: Post) -> list:
+    if post.group_space_id:
+        return get_group_chat_participants(post.group_space.group)
+    if post.project_space_id:
+        return get_project_chat_participants(post.project_space)
+    return []
 
 
 def parse_mentioned_users(text, candidates):
@@ -76,23 +92,26 @@ def _post_preview(post: Post) -> str:
 
 
 def _post_url(post: Post) -> str:
-    return f'{feed_url_for_group(post.group)}#post-{post.pk}'
+    return f'{post_space_ref(post).feed_url()}#post-{post.pk}'
 
 
-def notify_group_chat_post(post: Post) -> None:
-    """Notify group members about a new chat post (mentions + optional all-messages)."""
-    group = post.group_space.group
+def notify_space_chat_post(post: Post) -> None:
+    """Notify space members about a new chat post (mentions + optional all-messages)."""
+    if not post.group_space_id and not post.project_space_id:
+        return
+
     author = post.author
-    participants = get_group_chat_participants(group)
+    participants = get_space_chat_participants(post)
     mentioned = parse_mentioned_users(post.body, participants)
     mentioned_ids = {user.pk for user in mentioned}
 
-    group_name = group.name
+    space_label = post_space_ref(post).label
     author_name = author.display_name
     preview = _post_preview(post)
     relative_url = _post_url(post)
     site = getattr(settings, 'SITE_URL', '').rstrip('/')
     full_url = f'{site}{relative_url}' if relative_url else site
+    skip_slack_dm = channel_sync_active_for_post(post)
 
     for recipient in mentioned:
         if recipient.pk == author.pk:
@@ -101,18 +120,18 @@ def notify_group_chat_post(post: Post) -> None:
             event_type=EventType.GROUP_CHAT_MENTION,
             recipient=recipient,
             dedupe_key=f'group_chat:mention:{post.pk}:{recipient.pk}',
-            title=f'{author_name} mentioned you in {group_name}',
+            title=f'{author_name} mentioned you in {space_label}',
             body=preview,
             relative_url=relative_url,
             email_body=_email_body(
                 recipient=recipient,
                 author_name=author_name,
-                group_name=group_name,
+                group_name=space_label,
                 preview=preview,
                 full_url=full_url,
-                intro=f'{author_name} mentioned you in {group_name}.',
+                intro=f'{author_name} mentioned you in {space_label}.',
             ),
-            slack_text=f'💬 *{author_name}* mentioned you in *{group_name}*: {preview}',
+            slack_text=None if skip_slack_dm else f'💬 *{author_name}* mentioned you in *{space_label}*: {preview}',
         )
 
     for recipient in participants:
@@ -122,19 +141,24 @@ def notify_group_chat_post(post: Post) -> None:
             event_type=EventType.GROUP_CHAT_ALL,
             recipient=recipient,
             dedupe_key=f'group_chat:all:{post.pk}:{recipient.pk}',
-            title=f'New message in {group_name}',
+            title=f'New message in {space_label}',
             body=f'{author_name}: {preview}',
             relative_url=relative_url,
             email_body=_email_body(
                 recipient=recipient,
                 author_name=author_name,
-                group_name=group_name,
+                group_name=space_label,
                 preview=preview,
                 full_url=full_url,
-                intro=f'New message in {group_name} from {author_name}.',
+                intro=f'New message in {space_label} from {author_name}.',
             ),
-            slack_text=f'💬 *{author_name}* in *{group_name}*: {preview}',
+            slack_text=None if skip_slack_dm else f'💬 *{author_name}* in *{space_label}*: {preview}',
         )
+
+
+def notify_group_chat_post(post: Post) -> None:
+    """Backward-compatible alias — cohort and project spaces."""
+    notify_space_chat_post(post)
 
 
 def _email_body(*, recipient, author_name, group_name, preview, full_url, intro):

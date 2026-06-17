@@ -149,13 +149,16 @@ Enter the Slack **channel ID** (right-click channel → View channel details →
 
 - New posts (text, links, snapshots) are queued to Slack asynchronously.
 - Message includes author, space name, preview, and link back to PowerHUB.
-- Does **not** replace personal mention DMs — those still follow notification settings.
+- **Replies** in PowerHUB stay flat in chat (`↪ in reply to`) but post to the **Slack thread** when the parent is already synced.
+- **Edits and deletes** sync both ways when channel sync is enabled.
+- When channel sync is **on**, personal Slack DMs for mentions / all-messages are **skipped** — users see the channel post only. In-app and email notifications still follow user settings.
+- When channel sync is **off**, personal mention / all-message Slack DMs work as before (Notification settings).
 - **Two-way sync**: messages posted in a mapped Slack channel appear in PowerHUB when the author has connected Slack (Profile → Notification settings) with the same Slack user id.
 
 ### 4. Two-way sync (Slack → PowerHUB)
 
 1. In the Slack app: **Event Subscriptions** → enable → Request URL = the value shown on **Slack integration** (`…/accounts/slack/events/`).
-2. Subscribe to bot events: **`message.channels`** (and `message.groups` / `message.im` if you use those channel types).
+2. Subscribe to bot events: **`message.channels`** (and `message.groups` / `message.im` if you use those channel types). Edits and deletes require the same `message.*` events — Slack delivers `message_changed` and `message_deleted` automatically.
 3. Paste **Signing secret** on the Slack integration page (same app → Basic Information).
 4. Users who post from Slack must **Connect Slack** on their PowerHUB profile so their `slack_user_id` can be matched.
 

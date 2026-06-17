@@ -38,15 +38,25 @@ def slack_events(request):
     if payload.get('type') != 'event_callback':
         return HttpResponse(status=200)
 
-    from group_space.slack_ingest import ingest_slack_message_event, should_ignore_slack_message_event
+    from group_space.slack_ingest import (
+        ingest_slack_message_changed,
+        ingest_slack_message_deleted,
+        ingest_slack_message_event,
+        should_ignore_slack_message_event,
+    )
 
     event = payload.get('event') or {}
+    event_type = event.get('type', '')
+    subtype = (event.get('subtype') or '').strip()
     bot_user_id = (config.slack_bot_user_id or '').strip()
-    if should_ignore_slack_message_event(event, bot_user_id=bot_user_id):
-        return HttpResponse(status=200)
 
     try:
-        ingest_slack_message_event(event)
+        if event_type == 'message' and subtype == 'message_changed':
+            ingest_slack_message_changed(event)
+        elif event_type == 'message' and subtype == 'message_deleted':
+            ingest_slack_message_deleted(event)
+        elif not should_ignore_slack_message_event(event, bot_user_id=bot_user_id):
+            ingest_slack_message_event(event)
     except Exception:
         logger.exception('Slack event ingest failed')
     return HttpResponse(status=200)

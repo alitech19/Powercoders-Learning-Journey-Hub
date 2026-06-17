@@ -79,6 +79,13 @@
 
       {% if user == post.author or user.role == "teacher" or user.role == "admin" %}
       <div class="flex gap-2 opacity-0 group-hover/msg:opacity-100 transition-opacity">
+        <button type="button"
+                class="chat-reply-btn text-xs text-gray-400 hover:text-[#B23149]"
+                data-post-id="{{ post.pk }}"
+                data-author="{{ post.author.display_name|escape }}"
+                data-preview="{% if post.body %}{{ post.body|truncatewords:12 }}{% elif post.resource_label %}{{ post.resource_label|truncatewords:12 }}{% else %}message{% endif %}">
+          Reply
+        </button>
         {% if user == post.author and not post.drive_file_id %}
         <a href="{% url 'group_space:post_edit' post.pk %}" class="text-xs text-gray-400 hover:text-[#B23149]">Edit</a>
         {% endif %}

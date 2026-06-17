@@ -32,6 +32,16 @@ def mapping_for_group(group) -> SpaceSlackChannel | None:
     return get_mapping_for_group_space(get_group_space_for_group(group))
 
 
+def channel_sync_active_for_post(post) -> bool:
+    """True when this post's space mirrors chat to a Slack channel."""
+    from accounts.slack_workspace_config import chat_sync_configured
+
+    if not chat_sync_configured():
+        return False
+    mapping = get_mapping_for_post(post)
+    return bool(mapping and mapping.is_enabled and mapping.slack_channel_id)
+
+
 def get_mapping_for_slack_channel(channel_id: str) -> SpaceSlackChannel | None:
     channel_id = normalize_slack_channel_id(channel_id)
     if not channel_id:
