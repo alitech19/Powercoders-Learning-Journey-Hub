@@ -32,6 +32,20 @@ def mapping_for_group(group) -> SpaceSlackChannel | None:
     return get_mapping_for_group_space(get_group_space_for_group(group))
 
 
+def get_mapping_for_slack_channel(channel_id: str) -> SpaceSlackChannel | None:
+    channel_id = normalize_slack_channel_id(channel_id)
+    if not channel_id:
+        return None
+    return (
+        SpaceSlackChannel.objects.filter(
+            slack_channel_id=channel_id,
+            is_enabled=True,
+        )
+        .select_related('group_space__group__cohort', 'project_space')
+        .first()
+    )
+
+
 def save_space_slack_mapping(
     *,
     group_space: GroupSpace | None = None,

@@ -38,6 +38,18 @@ class SlackWorkspaceSettingsForm(forms.ModelForm):
         ),
         label='Bot token',
     )
+    signing_secret = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(
+            render_value=False,
+            attrs={
+                'class': 'w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm font-mono',
+                'placeholder': 'Leave blank to keep current',
+                'autocomplete': 'new-password',
+            },
+        ),
+        label='Signing secret',
+    )
 
     class Meta:
         model = SlackWorkspaceConfig
@@ -80,3 +92,6 @@ class SlackWorkspaceSettingsForm(forms.ModelForm):
         bot = (self.cleaned_data.get('bot_token') or '').strip()
         if bot:
             instance.set_bot_token(bot)
+        signing = (self.cleaned_data.get('signing_secret') or '').strip()
+        if signing:
+            instance.set_signing_secret(signing)

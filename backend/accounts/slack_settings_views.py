@@ -54,9 +54,12 @@ def slack_settings(request):
             'has_oauth_secret': bool(config.oauth_client_secret_encrypted),
             'has_webhook_url': bool(config.webhook_url_encrypted),
             'has_bot_token': bool(config.bot_token_encrypted),
+            'has_signing_secret': bool(config.signing_secret_encrypted),
             'masked_oauth_secret': config.masked_oauth_client_secret,
             'masked_webhook_url': config.masked_webhook_url,
             'masked_bot_token': config.masked_bot_token,
+            'masked_signing_secret': config.masked_signing_secret,
+            'events_url': request.build_absolute_uri(reverse('accounts:slack_events')),
             'oauth_ready': slack_oauth_configured(),
             'webhook_ready': staff_webhook_configured(),
             'chat_sync_ready': chat_sync_configured(),
@@ -130,6 +133,12 @@ def slack_test_bot(request):
 
     token = resolve_bot_token(config)
     try:
+        from accounts.slack_provider import auth_test, post_channel_message
+
+        auth_data = auth_test(token=token)
+        bot_user_id = (auth_data.get('user_id') or '').strip()
+        if bot_user_id:
+            config.slack_bot_user_id = bot_user_id
         post_channel_message(
             token=token,
             channel_id=channel_id,
@@ -138,7 +147,13 @@ def slack_test_bot(request):
         config.last_bot_test_at = timezone.now()
         config.last_bot_ok = True
         config.last_error = ''
-        config.save(update_fields=['last_bot_test_at', 'last_bot_ok', 'last_error', 'updated_at'])
+        config.save(update_fields=[
+            'last_bot_test_at',
+            'last_bot_ok',
+            'last_error',
+            'slack_bot_user_id',
+            'updated_at',
+        ])
         messages.success(request, f'Test message posted to channel {channel_id}.')
     except SlackApiError as exc:
         config.last_bot_test_at = timezone.now()

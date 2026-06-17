@@ -147,6 +147,10 @@ def post_channel_message(*, token: str, channel_id: str, text: str, thread_ts: s
     return posted.get('ts', '')
 
 
+def auth_test(*, token: str) -> dict:
+    return _api_post('auth.test', token=token, payload={})
+
+
 def revoke_access_token(token: str) -> None:
     if not token:
         return
@@ -176,5 +180,6 @@ __all__ = [
     'revoke_access_token',
     'send_user_dm',
     'post_channel_message',
+    'auth_test',
     'slack_oauth_configured',
 ]

@@ -125,6 +125,25 @@ class SpaceSlackChannel(models.Model):
         return f'Slack {self.slack_channel_id} — {parent}'
 
 
+class SlackPendingReply(models.Model):
+    """Thread reply received before the parent PowerHUB post has a slack_ts."""
+
+    slack_channel_id = models.CharField(max_length=32)
+    slack_ts = models.CharField(max_length=32)
+    slack_thread_ts = models.CharField(max_length=32)
+    slack_user_id = models.CharField(max_length=64)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['slack_channel_id', 'slack_ts'],
+                name='group_space_unique_pending_slack_ts',
+            ),
+        ]
+
+
 class Post(models.Model):
     class SourceSystem(models.TextChoices):
         POWERHUB = 'powerhub', 'PowerHUB'
@@ -213,6 +232,14 @@ class Post(models.Model):
     )
     slack_channel_id = models.CharField(max_length=32, blank=True)
     slack_ts = models.CharField(max_length=32, blank=True)
+    slack_thread_ts = models.CharField(max_length=32, blank=True)
+    reply_to_post = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='slack_replies',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -232,6 +259,11 @@ class Post(models.Model):
                     | Q(group_space__isnull=True, project_space__isnull=False)
                 ),
                 name='group_space_post_exactly_one_parent',
+            ),
+            models.UniqueConstraint(
+                fields=['slack_channel_id', 'slack_ts'],
+                condition=~Q(slack_ts='') & ~Q(slack_channel_id=''),
+                name='group_space_post_unique_slack_message',
             ),
         ]
 

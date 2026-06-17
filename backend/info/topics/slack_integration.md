@@ -150,7 +150,16 @@ Enter the Slack **channel ID** (right-click channel → View channel details →
 - New posts (text, links, snapshots) are queued to Slack asynchronously.
 - Message includes author, space name, preview, and link back to PowerHUB.
 - Does **not** replace personal mention DMs — those still follow notification settings.
-- **Two-way sync** (Slack → PowerHUB) is not implemented yet.
+- **Two-way sync**: messages posted in a mapped Slack channel appear in PowerHUB when the author has connected Slack (Profile → Notification settings) with the same Slack user id.
+
+### 4. Two-way sync (Slack → PowerHUB)
+
+1. In the Slack app: **Event Subscriptions** → enable → Request URL = the value shown on **Slack integration** (`…/accounts/slack/events/`).
+2. Subscribe to bot events: **`message.channels`** (and `message.groups` / `message.im` if you use those channel types).
+3. Paste **Signing secret** on the Slack integration page (same app → Basic Information).
+4. Users who post from Slack must **Connect Slack** on their PowerHUB profile so their `slack_user_id` can be matched.
+
+Thread replies in Slack become separate chat rows with **↪ in reply to** linking the parent message.
 
 ## Field reference {#field-reference}
 
@@ -166,5 +175,6 @@ Enter the Slack **channel ID** (right-click channel → View channel details →
 | Webhook URL | Slack app → Incoming Webhooks → channel URL |
 | Enable chat channel sync | Your policy — requires bot token |
 | Bot token | Slack app → OAuth & Permissions → Bot User OAuth Token (`xoxb-…`) |
+| Signing secret | Slack app → Basic Information → Signing Secret |
 
 `SITE_URL` must match how users reach PowerHUB (see `.env` / Render settings).

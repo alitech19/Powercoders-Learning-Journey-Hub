@@ -43,7 +43,8 @@ Plan: **[SLACK_INTEGRATION_PLAN.md](SLACK_INTEGRATION_PLAN.md)**
 | Global reminder admin UI (deadline + reflection digest schedule) | Done |
 | Group chat in-app / email / Slack (mentions + all messages) | Done |
 | Group chat → Slack channel sync (one-way) | Done |
-| Group chat ↔ Slack (two-way) + thread → flat reply links | Planned |
+| Group chat ↔ Slack (two-way) + thread → flat reply links | Done |
+| Slack message edit/delete sync | Planned |
 
 ---
 

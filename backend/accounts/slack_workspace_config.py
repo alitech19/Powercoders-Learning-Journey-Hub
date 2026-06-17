@@ -67,3 +67,15 @@ def chat_sync_configured() -> bool:
     if not config.chat_sync_enabled:
         return False
     return bool(resolve_bot_token(config))
+
+
+def slack_events_configured() -> bool:
+    config = get_slack_workspace_config()
+    if not config.chat_sync_enabled:
+        return False
+    return bool(resolve_signing_secret(config))
+
+
+def resolve_signing_secret(config: SlackWorkspaceConfig | None = None) -> str:
+    config = config or get_slack_workspace_config()
+    return config.get_signing_secret()

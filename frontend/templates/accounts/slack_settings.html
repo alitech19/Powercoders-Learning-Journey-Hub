@@ -130,6 +130,15 @@
         {% endif %}
         <p class="text-xs text-gray-400 mt-1">Install a Slack app with <code class="text-xs">chat:write</code> bot scope; invite the bot to each mapped channel.</p>
       </div>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">Signing secret (Events API)</label>
+        {{ form.signing_secret }}
+        {% if has_signing_secret %}
+        <p class="text-xs text-gray-400 mt-1">Current: {{ masked_signing_secret }}</p>
+        {% endif %}
+        <p class="text-xs text-gray-400 mt-1">Required for Slack → PowerHUB messages. Subscribe to <code class="text-xs">message.channels</code> (or groups/IM as needed).</p>
+        <p class="text-xs text-gray-500 mt-2">Request URL: <code class="text-xs break-all">{{ events_url }}</code></p>
+      </div>
     </div>
 
     <div class="flex flex-wrap gap-3">

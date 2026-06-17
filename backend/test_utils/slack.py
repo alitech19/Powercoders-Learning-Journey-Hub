@@ -14,6 +14,8 @@ def clear_slack_workspace_config() -> None:
     config.webhook_url_encrypted = ''
     config.chat_sync_enabled = False
     config.bot_token_encrypted = ''
+    config.signing_secret_encrypted = ''
+    config.slack_bot_user_id = ''
     config.save()
     invalidate_slack_workspace_config()
 
@@ -52,11 +54,14 @@ def configure_slack_webhook(
 def configure_slack_bot(
     *,
     token: str = 'xoxb-test-token',
+    signing_secret: str = 'test-signing-secret',
     enabled: bool = True,
 ) -> SlackWorkspaceConfig:
     config = SlackWorkspaceConfig.get()
     config.chat_sync_enabled = enabled
     config.set_bot_token(token)
+    if signing_secret:
+        config.set_signing_secret(signing_secret)
     config.save()
     invalidate_slack_workspace_config()
     return config

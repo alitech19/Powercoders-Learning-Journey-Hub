@@ -379,6 +379,12 @@ class SlackWorkspaceConfig(models.Model):
         help_text='Mirror Group Space chat posts to mapped Slack channels (bot token).',
     )
     bot_token_encrypted = models.TextField(blank=True)
+    signing_secret_encrypted = models.TextField(blank=True)
+    slack_bot_user_id = models.CharField(
+        max_length=32,
+        blank=True,
+        help_text='Cached from auth.test — used to ignore the bot’s own channel messages.',
+    )
     last_webhook_test_at = models.DateTimeField(null=True, blank=True)
     last_webhook_ok = models.BooleanField(null=True, blank=True)
     last_bot_test_at = models.DateTimeField(null=True, blank=True)
@@ -429,6 +435,17 @@ class SlackWorkspaceConfig(models.Model):
 
     def get_bot_token(self) -> str:
         return decrypt_secret(self.bot_token_encrypted)
+
+    def set_signing_secret(self, secret: str) -> None:
+        secret = (secret or '').strip()
+        self.signing_secret_encrypted = encrypt_secret(secret) if secret else ''
+
+    def get_signing_secret(self) -> str:
+        return decrypt_secret(self.signing_secret_encrypted)
+
+    @property
+    def masked_signing_secret(self) -> str:
+        return mask_secret(self.get_signing_secret())
 
     @property
     def masked_bot_token(self) -> str:

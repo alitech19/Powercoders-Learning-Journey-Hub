@@ -45,7 +45,7 @@ def build_chat_timeline(space: GroupSpace | ProjectSpace):
     """Chronological chat stream (oldest → newest). Pinned posts shown separately."""
     posts = list(
         _posts_for_space(space)
-        .select_related('author')
+        .select_related('author', 'reply_to_post', 'reply_to_post__author')
         .prefetch_related('comments__author')
         .order_by('created_at')
     )

@@ -4,7 +4,7 @@ from django.views.generic import RedirectView
 
 from google_storage import views as google_storage_views
 
-from . import management_views, privacy_views, slack_settings_views, slack_views, views
+from . import management_views, privacy_views, slack_events_views, slack_settings_views, slack_views, views
 
 app_name = 'accounts'
 
@@ -68,6 +68,7 @@ urlpatterns = [
         slack_settings_views.slack_test_bot,
         name='slack_test_bot',
     ),
+    path('slack/events/', slack_events_views.slack_events, name='slack_events'),
     path(
         'notifications/<int:pk>/read/',
         privacy_views.notification_mark_read,

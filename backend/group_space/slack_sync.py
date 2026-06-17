@@ -94,4 +94,32 @@ def deliver_post_to_slack_channel(post_id: int) -> bool:
         slack_channel_id=mapping.slack_channel_id,
         slack_ts=ts,
     )
+    reconcile_pending_slack_replies(mapping.slack_channel_id, ts)
     return True
+
+
+def reconcile_pending_slack_replies(channel_id: str, thread_ts: str) -> int:
+    """Attach pending Slack thread replies once the parent message has a slack_ts."""
+    from .models import SlackPendingReply
+    from .slack_ingest import create_post_from_pending
+
+    if not channel_id or not thread_ts:
+        return 0
+
+    parent = Post.objects.filter(slack_channel_id=channel_id, slack_ts=thread_ts).first()
+    if parent is None:
+        return 0
+
+    created = 0
+    pending_qs = SlackPendingReply.objects.filter(
+        slack_channel_id=channel_id,
+        slack_thread_ts=thread_ts,
+    )
+    for pending in list(pending_qs):
+        if Post.objects.filter(slack_channel_id=channel_id, slack_ts=pending.slack_ts).exists():
+            pending.delete()
+            continue
+        if create_post_from_pending(pending, parent):
+            pending.delete()
+            created += 1
+    return created
