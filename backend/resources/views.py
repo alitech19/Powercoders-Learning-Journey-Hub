@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -127,12 +127,12 @@ def container_create(request):
 
     if tab == 'themes':
         if not selected_group or not can_create_thematic_container(request.user, selected_group):
-            raise Http404
+            raise PermissionDenied
         container_type = ResourceContainer.ContainerType.THEMATIC
         title_default = ''
     else:
         if not can_create_personal_container(request.user):
-            raise Http404
+            raise PermissionDenied
         container_type = ResourceContainer.ContainerType.PERSONAL
         title_default = ''
         selected_group = None
@@ -164,7 +164,7 @@ def container_create(request):
 def container_edit(request, pk):
     container = get_container_or_404(request.user, pk)
     if not can_edit_container_metadata(request.user, container):
-        raise Http404
+        raise PermissionDenied
 
     if request.method == 'POST':
         form = ResourceContainerForm(request.POST, instance=container)
@@ -186,7 +186,7 @@ def container_edit(request, pk):
 def container_delete(request, pk):
     container = get_container_or_404(request.user, pk)
     if not can_delete_container(request.user, container):
-        raise Http404
+        raise PermissionDenied
     return_url = _container_return_url(container)
 
     if request.method == 'POST':
@@ -204,7 +204,7 @@ def container_delete(request, pk):
 def item_create(request, container_pk):
     container = get_container_or_404(request.user, container_pk)
     if not can_edit_container_items(request.user, container):
-        raise Http404
+        raise PermissionDenied
 
     if request.method == 'POST':
         form = ResourceItemForm(request.POST)
@@ -231,7 +231,7 @@ def item_create(request, container_pk):
 def item_edit(request, pk):
     item = get_item_or_404(request.user, pk)
     if not can_edit_container_items(request.user, item.container):
-        raise Http404
+        raise PermissionDenied
 
     if request.method == 'POST':
         form = ResourceItemForm(request.POST, instance=item)
@@ -255,7 +255,7 @@ def item_edit(request, pk):
 def item_delete(request, pk):
     item = get_item_or_404(request.user, pk)
     if not can_edit_container_items(request.user, item.container):
-        raise Http404
+        raise PermissionDenied
     container_pk = item.container_id
     item.delete()
     messages.success(request, 'Resource removed.')
@@ -267,7 +267,7 @@ def item_delete(request, pk):
 def item_move(request, pk):
     item = get_item_or_404(request.user, pk)
     if not can_edit_container_items(request.user, item.container):
-        raise Http404
+        raise PermissionDenied
     direction = request.POST.get('direction')
     siblings = list(item.container.items.order_by('sort_order', 'pk'))
     idx = next(i for i, row in enumerate(siblings) if row.pk == item.pk)

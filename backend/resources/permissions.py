@@ -1,5 +1,7 @@
 """Resources access control."""
 
+from django.core.exceptions import PermissionDenied
+
 from accounts.models import User
 from cohorts.permissions import get_teacher_group_ids, user_is_admin, user_is_teacher
 
@@ -85,7 +87,6 @@ def can_edit_container_metadata(user, container):
 
 
 def get_container_or_404(user, pk):
-    from django.http import Http404
     from django.shortcuts import get_object_or_404
 
     container = get_object_or_404(
@@ -93,12 +94,11 @@ def get_container_or_404(user, pk):
         pk=pk,
     )
     if not can_view_container(user, container):
-        raise Http404
+        raise PermissionDenied
     return container
 
 
 def get_item_or_404(user, pk):
-    from django.http import Http404
     from django.shortcuts import get_object_or_404
 
     item = get_object_or_404(
@@ -106,7 +106,7 @@ def get_item_or_404(user, pk):
         pk=pk,
     )
     if not can_view_container(user, item.container):
-        raise Http404
+        raise PermissionDenied
     return item
 
 

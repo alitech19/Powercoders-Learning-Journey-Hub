@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -45,7 +46,7 @@ def _get_habit_or_404(user, pk):
         pk=pk,
     )
     if not can_view_habit(user, habit):
-        raise Http404
+        raise PermissionDenied
     return habit
 
 
