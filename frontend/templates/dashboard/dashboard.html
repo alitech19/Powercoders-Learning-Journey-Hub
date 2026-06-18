@@ -122,7 +122,7 @@
   {% with page_title="Welcome, "|add:user.display_name %}
   {% include "includes/_page_title.html" with title=page_title %}
   {% endwith %}
-  <p class="text-gray-500 text-sm mt-1">Student progress across workflows, goals, tasks, and wellbeing (nav order).</p>
+  <p class="text-gray-500 text-sm mt-1">Student progress across workflows, goals, tasks, and wellbeing.</p>
 </div>
 
 <div class="flex flex-wrap gap-2 mb-6">
@@ -387,7 +387,7 @@
 </div>
 {% endif %}
 
-{# Row 3 — Journal · Habits · Group · Resources (nav order) #}
+{# Row 3 — Journal · Habits · Group · Resources #}
 {% if 'journal' in enabled_module_slugs or 'habits' in enabled_module_slugs or 'group_space' in enabled_module_slugs or 'resources' in enabled_module_slugs %}
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
   {% if 'journal' in enabled_module_slugs %}
