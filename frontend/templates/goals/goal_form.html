@@ -47,13 +47,13 @@
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
       <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Goal Title <span class="text-[#B23149]">*</span></label>
       <input type="text" name="title" value="{{ form.title.value|default:'' }}" required maxlength="{{ limits.title }}"
-             class="w-full text-lg font-semibold text-[#343534] dark:text-gray-100 border-0 outline-none bg-transparent">
+             class="ph-input ph-input-lg">
     </div>
 
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
       <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Description</label>
       <textarea name="description" rows="3" maxlength="{{ limits.description }}"
-                class="w-full text-sm border-0 outline-none bg-transparent resize-none">{{ form.description.value|default:'' }}</textarea>
+                class="ph-input ph-textarea resize-none">{{ form.description.value|default:'' }}</textarea>
     </div>
 
     {% include "includes/_resource_container_picker.html" %}
@@ -61,7 +61,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-{% if form.fields.status %}3{% else %}2{% endif %} gap-4">
       <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
         <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Category</label>
-        <select name="category" class="w-full text-sm border-0 outline-none bg-transparent">
+        <select name="category" class="ph-input ph-select">
           {% for value, label in form.fields.category.choices %}
           <option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
@@ -70,7 +70,7 @@
       {% if form.fields.status %}
       <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
         <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Status</label>
-        <select name="status" class="w-full text-sm border-0 outline-none bg-transparent">
+        <select name="status" class="ph-input ph-select">
           {% for value, label in form.fields.status.choices %}
           <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
@@ -145,7 +145,7 @@
         <template x-for="(ms, i) in milestones" :key="i">
           <div class="flex items-center gap-2 group">
             <span class="text-xs text-gray-400 w-4" x-text="i+1"></span>
-            <input type="text" x-model="milestones[i]" maxlength="{{ limits.title }}" class="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2">
+            <input type="text" x-model="milestones[i]" maxlength="{{ limits.title }}" class="flex-1 ph-input">
             <button type="button" @click="removeMs(i)" x-show="milestones.length > 0" class="text-gray-400 hover:text-red-500">×</button>
           </div>
         </template>

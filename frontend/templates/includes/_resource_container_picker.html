@@ -36,7 +36,7 @@
   <div x-show="mode === 'existing'" x-cloak class="space-y-1">
     <label class="block text-xs font-medium text-gray-500">Theme</label>
     <select name="resource_container_id"
-            class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
+            class="w-full ph-input ph-select">
       <option value="">— Select theme —</option>
       {% for container in pickable_resource_containers %}
       <option value="{{ container.pk }}"
@@ -53,7 +53,7 @@
            maxlength="{{ limits.title }}"
            value="{% if resource_container_mode == 'create' %}{{ resource_container_default_title }}{% endif %}"
            @focus="$el.dataset.touched = '1'"
-           class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm"
+           class="w-full ph-input"
            placeholder="Materials: …">
     <p class="text-xs text-gray-400">Defaults to “Materials:” plus the title above if left blank on save.</p>
   </div>
