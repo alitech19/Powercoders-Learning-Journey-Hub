@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 from accounts.models import User
 from cohorts.models import Group
 
-from .chat import ChatItem, build_chat_timeline
+from .chat import ChatItem, build_chat_timeline, posts_since
 from .forms import ChatComposerForm, GoogleDocCreateForm, PostForm
 from .models import Post, ProjectSpace
 from .permissions import (
@@ -411,3 +411,41 @@ def post_delete(request, pk):
         'space_ref': space_ref,
         'group': _group_for_ref(space_ref),
     })
+
+
+@login_required
+def chat_poll(request):
+    """Return new chat bubbles since `?since=<post_id>`. Used by the 5-second HTMX poller."""
+    from django.template.loader import render_to_string
+    from django.http import HttpResponse
+
+    user = request.user
+    space_ref, space = _resolve_request_space(user, request)
+    if not space_ref or space is None:
+        return HttpResponse(status=204)
+
+    try:
+        since_id = int(request.GET.get('since', 0))
+    except (ValueError, TypeError):
+        since_id = 0
+
+    if since_id == 0:
+        return HttpResponse(status=204)
+
+    new_posts = list(posts_since(space, since_id))
+    if not new_posts:
+        return HttpResponse(status=204)
+
+    group = _group_for_ref(space_ref)
+    html = ''.join(
+        render_to_string(
+            'group_space/_chat_bubble.html',
+            {'item': ChatItem(kind='post', created_at=p.created_at, post=p),
+             'user': user, 'space_ref': space_ref, 'group': group},
+            request=request,
+        )
+        for p in new_posts
+    )
+    response = HttpResponse(html)
+    response['HX-Trigger'] = 'chatPollUpdate'
+    return response

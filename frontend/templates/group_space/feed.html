@@ -74,6 +74,16 @@
       <div id="chat-bottom" class="h-px" aria-hidden="true"></div>
     </div>
 
+    {% if space_ref %}
+    <div id="chat-poller"
+         hx-get="{% url 'group_space:chat_poll' %}"
+         hx-trigger="every 5s [document.visibilityState !== 'hidden']"
+         hx-target="#chat-messages"
+         hx-swap="beforeend"
+         hx-vals='js:{"since": getChatSince(), "space_kind": "{{ space_ref.kind }}", "space_pk": "{{ space_ref.pk }}"}'
+         aria-hidden="true" style="display:none"></div>
+    {% endif %}
+
     {% if can_post %}
       {% include "group_space/_chat_composer.html" %}
     {% elif space_ref.is_archived %}
@@ -90,9 +100,19 @@
   const URL_RE = /https?:\/\//i;
   const resourcesLabel = {{ resources_scope_label|default:"group Resources list"|escapejs }};
 
-  function scrollChatToBottom() {
+  // Expose for hx-vals so the poll request always carries the current last post ID.
+  window.getChatSince = function () {
+    const arts = document.querySelectorAll('#chat-messages article');
+    if (!arts.length) return '0';
+    return (arts[arts.length - 1].id || 'chat-msg-0').replace('chat-msg-', '');
+  };
+
+  function scrollChatToBottom(force) {
     const el = document.getElementById('chat-scroll');
-    if (el) el.scrollTop = el.scrollHeight;
+    if (!el) return;
+    // Always scroll on own sends / initial load; on poll updates only if near bottom.
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+    if (force || nearBottom) el.scrollTop = el.scrollHeight;
   }
 
   function isAttachModeOpen() {
@@ -279,7 +299,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    scrollChatToBottom();
+    scrollChatToBottom(true);
     applySnapshotProgressBars();
     if (document.getElementById('chat-composer')?.dataset.initialAttach === '1') {
       openAttachMode();
@@ -363,13 +383,16 @@
     }
   });
 
-  document.body.addEventListener('chatScrollBottom', scrollChatToBottom);
+  document.body.addEventListener('chatScrollBottom', function () { scrollChatToBottom(true); });
+  document.body.addEventListener('chatPollUpdate', function () {
+    applySnapshotProgressBars();
+    scrollChatToBottom(false);
+  });
   document.body.addEventListener('closeSharePanel', closeSharePanel);
 
   document.body.addEventListener('htmx:afterSwap', function (evt) {
     if (evt.detail.target && evt.detail.target.id === 'chat-messages') {
       document.getElementById('chat-empty')?.remove();
-      scrollChatToBottom();
       applySnapshotProgressBars(evt.detail.target);
       closeSharePanel();
       closeAttachMode();

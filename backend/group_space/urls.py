@@ -6,6 +6,7 @@ app_name = 'group_space'
 
 urlpatterns = [
     path('', views.feed, name='feed'),
+    path('poll/', views.chat_poll, name='chat_poll'),
     path('send/', views.message_create, name='message_create'),
     path('google-doc/', views.google_doc_create, name='google_doc_create'),
     path('share/', views.share_create, name='share_create'),

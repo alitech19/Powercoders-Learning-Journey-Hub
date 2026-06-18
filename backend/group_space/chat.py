@@ -41,6 +41,17 @@ def _posts_for_space(space):
     raise TypeError(f'Unsupported space type: {type(space)!r}')
 
 
+def posts_since(space: GroupSpace | ProjectSpace, since_id: int):
+    """Return posts with id > since_id in the given space, oldest first."""
+    return (
+        _posts_for_space(space)
+        .select_related('author', 'reply_to_post', 'reply_to_post__author')
+        .prefetch_related('comments__author')
+        .filter(id__gt=since_id)
+        .order_by('created_at')
+    )
+
+
 def build_chat_timeline(space: GroupSpace | ProjectSpace):
     """Chronological chat stream (oldest → newest). Pinned posts shown separately."""
     posts = list(
