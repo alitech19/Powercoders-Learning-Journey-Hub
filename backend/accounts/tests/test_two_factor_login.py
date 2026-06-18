@@ -2,6 +2,7 @@
 
 from django.test import Client, TestCase
 from django.urls import reverse
+from django_otp import DEVICE_ID_SESSION_KEY
 from django_otp.oath import totp
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
@@ -125,3 +126,27 @@ class ProfilePageTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Enable Two-Factor Authentication')
         self.assertNotContains(response, 'Backup Tokens')
+
+
+class SetupCompletePageTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    def _login_with_verified_device(self, user, device):
+        self.client.force_login(user)
+        session = self.client.session
+        session[DEVICE_ID_SESSION_KEY] = device.persistent_id
+        session.save()
+
+    def test_setup_complete_uses_branded_template(self):
+        teacher = make_teacher('setup-complete@example.com')
+        device = TOTPDevice.objects.create(user=teacher, name='default', confirmed=True)
+        self._login_with_verified_device(teacher, device)
+
+        response = self.client.get(reverse('two_factor:setup_complete'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "You're all set")
+        self.assertContains(response, 'View backup tokens')
+        self.assertContains(response, 'Account security')
+        self.assertNotContains(response, 'Provide a template named')
