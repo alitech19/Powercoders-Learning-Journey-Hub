@@ -26,14 +26,41 @@ class WorkflowAdmin(admin.ModelAdmin):
         'assignee_cohort',
         'assignee_group',
         'visibility',
+        'scheduled_publish_at',
         'created_by',
         'created_at',
     )
     list_filter = ('progress_mode', 'assignee_type', 'visibility', 'assignee_cohort')
     search_fields = ('title', 'created_by__display_name', 'created_by__email')
-    autocomplete_fields = ('created_by', 'assignee_cohort', 'assignee_group')
+    autocomplete_fields = (
+        'created_by',
+        'assignee_cohort',
+        'assignee_group',
+        'resource_container',
+    )
     inlines = [WorkflowStepInline, WorkflowEnrollmentInline]
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at', 'scheduled_publish_task_id')
+    fieldsets = (
+        (None, {'fields': ('title', 'description', 'visibility')}),
+        (
+            'Assignment',
+            {
+                'fields': (
+                    'progress_mode',
+                    'assignee_type',
+                    'assignee_cohort',
+                    'assignee_group',
+                    'created_by',
+                ),
+            },
+        ),
+        ('Materials', {'fields': ('resource_container',)}),
+        (
+            'Scheduled publication',
+            {'fields': ('scheduled_publish_at', 'scheduled_publish_task_id')},
+        ),
+        ('Timestamps', {'fields': ('created_at', 'updated_at')}),
+    )
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

@@ -2,7 +2,16 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group as AuthGroup
 
-from .models import AuditLog, Notification, User
+from .models import (
+    AuditLog,
+    Notification,
+    NotificationDeliveryLog,
+    NotificationDigestItem,
+    SlackIntegration,
+    SlackWorkspaceConfig,
+    User,
+    UserNotificationSettings,
+)
 
 try:
     admin.site.unregister(AuthGroup)
@@ -101,6 +110,143 @@ class NotificationAdmin(admin.ModelAdmin):
     list_filter = ('is_read',)
     search_fields = ('title', 'recipient__email', 'recipient__display_name')
     readonly_fields = ('created_at',)
+
+
+@admin.register(NotificationDeliveryLog)
+class NotificationDeliveryLogAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'recipient', 'channel', 'status', 'event_key')
+    list_filter = ('channel', 'status')
+    search_fields = ('event_key', 'recipient__email', 'recipient__display_name')
+    readonly_fields = (
+        'event_key',
+        'recipient',
+        'channel',
+        'status',
+        'provider_message_id',
+        'error_message',
+        'created_at',
+        'sent_at',
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(NotificationDigestItem)
+class NotificationDigestItemAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'recipient', 'channel', 'digest_bucket', 'status', 'event_key')
+    list_filter = ('channel', 'digest_bucket', 'status')
+    search_fields = ('event_key', 'recipient__email', 'recipient__display_name')
+    readonly_fields = (
+        'event_key',
+        'recipient',
+        'channel',
+        'digest_bucket',
+        'scheduled_for',
+        'created_at',
+        'provider_message_id',
+        'error_message',
+        'sent_at',
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(UserNotificationSettings)
+class UserNotificationSettingsAdmin(admin.ModelAdmin):
+    list_display = ('user', 'in_app_enabled', 'email_enabled', 'slack_enabled', 'digest_mode', 'updated_at')
+    search_fields = ('user__email', 'user__display_name')
+    autocomplete_fields = ('user',)
+
+
+@admin.register(SlackIntegration)
+class SlackIntegrationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'slack_team_id', 'slack_user_id', 'is_active', 'connected_at')
+    search_fields = ('user__email', 'user__display_name', 'slack_user_id')
+    readonly_fields = ('connected_at', 'disconnected_at', 'last_error')
+    autocomplete_fields = ('user',)
+
+
+@admin.register(SlackWorkspaceConfig)
+class SlackWorkspaceConfigAdmin(admin.ModelAdmin):
+    list_display = (
+        'oauth_enabled',
+        'webhook_enabled',
+        'chat_sync_enabled',
+        'last_webhook_ok',
+        'last_bot_ok',
+        'updated_at',
+    )
+    readonly_fields = (
+        'slack_bot_user_id',
+        'last_webhook_test_at',
+        'last_webhook_ok',
+        'last_bot_test_at',
+        'last_bot_ok',
+        'last_error',
+        'updated_at',
+        'updated_by',
+    )
+    fieldsets = (
+        (
+            'Personal OAuth',
+            {
+                'fields': (
+                    'oauth_enabled',
+                    'oauth_client_id',
+                    'oauth_client_secret_encrypted',
+                    'oauth_redirect_uri',
+                ),
+            },
+        ),
+        (
+            'Staff webhook',
+            {
+                'fields': (
+                    'webhook_enabled',
+                    'webhook_url_encrypted',
+                    'last_webhook_test_at',
+                    'last_webhook_ok',
+                ),
+            },
+        ),
+        (
+            'Group chat channel sync',
+            {
+                'fields': (
+                    'chat_sync_enabled',
+                    'bot_token_encrypted',
+                    'signing_secret_encrypted',
+                    'slack_bot_user_id',
+                    'last_bot_test_at',
+                    'last_bot_ok',
+                ),
+            },
+        ),
+        (
+            'Diagnostics',
+            {
+                'fields': ('last_error', 'updated_at', 'updated_by'),
+            },
+        ),
+    )
+
+    def has_add_permission(self, request):
+        return not SlackWorkspaceConfig.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def save_model(self, request, obj, form, change):
+        obj.updated_by = request.user
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(AuditLog)

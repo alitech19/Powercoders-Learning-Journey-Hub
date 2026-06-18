@@ -29,10 +29,22 @@ If you belong to several groups, use the group chips on Group/Themes tabs to swi
 
 ### Thematic (`Themes` tab)
 
-- **Who:** tied to a group; created by students/teachers allowed to manage themes.
-- **Purpose:** curated topic boards the team agrees on (reading list, employer links, etc.) — **manual** links only.
-- **Create:** **+ New theme** — you name the tile; add links on the detail page.
+- **Who:** tied to a group; created by students/teachers allowed to manage themes, or **linked from staff workflow / task / goal forms** (create or pick a theme).
+- **Purpose:** curated topic boards (reading list, employer links, programme materials) — **manual** links on the theme detail page, or opened from **Open materials** on a linked entity.
+- **Create:** **+ New theme** on Resources, or **Create new** in a workflow/task/goal form — you name the tile; add links on the detail page.
 - **Separate** from chat auto-sync — chat does not push into theme tiles unless you copy links yourself.
+
+### Entity-linked materials (workflows, tasks, goals)
+
+Staff can attach an optional thematic container when creating or editing a **workflow**, **staff task**, or **staff goal**:
+
+| Option | Result |
+|--------|--------|
+| **None** | No materials link on the entity detail page. |
+| **Link existing theme** | Picker lists thematic boards (not system group tiles). |
+| **Create new** | New theme; default title `Materials: {entity title}` (editable). |
+
+Anyone who can view the entity sees **Open materials** on its detail page (assignees do not need to belong to a specific group tile).
 
 ## Auto-sync from Group chat {#group-chat-sync}
 

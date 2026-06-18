@@ -74,15 +74,11 @@ urlpatterns = [
     path('resources/', include('resources.urls')),
     path('bugs/', include('bug_reports.urls')),
     path('module-disabled/<slug:slug>/', module_disabled_view, name='module_disabled'),
+    path('admin-config/', include('config.notification_config_urls')),
     path('', include('info.urls')),
     path('', include('dashboard.urls')),
     path('home/', RedirectView.as_view(pattern_name='dashboard:dashboard', permanent=False), name='home'),
 ]
-
-if settings.DEBUG:
-    from django.conf.urls.static import static
-
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler404 = 'config.views.page_not_found'
 handler403 = 'config.views.permission_denied'

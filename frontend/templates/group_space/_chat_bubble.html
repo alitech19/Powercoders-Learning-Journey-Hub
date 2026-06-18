@@ -32,6 +32,14 @@
       {% endif %}
 
       <div class="text-sm text-gray-800 dark:text-gray-200 space-y-2">
+        {% if post.reply_to_post_id %}
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          <a href="#chat-msg-{{ post.reply_to_post_id }}" class="hover:text-[#B23149] hover:underline">
+            ↪ in reply to: “{% if post.reply_to_post.body %}{{ post.reply_to_post.body|truncatewords:10 }}{% elif post.reply_to_post.resource_label %}{{ post.reply_to_post.resource_label|truncatewords:10 }}{% else %}message{% endif %}”
+            by {{ post.reply_to_post.author.display_name }}
+          </a>
+        </p>
+        {% endif %}
         {% if post.resource_label and not post.has_snapshot %}
         <p class="font-medium text-[#343534] dark:text-gray-100">{{ post.resource_label }}</p>
         {% endif %}
@@ -71,6 +79,13 @@
 
       {% if user == post.author or user.role == "teacher" or user.role == "admin" %}
       <div class="flex gap-2 opacity-0 group-hover/msg:opacity-100 transition-opacity">
+        <button type="button"
+                class="chat-reply-btn text-xs text-gray-400 hover:text-[#B23149]"
+                data-post-id="{{ post.pk }}"
+                data-author="{{ post.author.display_name|escape }}"
+                data-preview="{% if post.body %}{{ post.body|truncatewords:12 }}{% elif post.resource_label %}{{ post.resource_label|truncatewords:12 }}{% else %}message{% endif %}">
+          Reply
+        </button>
         {% if user == post.author and not post.drive_file_id %}
         <a href="{% url 'group_space:post_edit' post.pk %}" class="text-xs text-gray-400 hover:text-[#B23149]">Edit</a>
         {% endif %}

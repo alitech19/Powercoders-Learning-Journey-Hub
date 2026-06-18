@@ -1,0 +1,9 @@
+{% if scheduled_publish_at %}
+<p class="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 rounded-lg px-3 py-2 mb-4">
+  Scheduled publication:
+  <time datetime="{{ scheduled_publish_at|date:'c' }}" class="font-semibold">
+    {{ scheduled_publish_at|date:"d M Y, H:i" }}
+  </time>
+  ({{ settings_time_zone }})
+</p>
+{% endif %}

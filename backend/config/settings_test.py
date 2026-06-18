@@ -6,6 +6,8 @@ sessions and cache use in-memory / DB backends so tests run with only Postgres a
 CI still uses config.settings + Redis to match production wiring.
 """
 
+import tempfile
+
 from .settings import *  # noqa: F403
 
 DEBUG = False
@@ -30,6 +32,16 @@ CELERY_TASK_EAGER_PROPAGATES = True
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 
 AXES_ENABLED = False
+
+GOOGLE_UPLOAD_STAGING_ROOT = tempfile.mkdtemp(prefix='powerhub_test_staging_')
+
+# CI/tests run without collectstatic; manifest storage needs staticfiles.json.
+STORAGES = {
+    **STORAGES,
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
+}
 
 # Quieter test output
 LOGGING = {

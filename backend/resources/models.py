@@ -8,12 +8,20 @@ class ResourceContainer(models.Model):
     class ContainerType(models.TextChoices):
         PERSONAL = 'personal', 'Personal'
         GROUP = 'group', 'Group'
+        PROJECT = 'project', 'Project'
         THEMATIC = 'thematic', 'Thematic'
 
     container_type = models.CharField(max_length=20, choices=ContainerType.choices)
     title = models.CharField(max_length=TITLE_MAX_LENGTH)
     group = models.ForeignKey(
         'cohorts.Group',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='resource_containers',
+    )
+    project_space = models.ForeignKey(
+        'group_space.ProjectSpace',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -47,10 +55,16 @@ class ResourceContainer(models.Model):
                 condition=models.Q(is_system=True, container_type='group'),
                 name='resources_one_system_container_per_group',
             ),
+            models.UniqueConstraint(
+                fields=['project_space'],
+                condition=models.Q(is_system=True, container_type='project'),
+                name='resources_one_system_container_per_project',
+            ),
         ]
         indexes = [
             models.Index(fields=['container_type', 'owner']),
             models.Index(fields=['container_type', 'group']),
+            models.Index(fields=['container_type', 'project_space']),
         ]
 
     def __str__(self):
@@ -104,4 +118,12 @@ class ResourceItem(models.Model):
 
     @property
     def from_group_chat(self):
+        return self.source_post_id is not None and bool(self.source_post.group_space_id)
+
+    @property
+    def from_project_chat(self):
+        return self.source_post_id is not None and bool(self.source_post.project_space_id)
+
+    @property
+    def from_space_chat(self):
         return self.source_post_id is not None

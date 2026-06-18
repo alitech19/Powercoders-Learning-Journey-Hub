@@ -10,9 +10,21 @@ Tasks are grouped into **Individual**, **Group**, and **Cohort**:
 
 ## Task detail {#detail}
 
-Status, priority, due date, subtasks, comments, and updates (when enabled). Staff-assigned tasks may lock editing of title/description for students.
+Status, priority, due date, subtasks, comments, and updates (when enabled). Staff-assigned tasks may lock editing of title/description for students. When a **Materials** theme is linked, assignees see **Open materials**. Staff drafts with a schedule show a **Scheduled publication** banner.
 
 ## Create task {#form-create}
+
+### Field order (staff create)
+
+1. **Title** and **Description**
+2. **Materials (Resources)** — optional
+3. **Priority** and **Due date** (and **Status** on edit)
+4. **Assignment** — individual students or whole group
+5. **Subtasks** — optional template lines before save
+6. **Sections** — updates, comments, subtasks toggles (when shown)
+7. **Visibility** — toggle buttons at the bottom
+8. **Scheduled publication** — when **Draft (staff only)** is selected
+9. **Create Task**
 
 ### Title (required)
 
@@ -21,6 +33,13 @@ Name of the task in lists and on the detail page.
 ### Description
 
 Optional longer text: steps, links, definition of done.
+
+### Materials (Resources)
+
+Staff only on create/edit. Optional **Themes** board:
+
+- **None**, **Link existing theme**, or **Create new** (default title `Materials: {task title}`).
+- Enrolled students open it via **Open materials** on the task detail page.
 
 ### Priority
 
@@ -78,6 +97,8 @@ Typical combos: all on for coached assignments; all off for a simple private rem
 
 ### Visibility
 
+Toggle buttons at the bottom of the form:
+
 **Students**
 
 - **Only me** — private: teachers see status/dates but not title or description.
@@ -88,9 +109,17 @@ Typical combos: all on for coached assignments; all off for a simple private rem
 - **Draft (staff only)** — students do not see the task until you change to Share with students.
 - **Share with students** — appears in student task lists immediately.
 
+### Scheduled publication
+
+Shown only when **Draft (staff only)** is selected:
+
+- Set **Publish automatically at…** with date/time (platform timezone).
+- Students are not notified until publication; switching to **Share with students** manually cancels the schedule.
+- Staff see the planned time on the task detail page until it fires or is cancelled.
+
 ## Edit task {#form-edit}
 
-Same fields where your role allows. Students on staff-assigned tasks often cannot change title/description but can change status and use enabled sections (updates, comments, subtasks).
+Same fields where your role allows, including **Materials** and **Scheduled publication** on staff-assigned tasks. Students on staff-assigned tasks often cannot change title/description but can change status and use enabled sections (updates, comments, subtasks).
 
 ## Delete task {#form-delete}
 

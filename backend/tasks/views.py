@@ -10,6 +10,10 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from accounts.models import User
+from accounts.notifications.staff_events import (
+    maybe_notify_workflow_completed,
+    notify_student_task_completed,
+)
 from cohorts.permissions import (
     get_teacher_accessible_students,
     user_is_admin,
@@ -18,6 +22,15 @@ from cohorts.permissions import (
 )
 
 from feedback.services import build_section_context
+
+from config.entity_publish import (
+    apply_publish_schedule_from_post,
+    cancel_scheduled_publish,
+    scheduled_publish_detail_context,
+    scheduled_publish_form_defaults,
+    scheduled_publish_picker_context,
+)
+from resources.entity_links import apply_entity_resource_container, entity_materials_context, resource_container_picker_context
 
 from .forms import SubtaskForm, TaskCommentForm, TaskForm, TaskUpdateForm
 from .models import Subtask, SubtaskEnrollment, Task, TaskComment, TaskEnrollment, TaskUpdate
@@ -71,6 +84,7 @@ def _task_queryset():
             'assignee_group',
             'assignee_group__cohort',
             'assignee_cohort',
+            'resource_container',
         )
         .prefetch_related(
             'subtasks',
@@ -513,6 +527,9 @@ def task_create(request):
     }
     if user_is_staff(request.user):
         context.update(get_assignment_form_context(request.user))
+        context.update(resource_container_picker_context(request.user))
+        context.update(scheduled_publish_form_defaults())
+        context.update({'draft_label': 'draft', 'entity_label': 'task'})
     return render(request, 'tasks/task_form.html', context)
 
 
@@ -544,6 +561,8 @@ def task_detail(request, pk):
             'show_comments': False,
             'status_choices': Task.Status.choices,
             'today': timezone.localdate(),
+            **entity_materials_context(user, task),
+            **scheduled_publish_detail_context(task),
         }
         if ctx['show_subtasks']:
             ctx.update(_subtask_ctx(user, enrollment))
@@ -571,6 +590,8 @@ def task_detail(request, pk):
             'show_comments': task_allows_comments(task) and can_content,
             'status_choices': Task.Status.choices,
             'today': timezone.localdate(),
+            **entity_materials_context(user, task),
+            **scheduled_publish_detail_context(task),
         }
         if ctx['show_subtasks']:
             ctx.update(_subtask_ctx(user, enrollment))
@@ -669,6 +690,8 @@ def task_detail(request, pk):
                 'can_add_participant_subtask': False,
                 'show_staff_subtasks': True,
             })
+    ctx.update(entity_materials_context(user, task))
+    ctx.update(scheduled_publish_detail_context(task))
     return render(request, 'tasks/task_detail.html', ctx)
 
 
@@ -701,10 +724,38 @@ def task_edit(request, pk):
                 initial=task.status,
             )
         if form.is_valid():
+            old_visibility = task.visibility
             form.save()
+            task.refresh_from_db()
+            if is_staff_assigned(task):
+                from accounts.models import User
+
+                students = User.objects.filter(
+                    pk__in=task.enrollments.values_list('student_id', flat=True),
+                    role=User.Role.STUDENT,
+                    is_active=True,
+                )
+                apply_publish_schedule_from_post(
+                    entity=task,
+                    post=request.POST,
+                    actor=request.user,
+                    previous_visibility=old_visibility,
+                    students=students,
+                )
+                apply_entity_resource_container(
+                    entity=task,
+                    user=request.user,
+                    post=request.POST,
+                    assignee_group=task.assignee_group,
+                )
             if enrollment and 'status' in form.cleaned_data:
                 enrollment.status = form.cleaned_data['status']
                 enrollment.save(update_fields=['status', 'completed_at'])
+                if (
+                    enrollment.status == Task.Status.DONE
+                    and user_is_student(request.user)
+                ):
+                    notify_student_task_completed(student=request.user, task=task)
             elif task.is_group_shared and 'status' in form.cleaned_data:
                 task.status = form.cleaned_data['status']
                 task.save(update_fields=['status', 'completed_at'])
@@ -724,7 +775,7 @@ def task_edit(request, pk):
                 initial=task.status,
             )
 
-    return render(request, 'tasks/task_form.html', {
+    context = {
         'form': form,
         'action': 'edit',
         'task': task,
@@ -733,7 +784,18 @@ def task_edit(request, pk):
         'visibility_mode': _visibility_form_mode(request.user, task=task),
         'status_choices': Task.Status.choices,
         'priority_choices': Task.Priority.choices,
-    })
+    }
+    if is_staff_assigned(task):
+        context.update(
+            resource_container_picker_context(
+                request.user,
+                entity_title=task.title,
+                linked_container=task.resource_container,
+            ),
+        )
+        context.update(scheduled_publish_picker_context(task))
+        context.update({'draft_label': 'draft', 'entity_label': 'task'})
+    return render(request, 'tasks/task_form.html', context)
 
 
 @login_required
@@ -742,6 +804,7 @@ def task_delete(request, pk):
     if not can_delete_task(request.user, task):
         return HttpResponseForbidden()
     if request.method == 'POST':
+        cancel_scheduled_publish(task, save=False)
         task.delete()
         messages.success(request, 'Task deleted.')
         return redirect('tasks:task_list')
@@ -768,6 +831,8 @@ def task_quick_status(request, pk):
             return HttpResponseForbidden()
         enrollment.status = status
         enrollment.save(update_fields=['status', 'completed_at'])
+        if status == Task.Status.DONE and user_is_student(request.user):
+            notify_student_task_completed(student=request.user, task=task)
 
     ctx = _task_status_context(request.user, task, enrollment)
     if request.GET.get('inline') == 'list':

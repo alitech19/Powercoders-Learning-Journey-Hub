@@ -23,21 +23,24 @@ from feedback.models import FeedbackEntry
 from journal.models import JournalEntry
 from reflections.constants import TAG_WEEKLY
 from test_utils.reflections import make_reflection
+from test_utils.slack import clear_slack_workspace_config, configure_slack_webhook
 from test_utils.users import login_as, make_admin, make_student, make_teacher
 
 _WEEK_START = timezone.make_aware(datetime.combine(date(2026, 5, 25), datetime.min.time()))
 
 
 class SlackMessageTests(TestCase):
-    @override_settings(SLACK_WEBHOOK_URL='')
+    def setUp(self):
+        clear_slack_workspace_config()
+
     def test_empty_webhook_is_no_op(self):
         with patch('urllib.request.urlopen') as mock_open:
             send_slack_message('hello')
         mock_open.assert_not_called()
 
-    @override_settings(SLACK_WEBHOOK_URL='https://hooks.slack.com/services/TEST')
     @patch('urllib.request.urlopen')
     def test_posts_json_payload(self, mock_urlopen):
+        configure_slack_webhook()
         mock_urlopen.return_value = MagicMock()
         send_slack_message('Test *bold*')
         mock_urlopen.assert_called_once()
@@ -46,9 +49,9 @@ class SlackMessageTests(TestCase):
         body = json.loads(req.data.decode())
         self.assertEqual(body['text'], 'Test *bold*')
 
-    @override_settings(SLACK_WEBHOOK_URL='https://hooks.slack.com/services/TEST')
     @patch('urllib.request.urlopen', side_effect=OSError('network down'))
     def test_network_errors_do_not_raise(self, _mock_urlopen):
+        configure_slack_webhook()
         send_slack_message('still ok')
 
 
@@ -143,10 +146,11 @@ class FeedbackEmailIntegrationTests(TestCase):
 
 
 @override_settings(
-    SLACK_WEBHOOK_URL='https://hooks.slack.com/services/TEST',
     CELERY_TASK_ALWAYS_EAGER=True,
 )
 class NotifyMissingReflectionsTaskTests(TestCase):
+    def setUp(self):
+        configure_slack_webhook()
     @patch('urllib.request.urlopen')
     @patch('dashboard.services.students_missing_weekly_reflection')
     def test_task_posts_all_clear_when_none_missing(self, mock_missing, mock_urlopen):

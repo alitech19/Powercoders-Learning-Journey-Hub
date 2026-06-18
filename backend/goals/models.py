@@ -51,6 +51,15 @@ class Goal(models.Model):
         choices=Visibility.choices,
         default=Visibility.PRIVATE,
     )
+    resource_container = models.ForeignKey(
+        'resources.ResourceContainer',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='goals',
+    )
+    scheduled_publish_at = models.DateTimeField(null=True, blank=True)
+    scheduled_publish_task_id = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -7,6 +7,7 @@ The **Administration** menu (top right, admins only) links to in-app staff tools
 | Tab | Purpose |
 |-----|---------|
 | Cohorts & Groups | Structure cohorts, groups, teacher assignment, student placement |
+| Group spaces | Custom collaboration rooms (chat + Resources) across cohorts |
 | Student Progress | Cross-app metrics per student |
 | File storage | Google Drive configuration |
 | Users | Search, filter, deactivate, delete |
@@ -37,6 +38,16 @@ Manage the academic structure students belong to.
 
 - Create cohort + groups **before** bulk CSV import if you use `cohort` / `group` columns.
 - Group names should be unique enough within a cohort when importing.
+
+## Group spaces {#group-spaces}
+
+<!-- role: admin -->
+
+Custom collaboration rooms with their own chat and **Resources → Group spaces** container. **Not** the same as cohort group chat (which comes from **Cohorts & Groups**).
+
+- **New group space** — title, description, then add members (any students/teachers).
+- **Archive** when done — space disappears from chat picker and this list (read-only; restore via Django admin).
+- Full guide: open **ⓘ** on **Administration → Group spaces**.
 
 ## Student Progress {#student-progress}
 

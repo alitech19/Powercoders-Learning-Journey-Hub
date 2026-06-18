@@ -1,0 +1,12 @@
+<label for="{{ id }}"
+       class="relative inline-block {% if disabled %}cursor-not-allowed opacity-50{% else %}cursor-pointer{% endif %}">
+  <input type="checkbox"
+         name="{{ name }}"
+         id="{{ id }}"
+         {% if checked %}checked{% endif %}
+         {% if disabled %}disabled{% endif %}
+         class="sr-only peer"
+         {% if alpine_onchange %}@change="{{ alpine_onchange }}"{% endif %}>
+  <div class="w-9 h-5 bg-gray-200 peer-checked:bg-[#B23149] peer-disabled:bg-gray-200 rounded-full transition-colors pointer-events-none"></div>
+  <div class="absolute left-0.5 top-0.5 h-4 w-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4 pointer-events-none"></div>
+</label>

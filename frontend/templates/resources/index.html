@@ -15,6 +15,11 @@
             {% if tab == 'group' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534] dark:text-gray-100{% endif %}">
     Group
   </a>
+  <a href="?tab=project"
+     class="px-4 py-2 rounded-md text-sm font-medium transition-colors
+            {% if tab == 'project' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534] dark:text-gray-100{% endif %}">
+    Group spaces
+  </a>
   <a href="?tab=themes{% if selected_group %}&group={{ selected_group.pk }}{% endif %}"
      class="px-4 py-2 rounded-md text-sm font-medium transition-colors
             {% if tab == 'themes' %}bg-[#343534] text-white{% else %}text-gray-500 hover:text-[#343534] dark:text-gray-100{% endif %}">
@@ -60,6 +65,9 @@
   <p class="text-gray-400 mt-1">Create a tile to collect your own links.</p>
   {% elif tab == "group" %}
   <p>No group resource tiles yet.</p>
+  {% elif tab == "project" %}
+  <p>No project resource tiles yet.</p>
+  <p class="text-gray-400 mt-1">Links from project chat appear here.</p>
   {% elif tab == "themes" %}
   {% if not selected_group %}
   <p>Join a group to see themed resources.</p>

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Group spaces{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <a href="{% url 'dashboard:dashboard' %}" class="text-sm text-gray-400 hover:text-[#B23149] transition-colors">← Dashboard</a>
+      {% include "includes/_page_title.html" with title="Group spaces" %}
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        Custom collaboration rooms with their own chat and Resources. Cohort group chats are managed under
+        <strong>Cohorts &amp; Groups</strong>.
+      </p>
+    </div>
+    <a href="{% url 'group_space:project_create' %}"
+       class="px-4 py-2 rounded-lg bg-[#B23149] hover:bg-[#9a2a3f] text-white text-sm font-semibold">
+      New group space
+    </a>
+  </div>
+
+  {% if projects %}
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-800">
+    {% for project in projects %}
+    <a href="{% url 'group_space:project_detail' project.pk %}"
+       class="flex items-center justify-between gap-4 px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+      <div class="min-w-0">
+        <p class="font-semibold text-[#343534] dark:text-gray-100 truncate">{{ project.title }}</p>
+        <p class="text-xs text-gray-400 mt-0.5">
+          {{ project.memberships.count }} member{{ project.memberships.count|pluralize }}
+          · created {{ project.created_at|date:"d M Y" }}
+          {% if project.is_archived %}· <span class="text-amber-600">archived</span>{% endif %}
+        </p>
+      </div>
+      <span class="text-sm text-[#B23149] shrink-0">Manage →</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-10 text-center">
+    <p class="text-gray-500 text-sm">No custom group spaces yet.</p>
+    <p class="text-gray-400 text-xs mt-2">Create one to add students and teachers from any cohort.</p>
+    <a href="{% url 'group_space:project_create' %}" class="inline-block mt-4 text-sm font-semibold text-[#B23149] hover:underline">New group space</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

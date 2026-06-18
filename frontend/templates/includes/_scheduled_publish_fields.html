@@ -1,0 +1,25 @@
+{% if show_scheduled_publish_fields %}
+<div class="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/40 p-4 space-y-3"
+     x-show="visibility === 'private'" x-cloak>
+  <div>
+    <p class="text-sm font-semibold text-[#343534] dark:text-gray-100">Scheduled publication</p>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+      While {{ draft_label }}, students cannot see this {{ entity_label }}.
+      Set a time to publish automatically, or publish manually by switching visibility — the schedule is then cancelled.
+    </p>
+  </div>
+  <label class="flex items-center gap-2 text-sm cursor-pointer">
+    <input type="checkbox" name="enable_scheduled_publish" value="on"
+           {% if scheduled_publish_enabled %}checked{% endif %}
+           class="accent-[#B23149]">
+    <span>Publish automatically at…</span>
+  </label>
+  <div>
+    <label class="block text-xs font-medium text-gray-500 mb-1" for="scheduled-publish-at">Date &amp; time</label>
+    <input type="datetime-local" name="scheduled_publish_at" id="scheduled-publish-at"
+           value="{{ scheduled_publish_at_value }}"
+           class="w-full sm:max-w-xs border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
+    <p class="text-xs text-gray-400 mt-1">Times use {{ settings_time_zone }}.</p>
+  </div>
+</div>
+{% endif %}

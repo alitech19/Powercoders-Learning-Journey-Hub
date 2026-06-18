@@ -61,6 +61,9 @@ ROUTE_MAP: dict[str, tuple[str, str]] = {
     'group_space:post_create': ('group_space', 'form-create'),
     'group_space:post_edit': ('group_space', 'form-edit'),
     'group_space:post_delete': ('group_space', 'form-delete'),
+    'group_space:project_list': ('group_spaces_admin', 'overview'),
+    'group_space:project_create': ('group_spaces_admin', 'create'),
+    'group_space:project_detail': ('group_spaces_admin', 'members'),
     # Resources
     'resources:index': ('resources', 'list'),
     'resources:container_create': ('resources', 'form-create'),
@@ -72,7 +75,10 @@ ROUTE_MAP: dict[str, tuple[str, str]] = {
     'resources:item_delete': ('resources', 'form-delete'),
     # Accounts
     'accounts:profile': ('accounts', 'profile'),
+    'accounts:notifications': ('accounts', 'notifications'),
+    'accounts:notification_settings': ('accounts', 'notification-settings'),
     'accounts:storage_settings': ('google_drive', 'student-oauth-gcp'),
+    'accounts:slack_settings': ('slack_integration', 'admin-quick-start'),
     # Administration (in-app staff UI)
     'accounts:cohort_list': ('administration', 'cohorts-groups'),
     'accounts:cohort_create': ('administration', 'cohorts-groups'),
@@ -161,10 +167,16 @@ HELP_LABELS: dict[str, str] = {
     'reflections:create': 'New reflection',
     'journal:list': 'Journal',
     'habits:list': 'Habits',
-    'group_space:feed': 'Group chat',
+    'group_space:feed': 'Group Space',
+    'group_space:project_list': 'Group spaces',
+    'group_space:project_create': 'New group space',
+    'group_space:project_detail': 'Group space',
     'resources:index': 'Resources',
     'accounts:profile': 'Profile',
+    'accounts:notifications': 'Notification centre',
+    'accounts:notification_settings': 'Notification settings',
     'accounts:storage_settings': 'File storage',
+    'accounts:slack_settings': 'Slack integration',
     'accounts:cohort_list': 'Cohorts & Groups',
     'accounts:cohort_create': 'New cohort',
     'accounts:cohort_edit': 'Edit cohort',
@@ -192,10 +204,12 @@ ALLOWED_APP_SLUGS = frozenset(
         'journal',
         'habits',
         'group_space',
+        'group_spaces_admin',
         'resources',
         'accounts',
         'google_drive',
         'administration',
+        'slack_integration',
     }
 )
 

@@ -172,8 +172,12 @@ STORAGES = {
     },
 }
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+GOOGLE_UPLOAD_STAGING_ROOT = Path(
+    os.environ.get(
+        'GOOGLE_UPLOAD_STAGING_ROOT',
+        str(PROJECT_ROOT / '.tmp' / 'google_upload_staging'),
+    )
+)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -224,6 +228,14 @@ CELERY_BEAT_SCHEDULE = {
         # Every Sunday at 02:00 Europe/Zurich
         'schedule': crontab(hour=2, minute=0, day_of_week='sunday'),
     },
+    'hourly-notification-digests': {
+        'task': 'accounts.tasks.dispatch_hourly_notification_digests_task',
+        'schedule': crontab(minute=0),
+    },
+    'daily-notification-digests': {
+        'task': 'accounts.tasks.dispatch_daily_notification_digests_task',
+        'schedule': crontab(hour=0, minute=0),
+    },
 }
 
 # --- Database backups ---
@@ -239,7 +251,6 @@ BACKUP_RETENTION_DAYS = int(os.environ.get('BACKUP_RETENTION_DAYS', '30'))
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@powercoders.org')
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8000').rstrip('/')
-SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL', '').strip()
 
 # Email — Brevo HTTP API (works on Render free tier; SMTP ports are blocked there)
 BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')

@@ -29,6 +29,27 @@ def ensure_system_group_container(group, *, created_by=None):
     return container
 
 
+def ensure_system_project_container(project_space, *, created_by=None):
+    author = created_by
+    if author is None:
+        author = User.objects.filter(is_superuser=True).order_by('pk').first()
+    if author is None:
+        author = User.objects.order_by('pk').first()
+    container, created = ResourceContainer.objects.get_or_create(
+        project_space=project_space,
+        is_system=True,
+        container_type=ResourceContainer.ContainerType.PROJECT,
+        defaults={
+            'title': project_space.title,
+            'created_by': author,
+        },
+    )
+    if not created and container.title != project_space.title:
+        container.title = project_space.title
+        container.save(update_fields=['title', 'updated_at'])
+    return container
+
+
 def _storage_backend_for_post(post) -> str:
     from group_space.models import Post
     from resources.models import ResourceItem
@@ -58,8 +79,8 @@ def resource_url_for_post(post, request=None):
     return ''
 
 
-def sync_from_group_post(post, *, request=None):
-    """Create/update/remove ResourceItem from a Group Space post (new posts only at call sites)."""
+def sync_from_space_post(post, *, request=None):
+    """Create/update/remove ResourceItem from a chat post."""
     if not post_qualifies_for_resources(post):
         ResourceItem.objects.filter(source_post=post).delete()
         return None
@@ -68,8 +89,12 @@ def sync_from_group_post(post, *, request=None):
         ResourceItem.objects.filter(source_post=post).delete()
         return None
 
-    group = post.group_space.group
-    container = ensure_system_group_container(group, created_by=post.author)
+    if post.project_space_id:
+        container = ensure_system_project_container(post.project_space, created_by=post.author)
+    else:
+        group = post.group_space.group
+        container = ensure_system_group_container(group, created_by=post.author)
+
     url = resource_url_for_post(post, request=request)
     if not url:
         ResourceItem.objects.filter(source_post=post).delete()
@@ -87,6 +112,11 @@ def sync_from_group_post(post, *, request=None):
         },
     )
     return item
+
+
+def sync_from_group_post(post, *, request=None):
+    """Backward-compatible alias."""
+    return sync_from_space_post(post, request=request)
 
 
 def next_item_sort_order(container):

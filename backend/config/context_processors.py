@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from .admin_menu import ADMIN_NAV_MENU_LABEL, admin_nav_items
 from .module_access import enabled_slugs
 from .nav import integrated_nav_groups, integrated_nav_items, metric_columns_for_request
@@ -41,4 +43,5 @@ def input_limits(request):
             'short_label': il.SHORT_LABEL_MAX_LENGTH,
             'search': il.SEARCH_QUERY_MAX_LENGTH,
         },
+        'settings_time_zone': settings.TIME_ZONE,
     }

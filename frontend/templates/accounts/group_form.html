@@ -60,6 +60,10 @@
         {% if form.teachers.errors %}<p class="mt-1 text-xs text-red-500">{{ form.teachers.errors|join:", " }}</p>{% endif %}
       </div>
 
+      {% if group %}
+      {% include "group_space/_slack_channel_fields.html" %}
+      {% endif %}
+
       <div class="flex gap-3 pt-2">
         <button type="submit"
                 class="bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors">

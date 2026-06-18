@@ -97,6 +97,9 @@ def user_create(request):
 
             send_welcome_email(created_user, temp_password)
             send_new_user_slack(created_user)
+            from accounts.notifications.staff_events import notify_new_user_account
+
+            notify_new_user_account(created_user=created_user, created_by=request.user)
             messages.success(request, f'User {display_name} created. Share the temporary password securely.')
             form = CreateUserForm(creator=user)
     else:
@@ -166,6 +169,9 @@ def user_import(request):
 
             send_welcome_email(new_user, temp_pw)
             send_new_user_slack(new_user)
+            from accounts.notifications.staff_events import notify_new_user_account
+
+            notify_new_user_account(created_user=new_user, created_by=request.user)
             created.append(
                 {
                     'row': i,
@@ -381,11 +387,18 @@ def group_create(request, cohort_pk):
 @admin_required
 def group_edit(request, pk):
     group = get_object_or_404(Group.objects.select_related('cohort'), pk=pk)
+    from group_space.services import get_group_space_for_group
+    from group_space.slack_forms import apply_slack_mapping_from_request, slack_mapping_context
+
+    group_space = get_group_space_for_group(group)
     if request.method == 'POST':
         form = GroupForm(request.POST, instance=group)
         if form.is_valid():
             form.save()
             _save_group_teachers(group, form.cleaned_data.get('teachers', []))
+            slack_error = apply_slack_mapping_from_request(request, group_space=group_space)
+            if slack_error:
+                messages.warning(request, f'Slack mapping not saved: {slack_error}')
             messages.success(request, f'Group "{group.name}" updated.')
             return redirect('accounts:cohort_list')
     else:
@@ -393,7 +406,13 @@ def group_edit(request, pk):
     return render(
         request,
         'accounts/group_form.html',
-        {'form': form, 'group': group, 'cohort': group.cohort, 'title': 'Edit Group'},
+        {
+            'form': form,
+            'group': group,
+            'cohort': group.cohort,
+            'title': 'Edit Group',
+            **slack_mapping_context(group_space=group_space),
+        },
     )
 
 

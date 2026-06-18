@@ -34,13 +34,15 @@ def _container_return_url(container):
         return _tab_url('my')
     if container.container_type == ResourceContainer.ContainerType.GROUP:
         return _tab_url('group', group=container.group)
+    if container.container_type == ResourceContainer.ContainerType.PROJECT:
+        return _tab_url('project')
     return _tab_url('themes', group=container.group)
 
 
 @login_required
 def index(request):
     tab = request.GET.get('tab', 'my')
-    if tab not in ('my', 'group', 'themes'):
+    if tab not in ('my', 'group', 'project', 'themes'):
         tab = 'my'
 
     selected_group, available_groups = resolve_selected_group(request.user, request.GET.get('group', ''))
@@ -63,6 +65,17 @@ def index(request):
                     group_id__in=group_ids,
                 ).select_related('group__cohort')
             )
+    elif tab == 'project':
+        from group_space.permissions import get_accessible_project_spaces
+
+        project_ids = [p.pk for p in get_accessible_project_spaces(request.user)]
+        containers = list(
+            ResourceContainer.objects.filter(
+                container_type=ResourceContainer.ContainerType.PROJECT,
+                is_system=True,
+                project_space_id__in=project_ids,
+            ).select_related('project_space')
+        )
     elif tab == 'themes' and selected_group:
         containers = list(
             ResourceContainer.objects.filter(

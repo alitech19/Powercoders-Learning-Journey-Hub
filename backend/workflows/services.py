@@ -134,6 +134,22 @@ def create_workflow(*, user, post):
     workflow.full_clean()
     workflow.save()
 
+    from resources.entity_links import apply_entity_resource_container
+
+    apply_entity_resource_container(
+        entity=workflow,
+        user=user,
+        post=post,
+        assignee_group=group,
+    )
+
+    from config.entity_publish import (
+        apply_publish_schedule_from_post,
+        should_defer_assignment_notifications,
+    )
+
+    apply_publish_schedule_from_post(entity=workflow, post=post, actor=user)
+
     for step_data in steps:
         WorkflowStep.objects.create(workflow=workflow, **step_data)
 
@@ -143,12 +159,21 @@ def create_workflow(*, user, post):
             WorkflowEnrollment(workflow=workflow, student=student)
             for student in students
         ])
+        notify_students = students
+    else:
+        from .permissions import get_workflow_assigned_students
 
+        notify_students = get_workflow_assigned_students(workflow)
+
+    from accounts.notifications.scheduling import schedule_workflow_assigned
+
+    if not should_defer_assignment_notifications(workflow):
+        schedule_workflow_assigned(workflow=workflow, students=notify_students, actor=user)
     return workflow
 
 
 @transaction.atomic
-def update_workflow_metadata(*, workflow, post):
+def update_workflow_metadata(*, workflow, user, post):
     title = post.get('title', '').strip()
     if not title:
         raise ValidationError('Title is required.')
@@ -157,10 +182,31 @@ def update_workflow_metadata(*, workflow, post):
     if visibility not in Workflow.Visibility.values:
         raise ValidationError('Invalid visibility.')
 
+    old_visibility = workflow.visibility
     workflow.title = title
     workflow.description = post.get('description', '').strip()
     workflow.visibility = visibility
     workflow.save(update_fields=['title', 'description', 'visibility', 'updated_at'])
+
+    from resources.entity_links import apply_entity_resource_container
+
+    apply_entity_resource_container(
+        entity=workflow,
+        user=user,
+        post=post,
+        assignee_group=workflow.assignee_group,
+    )
+
+    from config.entity_publish import apply_publish_schedule_from_post
+    from workflows.permissions import get_workflow_assigned_students
+
+    apply_publish_schedule_from_post(
+        entity=workflow,
+        post=post,
+        actor=user,
+        previous_visibility=old_visibility,
+        students=get_workflow_assigned_students(workflow),
+    )
     return workflow
 
 
@@ -220,6 +266,16 @@ def update_workflow_assignment(*, workflow, user, post):
 
         for student_id in new_ids - existing_ids:
             WorkflowEnrollment.objects.create(workflow=workflow, student_id=student_id)
+
+        if new_ids - existing_ids:
+            from accounts.notifications.scheduling import schedule_workflow_assigned
+
+            added_students = User.objects.filter(
+                pk__in=new_ids - existing_ids,
+                role=User.Role.STUDENT,
+                is_active=True,
+            )
+            schedule_workflow_assigned(workflow=workflow, students=added_students, actor=user)
 
     if old_mode != progress_mode:
         StepCompletion.objects.filter(workflow=workflow).delete()

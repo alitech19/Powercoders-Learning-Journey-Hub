@@ -40,15 +40,50 @@ class TaskAdmin(admin.ModelAdmin):
         'assignee_type',
         'progress_mode',
         'visibility',
+        'scheduled_publish_at',
         'status',
         'priority',
         'created_at',
     )
     list_filter = ('assignee_type', 'progress_mode', 'visibility', 'status', 'priority')
     search_fields = ('title', 'author__display_name', 'author__email')
-    autocomplete_fields = ('author', 'created_by', 'assignee_user', 'assignee_group', 'assignee_cohort')
+    autocomplete_fields = (
+        'author',
+        'created_by',
+        'assignee_user',
+        'assignee_group',
+        'assignee_cohort',
+        'resource_container',
+    )
     inlines = [SubtaskInline, TaskEnrollmentInline]
-    readonly_fields = ('created_at', 'updated_at', 'completed_at')
+    readonly_fields = ('created_at', 'updated_at', 'completed_at', 'scheduled_publish_task_id')
+    fieldsets = (
+        (None, {'fields': ('title', 'description', 'status', 'priority', 'due_date', 'visibility')}),
+        (
+            'Assignment',
+            {
+                'fields': (
+                    'author',
+                    'created_by',
+                    'assignee_type',
+                    'progress_mode',
+                    'assignee_user',
+                    'assignee_group',
+                    'assignee_cohort',
+                ),
+            },
+        ),
+        (
+            'Collaboration',
+            {'fields': ('allow_updates', 'allow_comments', 'allow_subtasks')},
+        ),
+        ('Materials', {'fields': ('resource_container',)}),
+        (
+            'Scheduled publication',
+            {'fields': ('scheduled_publish_at', 'scheduled_publish_task_id')},
+        ),
+        ('Timestamps', {'fields': ('created_at', 'updated_at', 'completed_at')}),
+    )
 
 
 @admin.register(TaskEnrollment)

@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from accounts.models import User
+from accounts.notifications.staff_events import notify_student_goal_completed
 from cohorts.permissions import (
     get_teacher_accessible_students,
     user_is_admin,
@@ -18,6 +19,15 @@ from cohorts.permissions import (
 
 from config.form_widgets import resolve_form_date
 from feedback.services import build_section_context
+
+from config.entity_publish import (
+    apply_publish_schedule_from_post,
+    cancel_scheduled_publish,
+    scheduled_publish_detail_context,
+    scheduled_publish_form_defaults,
+    scheduled_publish_picker_context,
+)
+from resources.entity_links import apply_entity_resource_container, entity_materials_context, resource_container_picker_context
 
 from .forms import GoalForm
 from .models import Goal, GoalEnrollment, Milestone
@@ -47,7 +57,7 @@ from .services import (
 
 def _goal_queryset():
     return (
-        Goal.objects.select_related('author', 'created_by')
+        Goal.objects.select_related('author', 'created_by', 'resource_container')
         .prefetch_related(
             'milestones',
             Prefetch(
@@ -207,6 +217,9 @@ def goal_create(request):
     }
     if user_is_staff(request.user):
         context.update(get_assignment_form_context(request.user))
+        context.update(resource_container_picker_context(request.user))
+        context.update(scheduled_publish_form_defaults())
+        context.update({'draft_label': 'draft', 'entity_label': 'goal'})
     return render(request, 'goals/goal_form.html', context)
 
 
@@ -224,6 +237,8 @@ def goal_detail(request, pk):
             'view_as': 'student',
             'can_edit': can_edit_goal(user, goal),
             'can_delete': can_delete_goal(user, goal),
+            **entity_materials_context(user, goal),
+            **scheduled_publish_detail_context(goal),
         }
         ctx.update(_goal_progress_ctx(user, enrollment))
         _apply_feedback_context(ctx, target=enrollment, viewer=user)
@@ -258,6 +273,8 @@ def goal_detail(request, pk):
         'milestones': milestones,
         'can_edit': can_edit_goal(user, goal),
         'can_delete': can_delete_goal(user, goal),
+        **entity_materials_context(user, goal),
+        **scheduled_publish_detail_context(goal),
     }
     return render(request, 'goals/goal_detail.html', ctx)
 
@@ -283,8 +300,29 @@ def goal_edit(request, pk):
             show_status=show_status,
         )
         if form.is_valid():
+            old_visibility = goal.visibility
             form.save()
+            goal.refresh_from_db()
             sync_milestones(goal, request.POST)
+            if is_staff_assigned(goal):
+                students = User.objects.filter(
+                    pk__in=goal.enrollments.values_list('student_id', flat=True),
+                    role=User.Role.STUDENT,
+                    is_active=True,
+                )
+                apply_publish_schedule_from_post(
+                    entity=goal,
+                    post=request.POST,
+                    actor=request.user,
+                    previous_visibility=old_visibility,
+                    students=students,
+                )
+                apply_entity_resource_container(
+                    entity=goal,
+                    user=request.user,
+                    post=request.POST,
+                    assignee_group=None,
+                )
             if enrollment and 'status' in form.fields:
                 enrollment.status = form.cleaned_data['status']
                 enrollment.save(update_fields=['status'])
@@ -293,7 +331,7 @@ def goal_edit(request, pk):
     else:
         form = GoalForm(instance=goal, enrollment=enrollment, show_status=show_status)
 
-    return render(request, 'goals/goal_form.html', {
+    context = {
         'form': form,
         'action': 'edit',
         'goal': goal,
@@ -304,7 +342,18 @@ def goal_edit(request, pk):
         ],
         'is_staff_create': False,
         'visibility_mode': _visibility_form_mode(request.user, goal=goal),
-    })
+    }
+    if is_staff_assigned(goal):
+        context.update(
+            resource_container_picker_context(
+                request.user,
+                entity_title=goal.title,
+                linked_container=goal.resource_container,
+            ),
+        )
+        context.update(scheduled_publish_picker_context(goal))
+        context.update({'draft_label': 'draft', 'entity_label': 'goal'})
+    return render(request, 'goals/goal_form.html', context)
 
 
 @login_required
@@ -313,6 +362,7 @@ def goal_delete(request, pk):
     if not can_delete_goal(request.user, goal):
         return HttpResponseForbidden()
     if request.method == 'POST':
+        cancel_scheduled_publish(goal, save=False)
         goal.delete()
         messages.success(request, 'Goal deleted.')
         return redirect('goals:list')
@@ -330,6 +380,8 @@ def goal_mark_achieved(request, pk):
     enrollment.status = GoalEnrollment.Status.COMPLETED
     enrollment.achieved_at = timezone.now()
     enrollment.save(update_fields=['status', 'achieved_at'])
+    if request.user.role == User.Role.STUDENT:
+        notify_student_goal_completed(student=request.user, goal=goal)
     messages.success(request, 'Goal marked as achieved.')
     return redirect('goals:detail', pk=goal.pk)
 

@@ -3,10 +3,18 @@ from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from .data_export import build_user_data_markdown
-from .models import Notification
+from .forms import NotificationSettingsForm
+from .models import Notification, SlackIntegration
+from .notifications.settings import get_notification_settings
+from .notifications.ui_constants import (
+    notification_rows_for_user,
+    notification_settings_intro_for_user,
+)
+from .slack_provider import slack_oauth_configured
 
 User = get_user_model()
 
@@ -38,6 +46,58 @@ def delete_own_account(request):
 
 def account_deleted(request):
     return render(request, 'accounts/account_deleted.html')
+
+
+@login_required
+def notification_settings(request):
+    settings = get_notification_settings(request.user)
+    slack_integration = SlackIntegration.objects.filter(user=request.user).first()
+    slack_connected = bool(slack_integration and slack_integration.is_connected)
+    if request.method == 'POST':
+        form = NotificationSettingsForm(
+            request.POST,
+            instance=settings,
+            user=request.user,
+            slack_connected=slack_connected,
+        )
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Notification settings updated.')
+            next_url = request.POST.get('next', '').strip()
+            if next_url and url_has_allowed_host_and_scheme(
+                next_url,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            ):
+                return redirect(next_url)
+            return redirect('accounts:notification_settings')
+    else:
+        form = NotificationSettingsForm(
+            instance=settings,
+            user=request.user,
+            slack_connected=slack_connected,
+        )
+    notification_rows = [
+        {
+            'label': row['label'],
+            'in_app': form[row['in_app_field']],
+            'email': form[row['email_field']],
+            'slack': form[row['slack_field']],
+        }
+        for row in notification_rows_for_user(request.user)
+    ]
+    return render(
+        request,
+        'accounts/notification_settings.html',
+        {
+            'form': form,
+            'notification_rows': notification_rows,
+            'slack_configured': slack_oauth_configured(),
+            'slack_integration': slack_integration,
+            'slack_connected': slack_connected,
+            'notification_intro': notification_settings_intro_for_user(request.user),
+        },
+    )
 
 
 @login_required

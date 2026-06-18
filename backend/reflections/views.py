@@ -5,6 +5,7 @@ from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.models import User
+from accounts.notifications.staff_events import notify_student_reflection_submitted
 from cohorts.permissions import (
     get_teacher_accessible_students,
     user_is_admin,
@@ -114,6 +115,13 @@ def reflection_list(request):
     return render(request, 'reflections/list.html', context)
 
 
+def _maybe_notify_reflection_submitted(*, user, reflection, had_final_before):
+    if user.role != User.Role.STUDENT:
+        return
+    if reflection.final_reflection_at and not had_final_before:
+        notify_student_reflection_submitted(student=user, reflection=reflection)
+
+
 @login_required
 def reflection_create(request):
     if not can_create_reflections(request.user):
@@ -125,6 +133,11 @@ def reflection_create(request):
             reflection = form.save(commit=False)
             reflection.author = request.user
             reflection.save()
+            _maybe_notify_reflection_submitted(
+                user=request.user,
+                reflection=reflection,
+                had_final_before=False,
+            )
             messages.success(request, 'Reflection created.')
             return redirect('reflections:detail', pk=reflection.pk)
     else:
@@ -182,9 +195,16 @@ def reflection_edit(request, pk):
         return HttpResponseForbidden()
 
     if request.method == 'POST':
+        had_final_before = bool(reflection.final_reflection_at)
         form = ReflectionForm(request.POST, instance=reflection)
         if form.is_valid():
             form.save()
+            reflection.refresh_from_db()
+            _maybe_notify_reflection_submitted(
+                user=request.user,
+                reflection=reflection,
+                had_final_before=had_final_before,
+            )
             messages.success(request, 'Reflection updated.')
             return redirect('reflections:detail', pk=reflection.pk)
     else:

@@ -1,13 +1,36 @@
+Group Space is the chat hub for your learning community. Each message belongs to **exactly one** space — cohort group or custom group space. Use the **pills** at the top of the feed to switch; the subtitle shows which space you are in.
+
+## Two kinds of space {#space-types}
+
+| Type | How it is created | Who is in it | Label on feed |
+|------|-------------------|--------------|---------------|
+| **Cohort group** | Automatically when a student is assigned to a group under **Cohorts & Groups** | Students in that academic group + assigned teachers + admins | `Cohort group · {name} · {cohort}` |
+| **Custom group space** | Admin creates it under **Administration → Group spaces** | Anyone the admin adds (students/teachers from any cohort) | `Custom group space · {title}` |
+
+Cohort groups follow academic placement (`User.group`). Custom spaces use a **separate membership list** — joining a project space does **not** move a student to another cohort group and does **not** change task or goal assignment.
+
+## Switching between chats {#switching}
+
+If you have access to more than one space, pills appear above the chat:
+
+1. Click a pill — the page reloads with that space’s history and composer.
+2. Check the subtitle under **Group Space** before you post.
+3. Messages you send appear **only** in the active space (not in other groups or projects).
+
+**Teachers** with several assigned groups see one pill per group and can write in each chat separately, the same way as before.
+
+**Archived** custom group spaces are hidden from the picker and are read-only. Active cohort group chats are always listed.
+
 ## Group feed {#list}
 
-One chronological chat for your study group. Everyone in the group can read and post.
+One chronological thread per space. Everyone who can access that space can read and post (unless the custom space is archived).
 
 ### Badges on posts
 
 | Badge | Meaning |
 |-------|---------|
 | **Shared · Journal / Habit / Goal / Task** | An **achievement snapshot** — a frozen preview card from your learning apps (see below). **Not** saved to Resources. |
-| **Resource** | A **file or link** that was saved to the group’s Resources list because you gave it a resource name. |
+| **Resource** | A **file or link** that was saved to the space’s Resources list because you gave it a resource name. |
 
 Plain text posts (no file, no link, no snapshot) have no badge.
 
@@ -20,7 +43,7 @@ Snapshots let you celebrate or discuss progress without copying private text by 
 1. On the feed, open **Share** (panel order: Goal → Task → Journal → Habit).
 2. Pick an item you already marked **shared with teachers** in that app (private items do not appear).
 3. The app builds a **read-only card** in the chat: title, status, milestones/subtasks, journal date, habit week grid, etc.
-4. The post is stored as HTML in chat only — classmates see the card in the thread.
+4. The post is stored in chat only — classmates see the card in the thread.
 
 ### What a snapshot is **not**
 
@@ -37,11 +60,11 @@ Teachers and admins do not use the Share panel the same way; they mainly post me
 
 ## Files, links, and auto-save to Resources {#resources-sync}
 
-When a post should become a **bookmark in Resources**, you must give it a **resource name** (label). That name becomes the link title on the group Resources tile.
+When a post should become a **bookmark in Resources**, you must give it a **resource name** (label). That name becomes the link title on the Resources tile.
 
 ### Qualifying posts (auto-sync)
 
-After you **save** a new or edited post, the app may add or update one link in your group’s **system Resources container** (same name as the group) when **all** of this is true:
+After you **save** a new or edited post, the app may add or update one link in the space’s **system Resources container** when **all** of this is true:
 
 1. The post is **not** a snapshot-only share.
 2. The post has a **file attachment** and/or a **http(s) link** in the message body.
@@ -49,14 +72,19 @@ After you **save** a new or edited post, the app may add or update one link in y
 
 If you remove the file, link, or name on edit, the linked Resources entry is **removed**. Deleting the post deletes the linked entry too.
 
+### Cohort group vs custom space
+
+| Space type | Resources tab | Container name |
+|------------|-----------------|----------------|
+| Cohort group | **Group** | Same as the group name |
+| Custom group space | **Group spaces** | Same as the space title |
+
 ### File upload
 
-- Attach a file in the composer (or edit form).
-- Enter **resource name** — e.g. “Week 3 slides”.
-- Allowed types include PDF, Word, text, common images (see form hint for full list); max size **10 MB**.
-- When Google Drive is enabled, files upload to Drive (students: **My Drive** after connecting Google on Profile; staff: org **Shared drive**). The chat shows **Uploading…** then **Open in Google Drive**. Failed uploads can be **retried** from the message.
-- **New Google file** (Doc, Sheet, Slides, Form) creates an empty file in the same Drive folder and adds it to Resources when you provide a name.
-- The saved link in Resources points to the Drive (or legacy) file so the group can open it again later.
+- **Cohort group chats** — attach a file in the composer (or edit form), with **resource name**. Allowed types include PDF, Word, text, common images; max size **10 MB**.
+- **Custom group spaces** — text and links only for now (file attachments not supported yet).
+- When Google Drive is enabled, cohort uploads go to Drive (students: **My Drive** after connecting Google on Profile; staff: org **Shared drive**). The chat shows **Uploading…** then **Open in Google Drive**. Failed uploads can be **retried** from the message.
+- **New Google file** (Doc, Sheet, Slides, Form) is available in **cohort group** chats when Drive is configured.
 
 ### Link in message
 
@@ -73,7 +101,7 @@ If you remove the file, link, or name on edit, the linked Resources entry is **r
 
 ### Where to find synced items
 
-Open **Resources → Group tab** → open the tile named after your group → links with a **Group chat** badge came from chat. You may delete them manually; they will not reappear unless someone posts a **new** qualifying message.
+Open **Resources** → **Group** or **Group spaces** tab → open the tile named after your group or project → links with a **Group chat** badge came from chat. You may delete them manually; they will not reappear unless someone posts a **new** qualifying message.
 
 ## Create post {#form-create}
 
@@ -83,11 +111,11 @@ Optional if you attach a file, paste a link (with name), or publish a snapshot.
 
 ### Attach file
 
-Upload + **resource name** → chat post with **Resource** badge + auto-sync to group Resources (see above).
+Cohort groups only: upload + **resource name** → chat post with **Resource** badge + auto-sync to group Resources (see above).
 
 ### Paste a URL
 
-Detected links trigger the resource name field; same sync behaviour.
+Detected links trigger the resource name field; same sync behaviour (cohort and custom spaces).
 
 ### Share
 
@@ -103,10 +131,16 @@ Removes the post and any Resources item tied to it (`source_post`).
 
 ## For students {#for-students}
 
-Use **Share** for progress cards, **file/link + name** for things the whole group should bookmark in Resources.
+Use **Share** for progress cards, **file/link + name** for things the whole group should bookmark in Resources. If you are in a custom group space, use links and text; file upload is for cohort group chats.
+
+## For teachers {#for-teachers}
+
+You see every cohort group you teach plus any custom group spaces you were added to. Switch pills before posting — each chat is independent. Moderators on a custom space can delete others’ messages; in cohort groups, teachers and admins can moderate.
 
 ## Admin notes {#admin-only}
 
 <!-- role: admin -->
 
-Pinned posts and moderation use the same rules; sync is per group system container.
+- Custom group spaces are managed under **Administration → Group spaces** (see that page’s **ⓘ** help).
+- **Archive** ends active chat for a custom space; archived spaces disappear from the feed picker and admin list (restore via Django admin if needed).
+- Pinned posts and moderation follow the same rules per space; Resources sync uses the matching system container.

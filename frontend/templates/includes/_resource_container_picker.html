@@ -1,0 +1,61 @@
+{% if show_resource_container_picker %}
+<div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-3"
+     x-data="{
+       mode: '{{ resource_container_mode|default:'none' }}',
+       defaultTitle: '{{ resource_container_default_title|escapejs }}',
+       syncTitle() {
+         const entityTitle = document.querySelector('input[name=title]');
+         const materials = document.getElementById('resource-container-new-title');
+         if (!materials || materials.dataset.touched === '1') return;
+         const base = (entityTitle && entityTitle.value.trim()) ? entityTitle.value.trim() : '';
+         materials.value = base ? ('Materials: ' + base) : 'Materials';
+       }
+     }">
+  <div>
+    <h2 class="text-sm font-semibold text-[#343534] dark:text-gray-100">Materials (Resources)</h2>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+      Optional theme — assignees open it from this page. Pick an existing Themes board or create a new one.
+    </p>
+  </div>
+
+  <div class="space-y-2 text-sm">
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input type="radio" name="resource_container_mode" value="none" x-model="mode" class="accent-[#B23149]">
+      <span>None</span>
+    </label>
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input type="radio" name="resource_container_mode" value="existing" x-model="mode" class="accent-[#B23149]">
+      <span>Link existing theme</span>
+    </label>
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input type="radio" name="resource_container_mode" value="create" x-model="mode" @change="syncTitle()" class="accent-[#B23149]">
+      <span>Create new theme</span>
+    </label>
+  </div>
+
+  <div x-show="mode === 'existing'" x-cloak class="space-y-1">
+    <label class="block text-xs font-medium text-gray-500">Theme</label>
+    <select name="resource_container_id"
+            class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
+      <option value="">— Select theme —</option>
+      {% for container in pickable_resource_containers %}
+      <option value="{{ container.pk }}"
+              {% if linked_resource_container and linked_resource_container.pk == container.pk %}selected{% endif %}>
+        {{ container.title }}{% if container.group %} · {{ container.group }}{% endif %}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div x-show="mode === 'create'" x-cloak class="space-y-1">
+    <label class="block text-xs font-medium text-gray-500" for="resource-container-new-title">Theme title</label>
+    <input type="text" name="resource_container_new_title" id="resource-container-new-title"
+           maxlength="{{ limits.title }}"
+           value="{% if resource_container_mode == 'create' %}{{ resource_container_default_title }}{% endif %}"
+           @focus="$el.dataset.touched = '1'"
+           class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm"
+           placeholder="Materials: …">
+    <p class="text-xs text-gray-400">Defaults to “Materials:” plus the title above if left blank on save.</p>
+  </div>
+</div>
+{% endif %}

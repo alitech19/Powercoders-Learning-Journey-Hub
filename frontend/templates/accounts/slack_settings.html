@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Slack integration{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+  <div class="mb-6">
+    <a href="{% url 'dashboard:dashboard' %}" class="text-sm text-gray-400 hover:text-[#B23149] transition-colors">← Dashboard</a>
+    {% include "includes/_page_title.html" with title="Slack integration" %}
+  </div>
+
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+    <h2 class="text-sm font-semibold text-[#343534] dark:text-gray-100 mb-3">Status</h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+      <div>
+        <dt class="text-gray-400">Personal OAuth (user DMs)</dt>
+        <dd class="font-medium {% if oauth_ready %}text-green-600 dark:text-green-400{% else %}text-gray-500{% endif %}">
+          {% if oauth_ready %}Ready{% else %}Not configured{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-400">Staff webhook</dt>
+        <dd class="font-medium {% if webhook_ready %}text-green-600 dark:text-green-400{% else %}text-gray-500{% endif %}">
+          {% if webhook_ready %}Ready{% else %}Not configured{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-400">Group chat sync (bot)</dt>
+        <dd class="font-medium {% if chat_sync_ready %}text-green-600 dark:text-green-400{% else %}text-gray-500{% endif %}">
+          {% if chat_sync_ready %}Ready{% else %}Not configured{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-400">Last webhook test</dt>
+        <dd class="text-[#343534] dark:text-gray-200 font-medium">
+          {% if config.last_webhook_test_at %}{{ config.last_webhook_test_at|date:"d M Y H:i" }}{% else %}—{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-400">Webhook test result</dt>
+        <dd class="font-medium {% if config.last_webhook_ok %}text-green-600 dark:text-green-400{% elif config.last_webhook_ok == False %}text-red-600 dark:text-red-400{% else %}text-gray-500{% endif %}">
+          {% if config.last_webhook_ok %}OK{% elif config.last_webhook_ok == False %}Failed{% else %}Not tested{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-400">Last bot test</dt>
+        <dd class="text-[#343534] dark:text-gray-200 font-medium">
+          {% if config.last_bot_test_at %}{{ config.last_bot_test_at|date:"d M Y H:i" }}{% else %}—{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-400">Bot test result</dt>
+        <dd class="font-medium {% if config.last_bot_ok %}text-green-600 dark:text-green-400{% elif config.last_bot_ok == False %}text-red-600 dark:text-red-400{% else %}text-gray-500{% endif %}">
+          {% if config.last_bot_ok %}OK{% elif config.last_bot_ok == False %}Failed{% else %}Not tested{% endif %}
+        </dd>
+      </div>
+      <div class="sm:col-span-2">
+        <dt class="text-gray-400">OAuth redirect URI (saved)</dt>
+        <dd class="text-[#343534] dark:text-gray-200 font-mono text-xs break-all">{{ config.oauth_redirect_uri|default:"—" }}</dd>
+      </div>
+      <div class="sm:col-span-2">
+        <dt class="text-gray-400">User callback path</dt>
+        <dd class="text-[#343534] dark:text-gray-200 font-mono text-xs">{{ callback_path }}</dd>
+      </div>
+      {% if config.last_error %}
+      <div class="sm:col-span-2">
+        <dt class="text-gray-400">Last error</dt>
+        <dd class="text-red-600 dark:text-red-400 text-xs">{{ config.last_error }}</dd>
+      </div>
+      {% endif %}
+    </dl>
+  </div>
+
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Personal Slack OAuth</h2>
+      <label class="flex items-center gap-3 cursor-pointer">
+        {{ form.oauth_enabled }}
+        <span class="text-sm font-medium text-[#343534] dark:text-gray-200">Enable personal Slack OAuth</span>
+      </label>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">OAuth client ID</label>
+        {{ form.oauth_client_id }}
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">OAuth client secret</label>
+        {{ form.oauth_client_secret }}
+        {% if has_oauth_secret %}
+        <p class="text-xs text-gray-400 mt-1">Current: {{ masked_oauth_secret }}</p>
+        {% endif %}
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">OAuth redirect URI</label>
+        {{ form.oauth_redirect_uri }}
+        <p class="text-xs text-gray-400 mt-1">Suggested: <code class="text-[#B23149]">{{ suggested_redirect_uri }}</code></p>
+      </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Staff channel webhook</h2>
+      <label class="flex items-center gap-3 cursor-pointer">
+        {{ form.webhook_enabled }}
+        <span class="text-sm font-medium text-[#343534] dark:text-gray-200">Enable staff webhook</span>
+      </label>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">Webhook URL</label>
+        {{ form.webhook_url }}
+        {% if has_webhook_url %}
+        <p class="text-xs text-gray-400 mt-1">Current: {{ masked_webhook_url }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+      <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Group chat → Slack channel</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Two-way sync between Group Space chat and mapped Slack channels: new messages, edits, deletes, and thread replies.
+        Map each cohort group or custom group space on its admin page. Requires bot token and Events API signing secret below.
+        When sync is on for a space, personal Slack mention/all-message DMs for that chat are skipped (in-app and email still apply).
+      </p>
+      <label class="flex items-center gap-3 cursor-pointer">
+        {{ form.chat_sync_enabled }}
+        <span class="text-sm font-medium text-[#343534] dark:text-gray-200">Enable chat channel sync</span>
+      </label>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">Bot token</label>
+        {{ form.bot_token }}
+        {% if has_bot_token %}
+        <p class="text-xs text-gray-400 mt-1">Current: {{ masked_bot_token }}</p>
+        {% endif %}
+        <p class="text-xs text-gray-400 mt-1">Install a Slack app with <code class="text-xs">chat:write</code> bot scope; invite the bot to each mapped channel. PowerHUB edits and deletes update the channel message.</p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-[#343534] dark:text-gray-200 mb-1.5">Signing secret (Events API)</label>
+        {{ form.signing_secret }}
+        {% if has_signing_secret %}
+        <p class="text-xs text-gray-400 mt-1">Current: {{ masked_signing_secret }}</p>
+        {% endif %}
+        <p class="text-xs text-gray-400 mt-1">Required for Slack → PowerHUB messages (and inbound edits/deletes). Subscribe to <code class="text-xs">message.channels</code> (or groups/IM as needed).</p>
+        <p class="text-xs text-gray-500 mt-2">Request URL: <code class="text-xs break-all">{{ events_url }}</code></p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-3">
+      <button type="submit"
+              class="px-5 py-2.5 rounded-lg bg-[#B23149] hover:bg-[#9a2a3f] text-white text-sm font-semibold transition-colors">
+        Save settings
+      </button>
+    </div>
+  </form>
+
+  <div class="flex flex-wrap gap-3 mt-4">
+    <form method="post" action="{% url 'accounts:slack_validate_oauth' %}">
+      {% csrf_token %}
+      <button type="submit"
+              class="px-4 py-2 rounded-lg border border-[#B23149]/30 text-sm font-semibold text-[#B23149] hover:bg-[#B23149]/5">
+        Validate OAuth config
+      </button>
+    </form>
+    <form method="post" action="{% url 'accounts:slack_test_webhook' %}">
+      {% csrf_token %}
+      <button type="submit"
+              class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:border-[#B23149]/40">
+        Send test webhook message
+      </button>
+    </form>
+    <form method="post" action="{% url 'accounts:slack_test_bot' %}" class="flex flex-wrap gap-2 items-center">
+      {% csrf_token %}
+      <input type="text" name="test_channel_id" placeholder="C0123456789"
+             class="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-mono w-40">
+      <button type="submit"
+              class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:border-[#B23149]/40">
+        Send test bot message
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

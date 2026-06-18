@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+  <div class="mb-2">
+    <a href="{% url 'group_space:project_list' %}" class="text-sm text-gray-400 hover:text-[#B23149] transition-colors">← Group spaces</a>
+    {% include "includes/_page_title.html" with title=project.title %}
+    {% if project.is_archived %}
+    <p class="text-sm text-amber-600 dark:text-amber-400 mt-1">Archived — chat is read-only.</p>
+    {% endif %}
+  </div>
+
+  <div class="flex flex-wrap gap-3">
+    <a href="{{ feed_url }}" class="px-4 py-2 rounded-lg border border-[#B23149]/30 text-sm font-semibold text-[#B23149] hover:bg-[#B23149]/5">Open chat</a>
+    {% if project.is_archived %}
+    <form method="post" action="{% url 'group_space:project_unarchive' project.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium">Restore</button>
+    </form>
+    {% else %}
+    <form method="post" action="{% url 'group_space:project_archive' project.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600">Archive</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <form method="post" class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+    {% csrf_token %}
+    <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Details</h2>
+    <div>
+      <label class="block text-sm font-medium mb-1.5">Title</label>
+      {{ form.title }}
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1.5">Description</label>
+      {{ form.description }}
+    </div>
+    {% include "group_space/_slack_channel_fields.html" %}
+    <button type="submit" class="px-4 py-2 rounded-lg bg-[#B23149] text-white text-sm font-semibold">Save</button>
+  </form>
+
+  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+    <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100">Members</h2>
+    {% if members %}
+    <ul class="divide-y divide-gray-100 dark:divide-gray-800">
+      {% for membership in members %}
+      <li class="flex items-center justify-between gap-3 py-3">
+        <div>
+          <p class="text-sm font-medium">{{ membership.user.display_name }}</p>
+          <p class="text-xs text-gray-400">{{ membership.user.email }} · {{ membership.get_role_display }}</p>
+        </div>
+        {% if not project.is_archived %}
+        <form method="post" action="{% url 'group_space:project_member_remove' project.pk membership.user.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="text-xs text-red-500 hover:underline">Remove</button>
+        </form>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-sm text-gray-500">No members yet.</p>
+    {% endif %}
+
+    {% if not project.is_archived %}
+    <form method="post" action="{% url 'group_space:project_member_add' project.pk %}" class="flex flex-wrap gap-3 items-end pt-2 border-t border-gray-100 dark:border-gray-800">
+      {% csrf_token %}
+      <div class="flex-1 min-w-[200px]">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Add student or teacher</label>
+        {{ add_form.user_id }}
+      </div>
+      <button type="submit" class="px-4 py-2 rounded-lg bg-[#343534] text-white text-sm font-semibold">Add</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

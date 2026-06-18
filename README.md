@@ -191,11 +191,12 @@ Powercoders-Learning-Journey-Hub/
 │   ├── SETUP.md           # Full local Docker setup
 │   ├── TESTING.md         # Test workflows (host + Docker)
 │   ├── DEPLOY.md          # Render deployment guide
+│   ├── GOOGLE_DRIVE_SETUP.md
+│   ├── SLACK_SETUP.md
 │   ├── PRODUCTION_CHECKLIST.md
 │   ├── INCIDENT_RESPONSE.md
 │   ├── SCALING_ROADMAP.md
-│   ├── USABILITY_TESTING.md
-│   └── plans/             # Feature plans
+│   └── USABILITY_TESTING.md
 ├── scripts/               # Render Native: render-web-start.sh, render-beat-start.sh
 ├── start.sh               # Docker image CMD (Gunicorn + legacy DB bootstrap; not used by compose)
 ├── docker-compose.yml
@@ -390,6 +391,8 @@ Configuration: `.github/workflows/ci.yml`.
 | [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md) | Pre-launch checklist |
 | [docs/INCIDENT_RESPONSE.md](docs/INCIDENT_RESPONSE.md) | Runbook for platform incidents |
 | [docs/SCALING_ROADMAP.md](docs/SCALING_ROADMAP.md) | Plan for scaling beyond Render |
+| [docs/GOOGLE_DRIVE_SETUP.md](docs/GOOGLE_DRIVE_SETUP.md) | Google Drive integration setup |
+| [docs/SLACK_SETUP.md](docs/SLACK_SETUP.md) | Slack integration setup |
 | [docs/USABILITY_TESTING.md](docs/USABILITY_TESTING.md) | Usability test plan |
 | **[Project Wiki](https://github.com/alitech19/Powercoders-Learning-Journey-Hub/wiki)** | User guides, architecture, deployment |
 

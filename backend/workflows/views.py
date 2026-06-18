@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from accounts.models import User
+from accounts.notifications.staff_events import maybe_notify_workflow_completed
 from cohorts.permissions import user_is_staff, user_is_student
 
 from .forms import WorkflowMetadataForm, WorkflowStepForm
@@ -20,6 +21,13 @@ from .permissions import (
     get_visible_workflows_for_user,
     shared_progress_pct,
 )
+from config.entity_publish import (
+    scheduled_publish_detail_context,
+    scheduled_publish_form_defaults,
+    scheduled_publish_picker_context,
+)
+from resources.entity_links import entity_materials_context, resource_container_picker_context
+
 from .services import (
     create_workflow,
     get_assignment_form_context,
@@ -32,6 +40,7 @@ def _get_workflow_or_404(user, pk):
     workflow = get_object_or_404(
         Workflow.objects.select_related(
             'created_by', 'assignee_cohort', 'assignee_group', 'assignee_group__cohort',
+            'resource_container',
         ).prefetch_related('steps', 'completions'),
         pk=pk,
     )
@@ -106,6 +115,10 @@ def workflow_create(request):
         'editing': False,
         'workflow': None,
         **get_assignment_form_context(request.user),
+        **resource_container_picker_context(request.user),
+        **scheduled_publish_form_defaults(),
+        'draft_label': 'private',
+        'entity_label': 'workflow',
     }
     return render(request, 'workflows/form.html', context)
 
@@ -133,6 +146,8 @@ def workflow_detail(request, pk):
             'step_data': build_step_data(user, workflow),
             'progress': progress,
             'can_toggle': True,
+            **entity_materials_context(user, workflow),
+            **scheduled_publish_detail_context(workflow),
         }
     else:
         enrollments = (
@@ -170,6 +185,8 @@ def workflow_detail(request, pk):
             'enrollments': enrollments,
             'assigned_count': assigned_students.count(),
             'available_students': available_students,
+            **entity_materials_context(user, workflow),
+            **scheduled_publish_detail_context(workflow),
         }
 
     return render(request, 'workflows/detail.html', context)
@@ -188,7 +205,7 @@ def workflow_edit(request, pk):
                 update_workflow_assignment(workflow=workflow, user=request.user, post=request.POST)
                 messages.success(request, 'Assignment updated.')
             else:
-                update_workflow_metadata(workflow=workflow, post=request.POST)
+                update_workflow_metadata(workflow=workflow, user=request.user, post=request.POST)
                 messages.success(request, 'Workflow updated.')
             return redirect('workflows:detail', pk=workflow.pk)
         except ValidationError as exc:
@@ -201,6 +218,14 @@ def workflow_edit(request, pk):
         'metadata_form': WorkflowMetadataForm(instance=workflow),
         'enrolled_ids': enrolled_ids,
         **get_assignment_form_context(request.user),
+        **resource_container_picker_context(
+            request.user,
+            entity_title=workflow.title,
+            linked_container=workflow.resource_container,
+        ),
+        **scheduled_publish_picker_context(workflow),
+        'draft_label': 'private',
+        'entity_label': 'workflow',
     }
     return render(request, 'workflows/form.html', context)
 
@@ -211,6 +236,9 @@ def workflow_delete(request, pk):
     if not can_manage_workflow(request.user, workflow):
         return HttpResponseForbidden()
     if request.method == 'POST':
+        from config.entity_publish import cancel_scheduled_publish
+
+        cancel_scheduled_publish(workflow, save=False)
         workflow.delete()
         messages.success(request, 'Workflow deleted.')
         return redirect('workflows:list')
@@ -288,6 +316,8 @@ def step_toggle(request, step_pk):
             student=student,
             completed_by=request.user,
         )
+        if user_is_student(request.user):
+            maybe_notify_workflow_completed(workflow=workflow, student=request.user)
 
     return redirect('workflows:detail', pk=workflow.pk)
 
@@ -306,7 +336,18 @@ def enroll_student(request, workflow_pk):
 
         student = get_object_or_404(User, pk=student_id, role=User.Role.STUDENT)
         if can_assign_students(request.user, workflow, [student]):
-            WorkflowEnrollment.objects.get_or_create(workflow=workflow, student=student)
+            enrollment, created = WorkflowEnrollment.objects.get_or_create(
+                workflow=workflow,
+                student=student,
+            )
+            if created:
+                from accounts.notifications.scheduling import schedule_workflow_assigned
+
+                schedule_workflow_assigned(
+                    workflow=workflow,
+                    students=[student],
+                    actor=request.user,
+                )
     return redirect('workflows:detail', pk=workflow_pk)
 
 

@@ -1,0 +1,25 @@
+<div class="mb-5 pt-4 border-t border-gray-100 dark:border-gray-800">
+  <h3 class="text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1">Slack channel sync</h3>
+  <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+    Sync chat with a Slack channel (two-way). Messages, edits, and deletes mirror in both directions;
+    PowerHUB replies appear as Slack threads. Configure the bot and Events API on
+    <a href="{% url 'accounts:slack_settings' %}" class="text-[#B23149] hover:underline">Slack integration</a>.
+  </p>
+  {% if not chat_sync_configured %}
+  <p class="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 rounded-lg px-3 py-2 mb-3">
+    Enable chat sync and save a bot token on the Slack integration page first.
+  </p>
+  {% endif %}
+  <label class="flex items-center gap-2 cursor-pointer mb-3">
+    <input type="checkbox" name="slack_sync_enabled" class="rounded border-gray-300 text-[#B23149]"
+           {% if slack_sync_enabled %}checked{% endif %}>
+    <span class="text-sm text-[#343534] dark:text-gray-200">Sync chat to Slack</span>
+  </label>
+  <div>
+    <label class="block text-sm font-medium text-[#343534] dark:text-gray-100 mb-1.5">Slack channel ID</label>
+    <input type="text" name="slack_channel_id" value="{{ slack_channel_id }}"
+           placeholder="C0123456789"
+           class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm font-mono text-[#343534] dark:text-gray-100 focus:outline-none focus:border-[#B23149] focus:ring-1 focus:ring-[#B23149]/20">
+    <p class="text-xs text-gray-400 mt-1">Invite the PowerHUB bot to this channel in Slack.</p>
+  </div>
+</div>

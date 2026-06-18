@@ -222,6 +222,26 @@ def create_goals_bulk(*, user, post):
     for ms in parse_milestones_from_post(post):
         Milestone.objects.create(goal=goal, **ms)
 
+    from resources.entity_links import apply_entity_resource_container
+
+    apply_entity_resource_container(
+        entity=goal,
+        user=user,
+        post=post,
+        assignee_group=group,
+    )
+
+    from config.entity_publish import (
+        apply_publish_schedule_from_post,
+        should_defer_assignment_notifications,
+    )
+
+    apply_publish_schedule_from_post(entity=goal, post=post, actor=user, students=students)
+
+    from accounts.notifications.scheduling import schedule_goal_assigned
+
+    if not should_defer_assignment_notifications(goal):
+        schedule_goal_assigned(goal=goal, students=students, actor=user)
     return goal
 
 

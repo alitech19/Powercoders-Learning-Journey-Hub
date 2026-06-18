@@ -7,7 +7,9 @@
   <div class="flex items-center justify-between mb-6">
     <div>
       <a href="{% url 'accounts:profile' %}" class="text-xs text-gray-400 hover:text-[#B23149]">← Profile</a>
-      <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100 mt-1">Notifications</h1>
+      <div class="mt-1">
+        {% include "includes/_page_title.html" with title="Notifications" title_size="xl" %}
+      </div>
     </div>
     <span class="text-sm text-gray-400">{{ notifications|length }} total</span>
   </div>

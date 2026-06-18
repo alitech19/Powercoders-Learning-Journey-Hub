@@ -1,0 +1,15 @@
+<div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+  <label class="block text-xs font-semibold text-gray-400 uppercase mb-3">Visibility</label>
+  <div class="flex gap-3">
+    <button type="button" @click="visibility = '{{ draft_value }}'"
+            :class="visibility === '{{ draft_value }}' ? 'border-[#343534] bg-[#343534] text-white' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+            class="flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium cursor-pointer">
+      {{ draft_button_label }}
+    </button>
+    <button type="button" @click="visibility = '{{ publish_value }}'"
+            :class="visibility === '{{ publish_value }}' ? 'border-[#B23149] bg-[#B23149]/5 text-[#B23149]' : 'border-gray-200 dark:border-gray-700 text-gray-500'"
+            class="flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium cursor-pointer">
+      {{ publish_button_label }}
+    </button>
+  </div>
+</div>
