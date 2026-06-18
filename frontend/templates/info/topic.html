@@ -5,16 +5,61 @@
 <style>
   .info-section:target { scroll-margin-top: 5rem; }
   .info-section.active-section > h2 { color: #B23149; }
+  html.dark .info-section.active-section > h2 { color: #F4A0AD; }
+
+  .info-prose :where(p, li, td) { color: inherit; }
+  .info-prose :where(h3, strong) { color: #343534; }
+  .info-prose th {
+    color: #6b7280;
+    border-color: #e5e7eb;
+  }
+  .info-prose td {
+    color: #374151;
+    border-color: #f3f4f6;
+  }
+  .info-prose code {
+    color: #343534;
+    background-color: #f3f4f6;
+    border-radius: 0.25rem;
+    padding: 0.1rem 0.35rem;
+    font-size: 0.85em;
+  }
+  .info-prose a { color: #B23149; text-decoration: underline; }
+
+  html.dark .info-prose {
+    color: #e5e7eb;
+  }
+  html.dark .info-prose :where(h3, strong) {
+    color: #f9fafb;
+  }
+  html.dark .info-prose th {
+    color: #d1d5db;
+    border-color: #4b5563;
+  }
+  html.dark .info-prose td {
+    color: #e5e7eb;
+    border-color: #374151;
+  }
+  html.dark .info-prose code {
+    color: #f3f4f6;
+    background-color: #374151;
+  }
+  html.dark .info-prose a {
+    color: #F4A0AD;
+  }
+  html.dark .info-prose a:hover {
+    color: #FECDD3;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pr-12">
   <div>
-    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Help</p>
+    <p class="text-xs text-gray-500 dark:text-gray-300 uppercase tracking-wide font-medium">Help</p>
     <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100">{{ topic.title }}</h1>
     {% if help_key %}
-    <p class="text-sm text-gray-500 mt-1">Opened from: <span class="font-medium text-[#343534] dark:text-gray-100">{{ source_label }}</span></p>
+    <p class="text-sm text-gray-500 dark:text-gray-300 mt-1">Opened from: <span class="font-medium text-[#343534] dark:text-gray-100">{{ source_label }}</span></p>
     {% endif %}
   </div>
   <a href="{{ back_url }}"
@@ -25,13 +70,13 @@
 
 <div class="flex flex-col lg:flex-row gap-8 max-w-5xl">
   <nav class="lg:w-60 shrink-0">
-    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">On this page</p>
+    <p class="text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wide mb-3">On this page</p>
     <ul class="space-y-1 text-sm">
       {% for item in toc %}
       <li>
         <a href="{{ item.url }}"
            class="block px-3 py-2 rounded-lg transition-colors
-                  {% if item.active %}bg-[#B23149] text-white font-medium{% else %}text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                  {% if item.active %}bg-[#B23149] text-white font-medium{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[#343534] dark:hover:text-gray-100{% endif %}">
           {{ item.title }}
         </a>
       </li>
@@ -44,14 +89,13 @@
     <section id="{{ section.section_id }}"
              class="info-section scroll-mt-20 {% if section.section_id == active_section %}active-section{% endif %}">
       <h2 class="text-lg font-bold text-[#343534] dark:text-gray-100 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">{{ section.title }}</h2>
-      <div class="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 leading-relaxed space-y-4
+      <div class="info-prose max-w-none text-gray-700 leading-relaxed space-y-4
                   [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1.5
-                  [&_a]:text-[#B23149] [&_a]:underline
-                  [&_h3]:text-base [&_h3]:font-semibold [&_h3]:text-[#343534] dark:text-gray-100 [&_h3]:mt-5 [&_h3]:mb-2
+                  [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2
                   [&_p]:my-2
                   [&_table]:w-full [&_table]:text-sm [&_table]:border-collapse [&_table]:my-3
-                  [&_th]:text-left [&_th]:text-xs [&_th]:uppercase [&_th]:text-gray-500 [&_th]:pb-2 [&_th]:pr-4 [&_th]:border-b [&_th]:border-gray-200
-                  [&_td]:align-top [&_td]:pr-4 [&_td]:py-2 [&_td]:border-b [&_td]:border-gray-100 [&_td]:text-gray-700">
+                  [&_th]:text-left [&_th]:text-xs [&_th]:uppercase [&_th]:pb-2 [&_th]:pr-4 [&_th]:border-b
+                  [&_td]:align-top [&_td]:pr-4 [&_td]:py-2 [&_td]:border-b">
         {{ section.html|safe }}
       </div>
     </section>
