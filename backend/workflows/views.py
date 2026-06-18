@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db.models import Max
+from django.db.models import Count, Max, Q
 from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -153,6 +153,13 @@ def workflow_detail(request, pk):
         enrollments = (
             WorkflowEnrollment.objects.filter(workflow=workflow)
             .select_related('student')
+            .annotate(
+                steps_done=Count(
+                    'student__workflow_step_completions',
+                    filter=Q(student__workflow_step_completions__workflow_id=workflow.pk),
+                    distinct=True,
+                ),
+            )
         )
         from .permissions import get_workflow_assigned_students
 
@@ -183,6 +190,7 @@ def workflow_detail(request, pk):
             'step_data': build_step_data(user, workflow) if workflow.is_shared else None,
             'shared_progress': shared_progress_pct(workflow) if workflow.is_shared else None,
             'enrollments': enrollments,
+            'steps_total': workflow.step_count,
             'assigned_count': assigned_students.count(),
             'available_students': available_students,
             **entity_materials_context(user, workflow),

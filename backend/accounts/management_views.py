@@ -6,7 +6,7 @@ import io
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Case, Count, Q, Value, When
 from django.shortcuts import get_object_or_404, redirect, render
 
 from cohorts.models import Cohort, Group, GroupTeacher
@@ -432,16 +432,34 @@ def group_assign_students(request, pk):
     group = get_object_or_404(Group.objects.select_related('cohort'), pk=pk)
     students = (
         User.objects.filter(role=User.Role.STUDENT, cohort=group.cohort)
-        .exclude(group=group)
-        .order_by('display_name')
+        .select_related('group')
+        .annotate(
+            membership_sort=Case(
+                When(group=group, then=Value(0)),
+                When(group__isnull=True, then=Value(1)),
+                default=Value(2),
+            ),
+        )
+        .order_by('membership_sort', 'display_name')
     )
     if request.method == 'POST':
-        student_ids = request.POST.getlist('students')
-        updated = User.objects.filter(pk__in=student_ids, cohort=group.cohort).update(group=group)
-        messages.success(request, f'{updated} student(s) assigned to "{group.name}".')
+        selected_ids = {int(sid) for sid in request.POST.getlist('students') if sid.isdigit()}
+        cohort_students = User.objects.filter(role=User.Role.STUDENT, cohort=group.cohort)
+        cohort_students.filter(pk__in=selected_ids).exclude(group=group).update(group=group)
+        cohort_students.filter(group=group).exclude(pk__in=selected_ids).update(group=None)
+        member_count = cohort_students.filter(group=group).count()
+        messages.success(
+            request,
+            f'Group "{group.name}" now has {member_count} student(s).',
+        )
         return redirect('accounts:cohort_list')
+    member_count = students.filter(group=group).count()
     return render(
         request,
         'accounts/group_assign_students.html',
-        {'group': group, 'students': students},
+        {
+            'group': group,
+            'students': students,
+            'member_count': member_count,
+        },
     )

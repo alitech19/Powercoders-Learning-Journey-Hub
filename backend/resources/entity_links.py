@@ -163,6 +163,99 @@ def entity_materials_context(user, entity) -> dict:
     return {'materials_container': container}
 
 
+def _workflow_visible_in_group_tab(workflow, group) -> bool:
+    container = workflow.resource_container
+    if container is None:
+        return False
+    if container.group_id == group.pk:
+        return True
+    from workflows.models import Workflow
+
+    if workflow.assignee_type == Workflow.AssigneeType.GROUP:
+        return workflow.assignee_group_id == group.pk
+    if workflow.assignee_type == Workflow.AssigneeType.COHORT:
+        return workflow.assignee_cohort_id == group.cohort_id
+    return workflow.enrollments.filter(student__group_id=group.pk).exists()
+
+
+def _task_visible_in_group_tab(task, group) -> bool:
+    container = task.resource_container
+    if container is None:
+        return False
+    if container.group_id == group.pk:
+        return True
+    from tasks.models import Task
+
+    if task.assignee_type == Task.AssigneeType.GROUP:
+        return task.assignee_group_id == group.pk
+    return task.enrollments.filter(student__group_id=group.pk).exists()
+
+
+def _goal_visible_in_group_tab(goal, group) -> bool:
+    container = goal.resource_container
+    if container is None:
+        return False
+    if container.group_id == group.pk:
+        return True
+    return goal.enrollments.filter(student__group_id=group.pk).exists()
+
+
+def list_visible_thematic_containers(user, selected_group) -> list[ResourceContainer]:
+    """Thematic containers for Resources → Themes (group tab + entity-linked materials)."""
+    if not user.is_authenticated or selected_group is None:
+        return []
+
+    from goals.permissions import get_visible_goals_for_user
+    from tasks.permissions import get_visible_tasks_for_user
+    from workflows.permissions import get_visible_workflows_for_user
+
+    from .permissions import can_view_container
+
+    container_ids: set[int] = set(
+        ResourceContainer.objects.filter(
+            container_type=ResourceContainer.ContainerType.THEMATIC,
+            group=selected_group,
+        ).values_list('pk', flat=True)
+    )
+
+    workflows = (
+        get_visible_workflows_for_user(user)
+        .filter(resource_container_id__isnull=False)
+        .select_related('resource_container')
+        .prefetch_related('enrollments__student')
+    )
+    for workflow in workflows:
+        if _workflow_visible_in_group_tab(workflow, selected_group):
+            container_ids.add(workflow.resource_container_id)
+
+    tasks = (
+        get_visible_tasks_for_user(user)
+        .filter(resource_container_id__isnull=False)
+        .select_related('resource_container')
+        .prefetch_related('enrollments__student')
+    )
+    for task in tasks:
+        if _task_visible_in_group_tab(task, selected_group):
+            container_ids.add(task.resource_container_id)
+
+    goals = (
+        get_visible_goals_for_user(user)
+        .filter(resource_container_id__isnull=False)
+        .select_related('resource_container')
+        .prefetch_related('enrollments__student')
+    )
+    for goal in goals:
+        if _goal_visible_in_group_tab(goal, selected_group):
+            container_ids.add(goal.resource_container_id)
+
+    containers = list(
+        ResourceContainer.objects.filter(pk__in=container_ids)
+        .select_related('group__cohort', 'created_by')
+        .order_by('title', 'pk')
+    )
+    return [container for container in containers if can_view_container(user, container)]
+
+
 def can_view_container_via_entity_link(user, container: ResourceContainer) -> bool:
     from goals.models import Goal
     from goals.permissions import can_view_goal

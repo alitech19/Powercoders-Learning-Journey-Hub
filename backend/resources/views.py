@@ -77,12 +77,9 @@ def index(request):
             ).select_related('project_space')
         )
     elif tab == 'themes' and selected_group:
-        containers = list(
-            ResourceContainer.objects.filter(
-                container_type=ResourceContainer.ContainerType.THEMATIC,
-                group=selected_group,
-            )
-        )
+        from .entity_links import list_visible_thematic_containers
+
+        containers = list_visible_thematic_containers(request.user, selected_group)
 
     can_create_personal = can_create_personal_container(request.user)
     can_create_thematic = bool(
