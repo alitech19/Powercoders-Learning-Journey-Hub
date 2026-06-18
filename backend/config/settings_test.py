@@ -35,6 +35,14 @@ AXES_ENABLED = False
 
 GOOGLE_UPLOAD_STAGING_ROOT = tempfile.mkdtemp(prefix='powerhub_test_staging_')
 
+# CI/tests run without collectstatic; manifest storage needs staticfiles.json.
+STORAGES = {
+    **STORAGES,
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
+}
+
 # Quieter test output
 LOGGING = {
     'version': 1,
