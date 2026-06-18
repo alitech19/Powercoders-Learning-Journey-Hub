@@ -156,10 +156,45 @@ class ProjectSpaceCrudTests(TestCase):
         student = make_student('member@example.com', cohort=cohort, group=group)
         response = self.client.post(
             reverse('group_space:project_member_add', args=[project.pk]),
-            {'user_id': student.pk},
+            {
+                'assignee_type': 'group',
+                'assignee_target_id': str(group.pk),
+                'student_ids': [str(student.pk)],
+            },
         )
         self.assertEqual(response.status_code, 302)
         self.assertTrue(project.memberships.filter(user=student).exists())
+
+    def test_admin_bulk_adds_students_with_select_all(self):
+        login_as(self.client, self.admin)
+        project = make_project_space(self.admin, title='Team space')
+        cohort = make_cohort()
+        group = make_group(cohort)
+        first = make_student('first@example.com', cohort=cohort, group=group)
+        second = make_student('second@example.com', cohort=cohort, group=group)
+
+        response = self.client.post(
+            reverse('group_space:project_member_add', args=[project.pk]),
+            {
+                'assignee_type': 'group',
+                'assignee_target_id': str(group.pk),
+                'select_all_students': 'on',
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        member_ids = set(project.memberships.values_list('user_id', flat=True))
+        self.assertEqual(member_ids, {first.pk, second.pk})
+
+    def test_admin_adds_teacher_as_moderator(self):
+        login_as(self.client, self.admin)
+        project = make_project_space(self.admin, title='Moderated space')
+        response = self.client.post(
+            reverse('group_space:project_member_add', args=[project.pk]),
+            {'user_id': self.teacher.pk},
+        )
+        self.assertEqual(response.status_code, 302)
+        membership = project.memberships.get(user=self.teacher)
+        self.assertEqual(membership.role, ProjectSpaceMembership.Role.MODERATOR)
 
     def test_teacher_cannot_open_group_spaces_admin(self):
         login_as(self.client, self.teacher)

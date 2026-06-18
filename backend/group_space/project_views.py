@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -8,7 +9,12 @@ from accounts.decorators import admin_required
 
 from .models import ProjectSpace, ProjectSpaceMembership
 from .permissions import can_manage_project_space, get_listable_project_spaces
-from .project_forms import ProjectMemberAddForm, ProjectSpaceForm
+from .project_forms import (
+    ProjectMemberAddForm,
+    ProjectSpaceForm,
+    add_project_members_from_post,
+    get_project_member_picker_context,
+)
 from .slack_forms import apply_slack_mapping_from_request, slack_mapping_context
 
 
@@ -58,12 +64,14 @@ def project_detail(request, pk):
 
     members = project.memberships.select_related('user').order_by('user__display_name')
     add_form = ProjectMemberAddForm(project_space=project)
+    picker_context = get_project_member_picker_context(project)
     return render(request, 'group_space/project_detail.html', {
         'project': project,
         'form': form,
         'members': members,
         'add_form': add_form,
         'feed_url': f"{reverse('group_space:feed')}?kind=project&space={project.pk}",
+        **picker_context,
         **slack_mapping_context(project_space=project),
     })
 
@@ -74,18 +82,31 @@ def project_member_add(request, pk):
     project = get_object_or_404(ProjectSpace, pk=pk)
     if not can_manage_project_space(request.user, project):
         raise Http404
-    form = ProjectMemberAddForm(request.POST, project_space=project)
-    if form.is_valid():
-        user = form.cleaned_data['user_id']
-        ProjectSpaceMembership.objects.create(
+
+    if request.POST.get('user_id'):
+        form = ProjectMemberAddForm(request.POST, project_space=project)
+        if form.is_valid():
+            user = form.cleaned_data['user_id']
+            ProjectSpaceMembership.objects.create(
+                project_space=project,
+                user=user,
+                role=form.membership_role,
+                added_by=request.user,
+            )
+            messages.success(request, f'Added {user.display_name} as moderator.')
+        else:
+            messages.error(request, form.errors.get('user_id', ['Could not add member.'])[0])
+        return redirect('group_space:project_detail', pk=project.pk)
+
+    try:
+        count = add_project_members_from_post(
             project_space=project,
-            user=user,
-            role=form.membership_role,
-            added_by=request.user,
+            user=request.user,
+            post=request.POST,
         )
-        messages.success(request, f'Added {user.display_name} to the group space.')
-    else:
-        messages.error(request, form.errors.get('user_id', ['Could not add member.'])[0])
+        messages.success(request, f'Added {count} student(s) to the group space.')
+    except ValidationError as exc:
+        messages.error(request, exc.messages[0] if exc.messages else str(exc))
     return redirect('group_space:project_detail', pk=project.pk)
 
 
