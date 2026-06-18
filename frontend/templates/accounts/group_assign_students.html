@@ -16,6 +16,9 @@
     <p class="text-gray-500 text-sm mt-0.5">
       Group: <span class="font-medium text-[#343534] dark:text-gray-100">{{ group.name }}</span>
       · Cohort: <span class="font-medium text-[#343534] dark:text-gray-100">{{ group.cohort.name }}</span>
+      {% if students %}
+      · <span class="font-medium text-[#343534] dark:text-gray-100">{{ member_count }}</span> in this group
+      {% endif %}
     </p>
   </div>
 
@@ -23,25 +26,43 @@
   <form method="post" class="space-y-4">
     {% csrf_token %}
 
-    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-50">
+    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-50 dark:divide-gray-800">
       {% for student in students %}
       <label class="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
         <input type="checkbox" name="students" value="{{ student.pk }}"
+               {% if student.group_id == group.pk %}checked{% endif %}
                class="h-4 w-4 accent-[#B23149]">
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-[#343534] dark:text-gray-100">{{ student.display_name }}</p>
-          <p class="text-xs text-gray-400">{{ student.email }}
-            {% if student.group %}· currently in {{ student.group.name }}{% else %}· no group{% endif %}
-          </p>
+          <div class="flex items-center gap-2 flex-wrap">
+            <p class="text-sm font-medium text-[#343534] dark:text-gray-100">{{ student.display_name }}</p>
+            {% if student.group_id == group.pk %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300">
+              In this group
+            </span>
+            {% elif student.group %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">
+              In {{ student.group.name }}
+            </span>
+            {% else %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+              No group
+            </span>
+            {% endif %}
+          </div>
+          <p class="text-xs text-gray-400 mt-0.5">{{ student.email }}</p>
         </div>
       </label>
       {% endfor %}
     </div>
 
+    <p class="text-xs text-gray-400">
+      Checked students are assigned to this group. Uncheck to remove them from the group.
+    </p>
+
     <div class="flex gap-3">
       <button type="submit"
               class="flex-1 bg-[#B23149] hover:bg-[#8E273A] text-white font-semibold py-2.5 rounded-lg transition-colors text-sm cursor-pointer">
-        Assign Selected Students
+        Save Group Members
       </button>
       <a href="{% url 'accounts:cohort_list' %}"
          class="px-5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
@@ -52,9 +73,9 @@
 
   {% else %}
   <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-10 text-center">
-    <div class="text-4xl mb-3">✅</div>
-    <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100 mb-1">All students assigned</h2>
-    <p class="text-sm text-gray-400">Every student in {{ group.cohort.name }} is already in this group or another group.</p>
+    <div class="text-4xl mb-3">👥</div>
+    <h2 class="text-base font-semibold text-[#343534] dark:text-gray-100 mb-1">No students in this cohort</h2>
+    <p class="text-sm text-gray-400">Import or create students in {{ group.cohort.name }} first.</p>
     <a href="{% url 'accounts:cohort_list' %}"
        class="inline-block mt-4 text-sm font-medium text-[#B23149] hover:underline">Back to cohorts</a>
   </div>
