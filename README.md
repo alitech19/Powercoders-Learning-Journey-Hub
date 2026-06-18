@@ -52,12 +52,12 @@ Home at `/` is a **role-based dashboard**. Contextual **ⓘ help** is in the pag
 |---|---|
 | 📓 **Learning Journal** | Daily entries with mood and tags; private or shared with teacher; teacher feedback |
 | 🎯 **Goals** | Hard / soft / language goals with milestones; staff-assigned goals |
-| ✅ **Tasks** | Personal and teacher-assigned tasks (`Task` + `TaskEnrollment`) with per-student subtask status |
+| ✅ **Tasks** | Personal and teacher-assigned tasks (`Task` + `TaskEnrollment`) with per-student subtask status; scheduled publish for drafts |
 | 🔄 **Reflections** | Structured weekly check-ins with well-being fields |
 | 💪 **Habits** | Weekly targets, streaks; share snapshots to group chat |
-| 👥 **Group Space** | Group feed — posts, comments, pins, files, **share panel** (goals, tasks, journal, habits) |
-| 📁 **Resources** | Group resource board; items from chat posts labelled as resources |
-| 🔀 **Workflows** | Teacher-defined step paths |
+| 👥 **Group Space** | Group feed — posts, comments, pins, files, **share panel** (goals, tasks, journal, habits); custom project spaces |
+| 📁 **Resources** | Group resource board; thematic containers linkable to workflows, tasks, and goals |
+| 🔀 **Workflows** | Teacher-defined step paths; scheduled publish for drafts |
 
 ### For Teachers & Admins
 
@@ -70,6 +70,9 @@ Home at `/` is a **role-based dashboard**. Contextual **ⓘ help** is in the pag
 | 📥 **Bulk User Import** | CSV import for students and teachers |
 | 🔍 **Audit Log** | Security-sensitive actions |
 | 📈 **Platform Analytics** | Dedicated analytics dashboard — weekly engagement charts, reflection submission rate, goal completion doughnut, cohort comparison, at-risk student table (7-day inactivity) |
+| 🔔 **Notification Admin** | **Administration → Notifications** — configure deadline reminders, reflection digest schedule, Celery Beat tasks; syncs automatically on save |
+| 💬 **Slack Admin** | **Administration → Slack integration** — OAuth credentials, staff webhook, bot token; all secrets encrypted in DB |
+| 🏛️ **Group Space Admin** | **Administration → Group spaces** — create and manage custom project spaces with isolated chat and Slack channel mapping |
 
 ### Platform-wide
 
@@ -77,10 +80,10 @@ Home at `/` is a **role-based dashboard**. Contextual **ⓘ help** is in the pag
 |---|---|
 | 🔐 **Two-Factor Auth** | TOTP for staff (django-two-factor-auth) |
 | 🛡️ **Security** | django-axes (brute force), CSP, Redis sessions, secure cookies when `DEBUG=False` |
-| 🔔 **Notifications** | In-app centre with unread badge; optional email per user |
+| 🔔 **Notifications** | In-app centre with unread badge; per-channel matrix (in-app, email, Slack) per notification type; quiet hours; hourly / daily digest; deadline reminders configured via **Administration → Notifications** |
 | 📧 **Email delivery** | SMTP via SendGrid or Postmark; console fallback in dev |
 | 🐛 **Error monitoring** | Sentry — real-time production errors with full stack traces |
-| 💬 **Slack** | Optional webhook for key events (new users, missing reflections) |
+| 💬 **Slack** | Full workspace integration: personal OAuth DMs per user, staff channel webhook, bi-directional Group Space ↔ Slack channel sync; all configured in-app via **Administration → Slack integration** (no `.env` secrets) |
 | 📤 **Data Export** | JSON, CSV, Markdown — full data portability |
 | ❌ **Account Deletion** | GDPR right-to-erasure flow |
 | ♿ **Accessible** | Skip link to `#main-content`, ARIA on nav, keyboard-friendly dropdowns |
@@ -378,6 +381,9 @@ Configuration: `.github/workflows/ci.yml`.
 | 2FA device lost | `/admin/` → OTP Devices → delete the user's device |
 | Account locked (axes) | `/admin/` → Access Attempts → clear the entry |
 | Migration conflict | `docker compose down -v && docker compose up --build` (resets DB) |
+| Slack DMs not arriving | User connected Slack on their profile; master Slack toggle on; **worker** running |
+| Slack OAuth redirect error | `SITE_URL` in `.env` matches redirect URI registered in your Slack app |
+| Notification digest never fires | **beat** service running; check `/admin/django_celery_beat/periodictask/` |
 
 ---
 

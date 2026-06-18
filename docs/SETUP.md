@@ -42,6 +42,9 @@ Edit `.env` if needed. Defaults work for local Docker development.
 | `REDIS_URL` | Cache and Celery broker |
 | `SECRET_KEY` | Django secret (change in production) |
 | `DEBUG` | `True` for local dev |
+| `SITE_URL` | Base URL for email links and Slack OAuth redirect (default: `http://localhost:8000`) |
+
+Slack credentials, reminder schedules, and notification settings are configured in-app — no additional `.env` entries needed. See [SLACK_SETUP.md](SLACK_SETUP.md).
 
 > **Note:** dev-user seeding and the quick-login panel have been **removed from the codebase**. Create accounts with `createsuperuser` and the in-app **Administration → Users**. See [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md).
 
@@ -115,6 +118,15 @@ docker compose logs beat
 Worker should show `celery@... ready.` Beat should show scheduler started.
 
 **Periodic schedules:** created automatically on `migrate` for deadline/reflection reminders (see **Administration → Notifications**). Hourly/daily user digests and weekly DB backup are registered from `CELERY_BEAT_SCHEDULE`. Verify in Django admin → **Periodic tasks**.
+
+### Slack integration (optional)
+
+Slack credentials are configured in-app — no `.env` changes needed. After logging in as admin:
+
+1. **Administration → Slack integration** — enable OAuth, paste client ID/secret; optionally add staff webhook or bot token
+2. `SITE_URL=http://localhost:8000` must be set in `.env` for OAuth redirect to work locally (already the default)
+
+See [SLACK_SETUP.md](SLACK_SETUP.md) for full step-by-step instructions.
 
 Test the ping task:
 

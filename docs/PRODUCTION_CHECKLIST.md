@@ -72,6 +72,9 @@ Still required at deploy time:
 
 - [ ] Create production admin manually with a strong password
 - [ ] Confirm no test users from `seed.yaml` were ever loaded on this environment
+- [ ] Open **Administration → Notifications** — enable reflection digest and deadline reminders (Beat tasks created automatically on save)
+- [ ] Open **Administration → Slack integration** — configure OAuth, staff webhook, and/or chat sync if using Slack (no `.env` changes needed; credentials stored encrypted in DB)
+- [ ] Verify `SITE_URL` matches the public HTTPS URL exactly (required for Slack OAuth redirect and Events API callbacks)
 
 ---
 
