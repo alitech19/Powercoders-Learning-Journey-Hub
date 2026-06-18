@@ -13,7 +13,7 @@
     {% if google_connect_enabled %}
       {% if google_connection and google_connection.is_active %}
       <p class="text-xs text-green-700 dark:text-green-400 font-medium mb-2">Connected as {{ google_connection.google_email }}</p>
-      <p class="text-xs text-gray-400 mb-4">Required before you can attach files in group chat.</p>
+      <p class="text-xs text-gray-400 mb-4">Used for attaching files in group chat. Sharing achievements does not require Google Drive.</p>
       <form method="post" action="{% url 'accounts:google_disconnect' %}">
         {% csrf_token %}
         <button type="submit"
@@ -23,7 +23,8 @@
       </form>
       {% else %}
       <p class="text-xs text-gray-400 mb-4">
-        Connect your org Google account to upload files to your My Drive when sharing resources in group chat.
+        Optional: connect your org Google account to upload files to My Drive in group chat.
+        You can share achievements (journal, goals, habits, tasks) without connecting Drive.
       </p>
       <a href="{% url 'accounts:google_connect' %}"
          class="flex items-center justify-center gap-2 w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-[#B23149] text-[#343534] dark:text-gray-100 text-sm font-semibold py-2.5 px-3 rounded-lg transition-colors">
