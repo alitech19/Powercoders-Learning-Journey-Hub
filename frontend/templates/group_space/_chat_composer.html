@@ -10,6 +10,10 @@
         ✕ Cancel
       </button>
     </div>
+    <p class="text-xs text-gray-500 dark:text-gray-400">
+      Share journal entries, goals, habits, or tasks you marked visible to teachers.
+      {% if drive_student_connect_required %}Google Drive is only needed for file attachments, not for sharing achievements.{% endif %}
+    </p>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
       {% for kind, label in share_kind_panel %}
       <button type="button" data-share-kind="{{ kind }}" class="share-kind-btn text-xs font-medium px-3 py-2 rounded-lg border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-[#B23149]">{{ label }}</button>
@@ -78,6 +82,13 @@
           ✕ Cancel
         </button>
       </div>
+      {% if drive_student_connect_required %}
+      <p class="text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 rounded-lg px-3 py-2">
+        Connect <a href="{% url 'accounts:profile' %}" class="text-[#B23149] font-semibold hover:underline">Google Drive on your profile</a> before attaching files.
+      </p>
+      {% elif drive_staff_path %}
+      <p class="text-xs text-gray-500 dark:text-gray-400">Files go to the organisation Shared drive.</p>
+      {% endif %}
       <input type="file" id="chat-file" name="file" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.gif,.webp"
              class="text-xs text-gray-600 dark:text-gray-400 w-full file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-white dark:file:bg-gray-900 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-100 dark:hover:file:bg-gray-700">
       {% if composer_form.file.errors %}<p class="text-xs text-red-600 dark:text-red-400">{{ composer_form.file.errors.0 }}</p>{% endif %}
@@ -96,6 +107,11 @@
           ✕ Cancel
         </button>
       </div>
+      {% if drive_student_connect_required %}
+      <p class="text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 rounded-lg px-3 py-2">
+        Connect <a href="{% url 'accounts:profile' %}" class="text-[#B23149] font-semibold hover:underline">Google Drive on your profile</a> before creating Google files.
+      </p>
+      {% endif %}
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {% for doc_type in google_doc_types %}
         <button type="button"
@@ -120,14 +136,6 @@
       {% endif %}
     </div>
 
-    {% if drive_student_connect_required %}
-    <p class="text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-800 rounded-lg px-3 py-2">
-      Connect <a href="{% url 'accounts:profile' %}" class="text-[#B23149] font-semibold hover:underline">Google Drive on your profile</a> before attaching files or creating Google files.
-    </p>
-    {% elif drive_staff_path %}
-    <p class="text-xs text-gray-500 dark:text-gray-400">Files and new Google docs go to the organisation Shared drive.</p>
-    {% endif %}
-
     <div id="composer-actions" class="flex items-center gap-3 text-xs flex-wrap overflow-visible">
       {% if allow_file_upload %}
       <button type="button" id="attach-toggle" class="text-gray-500 hover:text-[#B23149] font-medium {% if drive_student_connect_required %}opacity-50{% endif %}"
@@ -142,7 +150,7 @@
       </button>
       {% endif %}
       {% endif %}
-      {% if user.role == "student" %}
+      {% if can_share_achievements %}
       <button type="button" id="share-toggle" class="text-gray-500 hover:text-[#B23149] font-medium">
         ↗ Share my work
       </button>

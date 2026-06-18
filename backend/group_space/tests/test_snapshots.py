@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import Client, TestCase
 
 from goals.models import Goal
 from group_space.models import Post
@@ -16,6 +16,7 @@ from habits.models import Habit
 from journal.models import JournalEntry
 from tasks.models import Subtask, Task
 from test_utils.cohorts import make_cohort, make_group
+from test_utils.group_space import get_space_for_group
 from test_utils.goals import add_milestone, make_student_goal
 from test_utils.habits import make_habit
 from test_utils.journal import make_journal_entry
@@ -126,3 +127,48 @@ class SnapshotShareMenuTests(TestCase):
         self.assertEqual(kind, Post.SnapshotKind.JOURNAL)
         self.assertEqual(html, '')
         self.assertEqual(meta['title'], entry.title)
+
+
+class ShareCreateWithoutDriveTests(TestCase):
+    def setUp(self):
+        from google_storage.models import GoogleWorkspaceStorageConfig
+
+        self.cohort = make_cohort()
+        self.group = make_group(self.cohort)
+        self.space = get_space_for_group(self.group)
+        self.student = make_student('share@example.com', cohort=self.cohort, group=self.group)
+        GoogleWorkspaceStorageConfig.objects.create(
+            id=1,
+            is_enabled=True,
+            shared_drive_id='drive-abc',
+            student_oauth_enabled=True,
+            oauth_client_id='client',
+        )
+
+    def test_student_can_share_journal_without_google_connection(self):
+        from django.urls import reverse
+
+        from test_utils.journal import make_journal_entry
+        from test_utils.users import login_as
+
+        entry = make_journal_entry(
+            self.student,
+            title='Shared reflection',
+            visibility=JournalEntry.Visibility.SHARED,
+        )
+        client = Client()
+        login_as(client, self.student)
+        response = client.post(
+            reverse('group_space:share_create'),
+            {
+                'space_kind': 'cohort_group',
+                'space_pk': self.group.pk,
+                'kind': Post.SnapshotKind.JOURNAL,
+                'obj_id': entry.pk,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        post = Post.objects.latest('pk')
+        self.assertEqual(post.snapshot_kind, Post.SnapshotKind.JOURNAL)
+        self.assertEqual(post.snapshot_meta['title'], 'Shared reflection')
+        self.assertFalse(post.drive_file_id)

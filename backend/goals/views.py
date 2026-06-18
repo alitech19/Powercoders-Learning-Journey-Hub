@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Prefetch
 from django.http import Http404, HttpResponseForbidden
@@ -71,7 +71,7 @@ def _goal_queryset():
 def _get_goal_or_404(user, pk):
     goal = get_object_or_404(_goal_queryset(), pk=pk)
     if not can_view_goal(user, goal):
-        raise Http404
+        raise PermissionDenied
     return goal
 
 
@@ -81,7 +81,7 @@ def _get_enrollment_or_404(user, enrollment_pk):
         pk=enrollment_pk,
     )
     if not can_view_goal(user, enrollment.goal):
-        raise Http404
+        raise PermissionDenied
     return enrollment
 
 
@@ -283,7 +283,7 @@ def goal_detail(request, pk):
 def goal_edit(request, pk):
     goal = _get_goal_or_404(request.user, pk)
     if not can_edit_goal(request.user, goal):
-        raise Http404
+        raise PermissionDenied
 
     enrollment = None
     show_status = True
@@ -417,7 +417,7 @@ def milestone_toggle(request, pk):
     milestone = get_object_or_404(Milestone.objects.select_related('goal'), pk=pk)
     goal = milestone.goal
     if not can_view_goal(request.user, goal):
-        raise Http404
+        raise PermissionDenied
     enrollment = get_enrollment_for_user(request.user, goal)
     if not enrollment or not can_toggle_milestone(request.user, enrollment):
         return HttpResponseForbidden()

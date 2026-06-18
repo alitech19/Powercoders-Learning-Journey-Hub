@@ -3,17 +3,21 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
-  <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
-    <div>
-      <a href="{% url 'dashboard:dashboard' %}" class="text-sm text-gray-400 hover:text-[#B23149] transition-colors">← Dashboard</a>
+  <a href="{% url 'dashboard:dashboard' %}" class="text-sm text-gray-400 hover:text-[#B23149] transition-colors mb-3 inline-block">← Dashboard</a>
+
+  <div class="flex flex-wrap items-start sm:items-center justify-between gap-4 mb-6">
+    <div class="min-w-0">
       {% include "includes/_page_title.html" with title="Group spaces" %}
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 max-w-2xl">
         Custom collaboration rooms with their own chat and Resources. Cohort group chats are managed under
         <strong>Cohorts &amp; Groups</strong>.
       </p>
     </div>
     <a href="{% url 'group_space:project_create' %}"
-       class="px-4 py-2 rounded-lg bg-[#B23149] hover:bg-[#9a2a3f] text-white text-sm font-semibold">
+       class="inline-flex items-center gap-2 bg-[#B23149] hover:bg-[#8E273A] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors shrink-0">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+      </svg>
       New group space
     </a>
   </div>

@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
-from django.db.models import Max
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.db.models import Count, Max, Q
 from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -36,16 +36,19 @@ from .services import (
 )
 
 
-def _get_workflow_or_404(user, pk):
-    workflow = get_object_or_404(
+def _workflow_queryset():
+    return (
         Workflow.objects.select_related(
             'created_by', 'assignee_cohort', 'assignee_group', 'assignee_group__cohort',
             'resource_container',
-        ).prefetch_related('steps', 'completions'),
-        pk=pk,
+        ).prefetch_related('steps', 'completions')
     )
+
+
+def _get_workflow_or_404(user, pk):
+    workflow = get_object_or_404(_workflow_queryset(), pk=pk)
     if not can_view_workflow(user, workflow):
-        raise Http404
+        raise PermissionDenied
     return workflow
 
 
@@ -125,10 +128,12 @@ def workflow_create(request):
 
 @login_required
 def workflow_detail(request, pk):
-    workflow = _get_workflow_or_404(request.user, pk)
+    workflow = get_object_or_404(_workflow_queryset(), pk=pk)
     user = request.user
 
     if user_is_student(user):
+        if workflow.is_private:
+            raise Http404
         if not can_toggle_step(user, workflow):
             return render(request, 'workflows/detail.html', {
                 'workflow': workflow,
@@ -150,9 +155,18 @@ def workflow_detail(request, pk):
             **scheduled_publish_detail_context(workflow),
         }
     else:
+        if not can_view_workflow(user, workflow):
+            raise PermissionDenied
         enrollments = (
             WorkflowEnrollment.objects.filter(workflow=workflow)
             .select_related('student')
+            .annotate(
+                steps_done=Count(
+                    'student__workflow_step_completions',
+                    filter=Q(student__workflow_step_completions__workflow_id=workflow.pk),
+                    distinct=True,
+                ),
+            )
         )
         from .permissions import get_workflow_assigned_students
 
@@ -183,6 +197,7 @@ def workflow_detail(request, pk):
             'step_data': build_step_data(user, workflow) if workflow.is_shared else None,
             'shared_progress': shared_progress_pct(workflow) if workflow.is_shared else None,
             'enrollments': enrollments,
+            'steps_total': workflow.step_count,
             'assigned_count': assigned_students.count(),
             'available_students': available_students,
             **entity_materials_context(user, workflow),
@@ -250,7 +265,7 @@ def workflow_delete(request, pk):
 def step_add(request, workflow_pk):
     workflow = get_object_or_404(Workflow, pk=workflow_pk)
     if not can_view_workflow(request.user, workflow) or not can_manage_workflow(request.user, workflow):
-        raise Http404
+        raise PermissionDenied
     form = WorkflowStepForm(request.POST)
     if form.is_valid():
         step = form.save(commit=False)
@@ -269,7 +284,7 @@ def step_delete(request, pk):
     step = get_object_or_404(WorkflowStep.objects.select_related('workflow'), pk=pk)
     workflow = step.workflow
     if not can_view_workflow(request.user, workflow) or not can_manage_workflow(request.user, workflow):
-        raise Http404
+        raise PermissionDenied
     workflow_pk = step.workflow_id
     step.delete()
     return redirect('workflows:detail', pk=workflow_pk)

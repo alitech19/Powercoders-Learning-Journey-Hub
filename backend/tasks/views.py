@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Prefetch
 from django import forms as django_forms
@@ -99,7 +99,7 @@ def _task_queryset():
 def _get_task_or_404(user, pk):
     task = get_object_or_404(_task_queryset(), pk=pk)
     if not can_view_task(user, task):
-        raise Http404
+        raise PermissionDenied
     return task
 
 
@@ -109,7 +109,7 @@ def _get_enrollment_or_404(user, enrollment_pk):
         pk=enrollment_pk,
     )
     if not can_view_task(user, enrollment.task):
-        raise Http404
+        raise PermissionDenied
     return enrollment
 
 
@@ -699,7 +699,7 @@ def task_detail(request, pk):
 def task_edit(request, pk):
     task = _get_task_or_404(request.user, pk)
     if not can_edit_task(request.user, task):
-        raise Http404
+        raise PermissionDenied
 
     enrollment = None
     show_status = not task.is_group_shared
@@ -848,7 +848,7 @@ def subtask_status(request, pk):
     subtask = get_object_or_404(Subtask.objects.select_related('task'), pk=pk)
     task = subtask.task
     if not can_view_task(request.user, task):
-        raise Http404
+        raise PermissionDenied
 
     status = request.POST.get('status')
     if status not in Task.Status.values:
@@ -1008,9 +1008,9 @@ def subtask_edit(request, pk):
     subtask = get_object_or_404(Subtask.objects.select_related('task'), pk=pk)
     task = subtask.task
     if not can_view_task(request.user, task):
-        raise Http404
+        raise PermissionDenied
     if not can_edit_subtask(request.user, subtask):
-        raise Http404
+        raise PermissionDenied
 
     if request.method == 'POST':
         form = SubtaskForm(request.POST, instance=subtask)
@@ -1037,7 +1037,7 @@ def subtask_delete(request, pk):
     subtask = get_object_or_404(Subtask.objects.select_related('task'), pk=pk)
     task = subtask.task
     if not can_view_task(request.user, task):
-        raise Http404
+        raise PermissionDenied
     if not can_delete_subtask(request.user, subtask):
         return HttpResponseForbidden()
 

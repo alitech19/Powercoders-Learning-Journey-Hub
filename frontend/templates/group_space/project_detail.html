@@ -65,14 +65,106 @@
     {% endif %}
 
     {% if not project.is_archived %}
-    <form method="post" action="{% url 'group_space:project_member_add' project.pk %}" class="flex flex-wrap gap-3 items-end pt-2 border-t border-gray-100 dark:border-gray-800">
-      {% csrf_token %}
-      <div class="flex-1 min-w-[200px]">
-        <label class="block text-xs font-medium text-gray-500 mb-1">Add student or teacher</label>
-        {{ add_form.user_id }}
+    <div class="pt-4 border-t border-gray-100 dark:border-gray-800 space-y-6" x-data="projectMemberForm()">
+      <div>
+        <h3 class="text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1">Add students</h3>
+        <p class="text-xs text-gray-500 mb-3">Select a cohort or group, then choose students to add.</p>
+        {% if has_addable_students %}
+        {{ cohort_students_json|json_script:"cohort-students-data" }}
+        {{ group_students_json|json_script:"group-students-data" }}
+        <form method="post" action="{% url 'group_space:project_member_add' project.pk %}" class="space-y-3">
+          {% csrf_token %}
+          <div class="flex gap-4 text-sm">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="assignee_type" value="cohort" x-model="assigneeType" @change="targetId = ''; selectedStudents = []" class="accent-[#B23149]">
+              Cohort
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="assignee_type" value="group" x-model="assigneeType" @change="targetId = ''; selectedStudents = []" class="accent-[#B23149]">
+              Group
+            </label>
+          </div>
+          <div x-show="assigneeType === 'cohort'" class="space-y-2 max-h-40 overflow-y-auto">
+            {% for cohort in cohorts %}
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="radio" name="assignee_target_id" value="{{ cohort.pk }}" x-model="targetId" @change="selectedStudents = []" class="accent-[#B23149]">
+              {{ cohort.name }}
+            </label>
+            {% empty %}
+            <p class="text-xs text-gray-400">No active cohorts.</p>
+            {% endfor %}
+          </div>
+          <div x-show="assigneeType === 'group'" class="space-y-2 max-h-40 overflow-y-auto">
+            {% for group in groups %}
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="radio" name="assignee_target_id" value="{{ group.pk }}" x-model="targetId" @change="selectedStudents = []" class="accent-[#B23149]">
+              {{ group }}
+            </label>
+            {% empty %}
+            <p class="text-xs text-gray-400">No active groups.</p>
+            {% endfor %}
+          </div>
+          <div x-show="targetId && currentStudents().length" class="pt-3 border-t border-gray-100 dark:border-gray-800 space-y-2">
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" name="select_all_students" x-model="selectAll" @change="toggleSelectAll()" class="accent-[#B23149]">
+              All students in selected <span x-text="assigneeType"></span>
+            </label>
+            <div class="space-y-2 max-h-48 overflow-y-auto">
+              <template x-for="student in currentStudents()" :key="student.id">
+                <label class="flex items-center gap-2 text-sm cursor-pointer">
+                  <input type="checkbox" name="student_ids" :value="student.id" x-model="selectedStudents" :disabled="selectAll" class="accent-[#B23149]">
+                  <span x-text="student.name"></span>
+                </label>
+              </template>
+            </div>
+          </div>
+          <p x-show="targetId && !currentStudents().length" class="text-xs text-gray-400">All students in this selection are already members.</p>
+          <button type="submit"
+                  class="px-4 py-2 rounded-lg bg-[#343534] text-white text-sm font-semibold disabled:opacity-50"
+                  :disabled="!targetId || (!selectAll && selectedStudents.length === 0)">
+            Add selected students
+          </button>
+        </form>
+        {% else %}
+        <p class="text-sm text-gray-500">All students are already members of this group space.</p>
+        {% endif %}
       </div>
-      <button type="submit" class="px-4 py-2 rounded-lg bg-[#343534] text-white text-sm font-semibold">Add</button>
-    </form>
+
+      {% if add_form.fields.user_id.queryset.exists %}
+      <form method="post" action="{% url 'group_space:project_member_add' project.pk %}" class="flex flex-wrap gap-3 items-end">
+        {% csrf_token %}
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-xs font-medium text-gray-500 mb-1">Add teacher (moderator)</label>
+          {{ add_form.user_id }}
+        </div>
+        <button type="submit" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-semibold text-gray-700 dark:text-gray-200">Add teacher</button>
+      </form>
+      {% endif %}
+    </div>
+    <script>
+    function projectMemberForm() {
+      const cohortStudents = JSON.parse(document.getElementById('cohort-students-data')?.textContent || '{}');
+      const groupStudents = JSON.parse(document.getElementById('group-students-data')?.textContent || '{}');
+      return {
+        assigneeType: 'group',
+        targetId: '',
+        selectAll: false,
+        selectedStudents: [],
+        currentStudents() {
+          if (!this.targetId) return [];
+          const map = this.assigneeType === 'cohort' ? cohortStudents : groupStudents;
+          return map[this.targetId] || [];
+        },
+        toggleSelectAll() {
+          if (this.selectAll) {
+            this.selectedStudents = this.currentStudents().map(s => String(s.id));
+          } else {
+            this.selectedStudents = [];
+          }
+        },
+      };
+    }
+    </script>
     {% endif %}
   </div>
 </div>

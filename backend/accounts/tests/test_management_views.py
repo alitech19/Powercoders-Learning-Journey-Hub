@@ -36,11 +36,38 @@ class ManagementViewAccessTests(TestCase):
         login_as(self.client, self.admin)
         response = self.client.post(
             reverse('accounts:group_assign_students', args=[self.group.pk]),
-            {'students': [str(other.pk)]},
+            {'students': [str(self.student.pk), str(other.pk)]},
         )
         self.assertEqual(response.status_code, 302)
         other.refresh_from_db()
         self.assertEqual(other.group_id, self.group.pk)
+
+    def test_assign_page_lists_current_group_members(self):
+        unassigned = make_student('free@example.com', cohort=self.cohort)
+        other_group = make_group(self.cohort, name='Other')
+        elsewhere = make_student('else@example.com', cohort=self.cohort, group=other_group)
+
+        login_as(self.client, self.admin)
+        response = self.client.get(reverse('accounts:group_assign_students', args=[self.group.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.student.email)
+        self.assertContains(response, 'In this group')
+        self.assertContains(response, unassigned.email)
+        self.assertContains(response, 'No group')
+        self.assertContains(response, elsewhere.email)
+        self.assertContains(response, f'In {other_group.name}')
+
+    def test_uncheck_removes_student_from_group(self):
+        other = make_student('other@example.com', cohort=self.cohort, group=self.group)
+        login_as(self.client, self.admin)
+        response = self.client.post(
+            reverse('accounts:group_assign_students', args=[self.group.pk]),
+            {'students': [str(self.student.pk)]},
+        )
+        self.assertEqual(response.status_code, 302)
+        other.refresh_from_db()
+        self.assertIsNone(other.group_id)
 
     def test_cohort_edit_prefills_dates(self):
         self.cohort.start_date = date(2026, 1, 10)

@@ -49,6 +49,8 @@ def can_create_google_doc(user) -> bool:
 
 
 def composer_upload_context(user) -> dict:
+    from accounts.models import User
+
     return {
         'drive_chat_upload_enabled': should_upload_file_to_drive(user)
         or student_must_connect_google_for_upload(user)
@@ -57,5 +59,6 @@ def composer_upload_context(user) -> dict:
         'drive_staff_path': user.role in (User.Role.TEACHER, User.Role.ADMIN)
         and staff_drive_uploads_enabled(),
         'can_create_google_doc': can_create_google_doc(user),
+        'can_share_achievements': user.role == User.Role.STUDENT,
         'google_doc_types': GOOGLE_DOC_TYPES,
     }

@@ -7,12 +7,14 @@ from goals.services import create_goals_bulk
 from resources.entity_links import (
     apply_entity_resource_container,
     can_view_container_via_entity_link,
+    list_visible_thematic_containers,
     resolve_resource_container_for_entity,
 )
 from resources.models import ResourceContainer
 from resources.permissions import can_view_container
 from test_utils.cohorts import assign_teacher, make_cohort, make_group
 from test_utils.resources import make_thematic_container, system_group_container
+from test_utils.tasks import enroll_student, make_staff_individual_task
 from test_utils.users import make_student, make_teacher
 from workflows.models import Workflow
 from workflows.services import create_workflow
@@ -124,3 +126,58 @@ class EntityResourceContainerTests(TestCase):
         goal = create_goals_bulk(user=self.teacher, post=post)
         goal.refresh_from_db()
         self.assertEqual(goal.resource_container_id, self.existing_theme.pk)
+
+    def test_list_visible_thematic_includes_cohort_workflow_materials(self):
+        container = ResourceContainer.objects.create(
+            container_type=ResourceContainer.ContainerType.THEMATIC,
+            title='Cohort materials',
+            group=None,
+            created_by=self.teacher,
+        )
+        Workflow.objects.create(
+            title='Cohort flow',
+            visibility=Workflow.Visibility.PUBLIC,
+            progress_mode=Workflow.ProgressMode.SHARED,
+            assignee_type=Workflow.AssigneeType.COHORT,
+            assignee_cohort=self.cohort,
+            created_by=self.teacher,
+            resource_container=container,
+        )
+        visible_ids = {c.pk for c in list_visible_thematic_containers(self.student, self.group)}
+        self.assertIn(container.pk, visible_ids)
+        other_ids = {c.pk for c in list_visible_thematic_containers(self.other_student, self.other_student.group)}
+        self.assertNotIn(container.pk, other_ids)
+
+    def test_list_visible_thematic_includes_user_task_materials_without_group(self):
+        container = ResourceContainer.objects.create(
+            container_type=ResourceContainer.ContainerType.THEMATIC,
+            title='Task materials',
+            group=None,
+            created_by=self.teacher,
+        )
+        task = make_staff_individual_task(self.teacher, title='Assigned task')
+        task.resource_container = container
+        task.save(update_fields=['resource_container'])
+        enroll_student(task, self.student)
+
+        visible_ids = {c.pk for c in list_visible_thematic_containers(self.student, self.group)}
+        self.assertIn(container.pk, visible_ids)
+
+    def test_list_visible_thematic_includes_workflow_linked_theme(self):
+        workflow = create_workflow(
+            user=self.teacher,
+            post={
+                'title': 'Onboarding flow',
+                'description': '',
+                'visibility': 'public',
+                'progress_mode': 'shared',
+                'assignee_type': 'group',
+                'assignee_target_id': str(self.group.pk),
+                'step_title_1': 'Step one',
+                'resource_container_mode': 'create',
+                'resource_container_new_title': 'Materials: Onboarding flow',
+            },
+        )
+        workflow.refresh_from_db()
+        visible_ids = {c.pk for c in list_visible_thematic_containers(self.student, self.group)}
+        self.assertIn(workflow.resource_container_id, visible_ids)

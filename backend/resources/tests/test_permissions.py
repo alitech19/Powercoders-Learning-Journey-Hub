@@ -1,5 +1,6 @@
+from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.test import TestCase
+from django.test import Client, TestCase
 
 from resources.models import ResourceContainer
 from resources.permissions import (
@@ -74,7 +75,7 @@ class ResourcesPermissionTests(TestCase):
 
     def test_get_container_or_404_denies_wrong_user(self):
         personal = make_personal_container(self.student)
-        with self.assertRaises(Http404):
+        with self.assertRaises(PermissionDenied):
             get_container_or_404(self.other_student, personal.pk)
 
     def test_get_item_or_404_follows_container_access(self):
@@ -82,7 +83,7 @@ class ResourcesPermissionTests(TestCase):
         item = make_item(personal, self.student, title='X', url='https://x.test')
         found = get_item_or_404(self.student, item.pk)
         self.assertEqual(found.pk, item.pk)
-        with self.assertRaises(Http404):
+        with self.assertRaises(PermissionDenied):
             get_item_or_404(self.other_student, item.pk)
 
     def test_resolve_selected_group_student_defaults_to_own_group(self):
