@@ -95,6 +95,15 @@ body {
   color: #f4f4f5;
 }
 
+/* ── Theme toggle (minimal layouts) — explicit CSS so login/onboarding work
+   without a Tailwind rebuild when new utility classes are added ─────── */
+.ph-theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+}
+
 /* ── 2FA login: OTP input field styling ─────────────────────────────── */
 input[name="token-otp_token"],
 input[name="otp_token"],

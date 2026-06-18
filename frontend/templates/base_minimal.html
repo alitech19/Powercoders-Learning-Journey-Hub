@@ -10,11 +10,32 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+  <style>
+    [x-cloak] { display: none !important; }
+    .theme-mode-tip {
+      color: #343534 !important;
+      background-color: #ffffff !important;
+      border: 1px solid #e5e7eb !important;
+    }
+    html.dark .theme-mode-tip {
+      color: #f3f4f6 !important;
+      background-color: #1f2937 !important;
+      border-color: #4b5563 !important;
+    }
+    .ph-theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 50;
+    }
+  </style>
   <script src="{% static 'js/dark-mode-init.js' %}"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
   {% block extra_head %}{% endblock %}
 </head>
-<body class="h-full bg-gray-50 dark:bg-gray-950">
+<body class="{% block body_class %}h-full bg-gray-50 dark:bg-gray-950 text-[#343534] dark:text-gray-100 transition-colors duration-200{% endblock %}">
+  {% include "includes/_theme_toggle.html" %}
   {% block content %}{% endblock %}
+  <script defer src="{% static 'js/dark-mode.js' %}"></script>
+  <script defer src="{% static 'js/alpine.min.js' %}"></script>
 </body>
 </html>

@@ -1,113 +1,120 @@
-{% load static icon_tags %}
-<!DOCTYPE html>
-<html lang="en" class="h-full">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — Powercoders Learning Journey Hub</title>
-  <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
-</head>
+{% extends "base_minimal.html" %}
+{% load icon_tags %}
 
-<body class="min-h-full bg-[#F5EDE0] dark:bg-gray-950 py-8 px-4">
-  <div class="w-full max-w-5xl mx-auto">
+{% block title %}Login{% endblock %}
 
-    <div class="text-center mb-8">
-      <div class="font-black text-3xl tracking-tight leading-none mb-2">
-        <span class="text-[#B23149]">{</span><span class="text-[#343534] dark:text-gray-100">POWER</span><span class="text-[#B23149]">.</span><span class="text-[#343534] dark:text-gray-100">CODERS</span><span class="text-[#B23149]">}</span>
+{% block body_class %}min-h-full bg-[#F5EDE0] dark:bg-gray-950 py-8 px-4 text-[#343534] dark:text-gray-100 transition-colors duration-200{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-5xl mx-auto">
+
+  <div class="text-center mb-8">
+    <div class="font-black text-3xl tracking-tight leading-none mb-2">
+      <span class="text-[#B23149]">{</span><span class="text-[#343534] dark:text-gray-100">POWER</span><span class="text-[#B23149]">.</span><span class="text-[#343534] dark:text-gray-100">CODERS</span><span class="text-[#B23149]">}</span>
+    </div>
+    <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Learning Journey Hub</p>
+  </div>
+
+  <div class="max-w-md mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-[#EDE3D5] dark:border-gray-700 p-8">
+
+    {% if wizard.steps.current == 'auth' %}
+    <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100 mb-1">Welcome back</h1>
+    <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Sign in with email and password (production-like flow)</p>
+
+    {% elif wizard.steps.current == 'token' %}
+    <div class="flex items-center gap-3 mb-5">
+      <div class="flex-shrink-0">{% volumetric_icon "lock" size="sm" variant="brand" %}</div>
+      <div>
+        <h1 class="text-xl font-bold text-[#343534] dark:text-gray-100">Two-Factor Authentication</h1>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">Enter the code from your authenticator app</p>
       </div>
-      <p class="text-[#343534] dark:text-gray-100/50 text-sm font-medium">Learning Journey Hub</p>
     </div>
 
-    <div class="max-w-md mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-[#EDE3D5] dark:border-gray-700 p-8">
+    {% elif wizard.steps.current == 'backup' %}
+    <h1 class="text-xl font-bold text-[#343534] dark:text-gray-100 mb-1">Use Backup Token</h1>
+    <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Enter one of your saved backup tokens</p>
+    {% endif %}
+
+    {% if form.non_field_errors %}
+    <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-lg text-red-700 dark:text-red-300 text-sm">
+      <span>{{ form.non_field_errors.0 }}</span>
+    </div>
+    {% elif form.errors and wizard.steps.current == 'auth' %}
+    <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-lg text-red-700 dark:text-red-300 text-sm">
+      <span>Invalid email or password.</span>
+    </div>
+    {% endif %}
+
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+      {{ wizard.management_form }}
 
       {% if wizard.steps.current == 'auth' %}
-      <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100 mb-1">Welcome back</h1>
-      <p class="text-gray-500 text-sm mb-6">Sign in with email and password (production-like flow)</p>
+        {% for field in wizard.form %}
+        <div>
+          <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1.5">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+          <p class="text-red-600 dark:text-red-400 text-xs mt-1">{{ field.errors.0 }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
 
       {% elif wizard.steps.current == 'token' %}
-      <div class="flex items-center gap-3 mb-5">
-        <div class="flex-shrink-0">{% volumetric_icon "lock" size="sm" variant="brand" %}</div>
         <div>
-          <h1 class="text-xl font-bold text-[#343534] dark:text-gray-100">Two-Factor Authentication</h1>
-          <p class="text-gray-500 text-sm">Enter the code from your authenticator app</p>
+          <label for="{{ wizard.form.otp_token.id_for_label }}" class="block text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1.5">Authenticator code</label>
+          {{ wizard.form.otp_token }}
+          {% if wizard.form.otp_token.errors %}
+          <p class="text-red-600 dark:text-red-400 text-xs mt-1">{{ wizard.form.otp_token.errors.0 }}</p>
+          {% endif %}
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">6-digit code from your authenticator app</p>
         </div>
-      </div>
-
-      {% elif wizard.steps.current == 'backup' %}
-      <h1 class="text-xl font-bold text-[#343534] dark:text-gray-100 mb-1">Use Backup Token</h1>
-      <p class="text-gray-500 text-sm mb-6">Enter one of your saved backup tokens</p>
-      {% endif %}
-
-      {% if form.non_field_errors %}
-      <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-lg text-red-700 dark:text-red-300 text-sm">
-        <span>{{ form.non_field_errors.0 }}</span>
-      </div>
-      {% elif form.errors and wizard.steps.current == 'auth' %}
-      <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-lg text-red-700 dark:text-red-300 text-sm">
-        <span>Invalid email or password.</span>
-      </div>
-      {% elif form.errors %}
-      <div class="flex items-center gap-2 p-3 mb-5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-lg text-red-700 dark:text-red-300 text-sm">
-        <span>Invalid code. Please try again.</span>
-      </div>
-      {% endif %}
-
-      <form method="post" class="space-y-5">
-        {% csrf_token %}
-        {{ wizard.management_form }}
-
-        {% if wizard.steps.current == 'auth' %}
-          {% for field in wizard.form %}
-          <div>
-            <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1.5">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-            <p class="text-red-600 dark:text-red-400 text-xs mt-1">{{ field.errors.0 }}</p>
-            {% endif %}
-          </div>
-          {% endfor %}
-
-        {% elif wizard.steps.current == 'token' %}
-          <div>
-            <label class="block text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1.5">Authenticator code</label>
-            {{ form.otp_token }}
-            <p class="text-xs text-gray-400 mt-1.5">6-digit code from your authenticator app</p>
-          </div>
-          <p class="text-xs text-center">
-            <button type="submit" name="wizard_goto_step" value="backup" class="text-[#B23149] hover:text-[#8E273A] cursor-pointer bg-transparent border-0 p-0">
-              Use a backup token instead
-            </button>
-          </p>
-
-        {% elif wizard.steps.current == 'backup' %}
-          <div>
-            <label class="block text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1.5">Backup token</label>
-            {{ form.otp_token }}
-          </div>
-        {% endif %}
-
-        {% if next %}
-          <input type="hidden" name="next" value="{{ next }}">
-        {% endif %}
 
         <button type="submit"
                 class="w-full bg-[#B23149] hover:bg-[#8E273A] text-white font-semibold py-2.5 px-4 rounded-lg transition-colors text-sm cursor-pointer">
-          {% if wizard.steps.current == 'auth' %}Sign in{% else %}Verify{% endif %}
+          Verify
         </button>
-      </form>
+
+        <p class="text-xs text-center">
+          <button type="submit" name="wizard_goto_step" value="backup" class="text-[#B23149] hover:text-[#8E273A] cursor-pointer bg-transparent border-0 p-0">
+            Use a backup token instead
+          </button>
+        </p>
+
+      {% elif wizard.steps.current == 'backup' %}
+        <div>
+          <label for="{{ wizard.form.otp_token.id_for_label }}" class="block text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1.5">Backup token</label>
+          {{ wizard.form.otp_token }}
+          {% if wizard.form.otp_token.errors %}
+          <p class="text-red-600 dark:text-red-400 text-xs mt-1">{{ wizard.form.otp_token.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <button type="submit"
+                class="w-full bg-[#B23149] hover:bg-[#8E273A] text-white font-semibold py-2.5 px-4 rounded-lg transition-colors text-sm cursor-pointer">
+          Verify
+        </button>
+      {% endif %}
+
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% endif %}
 
       {% if wizard.steps.current == 'auth' %}
-      <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
-        <a href="{% url 'accounts:password_reset' %}" class="text-[#B23149] hover:text-[#8E273A] font-medium">Forgot your password?</a>
-      </p>
+      <button type="submit"
+              class="w-full bg-[#B23149] hover:bg-[#8E273A] text-white font-semibold py-2.5 px-4 rounded-lg transition-colors text-sm cursor-pointer">
+        Sign in
+      </button>
       {% endif %}
-    </div>
+    </form>
 
-    <p class="text-center text-xs text-[#343534] dark:text-gray-100/40 mt-8">© 2026 Powercoders</p>
+    {% if wizard.steps.current == 'auth' %}
+    <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
+      <a href="{% url 'accounts:password_reset' %}" class="text-[#B23149] hover:text-[#8E273A] font-medium">Forgot your password?</a>
+    </p>
+    {% endif %}
   </div>
-</body>
-</html>
+
+  <p class="text-center text-xs text-gray-400 dark:text-gray-600 mt-8">© 2026 Powercoders</p>
+</div>
+{% endblock %}

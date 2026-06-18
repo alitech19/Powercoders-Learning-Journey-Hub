@@ -1,13 +1,51 @@
-{% extends "base.html" %}
+{% extends "base_minimal.html" %}
 {% load static icon_tags %}
+
 {% block title %}Set Up Two-Factor Authentication{% endblock %}
+
+{% block body_class %}min-h-full bg-[#F5EDE0] dark:bg-gray-950 py-10 px-4 text-[#343534] dark:text-gray-100 transition-colors duration-200{% endblock %}
+
+{% block extra_head %}
+<style>
+  #id_generator-token, #id_token, input[name="token"] {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #D1D5DB;
+    font-size: 0.875rem;
+    letter-spacing: 0.25em;
+    background-color: #ffffff;
+    color: #343534;
+  }
+  #id_generator-token:focus, #id_token:focus, input[name="token"]:focus {
+    border-color: #B23149;
+    box-shadow: 0 0 0 2px rgba(192,57,43,0.2);
+    outline: none;
+  }
+  html.dark #id_generator-token, html.dark #id_token, html.dark input[name="token"] {
+    background-color: #1f2937;
+    color: #f3f4f6;
+    border-color: #4b5563;
+  }
+  html.dark #id_generator-token:focus, html.dark #id_token:focus, html.dark input[name="token"]:focus {
+    border-color: #B23149;
+    box-shadow: 0 0 0 2px rgba(178,49,73,0.25);
+  }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="max-w-lg mx-auto">
 
+  <div class="text-center mb-8">
+    <div class="font-black text-2xl tracking-tight leading-none">
+      <span class="text-[#B23149]">{</span><span class="text-[#343534] dark:text-gray-100">POWER</span><span class="text-[#B23149]">.</span><span class="text-[#343534] dark:text-gray-100">CODERS</span><span class="text-[#B23149]">}</span>
+    </div>
+  </div>
+
   <div class="mb-6">
     <h1 class="text-2xl font-bold text-[#343534] dark:text-gray-100">Set Up Two-Factor Authentication</h1>
-    <p class="text-gray-500 text-sm mt-1">Required for admin and teacher accounts. Takes less than 2 minutes.</p>
+    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Required for admin and teacher accounts. Takes less than 2 minutes.</p>
   </div>
 
   <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
@@ -21,7 +59,7 @@
         <div class="flex-shrink-0 mt-0.5">{% volumetric_icon "lock" size="sm" variant="brand" %}</div>
         <div>
           <p class="text-sm font-semibold text-[#343534] dark:text-gray-100 mb-1">Why is this required?</p>
-          <p class="text-sm text-gray-500">Admin and teacher accounts must have two-factor authentication enabled.</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Admin and teacher accounts must have two-factor authentication enabled.</p>
         </div>
       </div>
       <div class="bg-[#F5EDE0] dark:bg-gray-800 rounded-lg p-4 text-sm text-[#343534] dark:text-gray-100">
@@ -56,29 +94,4 @@
     </form>
   </div>
 </div>
-
-<style>
-  #id_generator-token, #id_token, input[name="token"] {
-    width: 100%;
-    padding: 0.625rem 1rem;
-    border-radius: 0.5rem;
-    border: 1px solid #D1D5DB;
-    font-size: 0.875rem;
-    letter-spacing: 0.25em;
-  }
-  #id_generator-token:focus, #id_token:focus, input[name="token"]:focus {
-    border-color: #B23149;
-    box-shadow: 0 0 0 2px rgba(192,57,43,0.2);
-    outline: none;
-  }
-  .dark #id_generator-token, .dark #id_token, .dark input[name="token"] {
-    background-color: #1f2937;
-    color: #f3f4f6;
-    border-color: #4b5563;
-  }
-  .dark #id_generator-token:focus, .dark #id_token:focus, .dark input[name="token"]:focus {
-    border-color: #B23149;
-    box-shadow: 0 0 0 2px rgba(178,49,73,0.25);
-  }
-</style>
 {% endblock %}
