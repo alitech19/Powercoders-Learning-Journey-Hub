@@ -172,8 +172,12 @@ STORAGES = {
     },
 }
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+GOOGLE_UPLOAD_STAGING_ROOT = Path(
+    os.environ.get(
+        'GOOGLE_UPLOAD_STAGING_ROOT',
+        str(PROJECT_ROOT / '.tmp' / 'google_upload_staging'),
+    )
+)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

@@ -80,11 +80,6 @@ urlpatterns = [
     path('home/', RedirectView.as_view(pattern_name='dashboard:dashboard', permanent=False), name='home'),
 ]
 
-if settings.DEBUG:
-    from django.conf.urls.static import static
-
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
 handler404 = 'config.views.page_not_found'
 handler403 = 'config.views.permission_denied'
 handler500 = 'config.views.server_error'

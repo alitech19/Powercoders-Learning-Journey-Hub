@@ -9,7 +9,7 @@ from django.conf import settings
 
 
 def staging_root() -> Path:
-    root = Path(settings.MEDIA_ROOT) / 'google_upload_staging'
+    root = Path(settings.GOOGLE_UPLOAD_STAGING_ROOT)
     root.mkdir(parents=True, exist_ok=True)
     return root
 

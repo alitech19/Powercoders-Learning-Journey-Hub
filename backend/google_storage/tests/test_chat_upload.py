@@ -2,10 +2,11 @@ from io import BytesIO
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from google_storage.models import GoogleWorkspaceStorageConfig
+from google_storage.tasks import upload_post_file_to_drive
 from group_space.models import Post
 from resources.models import ResourceItem
 from test_utils.cohorts import assign_teacher, make_cohort, make_group
@@ -99,10 +100,9 @@ class DriveChatUploadTests(TestCase):
         self.assertTrue(can_delete_post(admin, post))
 
     @patch('google_storage.tasks.upload_to_shared_drive')
+    @override_settings(CELERY_TASK_EAGER_PROPAGATES=False)
     def test_retry_failed_drive_upload(self, mock_upload):
         mock_upload.side_effect = [
-            Exception('network'),
-            Exception('network'),
             Exception('network'),
             {'id': 'f-2', 'webViewLink': 'https://drive/x'},
         ]
@@ -110,10 +110,16 @@ class DriveChatUploadTests(TestCase):
         assign_teacher(self.group, teacher)
         login_as(self.client, teacher)
         upload = SimpleUploadedFile('r.pdf', b'%PDF', content_type='application/pdf')
-        self.client.post(
-            reverse('group_space:message_create'),
-            {'group_pk': self.group.pk, 'resource_label': 'Retry me', 'file': upload},
-        )
+
+        def _fail_without_celery_retry(task, *, exc=None, **kwargs):
+            raise exc
+
+        with patch.object(upload_post_file_to_drive, 'retry', _fail_without_celery_retry):
+            response = self.client.post(
+                reverse('group_space:message_create'),
+                {'group_pk': self.group.pk, 'resource_label': 'Retry me', 'file': upload},
+            )
+        self.assertEqual(response.status_code, 200)
         post = Post.objects.latest('pk')
         self.assertEqual(post.drive_upload_status, Post.DriveUploadStatus.FAILED)
 

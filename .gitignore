@@ -224,8 +224,7 @@ __marimo__/
 
 frontend/staticfiles/
 frontend/node_modules/
-backend/media/*
-!backend/media/.gitkeep
+.tmp/
 
 docker-compose.override.yml
 

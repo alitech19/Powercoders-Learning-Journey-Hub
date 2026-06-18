@@ -30,7 +30,6 @@ services:
       - .env
     volumes:
       - .:/app
-      - ./backend/media:/app/backend/media
     depends_on:
       db:
         condition: service_healthy
@@ -48,7 +47,6 @@ services:
       - .env
     volumes:
       - .:/app
-      - ./backend/media:/app/backend/media
     depends_on:
       db:
         condition: service_healthy
