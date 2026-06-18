@@ -32,7 +32,7 @@
       <input type="text" name="title" value="{{ form.title.value|default:'' }}" required
              placeholder="e.g. Reflection week 7"
              maxlength="{{ limits.title }}"
-             class="w-full text-lg font-semibold border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B23149]/30">
+             class="ph-input ph-input-lg">
       {% if form.title.errors %}<p class="text-xs text-red-500 mt-1">{{ form.title.errors|join:", " }}</p>{% endif %}
     </div>
 
@@ -56,7 +56,7 @@
         <input type="text" name="custom_label" value="{{ form.custom_label.value|default:'' }}"
                placeholder="Custom tag label"
                maxlength="{{ limits.short_label }}"
-               class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
+               class="ph-input">
         {% if form.custom_label.errors %}<p class="text-xs text-red-500 mt-1">{{ form.custom_label.errors|join:", " }}</p>{% endif %}
       </div>
     </div>
@@ -70,7 +70,7 @@
       </div>
       <p class="text-xs text-gray-500 mb-3">Fill in at the start. You can edit anytime.</p>
       <textarea name="expectations" rows="6" maxlength="{{ limits.long_text }}"
-                class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#B23149]/30">{{ form.expectations.value|default:'' }}</textarea>
+                class="ph-input ph-textarea resize-y">{{ form.expectations.value|default:'' }}</textarea>
       {% if form.expectations.errors %}<p class="text-xs text-red-500 mt-1">{{ form.expectations.errors|join:", " }}</p>{% endif %}
     </div>
 
@@ -84,7 +84,7 @@
       <p class="text-xs text-gray-500 mb-3">Complete when you wrap up. Wellbeing check-in appears once you start writing here.</p>
       <textarea name="final_reflection" rows="8" x-model="finalReflection" @input="updateWellbeingVisibility()"
                 maxlength="{{ limits.long_text }}"
-                class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-[#B23149]/30"></textarea>
+                class="ph-input ph-textarea resize-y"></textarea>
       {% if form.final_reflection.errors %}<p class="text-xs text-red-500 mt-1">{{ form.final_reflection.errors|join:", " }}</p>{% endif %}
     </div>
 

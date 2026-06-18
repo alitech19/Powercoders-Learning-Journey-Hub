@@ -36,13 +36,13 @@
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
       <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Title <span class="text-[#B23149]">*</span></label>
       <input type="text" name="title" required value="{{ workflow.title }}" maxlength="{{ limits.title }}"
-             class="w-full text-lg font-semibold border-0 outline-none bg-transparent">
+             class="ph-input ph-input-lg">
     </div>
 
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
       <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Description</label>
       <textarea name="description" rows="3" maxlength="{{ limits.description }}"
-                class="w-full text-sm border-0 outline-none bg-transparent resize-none">{{ workflow.description }}</textarea>
+                class="ph-input ph-textarea resize-none">{{ workflow.description }}</textarea>
     </div>
 
     {% include "includes/_resource_container_picker.html" %}
@@ -67,13 +67,13 @@
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
       <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Title <span class="text-[#B23149]">*</span></label>
       <input type="text" name="title" required maxlength="{{ limits.title }}"
-             class="w-full text-lg font-semibold border-0 outline-none bg-transparent">
+             class="ph-input ph-input-lg">
     </div>
 
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
       <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Description</label>
       <textarea name="description" rows="3" maxlength="{{ limits.description }}"
-                class="w-full text-sm border-0 outline-none bg-transparent resize-none"></textarea>
+                class="ph-input ph-textarea resize-none"></textarea>
     </div>
 
     {% include "includes/_resource_container_picker.html" %}
@@ -174,10 +174,10 @@
             <div class="flex gap-2 mb-2">
               <span class="text-xs font-bold text-gray-400 w-5" x-text="i+1"></span>
               <input type="text" :name="'step_title_' + (i+1)" x-model="step.title" required placeholder="Step title" maxlength="{{ limits.title }}"
-                     class="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
+                     class="flex-1 ph-input">
             </div>
             <textarea :name="'step_desc_' + (i+1)" x-model="step.desc" rows="2" placeholder="Description (optional)" maxlength="{{ limits.step_description }}"
-                      class="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm resize-none mb-2"></textarea>
+                      class="ph-input ph-textarea resize-none mb-2"></textarea>
             <div class="flex items-center justify-between">
               <label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
                 <input type="checkbox" :name="'step_req_' + (i+1)" x-model="step.req" class="accent-[#B23149]">

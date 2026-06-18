@@ -16,6 +16,69 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+  <style>
+    [x-cloak] { display: none !important; }
+    .theme-mode-tip {
+      color: #343534 !important;
+      background-color: #ffffff !important;
+      border: 1px solid #e5e7eb !important;
+    }
+    html.dark .theme-mode-tip {
+      color: #f3f4f6 !important;
+      background-color: #1f2937 !important;
+      border-color: #4b5563 !important;
+    }
+
+  /* Visible borders/backgrounds for create/edit form fields */
+    .ph-input,
+    .ph-textarea,
+    .ph-select {
+      width: 100%;
+      border-radius: 0.5rem;
+      border: 1px solid #d1d5db;
+      background-color: #ffffff;
+      color: #343534;
+      padding: 0.625rem 0.75rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+    .ph-input-lg {
+      font-size: 1.125rem;
+      font-weight: 600;
+      padding: 0.75rem;
+    }
+    .ph-input-inline {
+      width: auto;
+      display: inline-block;
+      min-width: 8.75rem;
+    }
+    .ph-textarea {
+      resize: vertical;
+      min-height: 5rem;
+    }
+    .ph-input::placeholder,
+    .ph-textarea::placeholder {
+      color: #9ca3af;
+    }
+    .ph-input:focus,
+    .ph-textarea:focus,
+    .ph-select:focus {
+      outline: none;
+      border-color: #B23149;
+      box-shadow: 0 0 0 2px rgba(178, 49, 73, 0.25);
+    }
+    html.dark .ph-input,
+    html.dark .ph-textarea,
+    html.dark .ph-select {
+      border-color: #4b5563;
+      background-color: #030712;
+      color: #f3f4f6;
+    }
+    html.dark .ph-input::placeholder,
+    html.dark .ph-textarea::placeholder {
+      color: #6b7280;
+    }
+  </style>
   {# Sync (no defer) — must run before first paint to prevent flash of wrong theme #}
   <script src="{% static 'js/dark-mode-init.js' %}"></script>
   {% block extra_head %}{% endblock %}
@@ -27,7 +90,7 @@
     Skip to main content
   </a>
 
-  <nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-sm" x-data="{ mobileOpen: false }" aria-label="Main navigation">
+  <nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-sm overflow-visible" x-data="{ mobileOpen: false }" aria-label="Main navigation">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16 gap-3">
 
@@ -74,27 +137,46 @@
         {% endif %}
         </div>
 
-        <div class="hidden md:flex items-center gap-3 shrink-0">
+        <div class="hidden md:flex items-center gap-3 shrink-0 overflow-visible">
           {# ── Dark mode toggle: cycles light -> dark -> auto (day/night) ── #}
-          <button type="button"
-                  @click="$store.theme.toggle()"
-                  :aria-label="'Theme: ' + $store.theme.mode + ' — click to change'"
-                  class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[#B23149] dark:hover:text-[#B23149] transition-colors">
-            {# Moon — shown when pinned to light (click switches to dark) #}
-            <svg x-show="$store.theme.mode === 'light'" x-cloak class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
-            </svg>
-            {# Half circle — shown when pinned to dark (click switches to auto) #}
-            <svg x-show="$store.theme.mode === 'dark'" x-cloak class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <circle cx="12" cy="12" r="9"/>
-              <path fill="currentColor" stroke="none" d="M12 3a9 9 0 000 18z"/>
-            </svg>
-            {# Sun — shown when on auto/day-night (click switches to light) #}
-            <svg x-show="$store.theme.mode === 'auto'" x-cloak class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <circle cx="12" cy="12" r="5"/>
-              <path stroke-linecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-            </svg>
-          </button>
+          <div class="relative"
+               x-data="{ showTip: false }"
+               @mouseenter="showTip = true"
+               @mouseleave="showTip = false"
+               @focusin="showTip = true"
+               @focusout="showTip = false">
+            <button type="button"
+                    @click="$store.theme.toggle()"
+                    :title="$store.theme.tooltip()"
+                    :aria-label="$store.theme.tooltip()"
+                    class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[#B23149] dark:hover:text-[#B23149] transition-colors">
+              {# Moon — light mode pinned (click switches to dark) #}
+              <svg x-show="$store.theme.mode === 'light'" x-cloak class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+              </svg>
+              {# Half circle — dark mode pinned (click switches to auto) #}
+              <svg x-show="$store.theme.mode === 'dark'" x-cloak class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"/>
+                <path fill="currentColor" stroke="none" d="M12 3a9 9 0 000 18z"/>
+              </svg>
+              {# Sun — auto day/night (click switches to light) #}
+              <svg x-show="$store.theme.mode === 'auto'" x-cloak class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="5"/>
+                <path stroke-linecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+              </svg>
+            </button>
+            <div x-show="showTip"
+                 role="tooltip"
+                 class="theme-mode-tip pointer-events-none absolute bottom-full left-1/2 z-[100] mb-2 w-56 -translate-x-1/2 rounded-lg px-3 py-2.5 text-center text-xs font-medium normal-case leading-relaxed tracking-normal shadow-xl">
+              <p x-show="$store.theme.mode === 'light'" class="m-0">Light mode (fixed). Click for dark mode.</p>
+              <p x-show="$store.theme.mode === 'dark'" class="m-0">Dark mode (fixed). Click for auto (7:00–19:00 light).</p>
+              <p x-show="$store.theme.mode === 'auto'" class="m-0">
+                Auto —
+                <span x-text="$store.theme.dark ? 'dark' : 'light'"></span>
+                now. Click for light mode (fixed).
+              </p>
+            </div>
+          </div>
 
           {% if user.is_authenticated %}
           {% if admin_nav_items %}
@@ -242,19 +324,20 @@
         <div class="pt-2 border-t border-gray-100 dark:border-gray-800">
           <button type="button"
                   @click="$store.theme.toggle()"
+                  :aria-label="$store.theme.tooltip()"
                   class="flex items-center gap-2 py-2 text-xs font-bold uppercase tracking-wider text-[#343534] dark:text-gray-300 hover:text-[#B23149] dark:hover:text-[#B23149] transition-colors w-full">
-            <svg x-show="$store.theme.mode === 'light'" x-cloak class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <svg x-show="$store.theme.mode === 'light'" x-cloak class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
             </svg>
-            <svg x-show="$store.theme.mode === 'dark'" x-cloak class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <svg x-show="$store.theme.mode === 'dark'" x-cloak class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <circle cx="12" cy="12" r="9"/>
               <path fill="currentColor" stroke="none" d="M12 3a9 9 0 000 18z"/>
             </svg>
-            <svg x-show="$store.theme.mode === 'auto'" x-cloak class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <svg x-show="$store.theme.mode === 'auto'" x-cloak class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <circle cx="12" cy="12" r="5"/>
               <path stroke-linecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
             </svg>
-            <span x-text="$store.theme.mode === 'light' ? 'Dark mode' : ($store.theme.mode === 'dark' ? 'Auto (day/night)' : 'Light mode')"></span>
+            <span class="normal-case tracking-normal" x-text="$store.theme.mobileLabel()"></span>
           </button>
         </div>
 

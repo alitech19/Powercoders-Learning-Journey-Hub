@@ -15,6 +15,7 @@
  *   @click="$store.theme.toggle()"        — cycles light -> dark -> auto
  *   x-show="$store.theme.dark"            — true when the *applied* theme is dark
  *   x-show="$store.theme.mode === 'auto'" — true when following day/night
+ *   $store.theme.tooltip()                — hover label: current mode + next click
  */
 document.addEventListener('alpine:init', function () {
   var DAY_START_HOUR = 7;
@@ -63,6 +64,34 @@ document.addEventListener('alpine:init', function () {
         clearInterval(this._autoTimer);
         this._autoTimer = null;
       }
+    },
+
+    appliedLabel: function () {
+      return this.dark ? 'dark' : 'light';
+    },
+
+    tooltip: function () {
+      if (this.mode === 'light') {
+        return 'Light mode (fixed). Click for dark mode.';
+      }
+      if (this.mode === 'dark') {
+        return 'Dark mode (fixed). Click for auto — follows time of day (7:00–19:00 light).';
+      }
+      return (
+        'Auto mode — showing ' +
+        this.appliedLabel() +
+        ' now. Click to pin light mode.'
+      );
+    },
+
+    mobileLabel: function () {
+      if (this.mode === 'light') {
+        return 'Light mode · tap for dark';
+      }
+      if (this.mode === 'dark') {
+        return 'Dark mode · tap for auto';
+      }
+      return 'Auto (' + this.appliedLabel() + ' now) · tap for light';
     },
 
     // Cycles: light -> dark -> auto -> light ...
