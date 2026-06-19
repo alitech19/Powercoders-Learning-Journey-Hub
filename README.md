@@ -55,7 +55,7 @@ Home at `/` is a **role-based dashboard**. Contextual **ⓘ help** is in the pag
 | ✅ **Tasks** | Personal and teacher-assigned tasks (`Task` + `TaskEnrollment`) with per-student subtask status; scheduled publish for drafts |
 | 🔄 **Reflections** | Structured weekly check-ins with well-being fields |
 | 💪 **Habits** | Weekly targets, streaks; share snapshots to group chat |
-| 👥 **Group Space** | Group feed — posts, comments, pins, files, **share panel** (goals, tasks, journal, habits); custom project spaces |
+| 👥 **Group Space** | Group feed — posts, comments, pins, files, **share panel** (goals, tasks, journal, habits); custom project spaces; achievement sharing without Google Drive requirement |
 | 📁 **Resources** | Group resource board; thematic containers linkable to workflows, tasks, and goals |
 | 🔀 **Workflows** | Teacher-defined step paths; scheduled publish for drafts |
 
@@ -72,13 +72,13 @@ Home at `/` is a **role-based dashboard**. Contextual **ⓘ help** is in the pag
 | 📈 **Platform Analytics** | Dedicated analytics dashboard — weekly engagement charts, reflection submission rate, goal completion doughnut, cohort comparison, at-risk student table (7-day inactivity) |
 | 🔔 **Notification Admin** | **Administration → Notifications** — configure deadline reminders, reflection digest schedule, Celery Beat tasks; syncs automatically on save |
 | 💬 **Slack Admin** | **Administration → Slack integration** — OAuth credentials, staff webhook, bot token; all secrets encrypted in DB |
-| 🏛️ **Group Space Admin** | **Administration → Group spaces** — create and manage custom project spaces with isolated chat and Slack channel mapping |
+| 🏛️ **Group Space Admin** | **Administration → Group spaces** — create and manage custom project spaces with isolated chat and Slack channel mapping; bulk-add members via student checkboxes |
 
 ### Platform-wide
 
 | Capability | Details |
 |---|---|
-| 🔐 **Two-Factor Auth** | TOTP for staff (django-two-factor-auth) |
+| 🔐 **Two-Factor Auth** | TOTP for staff (django-two-factor-auth); branded setup, login, and setup-complete pages |
 | 🛡️ **Security** | django-axes (brute force), CSP, Redis sessions, secure cookies when `DEBUG=False` |
 | 🔔 **Notifications** | In-app centre with unread badge; per-channel matrix (in-app, email, Slack) per notification type; quiet hours; hourly / daily digest; deadline reminders configured via **Administration → Notifications** |
 | 📧 **Email delivery** | SMTP via SendGrid or Postmark; console fallback in dev |
@@ -88,7 +88,7 @@ Home at `/` is a **role-based dashboard**. Contextual **ⓘ help** is in the pag
 | ❌ **Account Deletion** | GDPR right-to-erasure flow |
 | ♿ **Accessible** | Skip link to `#main-content`, ARIA on nav, keyboard-friendly dropdowns |
 | 📱 **Progressive Web App** | Installable on mobile; service worker with offline fallback page; Web App Manifest with 3 icon sizes |
-| 🌙 **Dark mode** | System preference auto-detected; user toggle (sun/moon) persisted to `localStorage`; zero flash-of-wrong-theme |
+| 🌙 **Dark mode** | System preference auto-detected; user toggle (sun/moon) with readable hover labels persisted to `localStorage`; zero flash-of-wrong-theme; full coverage including auth, onboarding, and 2FA pages |
 
 **Navbar (English):** Learning ▾ · Wellbeing ▾ · Group Space · Resources · Administration ▾ (admin, right) · notifications · profile.
 
